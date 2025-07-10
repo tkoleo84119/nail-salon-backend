@@ -1,0 +1,398 @@
+Project NailSalonManagement {
+  database_type: 'PostgreSQL'
+}
+
+// ========== 門市與帳號權限 ==========
+Table stores {
+  id bigint [pk]
+  name varchar(100) [not null, unique]
+  address text
+  phone varchar(20)
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table staff_users {
+  id bigint [pk]
+  username varchar(50) [not null, unique]
+  email text [not null]
+  password_hash varchar(255) [not null]
+  role varchar(50) [not null] // SUPER_ADMIN, ADMIN, MANAGER, STYLIST
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table staff_user_store_access {
+  store_id bigint [not null]
+  staff_user_id bigint [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    (store_id, staff_user_id) [pk]
+  }
+}
+
+Ref: staff_user_store_access.store_id > stores.id [delete: cascade]
+Ref: staff_user_store_access.staff_user_id > staff_users.id [delete: cascade]
+
+Table staff_user_tokens {
+  id bigint [pk]
+  staff_user_id bigint [not null]
+  refresh_token varchar(255) [not null, unique]
+  user_agent text
+  ip_address inet
+  expired_at timestamptz [not null]
+  is_revoked boolean [default: false]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: staff_user_tokens.staff_user_id > staff_users.id [delete: cascade]
+
+// ========== 顧客管理 ==========
+Table customers {
+  id bigint [pk]
+  name varchar(100) [not null]
+  phone varchar(20) [not null]
+  birthday date [not null]
+  city varchar(100)
+  favorite_shapes text[] // 喜歡的指形
+  favorite_colors text[] // 喜歡的色系
+  favorite_styles text[] // 喜歡的款式
+  is_introvert boolean [not null] // 是否是I人
+  referral_source text[] // 推薦來源
+  referrer varchar(100) // 推薦人
+  customer_note text // 使用者自己的備註
+  store_note text // 店家的備註
+  level varchar(20) // NORMAL, VIP, VVIP
+  is_blacklisted boolean [default: false]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table customer_auths {
+  id bigint [pk]
+  customer_id bigint [not null]
+  provider varchar(50) [not null] // LINE, EMAIL, GOOGLE
+  provider_uid varchar(250) [not null] // LINE ID, Google sub, email address
+  other_indo jsonb
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    (provider, provider_uid) [unique] // 一個帳號對應一個客戶
+    (customer_id, provider) [unique] // 一個客戶一種登入來源(每個人只能有一個Line)
+  }
+}
+
+Ref: customer_auths.customer_id > customers.id [delete: cascade]
+
+Table customer_tokens {
+  id bigint [pk]
+  customer_id bigint [not null]
+  refresh_token varchar(255) [not null, unique]
+  user_agent text
+  ip_address inet
+  expired_at timestamptz [not null]
+  is_revoked boolean [default: false]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: customer_tokens.customer_id > customers.id [delete: cascade]
+
+// ========== 美甲師與排班 ==========
+Table stylists {
+  id bigint [pk]
+  staff_user_id bigint [unique]
+  name varchar(100) // 美甲師姓名(顯示給顧客看)
+  good_at_shapes text[] // 擅長指型
+  good_at_colors text[] // 擅長色系
+  good_at_styles text[] // 擅長款式
+  is_introvert boolean [not null] // 是否是I人
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: stylists.staff_user_id > staff_users.id [delete: cascade]
+
+Table schedules {
+  id bigint [pk]
+  store_id bigint [not null]
+  stylist_id bigint [not null]
+  work_date date [not null]
+  note text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    (store_id, stylist_id, work_date) [unique]
+  }
+}
+
+Ref: schedules.store_id > stores.id [delete: cascade]
+Ref: schedules.stylist_id > stylists.id [delete: cascade]
+
+Table time_slots {
+  id bigint [pk]
+  schedule_id bigint [not null]
+  start_time time [not null]
+  end_time time [not null]
+  is_available boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: time_slots.schedule_id > schedules.id [delete: cascade]
+
+Table time_slot_templates {
+  id bigint [pk]
+  name varchar(100) [not null]
+  note text
+  created_by bigint [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: time_slot_templates.created_by > staff_users.id [delete: cascade]
+
+Table time_slot_template_items {
+  id bigint [pk]
+  template_id bigint [not null]
+  start_time time [not null]
+  end_time time [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: time_slot_template_items.template_id > time_slot_templates.id [delete: cascade]
+
+// ========== 預約與服務 ==========
+Table services {
+  id bigint [pk]
+  name varchar(150) [not null, unique]
+  price numeric(10,2) [not null]
+  duration_minutes int [not null] // 操作時間(分)
+  is_addon boolean [default: false] // 是否是附加服務
+  is_visible boolean [default: true] // 是否可被客戶自己選擇
+  is_active boolean [default: true] // 是否可被預約
+  note text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table bookings {
+  id bigint [pk]
+  store_id bigint [not null]
+  customer_id bigint [not null]
+  stylist_id bigint [not null]
+  time_slot_id bigint [not null]
+  is_chat_enabled boolean [default: true] // 是否要聊天
+  no_show boolean [default: false] // 是否放鳥
+  actual_duration int // 實際完成時間(分)
+  note text // 客人備註(當次指甲狀況)
+  used_products text[] // 使用的產品
+  status varchar(30) [not null] // SCHEDULED, CANCELLED, COMPLETED
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: bookings.store_id > stores.id [delete: cascade]
+Ref: bookings.customer_id > customers.id [delete: cascade]
+Ref: bookings.stylist_id > stylists.id [delete: cascade]
+Ref: bookings.time_slot_id > time_slots.id [delete: cascade]
+
+Table booking_details {
+  id bigint [pk]
+  booking_id bigint [not null]
+  service_id bigint [not null]
+  price numeric(10,2)
+  discount_rate numeric(3,2) // 折數 (9.5 => 95折)
+  discount_amount numeric(10,2) // 實際折扣金額 (200元 => 200.00)
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: booking_details.booking_id > bookings.id [delete: cascade]
+Ref: booking_details.service_id > services.id [delete: cascade]
+
+Table checkouts {
+  id bigint [pk]
+  booking_id bigint [not null]
+  total_amount numeric(12,2) [not null] // 原價總額
+  final_amount numeric(12,2) [not null] // 實際應付
+  paid_amount numeric(12,2) [not null] // 實際收款
+  payment_method varchar(50) [not null]
+  coupon_id bigint
+  checkout_user_id bigint // 結帳人員Id
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: checkouts.booking_id > bookings.id [delete: cascade]
+Ref: checkouts.coupon_id > coupons.id [delete: cascade]
+Ref: checkouts.checkout_user_id > staff_users.id [delete: cascade]
+
+Table coupons {
+  id bigint [pk]
+  name varchar(100) [not null]
+  code varchar(50) [not null, unique]
+  discount_rate numeric(3,2) // 折數 (9.5 => 95折)
+  discount_amount numeric(10,2) // 實際折扣金額 (200元 => 200.00)
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table customer_coupons {
+  id bigint [pk]
+  customer_id bigint [not null]
+  coupon_id bigint [not null]
+  valid_from timestamptz [not null]
+  valid_to timestamptz
+  is_used boolean [default: false]
+  used_at timestamptz
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    (customer_id, coupon_id) [unique] // 一種優惠券只能使用一次
+  }
+}
+
+Ref: customer_coupons.customer_id > customers.id [delete: cascade]
+Ref: customer_coupons.coupon_id > coupons.id [delete: cascade]
+
+// ========== 支出與供應商 ==========
+Table supplier {
+  id bigint [pk]
+  name varchar(100) [not null, unique]
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table expenses {
+  id bigint [pk]
+  store_id bigint [not null]
+  category varchar(100) // 支出類別
+  supplier_id bigint [not null] // 實際購買供應商Id
+  amount numeric(12,2) [not null]
+  expense_date date [not null]
+  note text
+  payer_id bigint // 代墊人Id (如果沒有代墊人就是null)
+  is_reimbursed boolean // 是否已結清代墊款 (如果沒有代墊人就是null)
+  reimbursed_at timestamptz // 結清日期 (如果沒有代墊人就是null)
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: expenses.store_id > stores.id [delete: cascade]
+Ref: expenses.supplier_id > supplier.id [delete: cascade]
+Ref: expenses.payer_id > staff_users.id
+
+Table expense_items {
+  id bigint [pk]
+  expense_id bigint [not null]
+  product_id bigint [not null]
+  quantity int [not null]
+  total_price numeric(10,2) [not null]
+  expiration_date date // 有限期限
+  is_arrived boolean [default: false]
+  arrival_date date
+  storage_location varchar(100)
+  note text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: expense_items.expense_id > expenses.id [delete: cascade]
+Ref: expense_items.product_id > products.id [delete: cascade]
+
+// ========== 商品與庫存 ==========
+Table brands {
+  id bigint [pk]
+  name varchar(100) [not null, unique]
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table product_categories {
+  id bigint [pk]
+  name varchar(100) [not null, unique]
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table products {
+  id bigint [pk]
+  store_id bigint [not null]
+  name varchar(200) [not null]
+  brand_id bigint [not null]
+  category_id bigint [not null]
+  current_stock int [not null, default: 0]
+  safety_stock int [default: -1]
+  unit varchar(50)
+  storage_location varchar(100)
+  note text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    (store_id, brand_id, name) [unique]
+  }
+}
+
+Ref: products.store_id > stores.id [delete: cascade]
+Ref: products.brand_id > brands.id [delete: cascade]
+Ref: products.category_id > product_categories.id [delete: cascade]
+
+Table stock_usages {
+  id bigint [pk]
+  product_id bigint [not null]
+  quantity int [not null]
+  is_in_use boolean [default: true]
+  expiration date [not null] // 有限期限
+  usage_started date [not null]
+  usage_ended_at date
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: stock_usages.product_id > products.id [delete: cascade]
+
+// ========== 帳戶與資金流動 ==========
+Table accounts {
+  id bigint [pk]
+  store_id bigint [not null]
+  name varchar(100) [not null]
+  note text
+  is_active boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    (store_id, name) [unique]
+  }
+}
+
+Ref: accounts.store_id > stores.id [delete: cascade]
+
+Table account_transactions {
+  id bigint [pk]
+  account_id bigint [not null]
+  transaction_date timestamptz [not null, default: `now()`]
+  type varchar(50) [not null] // INCOME, EXPENSE
+  amount numeric(12,2) [not null]
+  balance numeric(12,2) [not null]  // 每筆交易後的帳戶餘額
+  note text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: account_transactions.account_id > accounts.id [delete: cascade]
