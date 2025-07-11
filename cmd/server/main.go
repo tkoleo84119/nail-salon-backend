@@ -7,7 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
+	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 )
 
 // init loads environment variables from a local .env file when not running in Release mode.
@@ -20,6 +22,17 @@ func init() {
 }
 
 func main() {
+	// load config
+	dbConfig := config.LoadString()
+
+	// connect to database
+	_, cleanup, err := db.New(dbConfig)
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer cleanup()
+
+	// start server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
