@@ -267,7 +267,7 @@ Ref: customer_coupons.customer_id > customers.id [delete: cascade]
 Ref: customer_coupons.coupon_id > coupons.id [delete: cascade]
 
 // ========== 支出與供應商 ==========
-Table supplier {
+Table suppliers {
   id bigint [pk]
   name varchar(100) [not null, unique]
   is_active boolean [default: true]

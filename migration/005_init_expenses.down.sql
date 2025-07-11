@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS expense_items;
+DROP TABLE IF EXISTS expenses;
+DROP TABLE IF EXISTS suppliers;
