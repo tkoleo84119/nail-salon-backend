@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS stock_usages;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS product_categories;
+DROP TABLE IF EXISTS brands;
