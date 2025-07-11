@@ -1,0 +1,42 @@
+---
+alwaysApply: false
+---
+# Conventional Commit Message Rule
+
+所有 commit message 必須遵循 [Conventional Commits](https://www.conventionalcommits.org/) 規範，格式如下：
+
+```
+<type>: <description>
+
+<optional body>
+```
+
+## type 類型（必填）
+- feat: 新增、調整或移除 API 或 UI 功能
+- fix: 修正 API 或 UI bug
+- refactor: 重構，不影響行為
+- perf: 性能優化
+- style: 程式碼風格調整（不影響行為）
+- test: 測試相關
+- docs: 文件相關
+- build: 建構、相依、CI/CD 相關
+- ops: 運維、部署、備份等
+- chore: 其他雜項
+
+## description 描述（必填）
+- 使用祈使句，現在式
+- 不要大寫開頭，不要句號結尾
+- 100 字以內
+- 使用英文撰寫
+
+## body 內容（選填）
+- 使用英文撰寫
+- 若 description 無法完整描述，則使用 body 補充
+
+## 範例
+- feat: add email notifications on new direct messages
+- fix: fix wrong calculation of request body checksum
+- refactor: implement fibonacci number calculation as recursion
+- style: remove empty line
+- chore: init
+---
