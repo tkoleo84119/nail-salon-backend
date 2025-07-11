@@ -1,0 +1,31 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, coverage
+*.test
+coverage.out
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below if you vendored dependencies)
+# vendor/
+
+# Build directories
+/bin/
+/obj/
+
+# IDE / Editor files
+.idea/
+.vscode/
+*.swp
+
+# OS files
+.DS_Store
+
+# Environment files
+.env
