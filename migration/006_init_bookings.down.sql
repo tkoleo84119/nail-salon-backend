@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS customer_coupons;
+DROP TABLE IF EXISTS booking_details;
+DROP TABLE IF EXISTS checkouts;
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS coupons;
+DROP TABLE IF EXISTS services;

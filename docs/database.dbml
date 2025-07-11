@@ -157,7 +157,7 @@ Table time_slot_templates {
   updated_at timestamptz [default: `now()`]
 }
 
-Ref: time_slot_templates.created_by > staff_users.id [delete: cascade]
+Ref: time_slot_templates.updater > staff_users.id [delete: cascade]
 
 Table time_slot_template_items {
   id bigint [pk]
@@ -227,14 +227,14 @@ Table checkouts {
   paid_amount numeric(12,2) [not null] // 實際收款
   payment_method varchar(50) [not null]
   coupon_id bigint
-  checkout_user_id bigint // 結帳人員Id
+  checkout_user bigint // 結帳人員Id
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
 
 Ref: checkouts.booking_id > bookings.id [delete: cascade]
 Ref: checkouts.coupon_id > coupons.id [delete: cascade]
-Ref: checkouts.checkout_user_id > staff_users.id [delete: cascade]
+Ref: checkouts.checkout_user > staff_users.id [delete: cascade]
 
 Table coupons {
   id bigint [pk]
