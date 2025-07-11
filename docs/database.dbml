@@ -62,7 +62,7 @@ Table customers {
   favorite_shapes text[] // 喜歡的指形
   favorite_colors text[] // 喜歡的色系
   favorite_styles text[] // 喜歡的款式
-  is_introvert boolean [not null] // 是否是I人
+  is_introvert boolean [default: false] // 是否是I人
   referral_source text[] // 推薦來源
   referrer varchar(100) // 推薦人
   customer_note text // 使用者自己的備註
@@ -78,7 +78,7 @@ Table customer_auths {
   customer_id bigint [not null]
   provider varchar(50) [not null] // LINE, EMAIL, GOOGLE
   provider_uid varchar(250) [not null] // LINE ID, Google sub, email address
-  other_indo jsonb
+  other_info jsonb
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 
