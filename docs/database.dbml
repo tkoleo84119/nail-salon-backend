@@ -112,7 +112,7 @@ Table stylists {
   good_at_shapes text[] // 擅長指型
   good_at_colors text[] // 擅長色系
   good_at_styles text[] // 擅長款式
-  is_introvert boolean [not null] // 是否是I人
+  is_introvert boolean [default: false] // 是否是I人
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
@@ -152,7 +152,7 @@ Table time_slot_templates {
   id bigint [pk]
   name varchar(100) [not null]
   note text
-  created_by bigint [not null]
+  updater bigint [not null]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
