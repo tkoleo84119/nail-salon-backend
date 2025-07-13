@@ -2,14 +2,17 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
+	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // init loads environment variables from a local .env file when not running in Release mode.
@@ -23,26 +26,42 @@ func init() {
 
 func main() {
 	// load config
-	dbConfig := config.LoadString()
+	cfg := config.Load()
 
 	// connect to database
-	_, cleanup, err := db.New(dbConfig)
+	database, cleanup, err := db.New(cfg.DB)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer cleanup()
 
-	// start server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
+	// initialize snowflake
+	if err := utils.InitSnowflake(cfg.Server.SnowflakeNodeId); err != nil {
+		log.Fatalf("Failed to initialize snowflake: %v", err)
 	}
+
+	// initialize sqlc queries
+	queries := dbgen.New(database.PgxPool)
+
+	// initialize services
+	staffLoginService := staffService.NewLoginService(queries, cfg.JWT)
+
+	// initialize handlers
+	staffLoginHandler := staffHandler.NewLoginHandler(staffLoginService)
 
 	router := gin.Default()
 
+	// routes
 	router.GET("/health", handler.Health)
+	api := router.Group("/api")
+	{
+		staff := api.Group("/staff")
+		{
+			staff.POST("/login", staffLoginHandler.Login)
+		}
+	}
 
-	if err := router.Run(":" + port); err != nil {
+	if err := router.Run(":" + cfg.Server.Port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }

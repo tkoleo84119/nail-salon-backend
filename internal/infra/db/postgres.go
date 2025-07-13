@@ -1,40 +1,58 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 )
 
 type Database struct {
-	Std  *sql.DB
-	Sqlx *sqlx.DB
+	Std     *sql.DB
+	Sqlx    *sqlx.DB
+	PgxPool *pgxpool.Pool
 }
 
-func New(dbConfig config.DBConfig) (*Database, func(), error) {
-	db, err := sql.Open("postgres", dbConfig.DSN)
+func New(dbCfg config.DBConfig) (*Database, func(), error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	poolCfg, err := pgxpool.ParseConfig(dbCfg.DSN)
 	if err != nil {
-		return nil, nil, fmt.Errorf("open db: %w", err)
+		return nil, nil, fmt.Errorf("parse DSN: %w", err)
 	}
 
-	db.SetMaxOpenConns(dbConfig.MaxOpenConns)
-	db.SetMaxIdleConns(dbConfig.MaxIdleConns)
-	db.SetConnMaxLifetime(dbConfig.ConnMaxLife)
+	// set pgxpool config
+	poolCfg.MaxConns = int32(dbCfg.MaxOpenConns)
+	poolCfg.MaxConnLifetime = dbCfg.MaxConnMaxLife
+	poolCfg.MaxConnLifetimeJitter = dbCfg.MaxConnLifetimeJitter // avoid same time reconnect
+	poolCfg.MaxConnIdleTime = dbCfg.MaxConnIdleTime
 
-	if err := db.Ping(); err != nil {
-		_ = db.Close()
-		return nil, nil, fmt.Errorf("ping db: %w", err)
+	pgxPool, err := pgxpool.NewWithConfig(ctx, poolCfg)
+	if err != nil {
+		return nil, nil, fmt.Errorf("new pgx pool: %w", err)
+	}
+	if err := pgxPool.Ping(ctx); err != nil {
+		pgxPool.Close()
+		return nil, nil, fmt.Errorf("ping pgx pool: %w", err)
 	}
 
-	sqlxDB := sqlx.NewDb(db, "postgres")
+	stdDB := stdlib.OpenDBFromPool(pgxPool)
+	sqlxDB := sqlx.NewDb(stdDB, "pgx")
 
-	cleanup := func() { _ = db.Close() }
+	cleanup := func() {
+		_ = stdDB.Close()
+		pgxPool.Close()
+	}
 
 	return &Database{
-		Std:  db,
-		Sqlx: sqlxDB,
+		Std:     stdDB,
+		Sqlx:    sqlxDB,
+		PgxPool: pgxPool,
 	}, cleanup, nil
 }

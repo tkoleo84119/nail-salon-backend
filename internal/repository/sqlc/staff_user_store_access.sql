@@ -1,0 +1,7 @@
+-- name: GetStaffUserStoreAccess :many
+SELECT
+    sa.store_id,
+    s.name as store_name
+FROM staff_user_store_access sa
+JOIN stores s ON sa.store_id = s.id
+WHERE sa.staff_user_id = $1 AND s.is_active = true;

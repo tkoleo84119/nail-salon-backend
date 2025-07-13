@@ -9,37 +9,69 @@ import (
 )
 
 type DBConfig struct {
-	DSN          string
-	Host         string
-	Port         int
-	User         string
-	Password     string
-	Name         string
-	SSLMode      string
-	MaxOpenConns int
-	MaxIdleConns int
-	ConnMaxLife  time.Duration
+	DSN                   string
+	Host                  string
+	Port                  int
+	User                  string
+	Password              string
+	Name                  string
+	SSLMode               string
+	MaxOpenConns          int
+	MaxConnMaxLife        time.Duration
+	MaxConnLifetimeJitter time.Duration
+	MaxConnIdleTime       time.Duration
 }
 
-func LoadString() DBConfig {
+type JWTConfig struct {
+	Secret      string
+	ExpiryHours int
+}
+
+type ServerConfig struct {
+	Port            string
+	SnowflakeNodeId int64
+}
+
+type Config struct {
+	DB     DBConfig
+	JWT    JWTConfig
+	Server ServerConfig
+}
+
+func Load() *Config {
 	dbConfig := DBConfig{
-		DSN:          os.Getenv("DB_DSN"),
-		Host:         getenvDefault("DB_HOST", "localhost"),
-		Port:         getenvIntDefault("DB_PORT", 5432),
-		User:         os.Getenv("DB_USER"),
-		Password:     os.Getenv("DB_PASS"),
-		Name:         os.Getenv("DB_NAME"),
-		SSLMode:      getenvDefault("DB_SSLMODE", "disable"),
-		MaxOpenConns: getenvIntDefault("DB_MAX_OPEN_CONNS", 25),
-		MaxIdleConns: getenvIntDefault("DB_MAX_IDLE_CONNS", 10),
-		ConnMaxLife:  getenvDuration("DB_CONN_MAX_LIFE", "30m"),
+		DSN:                   os.Getenv("DB_DSN"),
+		Host:                  getenvDefault("DB_HOST", "localhost"),
+		Port:                  getenvIntDefault("DB_PORT", 5432),
+		User:                  os.Getenv("DB_USER"),
+		Password:              os.Getenv("DB_PASS"),
+		Name:                  os.Getenv("DB_NAME"),
+		SSLMode:               getenvDefault("DB_SSLMODE", "disable"),
+		MaxOpenConns:          getenvIntDefault("DB_MAX_OPEN_CONNS", 25),
+		MaxConnMaxLife:        getenvDuration("DB_CONN_MAX_LIFE", "30m"),
+		MaxConnLifetimeJitter: getenvDuration("DB_CONN_MAX_LIFE_JITTER", "5m"),
+		MaxConnIdleTime:       getenvDuration("DB_CONN_IDLE_TIME", "2m"),
 	}
 
 	if dbConfig.DSN == "" {
 		dbConfig.DSN = dbConfig.ConnectionString()
 	}
 
-	return dbConfig
+	jwtConfig := JWTConfig{
+		Secret:      getenvRequired("JWT_SECRET"),
+		ExpiryHours: getenvIntDefault("JWT_EXPIRY_HOURS", 1),
+	}
+
+	serverConfig := ServerConfig{
+		Port:            getenvDefault("PORT", "3000"),
+		SnowflakeNodeId: int64(getenvIntDefault("SNOWFLAKE_NODE_ID", 1)),
+	}
+
+	return &Config{
+		DB:     dbConfig,
+		JWT:    jwtConfig,
+		Server: serverConfig,
+	}
 }
 
 func (c DBConfig) ConnectionString() string {
@@ -54,6 +86,14 @@ func getenvDefault(key, defaultVal string) string {
 		return val
 	}
 	return defaultVal
+}
+
+func getenvRequired(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		log.Fatalf("Required environment variable %s is not set", key)
+	}
+	return val
 }
 
 func getenvIntDefault(key string, defaultVal int) int {
