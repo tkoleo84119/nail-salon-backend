@@ -41,10 +41,10 @@ Content-Type: application/json
 
 ### 驗證規則
 
-| 欄位       | 規則       | 說明                  |
-| -------- | -------- | ------------------- |
-| username | required | 帳號（唯一）              |
-| password | required | 密碼明文（將與 DB hash 比對） |
+| 欄位       | 規則       | 說明                             |
+| -------- | -------- | -------------------------------- |
+| username | required | 帳號（唯一），長度介於 1 到 100 字元 |
+| password | required | 密碼明文（將與 DB hash 比對），長度介於 1 到 100 字元 |
 
 ---
 
@@ -54,30 +54,69 @@ Content-Type: application/json
 
 ```json
 {
-  "access_token": "<jwt_access_token>",
-  "refresh_token": "<secure_refresh_token>",
-  "expires_in": 3600,
-  "user": {
-    "id": "139842394",
-    "username": "admin001",
-    "role": "ADMIN",
-    "store_list": [
-      {
-        "id": 1,
-        "name": "門市1"
-      }
-    ]
+  "data": {
+    "access_token": "<jwt_access_token>",
+    "refresh_token": "<secure_refresh_token>",
+    "expires_in": 3600,
+    "user": {
+      "id": "139842394",
+      "username": "admin001",
+      "role": "ADMIN",
+      "store_list": [
+        {
+          "id": 1,
+          "name": "門市1"
+        }
+      ]
+    }
   }
 }
 ```
 
 ### 失敗
 
-#### 401 Unauthorized
+#### 400 Bad Request - 驗證錯誤
 
 ```json
 {
-  "error": "invalid username or password"
+  "message": "輸入驗證失敗",
+  "errors": {
+    "username": "帳號為必填項目",
+    "password": "密碼長度至少需要1個字元"
+  }
+}
+```
+
+#### 400 Bad Request - JSON 格式錯誤
+
+```json
+{
+  "message": "請求錯誤",
+  "errors": {
+    "request": "JSON格式錯誤"
+  }
+}
+```
+
+#### 401 Unauthorized - 認證失敗
+
+```json
+{
+  "message": "認證失敗",
+  "errors": {
+    "credentials": "帳號或密碼錯誤"
+  }
+}
+```
+
+#### 500 Internal Server Error
+
+```json
+{
+  "message": "系統錯誤",
+  "errors": {
+    "server": "伺服器內部錯誤"
+  }
 }
 ```
 

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -83,14 +84,25 @@ func TestLoginHandler_Login_Success(t *testing.T) {
 	// Assert response
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response staff.LoginResponse
+	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 
-	assert.Equal(t, expectedResponse.AccessToken, response.AccessToken)
-	assert.Equal(t, expectedResponse.RefreshToken, response.RefreshToken)
-	assert.Equal(t, expectedResponse.ExpiresIn, response.ExpiresIn)
-	assert.Equal(t, expectedResponse.User, response.User)
+	// Check that data is present and message is empty
+	assert.Empty(t, response.Message)
+	assert.NotNil(t, response.Data)
+	assert.Nil(t, response.Errors)
+
+	// Parse the data field
+	dataBytes, _ := json.Marshal(response.Data)
+	var loginResponse staff.LoginResponse
+	err = json.Unmarshal(dataBytes, &loginResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedResponse.AccessToken, loginResponse.AccessToken)
+	assert.Equal(t, expectedResponse.RefreshToken, loginResponse.RefreshToken)
+	assert.Equal(t, expectedResponse.ExpiresIn, loginResponse.ExpiresIn)
+	assert.Equal(t, expectedResponse.User, loginResponse.User)
 
 	// Verify all expectations were met
 	mockService.AssertExpectations(t)
@@ -125,10 +137,14 @@ func TestLoginHandler_Login_InvalidCredentials(t *testing.T) {
 	// Assert response
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
-	var response staff.ErrorResponse
+	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Equal(t, "invalid username or password", response.Error)
+	
+	assert.Equal(t, "認證失敗", response.Message)
+	assert.Nil(t, response.Data)
+	assert.NotNil(t, response.Errors)
+	assert.Equal(t, "帳號或密碼錯誤", response.Errors["credentials"])
 
 	// Verify all expectations were met
 	mockService.AssertExpectations(t)
@@ -163,10 +179,14 @@ func TestLoginHandler_Login_InternalError(t *testing.T) {
 	// Assert response
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	var response staff.ErrorResponse
+	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Equal(t, "internal server error", response.Error)
+	
+	assert.Equal(t, "系統錯誤", response.Message)
+	assert.Nil(t, response.Data)
+	assert.NotNil(t, response.Errors)
+	assert.Equal(t, "伺服器內部錯誤", response.Errors["server"])
 
 	// Verify all expectations were met
 	mockService.AssertExpectations(t)
@@ -217,10 +237,14 @@ func TestLoginHandler_Login_InvalidRequest(t *testing.T) {
 
 			assert.Equal(t, tt.expectCode, w.Code)
 
-			var response staff.ErrorResponse
+			var response common.ApiResponse
 			err := json.Unmarshal(w.Body.Bytes(), &response)
 			assert.NoError(t, err)
-			assert.Equal(t, "invalid request", response.Error)
+			
+			// Should have message and errors, no data
+			assert.NotEmpty(t, response.Message)
+			assert.Nil(t, response.Data)
+			assert.NotNil(t, response.Errors)
 		})
 	}
 }
