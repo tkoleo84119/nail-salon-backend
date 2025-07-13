@@ -8,7 +8,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,7 +27,7 @@ func main() {
 
 	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, dbName)
 
-	db := sqlx.MustConnect("postgres", dbURL)
+	db := sqlx.MustConnect("pgx", dbURL)
 	defer db.Close()
 
 	node, err := snowflake.NewNode(1)

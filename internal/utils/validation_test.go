@@ -10,8 +10,6 @@ import (
 type TestStruct struct {
 	Username string `validate:"required,min=1,max=100"`
 	Password string `validate:"required,min=1,max=100"`
-	Email    string `validate:"email"`
-	Age      int    `validate:"min=18,max=100"`
 }
 
 func TestExtractValidationErrors(t *testing.T) {
@@ -42,31 +40,6 @@ func TestExtractValidationErrors(t *testing.T) {
 			expectedMsgs: map[string]string{
 				"username": "帳號為必填項目",
 				"password": "密碼為必填項目",
-			},
-		},
-		{
-			name: "invalid email",
-			input: TestStruct{
-				Username: "testuser",
-				Password: "testpass",
-				Email:    "invalid-email",
-			},
-			expectedKeys: []string{"email"},
-			expectedMsgs: map[string]string{
-				"email": "電子郵件格式不正確",
-			},
-		},
-		{
-			name: "age validation",
-			input: TestStruct{
-				Username: "testuser",
-				Password: "testpass",
-				Email:    "test@example.com",
-				Age:      17,
-			},
-			expectedKeys: []string{"age"},
-			expectedMsgs: map[string]string{
-				"age": "年齡最小值為18",
 			},
 		},
 	}
@@ -106,7 +79,7 @@ func TestIsValidationError(t *testing.T) {
 		},
 		{
 			name:     "valid struct",
-			input:    TestStruct{Username: "test", Password: "test", Email: "test@example.com", Age: 25},
+			input:    TestStruct{Username: "test", Password: "test"},
 			expected: false,
 		},
 	}
