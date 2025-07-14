@@ -30,6 +30,6 @@ coverage.out
 # Environment files
 .env
 
-# claude
-.claude/
-CLAUDE.md
+# claude local files
+**/.claude/settings.local.json
+CLAUDE.local.md
