@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
+	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]GetStaffUserStoreAccessRow, error)
 }

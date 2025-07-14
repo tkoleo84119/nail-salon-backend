@@ -9,6 +9,36 @@ import (
 	"context"
 )
 
+const getStaffUserByID = `-- name: GetStaffUserByID :one
+SELECT
+    id,
+    username,
+    email,
+    password_hash,
+    role,
+    is_active,
+    created_at,
+    updated_at
+FROM staff_users
+WHERE id = $1
+`
+
+func (q *Queries) GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error) {
+	row := q.db.QueryRow(ctx, getStaffUserByID, id)
+	var i StaffUser
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Role,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getStaffUserByUsername = `-- name: GetStaffUserByUsername :one
 SELECT
     id,
