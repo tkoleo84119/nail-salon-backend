@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -83,8 +84,8 @@ func (s *LoginService) Login(ctx context.Context, req staff.LoginRequest, loginC
 }
 
 // getStoreAccess retrieves store access based on user role
-func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]utils.Store, error) {
-	var storeList []utils.Store
+func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
+	var storeList []common.Store
 
 	// SUPER_ADMIN can access all stores
 	if staffUser.Role == staff.RoleSuperAdmin {
@@ -93,7 +94,7 @@ func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.Staff
 			return nil, err
 		}
 		for _, store := range stores {
-			storeList = append(storeList, utils.Store{
+			storeList = append(storeList, common.Store{
 				ID:   store.ID,
 				Name: store.Name,
 			})
@@ -105,7 +106,7 @@ func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.Staff
 			return nil, err
 		}
 		for _, access := range storeAccess {
-			storeList = append(storeList, utils.Store{
+			storeList = append(storeList, common.Store{
 				ID:   access.StoreID,
 				Name: access.StoreName,
 			})

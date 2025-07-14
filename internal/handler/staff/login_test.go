@@ -16,7 +16,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // MockLoginService implements the LoginServiceInterface for testing
@@ -55,7 +54,7 @@ func TestLoginHandler_Login_Success(t *testing.T) {
 			ID:       "123",
 			Username: "testuser",
 			Role:     "ADMIN",
-			StoreList: []utils.Store{
+			StoreList: []common.Store{
 				{ID: 1, Name: "Store 1"},
 				{ID: 2, Name: "Store 2"},
 			},
@@ -140,7 +139,7 @@ func TestLoginHandler_Login_InvalidCredentials(t *testing.T) {
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	
+
 	assert.Equal(t, "認證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
@@ -182,7 +181,7 @@ func TestLoginHandler_Login_InternalError(t *testing.T) {
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	
+
 	assert.Equal(t, "系統錯誤", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
@@ -240,7 +239,7 @@ func TestLoginHandler_Login_InvalidRequest(t *testing.T) {
 			var response common.ApiResponse
 			err := json.Unmarshal(w.Body.Bytes(), &response)
 			assert.NoError(t, err)
-			
+
 			// Should have message and errors, no data
 			assert.NotEmpty(t, response.Message)
 			assert.Nil(t, response.Data)

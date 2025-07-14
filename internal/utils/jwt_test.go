@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 func TestGenerateJWT(t *testing.T) {
@@ -21,7 +22,7 @@ func TestGenerateJWT(t *testing.T) {
 		userID    int64
 		username  string
 		role      string
-		storeList []Store
+		storeList []common.Store
 		wantErr   bool
 	}{
 		{
@@ -29,7 +30,7 @@ func TestGenerateJWT(t *testing.T) {
 			userID:   123,
 			username: "testuser",
 			role:     "ADMIN",
-			storeList: []Store{
+			storeList: []common.Store{
 				{ID: 1, Name: "Store 1"},
 				{ID: 2, Name: "Store 2"},
 				{ID: 3, Name: "Store 3"},
@@ -41,7 +42,7 @@ func TestGenerateJWT(t *testing.T) {
 			userID:    456,
 			username:  "manager",
 			role:      "MANAGER",
-			storeList: []Store{},
+			storeList: []common.Store{},
 			wantErr:   false,
 		},
 	}
@@ -67,7 +68,7 @@ func TestGenerateJWTWithEmptySecret(t *testing.T) {
 		ExpiryHours: 1,
 	}
 
-	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []Store{
+	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []common.Store{
 		{ID: 1, Name: "Store 1"},
 	})
 	// JWT library allows empty secrets, so this should not error
@@ -84,7 +85,7 @@ func TestValidateJWT(t *testing.T) {
 	userID := int64(123)
 	username := "testuser"
 	role := "ADMIN"
-	storeList := []Store{
+	storeList := []common.Store{
 		{ID: 1, Name: "Store 1"},
 		{ID: 2, Name: "Store 2"},
 		{ID: 3, Name: "Store 3"},
@@ -141,7 +142,7 @@ func TestValidateJWTExpired(t *testing.T) {
 		ExpiryHours: 0, // Set to 0 hours to make it expire immediately
 	}
 
-	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []Store{
+	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []common.Store{
 		{ID: 1, Name: "Store 1"},
 	})
 	require.NoError(t, err)

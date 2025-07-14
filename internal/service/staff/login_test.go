@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -36,6 +37,11 @@ func (m *MockQuerier) GetStaffUserStoreAccess(ctx context.Context, staffUserID i
 func (m *MockQuerier) GetAllActiveStores(ctx context.Context) ([]dbgen.GetAllActiveStoresRow, error) {
 	args := m.Called(ctx)
 	return args.Get(0).([]dbgen.GetAllActiveStoresRow), args.Error(1)
+}
+
+func (m *MockQuerier) GetStaffUserByID(ctx context.Context, userID int64) (dbgen.StaffUser, error) {
+	args := m.Called(ctx, userID)
+	return args.Get(0).(dbgen.StaffUser), args.Error(1)
 }
 
 func (m *MockQuerier) CreateStaffUserToken(ctx context.Context, arg dbgen.CreateStaffUserTokenParams) (dbgen.CreateStaffUserTokenRow, error) {
@@ -121,7 +127,7 @@ func TestLoginService_Login_Success(t *testing.T) {
 	assert.Equal(t, "123", response.User.ID)
 	assert.Equal(t, "testuser", response.User.Username)
 	assert.Equal(t, staff.RoleAdmin, response.User.Role)
-	assert.Equal(t, []utils.Store{
+	assert.Equal(t, []common.Store{
 		{ID: 1, Name: "Store 1"},
 		{ID: 2, Name: "Store 2"},
 	}, response.User.StoreList)
@@ -190,7 +196,7 @@ func TestLoginService_Login_SuperAdmin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
 	assert.Equal(t, staff.RoleSuperAdmin, response.User.Role)
-	assert.Equal(t, []utils.Store{
+	assert.Equal(t, []common.Store{
 		{ID: 1, Name: "Store 1"},
 		{ID: 2, Name: "Store 2"},
 		{ID: 3, Name: "Store 3"},
