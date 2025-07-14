@@ -9,11 +9,17 @@ import (
 )
 
 type Querier interface {
+	BatchCreateStaffUserStoreAccess(ctx context.Context, arg BatchCreateStaffUserStoreAccessParams) error
+	CheckStaffUserExists(ctx context.Context, arg CheckStaffUserExistsParams) (bool, error)
+	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
+	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
+	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]GetStaffUserStoreAccessRow, error)
+	GetStoresByIDs(ctx context.Context, dollar_1 []int64) ([]GetStoresByIDsRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

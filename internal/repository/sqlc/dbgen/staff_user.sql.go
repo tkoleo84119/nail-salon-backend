@@ -7,7 +7,89 @@ package dbgen
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const checkStaffUserExists = `-- name: CheckStaffUserExists :one
+SELECT EXISTS(
+    SELECT 1 FROM staff_users 
+    WHERE username = $1 OR email = $2
+) as exists
+`
+
+type CheckStaffUserExistsParams struct {
+	Username string `db:"username" json:"username"`
+	Email    string `db:"email" json:"email"`
+}
+
+func (q *Queries) CheckStaffUserExists(ctx context.Context, arg CheckStaffUserExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStaffUserExists, arg.Username, arg.Email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const createStaffUser = `-- name: CreateStaffUser :one
+INSERT INTO staff_users (
+    id,
+    username,
+    email,
+    password_hash,
+    role,
+    is_active,
+    created_at,
+    updated_at
+) VALUES (
+    $1, $2, $3, $4, $5, true, NOW(), NOW()
+) RETURNING 
+    id,
+    username,
+    email,
+    role,
+    is_active,
+    created_at,
+    updated_at
+`
+
+type CreateStaffUserParams struct {
+	ID           int64  `db:"id" json:"id"`
+	Username     string `db:"username" json:"username"`
+	Email        string `db:"email" json:"email"`
+	PasswordHash string `db:"password_hash" json:"password_hash"`
+	Role         string `db:"role" json:"role"`
+}
+
+type CreateStaffUserRow struct {
+	ID        int64              `db:"id" json:"id"`
+	Username  string             `db:"username" json:"username"`
+	Email     string             `db:"email" json:"email"`
+	Role      string             `db:"role" json:"role"`
+	IsActive  pgtype.Bool        `db:"is_active" json:"is_active"`
+	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error) {
+	row := q.db.QueryRow(ctx, createStaffUser,
+		arg.ID,
+		arg.Username,
+		arg.Email,
+		arg.PasswordHash,
+		arg.Role,
+	)
+	var i CreateStaffUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Role,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
 
 const getStaffUserByID = `-- name: GetStaffUserByID :one
 SELECT

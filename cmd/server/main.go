@@ -10,6 +10,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
+	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -45,9 +46,11 @@ func main() {
 
 	// initialize services
 	staffLoginService := staffService.NewLoginService(queries, cfg.JWT)
+	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 
 	// initialize handlers
 	staffLoginHandler := staffHandler.NewLoginHandler(staffLoginService)
+	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 
 	router := gin.Default()
 
@@ -58,6 +61,7 @@ func main() {
 		staff := api.Group("/staff")
 		{
 			staff.POST("/login", staffLoginHandler.Login)
+			staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffCreateHandler.CreateStaff)
 		}
 	}
 

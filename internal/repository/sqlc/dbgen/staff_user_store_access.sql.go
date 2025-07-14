@@ -9,6 +9,51 @@ import (
 	"context"
 )
 
+const batchCreateStaffUserStoreAccess = `-- name: BatchCreateStaffUserStoreAccess :exec
+INSERT INTO staff_user_store_access (
+    store_id,
+    staff_user_id,
+    created_at,
+    updated_at
+)
+SELECT 
+    unnest($1::bigint[]) as store_id,
+    $2 as staff_user_id,
+    NOW() as created_at,
+    NOW() as updated_at
+`
+
+type BatchCreateStaffUserStoreAccessParams struct {
+	Column1     []int64 `db:"column_1" json:"column_1"`
+	StaffUserID int64   `db:"staff_user_id" json:"staff_user_id"`
+}
+
+func (q *Queries) BatchCreateStaffUserStoreAccess(ctx context.Context, arg BatchCreateStaffUserStoreAccessParams) error {
+	_, err := q.db.Exec(ctx, batchCreateStaffUserStoreAccess, arg.Column1, arg.StaffUserID)
+	return err
+}
+
+const createStaffUserStoreAccess = `-- name: CreateStaffUserStoreAccess :exec
+INSERT INTO staff_user_store_access (
+    store_id,
+    staff_user_id,
+    created_at,
+    updated_at
+) VALUES (
+    $1, $2, NOW(), NOW()
+)
+`
+
+type CreateStaffUserStoreAccessParams struct {
+	StoreID     int64 `db:"store_id" json:"store_id"`
+	StaffUserID int64 `db:"staff_user_id" json:"staff_user_id"`
+}
+
+func (q *Queries) CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error {
+	_, err := q.db.Exec(ctx, createStaffUserStoreAccess, arg.StoreID, arg.StaffUserID)
+	return err
+}
+
 const getStaffUserStoreAccess = `-- name: GetStaffUserStoreAccess :many
 SELECT
     sa.store_id,

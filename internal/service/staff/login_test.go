@@ -49,6 +49,36 @@ func (m *MockQuerier) CreateStaffUserToken(ctx context.Context, arg dbgen.Create
 	return args.Get(0).(dbgen.CreateStaffUserTokenRow), args.Error(1)
 }
 
+func (m *MockQuerier) CheckStaffUserExists(ctx context.Context, arg dbgen.CheckStaffUserExistsParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockQuerier) CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (dbgen.CheckStoresExistAndActiveRow, error) {
+	args := m.Called(ctx, storeIDs)
+	return args.Get(0).(dbgen.CheckStoresExistAndActiveRow), args.Error(1)
+}
+
+func (m *MockQuerier) CreateStaffUser(ctx context.Context, arg dbgen.CreateStaffUserParams) (dbgen.CreateStaffUserRow, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.CreateStaffUserRow), args.Error(1)
+}
+
+func (m *MockQuerier) CreateStaffUserStoreAccess(ctx context.Context, arg dbgen.CreateStaffUserStoreAccessParams) error {
+	args := m.Called(ctx, arg)
+	return args.Error(0)
+}
+
+func (m *MockQuerier) GetStoresByIDs(ctx context.Context, storeIDs []int64) ([]dbgen.GetStoresByIDsRow, error) {
+	args := m.Called(ctx, storeIDs)
+	return args.Get(0).([]dbgen.GetStoresByIDsRow), args.Error(1)
+}
+
+func (m *MockQuerier) BatchCreateStaffUserStoreAccess(ctx context.Context, arg dbgen.BatchCreateStaffUserStoreAccessParams) error {
+	args := m.Called(ctx, arg)
+	return args.Error(0)
+}
+
 func setupTestEnvironment(t *testing.T) func() {
 	// Set up JWT secret for testing
 	originalSecret := os.Getenv("JWT_SECRET")
