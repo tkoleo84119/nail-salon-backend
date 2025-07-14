@@ -2,7 +2,7 @@
 
 ## 概述
 
-JWT middleware 提供員工用戶的 JWT 令牌驗證功能，確保 API 安全訪問。
+JWT middleware 提供員工用戶的 JWT 令牌驗證功能，確保 API 端點安全訪問。
 
 ## 使用方式
 
@@ -44,7 +44,7 @@ func getProfile(c *gin.Context) {
   // 從context中獲取員工信息
   staff, exists := middleware.GetStaffFromContext(c)
   if !exists {
-    c.JSON(http.StatusUnauthorized, common.ErrorResponse("獲取員工資訊失敗", nil))
+    c.JSON(http.StatusUnauthorized, common.ErrorResponse("未找到使用者認證資訊", nil))
     return
   }
 
