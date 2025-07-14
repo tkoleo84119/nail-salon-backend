@@ -41,10 +41,10 @@ Content-Type: application/json
 
 ### 驗證規則
 
-| 欄位       | 規則       | 說明                             |
-| -------- | -------- | -------------------------------- |
-| username | required | 帳號（唯一），長度介於 1 到 100 字元 |
-| password | required | 密碼明文（將與 DB hash 比對），長度介於 1 到 100 字元 |
+| 欄位     | 規則                                 | 說明                          |
+| -------- | ------------------------------------ | ----------------------------- |
+| username | <li>必填<li>長度大於1<li>長度小於100 | 帳號（唯一）                  |
+| password | <li>必填<li>長度大於1<li>長度小於100 | 密碼明文（將與 DB hash 比對） |
 
 ---
 
@@ -147,4 +147,4 @@ Content-Type: application/json
 - 密碼不可回傳（僅比對）
 - `refresh_token` 儲存於 DB，並設置 `expired_at` / `user_agent` / `ip`
 - `expires_in` 表示 Access Token 的有效秒數
-- `store_ids` 為該員工可查看的門市列表
+- `store_list` 為該員工有權限的門市列表
