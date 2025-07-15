@@ -2,7 +2,6 @@ package staff
 
 import (
 	"context"
-	"fmt"
 	"net/netip"
 	"strconv"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -31,29 +31,29 @@ func NewLoginService(queries dbgen.Querier, jwtConfig config.JWTConfig) *LoginSe
 func (s *LoginService) Login(ctx context.Context, req staff.LoginRequest, loginCtx staff.LoginContext) (*staff.LoginResponse, error) {
 	staffUser, err := s.queries.GetStaffUserByUsername(ctx, req.Username)
 	if err != nil {
-		return nil, fmt.Errorf("invalid credentials")
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
 
 	// Verify password
 	if !utils.CheckPassword(req.Password, staffUser.PasswordHash) {
-		return nil, fmt.Errorf("invalid credentials")
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
 
 	// Get store access based on role
 	storeList, err := s.getStoreAccess(ctx, staffUser)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get store access: %w", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store access", err)
 	}
 
 	// Generate tokens
 	accessToken, err := utils.GenerateJWT(s.jwtConfig, staffUser.ID, staffUser.Username, staffUser.Role, storeList)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate access token: %w", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate access token", err)
 	}
 
 	refreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate refresh token", err)
 	}
 
 	// Store refresh token
@@ -65,7 +65,7 @@ func (s *LoginService) Login(ctx context.Context, req staff.LoginRequest, loginC
 	}
 
 	if err := s.storeRefreshToken(ctx, tokenInfo); err != nil {
-		return nil, fmt.Errorf("failed to store refresh token: %w", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to store refresh token", err)
 	}
 
 	response := &staff.LoginResponse{

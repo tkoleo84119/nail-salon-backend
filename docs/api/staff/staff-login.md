@@ -91,7 +91,7 @@ Content-Type: application/json
 
 ```json
 {
-  "message": "請求錯誤",
+  "message": "JSON格式錯誤",
   "errors": {
     "request": "JSON格式錯誤"
   }
@@ -102,10 +102,7 @@ Content-Type: application/json
 
 ```json
 {
-  "message": "認證失敗",
-  "errors": {
-    "credentials": "帳號或密碼錯誤"
-  }
+  "message": "帳號或密碼錯誤"
 }
 ```
 
@@ -113,10 +110,7 @@ Content-Type: application/json
 
 ```json
 {
-  "message": "系統錯誤",
-  "errors": {
-    "server": "伺服器內部錯誤"
-  }
+  "message": "系統發生錯誤，請稍後再試"
 }
 ```
 

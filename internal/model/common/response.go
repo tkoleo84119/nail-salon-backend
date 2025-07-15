@@ -31,16 +31,3 @@ func SuccessResponse(data interface{}) ApiResponse {
 	}
 }
 
-func ErrorResponse(message string, errors map[string]string) ApiResponse {
-	return ApiResponse{
-		Message: message,
-		Errors:  errors,
-	}
-}
-
-func ValidationErrorResponse(errors map[string]string) ApiResponse {
-	return ApiResponse{
-		Message: "輸入驗證失敗",
-		Errors:  errors,
-	}
-}

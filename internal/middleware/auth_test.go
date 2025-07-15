@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -77,8 +78,16 @@ func (m *MockQuerier) BatchCreateStaffUserStoreAccess(ctx context.Context, arg d
 	return args.Error(0)
 }
 
-func TestJWTAuth_MissingToken(t *testing.T) {
+func setupTestEnvironment() {
 	gin.SetMode(gin.TestMode)
+	
+	// Load error definitions for testing
+	errorManager := errorCodes.GetManager()
+	_ = errorManager.LoadFromFile("../errors/errors.yaml")
+}
+
+func TestJWTAuth_MissingToken(t *testing.T) {
+	setupTestEnvironment()
 
 	mockDB := new(MockQuerier)
 	cfg := config.Config{
@@ -104,7 +113,7 @@ func TestJWTAuth_MissingToken(t *testing.T) {
 }
 
 func TestJWTAuth_InvalidTokenFormat(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	mockDB := new(MockQuerier)
 	cfg := config.Config{
@@ -131,7 +140,7 @@ func TestJWTAuth_InvalidTokenFormat(t *testing.T) {
 }
 
 func TestGetStaffFromContext(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 
@@ -156,7 +165,7 @@ func TestGetStaffFromContext(t *testing.T) {
 }
 
 func TestGetStaffFromContext_NotExists(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 
@@ -167,7 +176,7 @@ func TestGetStaffFromContext_NotExists(t *testing.T) {
 }
 
 func TestRequireRoles_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
@@ -197,7 +206,7 @@ func TestRequireRoles_Success(t *testing.T) {
 }
 
 func TestRequireRoles_InsufficientPermissions(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
@@ -227,7 +236,7 @@ func TestRequireRoles_InsufficientPermissions(t *testing.T) {
 }
 
 func TestRequireRoles_NoStaffContext(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	router := gin.New()
 	router.Use(RequireRoles(staff.RoleSuperAdmin, staff.RoleAdmin))
@@ -245,7 +254,7 @@ func TestRequireRoles_NoStaffContext(t *testing.T) {
 }
 
 func TestRequireSuperAdmin_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
@@ -274,7 +283,7 @@ func TestRequireSuperAdmin_Success(t *testing.T) {
 }
 
 func TestRequireSuperAdmin_Forbidden(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	setupTestEnvironment()
 
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
@@ -313,7 +322,7 @@ func TestRequireAdminRoles_Success(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gin.SetMode(gin.TestMode)
+			setupTestEnvironment()
 
 			router := gin.New()
 			router.Use(func(c *gin.Context) {
@@ -355,7 +364,7 @@ func TestRequireManagerOrAbove_Success(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gin.SetMode(gin.TestMode)
+			setupTestEnvironment()
 
 			router := gin.New()
 			router.Use(func(c *gin.Context) {
@@ -398,7 +407,7 @@ func TestRequireAnyStaffRole_Success(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gin.SetMode(gin.TestMode)
+			setupTestEnvironment()
 
 			router := gin.New()
 			router.Use(func(c *gin.Context) {

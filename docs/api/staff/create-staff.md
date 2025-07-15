@@ -98,10 +98,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "認證失敗",
-  "errors": {
-    "token": "access_token 無效或已過期"
-  }
+  "message": "無效的 access_token"
 }
 ```
 
@@ -109,10 +106,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "權限不足",
-  "errors": {
-    "permission": "權限不足"
-  }
+  "message": "權限不足，無法執行此操作"
 }
 ```
 
@@ -120,10 +114,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "系統錯誤",
-  "errors": {
-    "server": "建立帳號時發生錯誤"
-  }
+  "message": "系統發生錯誤，請稍後再試"
 }
 ```
 

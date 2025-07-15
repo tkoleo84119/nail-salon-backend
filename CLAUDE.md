@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Workflow
 
 ### Task Planning and Execution
-**CRITICAL**: Before starting any task, always follow this workflow:
+**CRITICAL - MANDATORY WORKFLOW**: Before starting ANY task, you MUST follow this workflow exactly:
 
 1. **Task Analysis**: Read and understand the complete request
 2. **Create Todo List**: Use TodoWrite tool to break down the task into specific, actionable items
@@ -13,6 +13,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 4. **Execute Step by Step**: Work through each todo item systematically
 5. **Commit Granularly**: Make small, focused commits for each logical change (avoid large commits)
 6. **Update Documentation**: After task completion, check if CLAUDE.md needs updates
+
+**⚠️ IMPORTANT**: You MUST NOT start coding or making changes without first creating a todo list and getting user approval. This is non-negotiable and prevents scope creep and ensures proper task planning.
 
 ### Commit Guidelines
 - **Small, Focused Commits**: Each commit should represent one logical change
@@ -33,6 +35,12 @@ make run                    # Start the server (default port from config)
 go run cmd/server/main.go   # Alternative way to start server
 ```
 
+### Testing
+```bash
+make test                   # Run all tests
+go test ./...               # Alternative way to run tests
+```
+
 ### Database Operations
 ```bash
 make migrate-up             # Run all pending migrations
@@ -45,10 +53,19 @@ Database migrations are located in `migration/` directory and follow numbered na
 
 ### Environment Setup
 - Copy `.env.example` to `.env` and configure database credentials
-- Required environment variables: `DB_USER`, `DB_PASS`, `DB_NAME`, `DB_PORT`, `DB_HOST`
-- Authentication: `JWT_SECRET` (for JWT token signing)
-- Optional: `PORT` (server port, defaults to 3000), `JWT_EXPIRY_HOURS` (JWT expiry, defaults to 1 hour)
-- Advanced: Database connection pooling settings (`DB_MAX_OPEN_CONNS`, `DB_CONN_MAX_LIFE`, etc.)
+- **Required environment variables**: 
+  - `JWT_SECRET` (for JWT token signing)
+  - Either `DB_DSN` (connection string) OR individual DB settings: `DB_USER`, `DB_PASS`, `DB_NAME`, `DB_PORT`, `DB_HOST`
+- **Optional environment variables**: 
+  - `PORT` (server port, defaults to 3000)
+  - `JWT_EXPIRY_HOURS` (JWT expiry, defaults to 1 hour)
+  - `SNOWFLAKE_NODE_ID` (for distributed ID generation, defaults to 1)
+  - `DB_SSLMODE` (SSL mode, defaults to disable)
+- **Advanced Database Settings**: 
+  - `DB_MAX_OPEN_CONNS` (max open connections, defaults to 25)
+  - `DB_CONN_MAX_LIFE` (connection max lifetime, defaults to 30m)
+  - `DB_CONN_MAX_LIFE_JITTER` (connection lifetime jitter, defaults to 5m)
+  - `DB_CONN_IDLE_TIME` (connection idle time, defaults to 2m)
 
 ## Architecture Overview
 
@@ -60,6 +77,12 @@ nail-salon-backend/
 ├── cmd/server/                 # Application entry point
 ├── internal/
 │   ├── config/                # Configuration management with environment loading
+│   ├── errors/                # Centralized error management system
+│   │   ├── codes.go          # Error code constants
+│   │   ├── error_manager.go  # YAML-based error manager
+│   │   ├── errors.yaml       # Error definitions with Chinese messages
+│   │   ├── response_helper.go # Error response utilities
+│   │   └── service_error.go  # Service error handling
 │   ├── handler/               # HTTP request handlers (Presentation Layer)
 │   │   └── staff/            # Staff module handlers
 │   ├── infra/db/             # Database infrastructure layer
@@ -220,10 +243,75 @@ type Config struct {
 
 ### Error Handling Philosophy
 
-- Use wrapped errors with context information
-- Consistent error responses across API endpoints
+The application uses a **centralized error management system** with YAML-based error definitions:
+
+**Error Management Architecture:**
+- **Error Codes**: Constants defined in `internal/errors/codes.go`
+- **Error Definitions**: YAML configuration in `internal/errors/errors.yaml` with Chinese messages
+- **Error Manager**: Singleton pattern for loading and managing error definitions
+- **Response Helpers**: Standardized error response generation
+
+**Error Handling Patterns:**
+- Service errors wrapped with specific error codes
 - Database connection validation with proper cleanup
 - Graceful degradation with meaningful error messages
+- Consistent error responses across API endpoints using `errorCodes.RespondWithError()`
+- **Development-friendly debugging**: In development mode, API responses include `dev_details` field with technical error information
+- **Production security**: In production mode (`GIN_MODE=release`), only user-friendly messages are returned
+
+## Error Management System
+
+### YAML-Based Error Definitions
+The application uses a centralized error management system with YAML-based error definitions:
+
+**Key Components:**
+- **Error Codes**: Constants in `internal/errors/codes.go` for easy reference
+- **Error Definitions**: YAML file `internal/errors/errors.yaml` with Chinese messages and HTTP status codes
+- **Error Manager**: Singleton pattern for loading and managing error definitions
+- **Response Helpers**: Standardized utilities for error responses
+
+**Error Categories:**
+- **AUTH**: Authentication and authorization errors
+- **USER**: User management and validation errors  
+- **VAL**: Input validation and format errors
+- **SYS**: System and infrastructure errors
+
+**Usage Pattern:**
+```go
+// Load error definitions (in main.go)
+errorManager := errorCodes.GetManager()
+if err := errorManager.LoadFromFile("internal/errors/errors.yaml"); err != nil {
+    log.Fatalf("Failed to load error definitions: %v", err)
+}
+
+// Use in handlers
+errorCodes.RespondWithError(c, errorCodes.AuthInvalidCredentials, nil)
+errorCodes.RespondWithServiceError(c, err) // Automatically includes dev_details in development
+
+// Custom error with details
+errorCodes.RespondWithErrorDetails(c, errorCodes.SysDatabaseError, nil, "connection failed: timeout")
+
+// Direct error manager usage (unified method)
+errorManager.GetErrorResponse(code, fieldErrors)                    // Without details
+errorManager.GetErrorResponse(code, fieldErrors, "debug info")     // With details
+```
+
+**Development vs Production Error Responses:**
+
+Development Mode (GIN_MODE != "release"):
+```json
+{
+  "message": "資料庫連接錯誤",
+  "dev_details": "failed to get store access: sql: connection timeout"
+}
+```
+
+Production Mode (GIN_MODE="release"):
+```json
+{
+  "message": "資料庫連接錯誤"
+}
+```
 
 ## API Design Standards
 
@@ -267,12 +355,17 @@ All APIs (except `/health`) use a consistent response structure:
 // Success
 c.JSON(http.StatusOK, common.SuccessResponse(responseData))
 
+// Service Error
+errorCodes.RespondWithServiceError(c, err)
+
 // Validation Error
-c.JSON(http.StatusBadRequest, common.ValidationErrorResponse(validationErrors))
+errorCodes.RespondWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 
 // Custom Error
-errors := map[string]string{"field": "錯誤訊息"}
-c.JSON(http.StatusXxx, common.ErrorResponse("訊息", errors))
+errorCodes.RespondWithError(c, errorCodes.AuthTokenMissing, nil)
+
+// Middleware Error (with abort)
+errorCodes.AbortWithError(c, errorCodes.AuthPermissionDenied, nil)
 ```
 
 ## API Documentation Standards
@@ -298,7 +391,7 @@ Types: feat, fix, refactor, perf, style, test, docs, build, ops, chore
 ## Important Development Reminders
 
 **DO:**
-- **ALWAYS start tasks by creating a todo list and getting user confirmation**
+- **ALWAYS start tasks by creating a todo list and getting user confirmation** - This is the single most important rule
 - Follow the modular architecture pattern established by the staff module
 - Use role constants instead of hardcoded strings
 - Generate Snowflake IDs for all database insertions
@@ -306,14 +399,18 @@ Types: feat, fix, refactor, perf, style, test, docs, build, ops, chore
 - Use sqlc for type-safe database operations as primary approach
 - Centralize configuration in config layer
 - Follow Clean Architecture dependency flow
-- Use standardized API response format with `common.SuccessResponse()` and `common.ErrorResponse()`
+- Use standardized API response format with `common.SuccessResponse()` and `errorCodes.RespondWithError()`
 - Provide Chinese error messages for all user-facing errors
 - Extract validation errors using `utils.ExtractValidationErrors()`
 - Make small, focused commits with clear messages
 - Update CLAUDE.md after completing tasks that introduce new patterns
+- Load error definitions from YAML file in main.go initialization
+- Use the centralized error management system for all error responses
+- Prefer `RespondWithServiceError()` for service layer errors (includes development details automatically)
+- Use `RespondWithErrorDetails()` when you want to add specific debug information
 
 **DON'T:**
-- **Start coding without presenting a plan to the user first**
+- **Start coding without presenting a plan to the user first** - This will result in incomplete/incorrect implementations
 - Put business logic in handlers (belongs in service layer)
 - Read environment variables directly with `os.Getenv` outside config layer
 - Use auto-incrementing database IDs (use Snowflake IDs)
@@ -325,6 +422,8 @@ Types: feat, fix, refactor, perf, style, test, docs, build, ops, chore
 - Hardcode validation error messages in handlers
 - Make large commits that change too many things at once
 - Use different PostgreSQL drivers (stick to pgx/v5)
+- Modify error messages directly in code (use `internal/errors/errors.yaml`)
+- Skip loading error definitions in main.go (required for error system to work)
 
 **ARCHITECTURE NOTES:**
 - The system is designed for multi-store nail salon businesses

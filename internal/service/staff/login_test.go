@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -86,6 +87,11 @@ func setupTestEnvironment(t *testing.T) func() {
 
 	// Initialize snowflake for testing
 	err := utils.InitSnowflake(1)
+	require.NoError(t, err)
+
+	// Load error definitions for testing
+	errorManager := errorCodes.GetManager()
+	err = errorManager.LoadFromFile("../../errors/errors.yaml")
 	require.NoError(t, err)
 
 	return func() {
@@ -269,7 +275,7 @@ func TestLoginService_Login_InvalidCredentials(t *testing.T) {
 	// Assert error
 	assert.Error(t, err)
 	assert.Nil(t, response)
-	assert.Contains(t, err.Error(), "invalid credentials")
+	assert.Contains(t, err.Error(), "AUTH_INVALID_CREDENTIALS")
 
 	// Verify all expectations were met
 	mockQuerier.AssertExpectations(t)
@@ -320,7 +326,7 @@ func TestLoginService_Login_WrongPassword(t *testing.T) {
 	// Assert error
 	assert.Error(t, err)
 	assert.Nil(t, response)
-	assert.Contains(t, err.Error(), "invalid credentials")
+	assert.Contains(t, err.Error(), "AUTH_INVALID_CREDENTIALS")
 
 	// Verify all expectations were met
 	mockQuerier.AssertExpectations(t)

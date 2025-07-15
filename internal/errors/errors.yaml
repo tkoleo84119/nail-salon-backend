@@ -1,0 +1,73 @@
+AUTH:
+  AUTH_INVALID_CREDENTIALS:
+    message: 帳號或密碼錯誤
+    status: 401
+  AUTH_TOKEN_EXPIRED:
+    message: 登入已過期，請重新登入
+    status: 401
+  AUTH_TOKEN_INVALID:
+    message: 無效的 access_token
+    status: 401
+  AUTH_TOKEN_MISSING:
+    message: access_token 缺失
+    status: 401
+  AUTH_TOKEN_FORMAT_ERROR:
+    message: access_token 格式錯誤
+    status: 401
+  AUTH_STAFF_FAILED:
+    message: 未找到員工資訊
+    status: 401
+  AUTH_CONTEXT_MISSING:
+    message: 未找到使用者認證資訊
+    status: 401
+  AUTH_PERMISSION_DENIED:
+    message: 權限不足，無法執行此操作
+    status: 403
+
+USER:
+  USER_INVALID_ROLE:
+    message: 無效的角色
+    status: 400
+  USER_STORE_NOT_EXIST:
+    message: 部分門市不存在
+    status: 400
+  USER_STORE_NOT_ACTIVE:
+    message: 部分門市未啟用
+    status: 400
+  USER_INACTIVE:
+    message: 帳號已停用
+    status: 403
+  USER_NOT_FOUND:
+    message: 使用者不存在
+    status: 404
+  USER_ALREADY_EXISTS:
+    message: 帳號或Email已存在
+    status: 409
+  USER_EMAIL_EXISTS:
+    message: 此電子郵件已被註冊
+    status: 409
+  USER_USERNAME_EXISTS:
+    message: 此帳號已被使用
+    status: 409
+
+VAL:
+  VAL_JSON_FORMAT:
+    message: JSON格式錯誤
+    status: 400
+  VAL_INPUT_VALIDATION_FAILED:
+    message: 輸入驗證失敗
+    status: 400
+
+SYS:
+  SYS_INTERNAL_ERROR:
+    message: 系統發生錯誤，請稍後再試
+    status: 500
+  SYS_DATABASE_ERROR:
+    message: 資料庫連接錯誤
+    status: 500
+  SYS_SERVICE_UNAVAILABLE:
+    message: 服務暫時無法使用
+    status: 503
+  SYS_TIMEOUT:
+    message: 請求超時，請稍後再試
+    status: 504

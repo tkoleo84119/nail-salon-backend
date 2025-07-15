@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
@@ -30,11 +31,11 @@ func (h *LoginHandler) Login(c *gin.Context) {
 		// Handle validation errors
 		if utils.IsValidationError(err) {
 			validationErrors := utils.ExtractValidationErrors(err)
-			c.JSON(http.StatusBadRequest, common.ValidationErrorResponse(validationErrors))
+			errorCodes.RespondWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		} else {
 			// Handle JSON parsing errors
-			errors := map[string]string{"request": "JSON格式錯誤"}
-			c.JSON(http.StatusBadRequest, common.ErrorResponse("請求錯誤", errors))
+			fieldErrors := map[string]string{"request": "JSON格式錯誤"}
+			errorCodes.RespondWithError(c, errorCodes.ValJsonFormat, fieldErrors)
 		}
 		return
 	}
@@ -49,14 +50,7 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	// Call service layer
 	response, err := h.loginService.Login(c.Request.Context(), req, loginCtx)
 	if err != nil {
-		// For security, don't expose internal errors
-		if err.Error() == "invalid credentials" {
-			errors := map[string]string{"credentials": "帳號或密碼錯誤"}
-			c.JSON(http.StatusUnauthorized, common.ErrorResponse("認證失敗", errors))
-		} else {
-			errors := map[string]string{"server": "伺服器內部錯誤"}
-			c.JSON(http.StatusInternalServerError, common.ErrorResponse("系統錯誤", errors))
-		}
+		errorCodes.RespondWithServiceError(c, err)
 		return
 	}
 

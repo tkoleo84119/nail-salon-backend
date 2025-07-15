@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
@@ -39,6 +40,12 @@ func main() {
 	// initialize snowflake
 	if err := utils.InitSnowflake(cfg.Server.SnowflakeNodeId); err != nil {
 		log.Fatalf("Failed to initialize snowflake: %v", err)
+	}
+
+	// initialize error manager
+	errorManager := errorCodes.GetManager()
+	if err := errorManager.LoadFromFile("internal/errors/errors.yaml"); err != nil {
+		log.Fatalf("Failed to load error definitions: %v", err)
 	}
 
 	// initialize sqlc queries

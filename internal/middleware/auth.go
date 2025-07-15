@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"net/http"
 	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -21,33 +21,25 @@ func JWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			errors := map[string]string{"token": "access_token 缺失"}
-			c.JSON(http.StatusUnauthorized, common.ErrorResponse("認證失敗", errors))
-			c.Abort()
+			errorCodes.AbortWithError(c, errorCodes.AuthTokenMissing, nil)
 			return
 		}
 
 		tokenParts := strings.SplitN(authHeader, " ", 2)
 		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			errors := map[string]string{"token": "access_token 格式錯誤"}
-			c.JSON(http.StatusUnauthorized, common.ErrorResponse("認證失敗", errors))
-			c.Abort()
+			errorCodes.AbortWithError(c, errorCodes.AuthTokenFormatError, nil)
 			return
 		}
 
 		token := tokenParts[1]
 		claims, err := utils.ValidateJWT(cfg.JWT, token)
 		if err != nil {
-			errors := map[string]string{"token": "access_token 無效或已過期"}
-			c.JSON(http.StatusUnauthorized, common.ErrorResponse("認證失敗", errors))
-			c.Abort()
+			errorCodes.AbortWithError(c, errorCodes.AuthTokenInvalid, nil)
 			return
 		}
 
 		if err := validateStaffToken(c, db, claims); err != nil {
-			errors := map[string]string{"token": "員工認證失敗"}
-			c.JSON(http.StatusUnauthorized, common.ErrorResponse("認證失敗", errors))
-			c.Abort()
+			errorCodes.AbortWithError(c, errorCodes.AuthStaffFailed, nil)
 			return
 		}
 
@@ -85,16 +77,12 @@ func RequireRoles(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		staffContext, exists := GetStaffFromContext(c)
 		if !exists {
-			errors := map[string]string{"auth": "未找到使用者認證資訊"}
-			c.JSON(http.StatusUnauthorized, common.ErrorResponse("認證失敗", errors))
-			c.Abort()
+			errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 			return
 		}
 
 		if !hasRequiredRole(staffContext.Role, allowedRoles) {
-			errors := map[string]string{"permission": "權限不足"}
-			c.JSON(http.StatusForbidden, common.ErrorResponse("權限不足", errors))
-			c.Abort()
+			errorCodes.AbortWithError(c, errorCodes.AuthPermissionDenied, nil)
 			return
 		}
 

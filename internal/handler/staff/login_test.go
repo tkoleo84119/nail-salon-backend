@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
@@ -36,6 +37,10 @@ func (m *MockLoginService) Login(ctx context.Context, req staff.LoginRequest, lo
 
 func setupTestGin() {
 	gin.SetMode(gin.TestMode)
+	
+	// Load error definitions for testing
+	errorManager := errorCodes.GetManager()
+	_ = errorManager.LoadFromFile("../../errors/errors.yaml")
 }
 
 func TestLoginHandler_Login_Success(t *testing.T) {
@@ -115,7 +120,8 @@ func TestLoginHandler_Login_InvalidCredentials(t *testing.T) {
 	handler := NewLoginHandler(mockService)
 
 	// Set up mock expectations - invalid credentials
-	mockService.On("Login", mock.Anything, mock.AnythingOfType("staff.LoginRequest"), mock.AnythingOfType("staff.LoginContext")).Return(nil, errors.New("invalid credentials"))
+	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
+	mockService.On("Login", mock.Anything, mock.AnythingOfType("staff.LoginRequest"), mock.AnythingOfType("staff.LoginContext")).Return(nil, serviceError)
 
 	// Create request
 	loginReq := staff.LoginRequest{
@@ -140,10 +146,9 @@ func TestLoginHandler_Login_InvalidCredentials(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "認證失敗", response.Message)
+	assert.Equal(t, "帳號或密碼錯誤", response.Message)
 	assert.Nil(t, response.Data)
-	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "帳號或密碼錯誤", response.Errors["credentials"])
+	assert.Nil(t, response.Errors) // Service errors don't have field-specific errors
 
 	// Verify all expectations were met
 	mockService.AssertExpectations(t)
@@ -182,10 +187,9 @@ func TestLoginHandler_Login_InternalError(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "系統錯誤", response.Message)
+	assert.Equal(t, "系統發生錯誤，請稍後再試", response.Message)
 	assert.Nil(t, response.Data)
-	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "伺服器內部錯誤", response.Errors["server"])
+	assert.Nil(t, response.Errors) // Internal errors don't have field-specific errors
 
 	// Verify all expectations were met
 	mockService.AssertExpectations(t)

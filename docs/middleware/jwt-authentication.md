@@ -44,7 +44,7 @@ func getProfile(c *gin.Context) {
   // 從context中獲取員工信息
   staff, exists := middleware.GetStaffFromContext(c)
   if !exists {
-    c.JSON(http.StatusUnauthorized, common.ErrorResponse("未找到使用者認證資訊", nil))
+    errorCodes.RespondWithError(c, errorCodes.AuthContextMissing, nil)
     return
   }
 
@@ -67,40 +67,28 @@ middleware 會根據不同的認證失敗情況返回相應的錯誤訊息：
 ### 缺少認證令牌
 ```json
 {
-  "message": "認證失敗",
-  "errors": {
-    "token": "access_token 缺失"
-  }
+  "message": "access_token 缺失"
 }
 ```
 
 ### 令牌格式錯誤
 ```json
 {
-  "message": "認證失敗",
-  "errors": {
-    "token": "access_token 格式錯誤"
-  }
+  "message": "access_token 格式錯誤"
 }
 ```
 
 ### 令牌無效或過期
 ```json
 {
-  "message": "認證失敗",
-  "errors": {
-    "token": "access_token 無效或已過期"
-  }
+  "message": "無效的 access_token"
 }
 ```
 
-### 員工認證失敗
+### 未找到員工資訊
 ```json
 {
-  "message": "認證失敗",
-  "errors": {
-    "token": "員工認證失敗"
-  }
+  "message": "未找到員工資訊"
 }
 ```
 
