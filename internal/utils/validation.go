@@ -54,6 +54,7 @@ func getFieldDisplayName(fieldName string) string {
 		"Email":     "Email",
 		"Role":      "角色",
 		"StoreIDs":  "門市清單",
+		"StoreID":   "門市ID",
 	}
 
 	if displayName, exists := fieldNames[fieldName]; exists {

@@ -65,6 +65,28 @@ func (q *Queries) GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresR
 	return items, nil
 }
 
+const getStoreByID = `-- name: GetStoreByID :one
+SELECT
+    id,
+    name,
+    is_active
+FROM stores
+WHERE id = $1
+`
+
+type GetStoreByIDRow struct {
+	ID       int64       `db:"id" json:"id"`
+	Name     string      `db:"name" json:"name"`
+	IsActive pgtype.Bool `db:"is_active" json:"is_active"`
+}
+
+func (q *Queries) GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error) {
+	row := q.db.QueryRow(ctx, getStoreByID, id)
+	var i GetStoreByIDRow
+	err := row.Scan(&i.ID, &i.Name, &i.IsActive)
+	return i, err
+}
+
 const getStoresByIDs = `-- name: GetStoresByIDs :many
 SELECT
     id,

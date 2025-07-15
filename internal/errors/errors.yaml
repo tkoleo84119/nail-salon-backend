@@ -52,6 +52,12 @@ USER:
   USER_NOT_UPDATE_SELF:
     message: 不可更新自己的帳號
     status: 400
+  USER_STAFF_NOT_FOUND:
+    message: 指定的員工不存在
+    status: 404
+  USER_STORE_NOT_FOUND:
+    message: 指定的門市不存在
+    status: 404
 
 VAL:
   VAL_JSON_FORMAT:

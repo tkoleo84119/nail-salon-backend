@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/bwmarrin/snowflake"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -55,14 +55,17 @@ func main() {
 		}
 	}
 
-	// Create test store
-	storeID := node.Generate().Int64()
-	_, err = db.Exec(`
+	// Create test many stores
+	for i := 0; i < 5; i++ {
+		storeID := node.Generate().Int64()
+		storeName := fmt.Sprintf("測試門市%d", i)
+		_, err = db.Exec(`
 		INSERT INTO stores (id, name, address, phone)
-		VALUES ($1, '測試門市', '台北市信義區', '0223456789')
-	`, storeID)
-	if err != nil {
-		log.Fatalf("Failed to create test store: %v", err)
+		VALUES ($1, $2, '台北市信義區', '0223456789')
+	`, storeID, storeName)
+		if err != nil {
+			log.Fatalf("Failed to create test store: %v", err)
+		}
 	}
 
 	// Create test super admin

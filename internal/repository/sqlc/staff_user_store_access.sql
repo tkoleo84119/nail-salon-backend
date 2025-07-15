@@ -28,3 +28,9 @@ SELECT
     $2 as staff_user_id,
     NOW() as created_at,
     NOW() as updated_at;
+
+-- name: CheckStoreAccessExists :one
+SELECT EXISTS(
+    SELECT 1 FROM staff_user_store_access 
+    WHERE staff_user_id = $1 AND store_id = $2
+) as exists;

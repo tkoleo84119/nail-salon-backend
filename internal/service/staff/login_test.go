@@ -80,6 +80,16 @@ func (m *MockQuerier) BatchCreateStaffUserStoreAccess(ctx context.Context, arg d
 	return args.Error(0)
 }
 
+func (m *MockQuerier) GetStoreByID(ctx context.Context, id int64) (dbgen.GetStoreByIDRow, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.GetStoreByIDRow), args.Error(1)
+}
+
+func (m *MockQuerier) CheckStoreAccessExists(ctx context.Context, arg dbgen.CheckStoreAccessExistsParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}
+
 func setupTestEnvironment(t *testing.T) func() {
 	// Set up JWT secret for testing
 	originalSecret := os.Getenv("JWT_SECRET")

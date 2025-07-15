@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	BatchCreateStaffUserStoreAccess(ctx context.Context, arg BatchCreateStaffUserStoreAccessParams) error
 	CheckStaffUserExists(ctx context.Context, arg CheckStaffUserExistsParams) (bool, error)
+	CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
@@ -19,6 +20,7 @@ type Querier interface {
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]GetStaffUserStoreAccessRow, error)
+	GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error)
 	GetStoresByIDs(ctx context.Context, dollar_1 []int64) ([]GetStoresByIDsRow, error)
 }
 

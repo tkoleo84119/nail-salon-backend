@@ -6,6 +6,14 @@ FROM stores
 WHERE is_active = true
 ORDER BY name;
 
+-- name: GetStoreByID :one
+SELECT
+    id,
+    name,
+    is_active
+FROM stores
+WHERE id = $1;
+
 -- name: GetStoresByIDs :many
 SELECT
     id,

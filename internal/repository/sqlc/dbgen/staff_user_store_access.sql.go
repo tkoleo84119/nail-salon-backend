@@ -33,6 +33,25 @@ func (q *Queries) BatchCreateStaffUserStoreAccess(ctx context.Context, arg Batch
 	return err
 }
 
+const checkStoreAccessExists = `-- name: CheckStoreAccessExists :one
+SELECT EXISTS(
+    SELECT 1 FROM staff_user_store_access 
+    WHERE staff_user_id = $1 AND store_id = $2
+) as exists
+`
+
+type CheckStoreAccessExistsParams struct {
+	StaffUserID int64 `db:"staff_user_id" json:"staff_user_id"`
+	StoreID     int64 `db:"store_id" json:"store_id"`
+}
+
+func (q *Queries) CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStoreAccessExists, arg.StaffUserID, arg.StoreID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createStaffUserStoreAccess = `-- name: CreateStaffUserStoreAccess :exec
 INSERT INTO staff_user_store_access (
     store_id,

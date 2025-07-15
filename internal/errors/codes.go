@@ -22,6 +22,8 @@ const (
 	UserEmailExists    = "USER_EMAIL_EXISTS"
 	UserUsernameExists = "USER_USERNAME_EXISTS"
 	UserNotUpdateSelf  = "USER_NOT_UPDATE_SELF"
+	UserStaffNotFound  = "USER_STAFF_NOT_FOUND"
+	UserStoreNotFound  = "USER_STORE_NOT_FOUND"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
