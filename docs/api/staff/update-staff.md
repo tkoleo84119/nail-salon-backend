@@ -1,0 +1,131 @@
+## User Story
+
+作為一位超級管理員（`SUPER_ADMIN`）或系統管理員（`ADMIN`），我希望能夠管理後台員工帳號， 包含：
+
+1. 修改其角色（如：由 `STYLIST` 轉為 `MANAGER`），以調整其權限範圍。
+2. 停用或重新啟用帳號，以控管系統存取權限。
+
+---
+
+## Endpoint
+
+**PATCH** `/api/staff/{id}`
+
+---
+
+## 權限
+
+- 僅限 `SUPER_ADMIN` 或 `ADMIN` 存取
+
+---
+
+## Request
+
+### Header
+
+```http
+Content-Type: application/json
+Authorization: Bearer <access_token>
+```
+
+### Body（可傳任一欄位，僅更新指定內容）
+
+```json
+{
+  "role": "MANAGER",
+  "is_active": false
+}
+```
+
+### 驗證規則
+
+| 欄位      | 規則                                         | 說明               |
+| --------- | -------------------------------------------- | ------------------ |
+| role      | <li>可選<li>值只能為 ADMIN、MANAGER、STYLIST | 欲變更的角色       |
+| is_active | <li>可選<li>布林值                           | 是否啟用該員工帳號 |
+
+---
+
+## Response
+
+### 成功 200 OK
+
+```json
+{
+  "data": {
+    "id": "13984392823",
+    "username": "staff_amy",
+    "email": "amy@example.com",
+    "role": "MANAGER",
+    "is_active": false
+  }
+}
+```
+
+### 失敗
+
+#### 400 Bad Request - 驗證錯誤
+
+```json
+{
+  "message": "輸入驗證失敗",
+  "errors": {
+    "role": "不允許的角色"
+  }
+}
+```
+
+#### 401 Unauthorized - 認證失敗
+
+```json
+{
+  "message": "無效的 access_token"
+}
+```
+
+#### 403 Forbidden - 權限不足
+
+```json
+{
+  "message": "權限不足，無法執行此操作"
+}
+```
+
+#### 404 Not Found - 員工不存在
+
+```json
+{
+  "message": "指定的員工帳號不存在"
+}
+```
+
+#### 500 Internal Server Error
+
+```json
+{
+  "message": "系統發生錯誤，請稍後再試"
+}
+```
+
+---
+
+## 資料表
+
+- `staff_users`
+
+---
+
+## Service 邏輯
+
+1. 確認目標員工是否存在
+2. 驗證傳入的欄位是否合法（如角色值）
+3. 更新 `staff_users` 的 `role` 與 `is_active` 欄位
+4. 回傳更新後資訊
+
+---
+
+## 注意事項
+
+- 不可修改自身帳號的 `role` 或 `is_active`
+- 不可修改 `SUPER_ADMIN` 的帳號狀態與角色（僅能由系統預設）
+

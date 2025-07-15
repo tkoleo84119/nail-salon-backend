@@ -7,7 +7,7 @@ type CreateStaffRequest struct {
 	Username string  `json:"username" binding:"required,min=1,max=30"`
 	Email    string  `json:"email" binding:"required,email"`
 	Password string  `json:"password" binding:"required,min=1,max=50"`
-	Role     string  `json:"role" binding:"required"`
+	Role     string  `json:"role" binding:"required,oneof=ADMIN MANAGER STYLIST"`
 	StoreIDs []int64 `json:"store_ids" binding:"required,min=1"`
 }
 

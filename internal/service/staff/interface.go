@@ -13,3 +13,7 @@ type LoginServiceInterface interface {
 type CreateStaffServiceInterface interface {
 	CreateStaff(ctx context.Context, req staff.CreateStaffRequest, creatorRole string, creatorStoreIDs []int64) (*staff.CreateStaffResponse, error)
 }
+
+type UpdateStaffServiceInterface interface {
+	UpdateStaff(ctx context.Context, targetID string, req staff.UpdateStaffRequest, updaterID int64, updaterRole string) (*staff.UpdateStaffResponse, error)
+}

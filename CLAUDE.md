@@ -53,15 +53,15 @@ Database migrations are located in `migration/` directory and follow numbered na
 
 ### Environment Setup
 - Copy `.env.example` to `.env` and configure database credentials
-- **Required environment variables**: 
+- **Required environment variables**:
   - `JWT_SECRET` (for JWT token signing)
   - Either `DB_DSN` (connection string) OR individual DB settings: `DB_USER`, `DB_PASS`, `DB_NAME`, `DB_PORT`, `DB_HOST`
-- **Optional environment variables**: 
+- **Optional environment variables**:
   - `PORT` (server port, defaults to 3000)
   - `JWT_EXPIRY_HOURS` (JWT expiry, defaults to 1 hour)
   - `SNOWFLAKE_NODE_ID` (for distributed ID generation, defaults to 1)
   - `DB_SSLMODE` (SSL mode, defaults to disable)
-- **Advanced Database Settings**: 
+- **Advanced Database Settings**:
   - `DB_MAX_OPEN_CONNS` (max open connections, defaults to 25)
   - `DB_CONN_MAX_LIFE` (connection max lifetime, defaults to 30m)
   - `DB_CONN_MAX_LIFE_JITTER` (connection lifetime jitter, defaults to 5m)
@@ -168,7 +168,8 @@ The system manages a comprehensive nail salon business with these design princip
 
 **Dependency Management:**
 - Use interfaces for all service dependencies
-- Pass `dbgen.Querier` interface to services for database operations
+- Pass `dbgen.Querier` interface to services for standard database operations
+- Use `sqlx.DB` for dynamic query operations requiring conditional SQL building
 - Store configuration in `internal/config/config.go` with centralized env var loading
 - Follow dependency injection pattern with interface compliance verification
 
@@ -184,7 +185,10 @@ The system manages a comprehensive nail salon business with these design princip
   - SQL files organized by module in `internal/repository/sqlc/[module]/`
   - Generated code centralized in `internal/repository/sqlc/dbgen/`
   - Run `sqlc generate` after adding/modifying SQL queries
-- **Fallback**: Use sqlx for complex dynamic operations when sqlc is insufficient
+- **Dynamic Operations**: Use sqlx for complex dynamic operations when sqlc is insufficient
+  - Repository structure: `internal/repository/sqlx/[module].go`
+  - Example: Update operations with optional fields, conditional WHERE clauses
+  - Pattern: Build dynamic SQL with conditional parts based on provided parameters
 
 **ID Generation Strategy:**
 - **Manual ID insertion**: All database inserts use Snowflake-generated IDs
@@ -272,7 +276,7 @@ The application uses a centralized error management system with YAML-based error
 
 **Error Categories:**
 - **AUTH**: Authentication and authorization errors
-- **USER**: User management and validation errors  
+- **USER**: User management and validation errors
 - **VAL**: Input validation and format errors
 - **SYS**: System and infrastructure errors
 
@@ -397,6 +401,7 @@ Types: feat, fix, refactor, perf, style, test, docs, build, ops, chore
 - Generate Snowflake IDs for all database insertions
 - Write comprehensive tests for both success and failure scenarios
 - Use sqlc for type-safe database operations as primary approach
+- Use sqlx for dynamic operations requiring conditional SQL (e.g., optional field updates)
 - Centralize configuration in config layer
 - Follow Clean Architecture dependency flow
 - Use standardized API response format with `common.SuccessResponse()` and `errorCodes.RespondWithError()`
@@ -416,7 +421,7 @@ Types: feat, fix, refactor, perf, style, test, docs, build, ops, chore
 - Use auto-incrementing database IDs (use Snowflake IDs)
 - Hardcode role strings (use constants from `staff.Role*`)
 - Skip testing error scenarios
-- Mix dynamic queries with sqlc unless necessary
+- Mix dynamic queries with sqlc unless necessary (use sqlx for dynamic operations)
 - Return inconsistent API response formats
 - Use English error messages for user-facing errors
 - Hardcode validation error messages in handlers

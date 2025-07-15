@@ -54,10 +54,12 @@ func main() {
 	// initialize services
 	staffLoginService := staffService.NewLoginService(queries, cfg.JWT)
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
+	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 
 	// initialize handlers
 	staffLoginHandler := staffHandler.NewLoginHandler(staffLoginService)
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
+	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 
 	router := gin.Default()
 
@@ -69,6 +71,7 @@ func main() {
 		{
 			staff.POST("/login", staffLoginHandler.Login)
 			staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffCreateHandler.CreateStaff)
+			staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffUpdateHandler.UpdateStaff)
 		}
 	}
 

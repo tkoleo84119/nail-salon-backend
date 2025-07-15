@@ -49,6 +49,9 @@ USER:
   USER_USERNAME_EXISTS:
     message: 此帳號已被使用
     status: 409
+  USER_NOT_UPDATE_SELF:
+    message: 不可更新自己的帳號
+    status: 400
 
 VAL:
   VAL_JSON_FORMAT:
@@ -56,6 +59,9 @@ VAL:
     status: 400
   VAL_INPUT_VALIDATION_FAILED:
     message: 輸入驗證失敗
+    status: 400
+  VAL_ALL_FIELDS_EMPTY:
+    message: 至少需要提供一個欄位進行更新
     status: 400
 
 SYS:

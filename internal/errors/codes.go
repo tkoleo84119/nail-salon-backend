@@ -21,10 +21,12 @@ const (
 	UserAlreadyExists  = "USER_ALREADY_EXISTS"
 	UserEmailExists    = "USER_EMAIL_EXISTS"
 	UserUsernameExists = "USER_USERNAME_EXISTS"
+	UserNotUpdateSelf  = "USER_NOT_UPDATE_SELF"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"
+	ValAllFieldsEmpty        = "VAL_ALL_FIELDS_EMPTY"
 
 	// SYS - System errors
 	SysInternalError      = "SYS_INTERNAL_ERROR"
