@@ -1,4 +1,4 @@
-package staff
+package auth
 
 import (
 	"bytes"
@@ -14,9 +14,9 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
+	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 )
 
 // MockLoginService implements the LoginServiceInterface for testing
@@ -25,19 +25,19 @@ type MockLoginService struct {
 }
 
 // Ensure MockLoginService implements the interface
-var _ staffService.LoginServiceInterface = (*MockLoginService)(nil)
+var _ authService.LoginServiceInterface = (*MockLoginService)(nil)
 
-func (m *MockLoginService) Login(ctx context.Context, req staff.LoginRequest, loginCtx staff.LoginContext) (*staff.LoginResponse, error) {
+func (m *MockLoginService) Login(ctx context.Context, req auth.LoginRequest, loginCtx auth.LoginContext) (*auth.LoginResponse, error) {
 	args := m.Called(ctx, req, loginCtx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*staff.LoginResponse), args.Error(1)
+	return args.Get(0).(*auth.LoginResponse), args.Error(1)
 }
 
 func setupTestGin() {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Load error definitions for testing
 	errorManager := errorCodes.GetManager()
 	_ = errorManager.LoadFromFile("../../errors/errors.yaml")
@@ -51,11 +51,11 @@ func TestLoginHandler_Login_Success(t *testing.T) {
 	handler := NewLoginHandler(mockService)
 
 	// Set up mock expectations
-	expectedResponse := &staff.LoginResponse{
+	expectedResponse := &auth.LoginResponse{
 		AccessToken:  "test-access-token",
 		RefreshToken: "test-refresh-token",
 		ExpiresIn:    3600,
-		User: staff.User{
+		User: auth.User{
 			ID:       "123",
 			Username: "testuser",
 			Role:     "ADMIN",
@@ -66,10 +66,10 @@ func TestLoginHandler_Login_Success(t *testing.T) {
 		},
 	}
 
-	mockService.On("Login", mock.Anything, mock.AnythingOfType("staff.LoginRequest"), mock.AnythingOfType("staff.LoginContext")).Return(expectedResponse, nil)
+	mockService.On("Login", mock.Anything, mock.AnythingOfType("auth.LoginRequest"), mock.AnythingOfType("auth.LoginContext")).Return(expectedResponse, nil)
 
 	// Create request
-	loginReq := staff.LoginRequest{
+	loginReq := auth.LoginRequest{
 		Username: "testuser",
 		Password: "testpassword",
 	}
@@ -99,7 +99,7 @@ func TestLoginHandler_Login_Success(t *testing.T) {
 
 	// Parse the data field
 	dataBytes, _ := json.Marshal(response.Data)
-	var loginResponse staff.LoginResponse
+	var loginResponse auth.LoginResponse
 	err = json.Unmarshal(dataBytes, &loginResponse)
 	assert.NoError(t, err)
 
@@ -121,10 +121,10 @@ func TestLoginHandler_Login_InvalidCredentials(t *testing.T) {
 
 	// Set up mock expectations - invalid credentials
 	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
-	mockService.On("Login", mock.Anything, mock.AnythingOfType("staff.LoginRequest"), mock.AnythingOfType("staff.LoginContext")).Return(nil, serviceError)
+	mockService.On("Login", mock.Anything, mock.AnythingOfType("auth.LoginRequest"), mock.AnythingOfType("auth.LoginContext")).Return(nil, serviceError)
 
 	// Create request
-	loginReq := staff.LoginRequest{
+	loginReq := auth.LoginRequest{
 		Username: "wronguser",
 		Password: "wrongpassword",
 	}
@@ -162,10 +162,10 @@ func TestLoginHandler_Login_InternalError(t *testing.T) {
 	handler := NewLoginHandler(mockService)
 
 	// Set up mock expectations - internal error
-	mockService.On("Login", mock.Anything, mock.AnythingOfType("staff.LoginRequest"), mock.AnythingOfType("staff.LoginContext")).Return(nil, errors.New("database connection failed"))
+	mockService.On("Login", mock.Anything, mock.AnythingOfType("auth.LoginRequest"), mock.AnythingOfType("auth.LoginContext")).Return(nil, errors.New("database connection failed"))
 
 	// Create request
-	loginReq := staff.LoginRequest{
+	loginReq := auth.LoginRequest{
 		Username: "testuser",
 		Password: "testpassword",
 	}

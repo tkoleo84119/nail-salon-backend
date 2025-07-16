@@ -1,4 +1,4 @@
-package staff
+package auth
 
 import (
 	"time"
@@ -22,9 +22,9 @@ type LoginResponse struct {
 
 // User represents the authenticated staff user info
 type User struct {
-	ID        string        `json:"id"` // Snowflake ID as string
-	Username  string        `json:"username"`
-	Role      string        `json:"role"`
+	ID        string         `json:"id"` // Snowflake ID as string
+	Username  string         `json:"username"`
+	Role      string         `json:"role"`
 	StoreList []common.Store `json:"storeList"`
 }
 

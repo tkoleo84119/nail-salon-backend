@@ -9,11 +9,15 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
+	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
+	storeAccessHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store-access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
+	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -52,18 +56,18 @@ func main() {
 	queries := dbgen.New(database.PgxPool)
 
 	// initialize services
-	staffLoginService := staffService.NewLoginService(queries, cfg.JWT)
+	authLoginService := authService.NewLoginService(queries, cfg.JWT)
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
-	staffStoreAccessService := staffService.NewCreateStoreAccessService(queries)
-	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessService(queries)
+	staffStoreAccessService := storeAccessService.NewCreateStoreAccessService(queries)
+	staffDeleteStoreAccessService := storeAccessService.NewDeleteStoreAccessService(queries)
 
 	// initialize handlers
-	staffLoginHandler := staffHandler.NewLoginHandler(staffLoginService)
+	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
-	staffStoreAccessHandler := staffHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
-	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
+	staffStoreAccessHandler := storeAccessHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
+	staffDeleteStoreAccessHandler := storeAccessHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
 
 	router := gin.Default()
 
@@ -73,7 +77,7 @@ func main() {
 	{
 		staff := api.Group("/staff")
 		{
-			staff.POST("/login", staffLoginHandler.Login)
+			staff.POST("/login", authLoginHandler.Login)
 			staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffCreateHandler.CreateStaff)
 			staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffUpdateHandler.UpdateStaff)
 			staff.POST("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffStoreAccessHandler.CreateStoreAccess)

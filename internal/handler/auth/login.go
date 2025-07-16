@@ -1,4 +1,4 @@
-package staff
+package auth
 
 import (
 	"net/http"
@@ -8,17 +8,17 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
+	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type LoginHandler struct {
-	loginService staffService.LoginServiceInterface
+	loginService authService.LoginServiceInterface
 }
 
 // NewLoginHandler creates a new login handler
-func NewLoginHandler(loginService staffService.LoginServiceInterface) *LoginHandler {
+func NewLoginHandler(loginService authService.LoginServiceInterface) *LoginHandler {
 	return &LoginHandler{
 		loginService: loginService,
 	}
@@ -26,7 +26,7 @@ func NewLoginHandler(loginService staffService.LoginServiceInterface) *LoginHand
 
 // Login handles the staff login endpoint
 func (h *LoginHandler) Login(c *gin.Context) {
-	var req staff.LoginRequest
+	var req auth.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// Handle validation errors
 		if utils.IsValidationError(err) {
@@ -41,7 +41,7 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	}
 
 	// Extract login context
-	loginCtx := staff.LoginContext{
+	loginCtx := auth.LoginContext{
 		UserAgent: c.GetHeader("User-Agent"),
 		IPAddress: c.ClientIP(),
 		Timestamp: time.Now(),

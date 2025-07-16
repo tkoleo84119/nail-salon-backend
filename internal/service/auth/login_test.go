@@ -1,4 +1,4 @@
-package staff
+package auth
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/mocks"
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
@@ -56,12 +57,12 @@ func TestLoginService_Login_Success(t *testing.T) {
 	mockQuerier.On("CreateStaffUserToken", mock.Anything, mock.AnythingOfType("dbgen.CreateStaffUserTokenParams")).Return(tokenRow, nil)
 
 	// Create request and context
-	req := staff.LoginRequest{
+	req := auth.LoginRequest{
 		Username: "testuser",
 		Password: "testpassword",
 	}
 
-	loginCtx := staff.LoginContext{
+	loginCtx := auth.LoginContext{
 		UserAgent: "test-agent",
 		IPAddress: "127.0.0.1",
 		Timestamp: time.Now(),
@@ -126,12 +127,12 @@ func TestLoginService_Login_SuperAdmin(t *testing.T) {
 	mockQuerier.On("CreateStaffUserToken", mock.Anything, mock.AnythingOfType("dbgen.CreateStaffUserTokenParams")).Return(tokenRow, nil)
 
 	// Create request and context
-	req := staff.LoginRequest{
+	req := auth.LoginRequest{
 		Username: "superadmin",
 		Password: "adminpassword",
 	}
 
-	loginCtx := staff.LoginContext{
+	loginCtx := auth.LoginContext{
 		UserAgent: "test-agent",
 		IPAddress: "127.0.0.1",
 		Timestamp: time.Now(),
@@ -166,12 +167,12 @@ func TestLoginService_Login_InvalidCredentials(t *testing.T) {
 	mockQuerier.On("GetStaffUserByUsername", mock.Anything, "nonexistent").Return(dbgen.StaffUser{}, assert.AnError)
 
 	// Create request
-	req := staff.LoginRequest{
+	req := auth.LoginRequest{
 		Username: "nonexistent",
 		Password: "password",
 	}
 
-	loginCtx := staff.LoginContext{
+	loginCtx := auth.LoginContext{
 		UserAgent: "test-agent",
 		IPAddress: "127.0.0.1",
 		Timestamp: time.Now(),
@@ -213,12 +214,12 @@ func TestLoginService_Login_WrongPassword(t *testing.T) {
 	mockQuerier.On("GetStaffUserByUsername", mock.Anything, "testuser").Return(testUser, nil)
 
 	// Create request with wrong password
-	req := staff.LoginRequest{
+	req := auth.LoginRequest{
 		Username: "testuser",
 		Password: "wrongpassword",
 	}
 
-	loginCtx := staff.LoginContext{
+	loginCtx := auth.LoginContext{
 		UserAgent: "test-agent",
 		IPAddress: "127.0.0.1",
 		Timestamp: time.Now(),

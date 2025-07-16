@@ -1,4 +1,4 @@
-package staff
+package auth
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -27,7 +28,7 @@ func NewLoginService(queries dbgen.Querier, jwtConfig config.JWTConfig) *LoginSe
 	}
 }
 
-func (s *LoginService) Login(ctx context.Context, req staff.LoginRequest, loginCtx staff.LoginContext) (*staff.LoginResponse, error) {
+func (s *LoginService) Login(ctx context.Context, req auth.LoginRequest, loginCtx auth.LoginContext) (*auth.LoginResponse, error) {
 	staffUser, err := s.queries.GetStaffUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
@@ -56,7 +57,7 @@ func (s *LoginService) Login(ctx context.Context, req staff.LoginRequest, loginC
 	}
 
 	// Store refresh token
-	tokenInfo := staff.TokenInfo{
+	tokenInfo := auth.TokenInfo{
 		StaffUserID:  staffUser.ID,
 		RefreshToken: refreshToken,
 		Context:      loginCtx,
@@ -67,11 +68,11 @@ func (s *LoginService) Login(ctx context.Context, req staff.LoginRequest, loginC
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to store refresh token", err)
 	}
 
-	response := &staff.LoginResponse{
+	response := &auth.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
-		User: staff.User{
+		User: auth.User{
 			ID:        utils.FormatID(staffUser.ID),
 			Username:  staffUser.Username,
 			Role:      staffUser.Role,
@@ -116,7 +117,7 @@ func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.Staff
 }
 
 // storeRefreshToken stores the refresh token in database
-func (s *LoginService) storeRefreshToken(ctx context.Context, tokenInfo staff.TokenInfo) error {
+func (s *LoginService) storeRefreshToken(ctx context.Context, tokenInfo auth.TokenInfo) error {
 	// Parse IP address
 	var ipAddr *netip.Addr
 	if addr, err := netip.ParseAddr(tokenInfo.Context.IPAddress); err == nil {
