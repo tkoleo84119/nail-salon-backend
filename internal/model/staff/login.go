@@ -14,9 +14,9 @@ type LoginRequest struct {
 
 // LoginResponse represents the successful login response
 type LoginResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int    `json:"expires_in"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    int    `json:"expiresIn"`
 	User         User   `json:"user"`
 }
 
@@ -25,7 +25,7 @@ type User struct {
 	ID        string        `json:"id"` // Snowflake ID as string
 	Username  string        `json:"username"`
 	Role      string        `json:"role"`
-	StoreList []common.Store `json:"store_list"`
+	StoreList []common.Store `json:"storeList"`
 }
 
 // LoginContext contains the context information for login

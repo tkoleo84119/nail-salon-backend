@@ -72,7 +72,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_NewlyCreated(t *test
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	targetStaff := dbgen.StaffUser{
@@ -110,7 +110,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_NewlyCreated(t *test
 	mockQuerier.On("GetStaffUserStoreAccess", mock.Anything, int64(123456789)).Return(storeAccessList, nil)
 
 	// Call service
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.NoError(t, err)
@@ -118,9 +118,9 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_NewlyCreated(t *test
 	assert.NotNil(t, response)
 	assert.Equal(t, "123456789", response.StaffUserID)
 	assert.Len(t, response.StoreList, 2)
-	assert.Equal(t, int64(1), response.StoreList[0].ID)
+	assert.Equal(t, "1", response.StoreList[0].ID)
 	assert.Equal(t, "Store 1", response.StoreList[0].Name)
-	assert.Equal(t, int64(2), response.StoreList[1].ID)
+	assert.Equal(t, "2", response.StoreList[1].ID)
 	assert.Equal(t, "Test Store", response.StoreList[1].Name)
 
 	// Verify all expectations were met
@@ -137,7 +137,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_AlreadyExists(t *tes
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	targetStaff := dbgen.StaffUser{
@@ -171,7 +171,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_AlreadyExists(t *tes
 	mockQuerier.On("GetStaffUserStoreAccess", mock.Anything, int64(123456789)).Return(storeAccessList, nil)
 
 	// Call service
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.NoError(t, err)
@@ -194,17 +194,17 @@ func TestCreateStoreAccessService_CreateStoreAccess_InvalidID(t *testing.T) {
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	// Call service with invalid ID
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "invalid_id", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "invalid_id", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
 	assert.False(t, isNewlyCreated)
 	assert.Nil(t, response)
-	assert.Contains(t, err.Error(), "VAL_INPUT_VALIDATION_FAILED")
+	assert.Contains(t, err.Error(), "invalid target staff ID")
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_StaffNotFound(t *testing.T) {
@@ -217,14 +217,14 @@ func TestCreateStoreAccessService_CreateStoreAccess_StaffNotFound(t *testing.T) 
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	// Mock expectations - staff not found
 	mockQuerier.On("GetStaffUserByID", mock.Anything, int64(123456789)).Return(dbgen.StaffUser{}, sql.ErrNoRows)
 
 	// Call service
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -246,7 +246,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSelf(t *testing.
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	targetStaff := dbgen.StaffUser{
@@ -261,7 +261,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSelf(t *testing.
 	mockQuerier.On("GetStaffUserByID", mock.Anything, int64(1)).Return(targetStaff, nil)
 
 	// Call service - creator ID same as target ID
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "1", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "1", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -283,7 +283,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSuperAdmin(t *te
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	targetStaff := dbgen.StaffUser{
@@ -298,7 +298,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSuperAdmin(t *te
 	mockQuerier.On("GetStaffUserByID", mock.Anything, int64(123456789)).Return(targetStaff, nil)
 
 	// Call service
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -320,7 +320,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotFound(t *testing.T) 
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	targetStaff := dbgen.StaffUser{
@@ -336,7 +336,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotFound(t *testing.T) 
 	mockQuerier.On("GetStoreByID", mock.Anything, int64(2)).Return(dbgen.GetStoreByIDRow{}, sql.ErrNoRows)
 
 	// Call service
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -358,7 +358,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotActive(t *testing.T)
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	targetStaff := dbgen.StaffUser{
@@ -380,7 +380,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotActive(t *testing.T)
 	mockQuerier.On("GetStoreByID", mock.Anything, int64(2)).Return(store, nil)
 
 	// Call service
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -402,7 +402,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_AdminNoPermission(t *testing
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 3, // Admin doesn't have access to store 3
+		StoreID: "3", // Admin doesn't have access to store 3
 	}
 
 	targetStaff := dbgen.StaffUser{
@@ -424,7 +424,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_AdminNoPermission(t *testing
 	mockQuerier.On("GetStoreByID", mock.Anything, int64(3)).Return(store, nil)
 
 	// Call service - admin only has access to stores 1 and 2, but requesting store 3
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -446,14 +446,14 @@ func TestCreateStoreAccessService_CreateStoreAccess_DatabaseError(t *testing.T) 
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	// Mock expectations - database error
 	mockQuerier.On("GetStaffUserByID", mock.Anything, int64(123456789)).Return(dbgen.StaffUser{}, errors.New("database connection failed"))
 
 	// Call service
-	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1, 2})
+	response, isNewlyCreated, err := service.CreateStoreAccess(context.Background(), "123456789", req, int64(1), staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)

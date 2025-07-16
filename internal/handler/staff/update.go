@@ -52,8 +52,15 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 		return
 	}
 
+	// Convert UserID to int64
+	updaterID, err := utils.ParseID(staffContext.UserID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		return
+	}
+
 	// Call service
-	response, err := h.service.UpdateStaff(c.Request.Context(), targetID, req, staffContext.UserID, staffContext.Role)
+	response, err := h.service.UpdateStaff(c.Request.Context(), targetID, req, updaterID, staffContext.Role)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

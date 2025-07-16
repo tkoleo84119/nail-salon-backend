@@ -174,8 +174,8 @@ func TestLoginService_Login_Success(t *testing.T) {
 	assert.Equal(t, "testuser", response.User.Username)
 	assert.Equal(t, staff.RoleAdmin, response.User.Role)
 	assert.Equal(t, []common.Store{
-		{ID: 1, Name: "Store 1"},
-		{ID: 2, Name: "Store 2"},
+		{ID: "1", Name: "Store 1"},
+		{ID: "2", Name: "Store 2"},
 	}, response.User.StoreList)
 
 	// Verify all expectations were met
@@ -243,9 +243,9 @@ func TestLoginService_Login_SuperAdmin(t *testing.T) {
 	assert.NotNil(t, response)
 	assert.Equal(t, staff.RoleSuperAdmin, response.User.Role)
 	assert.Equal(t, []common.Store{
-		{ID: 1, Name: "Store 1"},
-		{ID: 2, Name: "Store 2"},
-		{ID: 3, Name: "Store 3"},
+		{ID: "1", Name: "Store 1"},
+		{ID: "2", Name: "Store 2"},
+		{ID: "3", Name: "Store 3"},
 	}, response.User.StoreList)
 
 	// Verify all expectations were met

@@ -57,7 +57,7 @@ func TestCreateStaffHandler_CreateStaff_Success(t *testing.T) {
 		Email:    "test@example.com",
 		Role:     staff.RoleManager,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 
@@ -69,7 +69,7 @@ func TestCreateStaffHandler_CreateStaff_Success(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1},
+		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(createReq)
 
@@ -81,11 +81,11 @@ func TestCreateStaffHandler_CreateStaff_Success(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -133,7 +133,7 @@ func TestCreateStaffHandler_CreateStaff_ValidationError(t *testing.T) {
 				Email:    "test@example.com",
 				Password: "testpassword",
 				Role:     staff.RoleManager,
-				StoreIDs: []int64{1},
+				StoreIDs: []string{"1"},
 			},
 			expected: "輸入驗證失敗",
 		},
@@ -143,7 +143,7 @@ func TestCreateStaffHandler_CreateStaff_ValidationError(t *testing.T) {
 				Username: "testuser",
 				Password: "testpassword",
 				Role:     staff.RoleManager,
-				StoreIDs: []int64{1},
+				StoreIDs: []string{"1"},
 			},
 			expected: "輸入驗證失敗",
 		},
@@ -153,7 +153,7 @@ func TestCreateStaffHandler_CreateStaff_ValidationError(t *testing.T) {
 				Username: "testuser",
 				Email:    "test@example.com",
 				Role:     staff.RoleManager,
-				StoreIDs: []int64{1},
+				StoreIDs: []string{"1"},
 			},
 			expected: "輸入驗證失敗",
 		},
@@ -163,7 +163,7 @@ func TestCreateStaffHandler_CreateStaff_ValidationError(t *testing.T) {
 				Username: "testuser",
 				Email:    "test@example.com",
 				Password: "testpassword",
-				StoreIDs: []int64{1},
+				StoreIDs: []string{"1"},
 			},
 			expected: "輸入驗證失敗",
 		},
@@ -184,7 +184,7 @@ func TestCreateStaffHandler_CreateStaff_ValidationError(t *testing.T) {
 				Email:    "invalid-email",
 				Password: "testpassword",
 				Role:     staff.RoleManager,
-				StoreIDs: []int64{1},
+				StoreIDs: []string{"1"},
 			},
 			expected: "輸入驗證失敗",
 		},
@@ -195,7 +195,7 @@ func TestCreateStaffHandler_CreateStaff_ValidationError(t *testing.T) {
 				Email:    "test@example.com",
 				Password: "testpassword",
 				Role:     staff.RoleManager,
-				StoreIDs: []int64{},
+				StoreIDs: []string{},
 			},
 			expected: "輸入驗證失敗",
 		},
@@ -214,14 +214,14 @@ func TestCreateStaffHandler_CreateStaff_ValidationError(t *testing.T) {
 
 			// Set staff context
 			staffContext := &common.StaffContext{
-				UserID:   1,
+				UserID:   "1",
 				Username: "admin",
 				Role:     staff.RoleSuperAdmin,
 				StoreList: []common.Store{
-					{ID: 1, Name: "Test Store"},
+					{ID: "1", Name: "Test Store"},
 				},
 			}
-			c.Set("staff", staffContext)
+			c.Set("user", staffContext)
 
 			// Call handler
 			handler.CreateStaff(c)
@@ -258,11 +258,11 @@ func TestCreateStaffHandler_CreateStaff_InvalidJSON(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -296,7 +296,7 @@ func TestCreateStaffHandler_CreateStaff_MissingStaffContext(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1},
+		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(createReq)
 
@@ -338,7 +338,7 @@ func TestCreateStaffHandler_CreateStaff_ServiceError(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1},
+		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(createReq)
 
@@ -350,11 +350,11 @@ func TestCreateStaffHandler_CreateStaff_ServiceError(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -394,7 +394,7 @@ func TestCreateStaffHandler_CreateStaff_InternalError(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1},
+		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(createReq)
 
@@ -406,11 +406,11 @@ func TestCreateStaffHandler_CreateStaff_InternalError(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)

@@ -134,7 +134,7 @@ func TestUpdateStaffService_UpdateStaff_InvalidID(t *testing.T) {
 	// Assert results
 	assert.Error(t, err)
 	assert.Nil(t, response)
-	assert.Contains(t, err.Error(), "VAL_INPUT_VALIDATION_FAILED")
+	assert.Contains(t, err.Error(), "invalid target ID")
 }
 
 func TestUpdateStaffService_UpdateStaff_EmptyRequest(t *testing.T) {

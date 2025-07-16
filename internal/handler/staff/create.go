@@ -44,7 +44,12 @@ func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
 
 	creatorStoreIDs := make([]int64, len(staffContext.StoreList))
 	for i, store := range staffContext.StoreList {
-		creatorStoreIDs[i] = store.ID
+		storeID, err := utils.ParseID(store.ID)
+		if err != nil {
+			errorCodes.RespondWithError(c, errorCodes.AuthContextMissing, nil)
+			return
+		}
+		creatorStoreIDs[i] = storeID
 	}
 
 	response, err := h.createStaffService.CreateStaff(c.Request.Context(), req, staffContext.Role, creatorStoreIDs)

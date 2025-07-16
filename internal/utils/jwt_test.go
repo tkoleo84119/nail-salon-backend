@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strconv"
 	"testing"
 	"time"
 
@@ -31,9 +32,9 @@ func TestGenerateJWT(t *testing.T) {
 			username: "testuser",
 			role:     "ADMIN",
 			storeList: []common.Store{
-				{ID: 1, Name: "Store 1"},
-				{ID: 2, Name: "Store 2"},
-				{ID: 3, Name: "Store 3"},
+				{ID: "1", Name: "Store 1"},
+				{ID: "2", Name: "Store 2"},
+				{ID: "3", Name: "Store 3"},
 			},
 			wantErr: false,
 		},
@@ -69,7 +70,7 @@ func TestGenerateJWTWithEmptySecret(t *testing.T) {
 	}
 
 	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []common.Store{
-		{ID: 1, Name: "Store 1"},
+		{ID: "1", Name: "Store 1"},
 	})
 	// JWT library allows empty secrets, so this should not error
 	assert.NoError(t, err)
@@ -86,9 +87,9 @@ func TestValidateJWT(t *testing.T) {
 	username := "testuser"
 	role := "ADMIN"
 	storeList := []common.Store{
-		{ID: 1, Name: "Store 1"},
-		{ID: 2, Name: "Store 2"},
-		{ID: 3, Name: "Store 3"},
+		{ID: "1", Name: "Store 1"},
+		{ID: "2", Name: "Store 2"},
+		{ID: "3", Name: "Store 3"},
 	}
 
 	token, err := GenerateJWT(jwtConfig, userID, username, role, storeList)
@@ -97,7 +98,7 @@ func TestValidateJWT(t *testing.T) {
 	claims, err := ValidateJWT(jwtConfig, token)
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
-	assert.Equal(t, userID, claims.UserID)
+	assert.Equal(t, strconv.FormatInt(userID, 10), claims.UserID)
 	assert.Equal(t, username, claims.Username)
 	assert.Equal(t, role, claims.Role)
 	assert.Equal(t, storeList, claims.StoreList)
@@ -143,7 +144,7 @@ func TestValidateJWTExpired(t *testing.T) {
 	}
 
 	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []common.Store{
-		{ID: 1, Name: "Store 1"},
+		{ID: "1", Name: "Store 1"},
 	})
 	require.NoError(t, err)
 

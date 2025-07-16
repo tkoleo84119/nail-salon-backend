@@ -3,7 +3,7 @@ package staff
 // UpdateStaffRequest represents the request to update staff information
 type UpdateStaffRequest struct {
 	Role     *string `json:"role,omitempty" binding:"omitempty,oneof=ADMIN MANAGER STYLIST"`
-	IsActive *bool   `json:"is_active,omitempty" binding:"omitempty,boolean"`
+	IsActive *bool   `json:"isActive,omitempty" binding:"omitempty,boolean"`
 }
 
 // UpdateStaffResponse represents the response after updating staff information
@@ -12,5 +12,5 @@ type UpdateStaffResponse struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Role     string `json:"role"`
-	IsActive bool   `json:"is_active"`
+	IsActive bool   `json:"isActive"`
 }

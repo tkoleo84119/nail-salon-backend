@@ -44,14 +44,26 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 		return
 	}
 
+	// Convert UserID to int64
+	creatorID, err := utils.ParseID(staffContext.UserID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		return
+	}
+
 	// Extract store IDs from staff context
 	var creatorStoreIDs []int64
 	for _, store := range staffContext.StoreList {
-		creatorStoreIDs = append(creatorStoreIDs, store.ID)
+		storeID, err := utils.ParseID(store.ID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+			return
+		}
+		creatorStoreIDs = append(creatorStoreIDs, storeID)
 	}
 
 	// Call service
-	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), targetID, req, staffContext.UserID, staffContext.Role, creatorStoreIDs)
+	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), targetID, req, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

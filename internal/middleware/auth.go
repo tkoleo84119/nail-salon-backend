@@ -49,7 +49,12 @@ func JWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 
 // validate staff is active with token claims
 func validateStaffToken(c *gin.Context, db dbgen.Querier, claims *common.JWTClaims) error {
-	staff, err := db.GetStaffUserByID(c.Request.Context(), claims.UserID)
+	userID, err := utils.ParseID(claims.UserID)
+	if err != nil {
+		return err
+	}
+
+	staff, err := db.GetStaffUserByID(c.Request.Context(), userID)
 	if err != nil {
 		return err
 	}

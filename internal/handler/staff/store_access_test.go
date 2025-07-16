@@ -52,14 +52,14 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_Success_Created(t *testing.T
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	expectedResponse := &staff.CreateStoreAccessResponse{
 		StaffUserID: "123456789",
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
-			{ID: 2, Name: "Store 2"},
+			{ID: "1", Name: "Store 1"},
+			{ID: "2", Name: "Store 2"},
 		},
 	}
 
@@ -78,12 +78,12 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_Success_Created(t *testing.T
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
-			{ID: 2, Name: "Store 2"},
+			{ID: "1", Name: "Store 1"},
+			{ID: "2", Name: "Store 2"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -104,8 +104,8 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_Success_Created(t *testing.T
 
 	// Verify the response data
 	responseData := response.Data.(map[string]interface{})
-	assert.Equal(t, expectedResponse.StaffUserID, responseData["staff_user_id"])
-	assert.NotNil(t, responseData["store_list"])
+	assert.Equal(t, expectedResponse.StaffUserID, responseData["staffUserId"])
+	assert.NotNil(t, responseData["storeList"])
 
 	// Verify all expectations were met
 	mockService.AssertExpectations(t)
@@ -120,14 +120,14 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_Success_AlreadyExists(t *tes
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	expectedResponse := &staff.CreateStoreAccessResponse{
 		StaffUserID: "123456789",
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
-			{ID: 2, Name: "Store 2"},
+			{ID: "1", Name: "Store 1"},
+			{ID: "2", Name: "Store 2"},
 		},
 	}
 
@@ -146,12 +146,12 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_Success_AlreadyExists(t *tes
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
-			{ID: 2, Name: "Store 2"},
+			{ID: "1", Name: "Store 1"},
+			{ID: "2", Name: "Store 2"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -183,7 +183,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingID(t *testing.T) {
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	// Create request
@@ -198,11 +198,11 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingID(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
+			{ID: "1", Name: "Store 1"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -232,7 +232,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingStaffContext(t *testi
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	// Create request
@@ -279,11 +279,11 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_InvalidJSON(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
+			{ID: "1", Name: "Store 1"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -322,11 +322,11 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingStoreID(t *testing.T)
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
+			{ID: "1", Name: "Store 1"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -344,7 +344,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingStoreID(t *testing.T)
 	assert.Equal(t, "輸入驗證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "門市ID為必填項目", response.Errors["storeid"])
+	assert.Equal(t, "門市ID為必填項目", response.Errors["storeId"])
 }
 
 func TestCreateStoreAccessHandler_CreateStoreAccess_ServiceError(t *testing.T) {
@@ -356,7 +356,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_ServiceError(t *testing.T) {
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	// Set up mock expectations - return service error
@@ -375,12 +375,12 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_ServiceError(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
-			{ID: 2, Name: "Store 2"},
+			{ID: "1", Name: "Store 1"},
+			{ID: "2", Name: "Store 2"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -412,7 +412,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_InternalError(t *testing.T) 
 
 	// Test data
 	req := staff.CreateStoreAccessRequest{
-		StoreID: 2,
+		StoreID: "2",
 	}
 
 	// Set up mock expectations - return internal error
@@ -431,12 +431,12 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_InternalError(t *testing.T) 
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
-			{ID: 2, Name: "Store 2"},
+			{ID: "1", Name: "Store 1"},
+			{ID: "2", Name: "Store 2"},
 		},
 	}
 	c.Set("user", staffContext)

@@ -3,13 +3,13 @@ package staff
 import (
 	"context"
 	"database/sql"
-	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateStaffService struct {
@@ -25,9 +25,9 @@ func NewUpdateStaffService(queries dbgen.Querier, db *sqlx.DB) *UpdateStaffServi
 }
 
 func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, req staff.UpdateStaffRequest, updaterID int64, updaterRole string) (*staff.UpdateStaffResponse, error) {
-	targetIDInt, err := strconv.ParseInt(targetID, 10, 64)
+	targetIDInt, err := utils.ParseID(targetID)
 	if err != nil {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValInputValidationFailed)
+		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid target ID", err)
 	}
 
 	// Validate request has at least one field to update

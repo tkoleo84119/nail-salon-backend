@@ -9,15 +9,15 @@ type ApiResponse struct {
 }
 
 type Store struct {
-	ID   int64  `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type StaffContext struct {
-	UserID    int64   `json:"user_id"`
+	UserID    string  `json:"userId"`
 	Username  string  `json:"username"`
 	Role      string  `json:"role"`
-	StoreList []Store `json:"store_list"`
+	StoreList []Store `json:"storeList"`
 }
 
 type JWTClaims struct {

@@ -60,8 +60,8 @@ func TestLoginHandler_Login_Success(t *testing.T) {
 			Username: "testuser",
 			Role:     "ADMIN",
 			StoreList: []common.Store{
-				{ID: 1, Name: "Store 1"},
-				{ID: 2, Name: "Store 2"},
+				{ID: "1", Name: "Store 1"},
+				{ID: "2", Name: "Store 2"},
 			},
 		},
 	}

@@ -3,12 +3,12 @@ package sqlx
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // StaffUserRepositoryInterface defines the interface for staff user repository
@@ -71,7 +71,7 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 	}
 
 	response := &staff.UpdateStaffResponse{
-		ID:       strconv.FormatInt(result.ID, 10),
+		ID:       utils.FormatID(result.ID),
 		Username: result.Username,
 		Email:    result.Email,
 		Role:     result.Role,

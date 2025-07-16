@@ -12,7 +12,7 @@ import (
 func GenerateJWT(jwtConfig config.JWTConfig, userID int64, username, role string, storeList []common.Store) (string, error) {
 	claims := common.JWTClaims{
 		StaffContext: common.StaffContext{
-			UserID:    userID,
+			UserID:    FormatID(userID),
 			Username:  username,
 			Role:      role,
 			StoreList: storeList,

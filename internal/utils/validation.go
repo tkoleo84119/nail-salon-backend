@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -13,7 +12,7 @@ func ExtractValidationErrors(err error) map[string]string {
 
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
 		for _, fieldError := range validationErrors {
-			fieldName := strings.ToLower(fieldError.Field())
+			fieldName := PascalToCamel(fieldError.Field())
 
 			switch fieldError.Tag() {
 			case "required":
@@ -49,12 +48,12 @@ func ExtractValidationErrors(err error) map[string]string {
 // getFieldDisplayName returns Chinese display name for field
 func getFieldDisplayName(fieldName string) string {
 	fieldNames := map[string]string{
-		"Username":  "帳號",
-		"Password":  "密碼",
-		"Email":     "Email",
-		"Role":      "角色",
-		"StoreIDs":  "門市清單",
-		"StoreID":   "門市ID",
+		"Username": "帳號",
+		"Password": "密碼",
+		"Email":    "Email",
+		"Role":     "角色",
+		"StoreIDs": "門市清單",
+		"StoreID":  "門市ID",
 	}
 
 	if displayName, exists := fieldNames[fieldName]; exists {

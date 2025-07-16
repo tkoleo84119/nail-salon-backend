@@ -3,7 +3,6 @@ package staff
 import (
 	"context"
 	"net/netip"
-	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -73,7 +72,7 @@ func (s *LoginService) Login(ctx context.Context, req staff.LoginRequest, loginC
 		RefreshToken: refreshToken,
 		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
 		User: staff.User{
-			ID:        strconv.FormatInt(staffUser.ID, 10),
+			ID:        utils.FormatID(staffUser.ID),
 			Username:  staffUser.Username,
 			Role:      staffUser.Role,
 			StoreList: storeList,
@@ -95,7 +94,7 @@ func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.Staff
 		}
 		for _, store := range stores {
 			storeList = append(storeList, common.Store{
-				ID:   store.ID,
+				ID:   utils.FormatID(store.ID),
 				Name: store.Name,
 			})
 		}
@@ -107,7 +106,7 @@ func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.Staff
 		}
 		for _, access := range storeAccess {
 			storeList = append(storeList, common.Store{
-				ID:   access.StoreID,
+				ID:   utils.FormatID(access.StoreID),
 				Name: access.StoreName,
 			})
 		}

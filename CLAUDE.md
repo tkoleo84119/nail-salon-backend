@@ -341,11 +341,27 @@ All APIs (except `/health`) use a consistent response structure:
 }
 ```
 
+### JSON Response Format Standards
+**Field Naming Convention:**
+- All JSON response field names use **camelCase** (e.g., `userId`, `storeId`, `storeList`)
+- Database fields remain snake_case internally for consistency with PostgreSQL conventions
+
+**ID Field Format:**
+- All ID fields in API responses are returned as **strings** (e.g., `"123456789"`)
+- Frontend requests should send ID fields as strings
+- Backend internally converts between string (API) and int64 (database) using `utils.ParseID()` and `utils.FormatID()`
+
+**Field Conversion Utilities:**
+- `utils.ParseID(string)` - Convert string ID to int64 for database operations
+- `utils.FormatID(int64)` - Convert int64 ID to string for API responses
+- `utils.ParseIDSlice([]string)` - Convert string ID slice to int64 slice
+- `utils.FormatIDSlice([]int64)` - Convert int64 ID slice to string slice
+
 ### Error Message Localization
 - All error messages are in Traditional Chinese
 - Field validation errors include specific field names in Chinese
 - Use `internal/utils/validation.go` for extracting and translating validation errors
-- Common field translations: Username→帳號, Password→密碼
+- Common field translations: Username→帳號, Password→密碼, StoreID→門市ID
 
 ### Response Structure Guidelines
 - **Success responses**: Only include `data` field, no `message`
@@ -422,8 +438,10 @@ Types: feat, fix, refactor, perf, style, test, docs, build, ops, chore
 - Hardcode role strings (use constants from `staff.Role*`)
 - Skip testing error scenarios
 - Mix dynamic queries with sqlc unless necessary (use sqlx for dynamic operations)
-- Return inconsistent API response formats
+- Return inconsistent API response formats (always use camelCase and string IDs)
 - Use English error messages for user-facing errors
+- Mix snake_case and camelCase in JSON responses (always use camelCase)
+- Return ID fields as numbers in API responses (always use strings)
 - Hardcode validation error messages in handlers
 - Make large commits that change too many things at once
 - Use different PostgreSQL drivers (stick to pgx/v5)

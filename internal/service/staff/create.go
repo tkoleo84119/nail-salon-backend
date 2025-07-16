@@ -2,7 +2,6 @@ package staff
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -26,6 +25,11 @@ func NewCreateStaffService(queries dbgen.Querier, db *pgxpool.Pool) *CreateStaff
 }
 
 func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateStaffRequest, creatorRole string, creatorStoreIDs []int64) (*staff.CreateStaffResponse, error) {
+	// Convert string store IDs to int64
+	storeIDs, err := utils.ParseIDSlice(req.StoreIDs)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store IDs", err)
+	}
 	if err := s.validatePermissions(creatorRole, req.Role); err != nil {
 		return nil, err
 	}
@@ -38,7 +42,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
-	if err := s.validateStoreAccess(creatorRole, creatorStoreIDs, req.StoreIDs); err != nil {
+	if err := s.validateStoreAccess(creatorRole, creatorStoreIDs, storeIDs); err != nil {
 		return nil, err
 	}
 
@@ -55,11 +59,11 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 	}
 
 	// check if stores exist and active
-	storeCheck, err := s.queries.CheckStoresExistAndActive(ctx, req.StoreIDs)
+	storeCheck, err := s.queries.CheckStoresExistAndActive(ctx, storeIDs)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check stores", err)
 	}
-	if storeCheck.TotalCount != int64(len(req.StoreIDs)) {
+	if storeCheck.TotalCount != int64(len(storeIDs)) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotExist)
 	}
 	if storeCheck.ActiveCount != storeCheck.TotalCount {
@@ -92,7 +96,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 
 	// batch create store access records
 	err = qtx.BatchCreateStaffUserStoreAccess(ctx, dbgen.BatchCreateStaffUserStoreAccessParams{
-		Column1:     req.StoreIDs,
+		Column1:     storeIDs,
 		StaffUserID: staffID,
 	})
 	if err != nil {
@@ -104,7 +108,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 	}
 
 	// get store list information
-	stores, err := s.queries.GetStoresByIDs(ctx, req.StoreIDs)
+	stores, err := s.queries.GetStoresByIDs(ctx, storeIDs)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store information", err)
 	}
@@ -112,13 +116,13 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 	storeList := make([]common.Store, 0, len(stores))
 	for _, store := range stores {
 		storeList = append(storeList, common.Store{
-			ID:   store.ID,
+			ID:   utils.FormatID(store.ID),
 			Name: store.Name,
 		})
 	}
 
 	response := &staff.CreateStaffResponse{
-		ID:        strconv.FormatInt(createdStaff.ID, 10),
+		ID:        utils.FormatID(createdStaff.ID),
 		Username:  createdStaff.Username,
 		Email:     createdStaff.Email,
 		Role:      createdStaff.Role,

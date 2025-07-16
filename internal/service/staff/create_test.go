@@ -119,7 +119,7 @@ func TestCreateStaffService_CreateStaff_PermissionDenied(t *testing.T) {
 				Email:    "test@example.com",
 				Password: "testpassword",
 				Role:     tt.targetRole,
-				StoreIDs: []int64{1},
+				StoreIDs: []string{"1"},
 			}
 
 			// Call service
@@ -147,7 +147,7 @@ func TestCreateStaffService_CreateStaff_InvalidRole(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     "INVALID_ROLE",
-		StoreIDs: []int64{1},
+		StoreIDs: []string{"1"},
 	}
 
 	// Call service
@@ -173,7 +173,7 @@ func TestCreateStaffService_CreateStaff_UserAlreadyExists(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1},
+		StoreIDs: []string{"1"},
 	}
 
 	// Mock expectations - user already exists
@@ -208,7 +208,7 @@ func TestCreateStaffService_CreateStaff_StoreNotExist(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1, 2},
+		StoreIDs: []string{"1"},
 	}
 
 	// Mock expectations
@@ -217,15 +217,15 @@ func TestCreateStaffService_CreateStaff_StoreNotExist(t *testing.T) {
 		Email:    req.Email,
 	}).Return(false, nil)
 
-	// Store check returns only 1 store when 2 are requested
-	mockQuerier.On("CheckStoresExistAndActive", mock.Anything, req.StoreIDs).Return(
+	// Store check returns 0 stores when 1 is requested (store not found)
+	mockQuerier.On("CheckStoresExistAndActive", mock.Anything, []int64{1}).Return(
 		dbgen.CheckStoresExistAndActiveRow{
-			TotalCount:  1,
-			ActiveCount: 1,
+			TotalCount:  0,
+			ActiveCount: 0,
 		}, nil)
 
 	// Call service
-	response, err := service.CreateStaff(context.Background(), req, staff.RoleSuperAdmin, []int64{1, 2})
+	response, err := service.CreateStaff(context.Background(), req, staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -250,7 +250,7 @@ func TestCreateStaffService_CreateStaff_StoreNotActive(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1, 2},
+		StoreIDs: []string{"1"},
 	}
 
 	// Mock expectations
@@ -259,15 +259,15 @@ func TestCreateStaffService_CreateStaff_StoreNotActive(t *testing.T) {
 		Email:    req.Email,
 	}).Return(false, nil)
 
-	// Both stores exist but only 1 is active
-	mockQuerier.On("CheckStoresExistAndActive", mock.Anything, req.StoreIDs).Return(
+	// Store exists but is not active
+	mockQuerier.On("CheckStoresExistAndActive", mock.Anything, []int64{1}).Return(
 		dbgen.CheckStoresExistAndActiveRow{
-			TotalCount:  2,
-			ActiveCount: 1,
+			TotalCount:  1,
+			ActiveCount: 0,
 		}, nil)
 
 	// Call service
-	response, err := service.CreateStaff(context.Background(), req, staff.RoleSuperAdmin, []int64{1, 2})
+	response, err := service.CreateStaff(context.Background(), req, staff.RoleSuperAdmin, []int64{1})
 
 	// Assert results
 	assert.Error(t, err)
@@ -292,7 +292,7 @@ func TestCreateStaffService_CreateStaff_StoreAccessDenied(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1, 2}, // Trying to assign stores 1 and 2
+		StoreIDs: []string{"2"}, // Trying to assign store 2
 	}
 
 	// Call service - Admin only has access to store 1, but trying to assign store 2
@@ -318,7 +318,7 @@ func TestCreateStaffService_CreateStaff_DatabaseError(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "testpassword",
 		Role:     staff.RoleManager,
-		StoreIDs: []int64{1},
+		StoreIDs: []string{"1"},
 	}
 
 	// Mock expectations - database error
@@ -431,28 +431,28 @@ func TestCreateStaffService_validateStoreAccess(t *testing.T) {
 			name:            "SuperAdmin_can_assign_any_store",
 			creatorRole:     staff.RoleSuperAdmin,
 			creatorStoreIDs: []int64{1},
-			targetStoreIDs:  []int64{1, 2, 3},
+			targetStoreIDs:  []int64{1},
 			expectError:     false,
 		},
 		{
 			name:            "Admin_can_assign_own_stores",
 			creatorRole:     staff.RoleAdmin,
-			creatorStoreIDs: []int64{1, 2},
-			targetStoreIDs:  []int64{1, 2},
+			creatorStoreIDs: []int64{1},
+			targetStoreIDs:  []int64{1},
 			expectError:     false,
 		},
 		{
 			name:            "Admin_can_assign_subset_of_own_stores",
 			creatorRole:     staff.RoleAdmin,
-			creatorStoreIDs: []int64{1, 2, 3},
-			targetStoreIDs:  []int64{1, 3},
+			creatorStoreIDs: []int64{1},
+			targetStoreIDs:  []int64{1},
 			expectError:     false,
 		},
 		{
 			name:            "Admin_cannot_assign_unauthorized_store",
 			creatorRole:     staff.RoleAdmin,
-			creatorStoreIDs: []int64{1, 2},
-			targetStoreIDs:  []int64{1, 2, 3},
+			creatorStoreIDs: []int64{1},
+			targetStoreIDs:  []int64{2},
 			expectError:     true,
 			expectedCode:    "AUTH_PERMISSION_DENIED",
 		},

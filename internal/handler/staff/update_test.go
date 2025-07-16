@@ -81,11 +81,11 @@ func TestUpdateStaffHandler_UpdateStaff_Success(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -110,7 +110,7 @@ func TestUpdateStaffHandler_UpdateStaff_Success(t *testing.T) {
 	assert.Equal(t, expectedResponse.Username, responseData["username"])
 	assert.Equal(t, expectedResponse.Email, responseData["email"])
 	assert.Equal(t, expectedResponse.Role, responseData["role"])
-	assert.Equal(t, expectedResponse.IsActive, responseData["is_active"])
+	assert.Equal(t, expectedResponse.IsActive, responseData["isActive"])
 
 	// Verify all expectations were met
 	mockService.AssertExpectations(t)
@@ -141,11 +141,11 @@ func TestUpdateStaffHandler_UpdateStaff_MissingID(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -223,11 +223,11 @@ func TestUpdateStaffHandler_UpdateStaff_InvalidJSON(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -269,11 +269,11 @@ func TestUpdateStaffHandler_UpdateStaff_EmptyRequest(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -319,11 +319,11 @@ func TestUpdateStaffHandler_UpdateStaff_InvalidRole(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -373,11 +373,11 @@ func TestUpdateStaffHandler_UpdateStaff_ServiceError(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)
@@ -429,11 +429,11 @@ func TestUpdateStaffHandler_UpdateStaff_InternalError(t *testing.T) {
 
 	// Set staff context
 	staffContext := common.StaffContext{
-		UserID:   1,
+		UserID:   "1",
 		Username: "admin",
 		Role:     staff.RoleSuperAdmin,
 		StoreList: []common.Store{
-			{ID: 1, Name: "Test Store"},
+			{ID: "1", Name: "Test Store"},
 		},
 	}
 	c.Set("user", staffContext)

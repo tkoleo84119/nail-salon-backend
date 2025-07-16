@@ -155,11 +155,11 @@ func TestGetStaffFromContext(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 
 	staffContext := common.StaffContext{
-		UserID:   123,
+		UserID:   "123",
 		Username: "testuser",
 		Role:     "ADMIN",
 		StoreList: []common.Store{
-			{ID: 1, Name: "Store 1"},
+			{ID: "1", Name: "Store 1"},
 		},
 	}
 
@@ -169,7 +169,7 @@ func TestGetStaffFromContext(t *testing.T) {
 
 	assert.True(t, exists)
 	assert.NotNil(t, result)
-	assert.Equal(t, int64(123), result.UserID)
+	assert.Equal(t, "123", result.UserID)
 	assert.Equal(t, "testuser", result.Username)
 	assert.Equal(t, "ADMIN", result.Role)
 }
@@ -191,11 +191,11 @@ func TestRequireRoles_Success(t *testing.T) {
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
 		staffContext := common.StaffContext{
-			UserID:   123,
+			UserID:   "123",
 			Username: "testuser",
 			Role:     staff.RoleAdmin,
 			StoreList: []common.Store{
-				{ID: 1, Name: "Store 1"},
+				{ID: "1", Name: "Store 1"},
 			},
 		}
 		c.Set(UserContextKey, staffContext)
@@ -221,11 +221,11 @@ func TestRequireRoles_InsufficientPermissions(t *testing.T) {
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
 		staffContext := common.StaffContext{
-			UserID:   123,
+			UserID:   "123",
 			Username: "testuser",
 			Role:     staff.RoleStylist,
 			StoreList: []common.Store{
-				{ID: 1, Name: "Store 1"},
+				{ID: "1", Name: "Store 1"},
 			},
 		}
 		c.Set(UserContextKey, staffContext)
@@ -269,11 +269,11 @@ func TestRequireSuperAdmin_Success(t *testing.T) {
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
 		staffContext := common.StaffContext{
-			UserID:   123,
+			UserID:   "123",
 			Username: "testuser",
 			Role:     staff.RoleSuperAdmin,
 			StoreList: []common.Store{
-				{ID: 1, Name: "Store 1"},
+				{ID: "1", Name: "Store 1"},
 			},
 		}
 		c.Set(UserContextKey, staffContext)
@@ -298,11 +298,11 @@ func TestRequireSuperAdmin_Forbidden(t *testing.T) {
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
 		staffContext := common.StaffContext{
-			UserID:   123,
+			UserID:   "123",
 			Username: "testuser",
 			Role:     staff.RoleAdmin,
 			StoreList: []common.Store{
-				{ID: 1, Name: "Store 1"},
+				{ID: "1", Name: "Store 1"},
 			},
 		}
 		c.Set(UserContextKey, staffContext)
@@ -337,11 +337,11 @@ func TestRequireAdminRoles_Success(t *testing.T) {
 			router := gin.New()
 			router.Use(func(c *gin.Context) {
 				staffContext := common.StaffContext{
-					UserID:   123,
+					UserID:   "123",
 					Username: "testuser",
 					Role:     tc.role,
 					StoreList: []common.Store{
-						{ID: 1, Name: "Store 1"},
+						{ID: "1", Name: "Store 1"},
 					},
 				}
 				c.Set(UserContextKey, staffContext)
@@ -379,11 +379,11 @@ func TestRequireManagerOrAbove_Success(t *testing.T) {
 			router := gin.New()
 			router.Use(func(c *gin.Context) {
 				staffContext := common.StaffContext{
-					UserID:   123,
+					UserID:   "123",
 					Username: "testuser",
 					Role:     tc.role,
 					StoreList: []common.Store{
-						{ID: 1, Name: "Store 1"},
+						{ID: "1", Name: "Store 1"},
 					},
 				}
 				c.Set(UserContextKey, staffContext)
@@ -422,11 +422,11 @@ func TestRequireAnyStaffRole_Success(t *testing.T) {
 			router := gin.New()
 			router.Use(func(c *gin.Context) {
 				staffContext := common.StaffContext{
-					UserID:   123,
+					UserID:   "123",
 					Username: "testuser",
 					Role:     tc.role,
 					StoreList: []common.Store{
-						{ID: 1, Name: "Store 1"},
+						{ID: "1", Name: "Store 1"},
 					},
 				}
 				c.Set(UserContextKey, staffContext)
