@@ -8,64 +8,23 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
-	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
-	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/mocks"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// MockUpdateStaffRepository mocks the sqlx repository for testing
-type MockUpdateStaffRepository struct {
-	mock.Mock
-}
 
-// Ensure MockUpdateStaffRepository implements the interface
-var _ sqlxRepo.StaffUserRepositoryInterface = (*MockUpdateStaffRepository)(nil)
-
-func (m *MockUpdateStaffRepository) UpdateStaffUser(ctx context.Context, id int64, req staff.UpdateStaffRequest) (*staff.UpdateStaffResponse, error) {
-	args := m.Called(ctx, id, req)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*staff.UpdateStaffResponse), args.Error(1)
-}
-
-// MockUpdateStaffQuerier extends MockQuerier for update staff specific queries
-type MockUpdateStaffQuerier struct {
-	MockQuerier
-}
-
-func (m *MockUpdateStaffQuerier) GetStaffUserByID(ctx context.Context, id int64) (dbgen.StaffUser, error) {
-	args := m.Called(ctx, id)
-	return args.Get(0).(dbgen.StaffUser), args.Error(1)
-}
-
-func setupTestEnvironmentForUpdate(t *testing.T) func() {
-	// Initialize snowflake for testing
-	err := utils.InitSnowflake(1)
-	require.NoError(t, err)
-
-	// Load error definitions for testing
-	errorManager := errorCodes.GetManager()
-	err = errorManager.LoadFromFile("../../errors/errors.yaml")
-	require.NoError(t, err)
-
-	return func() {
-		// cleanup if needed
-	}
-}
 
 func TestUpdateStaffService_UpdateStaff_Success(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data
@@ -114,12 +73,12 @@ func TestUpdateStaffService_UpdateStaff_Success(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_InvalidID(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data
@@ -138,12 +97,12 @@ func TestUpdateStaffService_UpdateStaff_InvalidID(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_EmptyRequest(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Empty request
@@ -159,12 +118,12 @@ func TestUpdateStaffService_UpdateStaff_EmptyRequest(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_InvalidRole(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data with invalid role
@@ -183,12 +142,12 @@ func TestUpdateStaffService_UpdateStaff_InvalidRole(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_UserNotFound(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data
@@ -214,12 +173,12 @@ func TestUpdateStaffService_UpdateStaff_UserNotFound(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_CannotUpdateSelf(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data
@@ -253,12 +212,12 @@ func TestUpdateStaffService_UpdateStaff_CannotUpdateSelf(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_CannotUpdateSuperAdmin(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data
@@ -292,12 +251,12 @@ func TestUpdateStaffService_UpdateStaff_CannotUpdateSuperAdmin(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_ManagerCannotUpdate(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data
@@ -331,12 +290,12 @@ func TestUpdateStaffService_UpdateStaff_ManagerCannotUpdate(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_AdminCannotSetToSuperAdmin(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data - trying to set to SUPER_ADMIN
@@ -370,12 +329,12 @@ func TestUpdateStaffService_UpdateStaff_AdminCannotSetToSuperAdmin(t *testing.T)
 }
 
 func TestUpdateStaffService_UpdateStaff_AdminCannotSetToAdmin(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data - trying to set to ADMIN
@@ -409,12 +368,12 @@ func TestUpdateStaffService_UpdateStaff_AdminCannotSetToAdmin(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_AdminCanUpdateManagerAndStylist(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	tests := []struct {
@@ -476,12 +435,12 @@ func TestUpdateStaffService_UpdateStaff_AdminCanUpdateManagerAndStylist(t *testi
 }
 
 func TestUpdateStaffService_UpdateStaff_DatabaseError(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data
@@ -507,12 +466,12 @@ func TestUpdateStaffService_UpdateStaff_DatabaseError(t *testing.T) {
 }
 
 func TestUpdateStaffService_UpdateStaff_UpdateDatabaseError(t *testing.T) {
-	cleanup := setupTestEnvironmentForUpdate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock repository and querier
-	mockRepo := new(MockUpdateStaffRepository)
-	mockQuerier := new(MockUpdateStaffQuerier)
+	mockRepo := mocks.NewMockStaffUserRepository()
+	mockQuerier := mocks.NewMockQuerier()
 	service := &UpdateStaffService{queries: mockQuerier, repo: mockRepo}
 
 	// Test data

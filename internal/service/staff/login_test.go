@@ -2,7 +2,6 @@ package staff
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -11,115 +10,22 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/config"
-	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/mocks"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type MockQuerier struct {
-	mock.Mock
-}
-
-var _ dbgen.Querier = (*MockQuerier)(nil)
-
-func (m *MockQuerier) GetStaffUserByUsername(ctx context.Context, username string) (dbgen.StaffUser, error) {
-	args := m.Called(ctx, username)
-	return args.Get(0).(dbgen.StaffUser), args.Error(1)
-}
-
-func (m *MockQuerier) GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]dbgen.GetStaffUserStoreAccessRow, error) {
-	args := m.Called(ctx, staffUserID)
-	return args.Get(0).([]dbgen.GetStaffUserStoreAccessRow), args.Error(1)
-}
-
-func (m *MockQuerier) GetAllActiveStores(ctx context.Context) ([]dbgen.GetAllActiveStoresRow, error) {
-	args := m.Called(ctx)
-	return args.Get(0).([]dbgen.GetAllActiveStoresRow), args.Error(1)
-}
-
-func (m *MockQuerier) GetStaffUserByID(ctx context.Context, userID int64) (dbgen.StaffUser, error) {
-	args := m.Called(ctx, userID)
-	return args.Get(0).(dbgen.StaffUser), args.Error(1)
-}
-
-func (m *MockQuerier) CreateStaffUserToken(ctx context.Context, arg dbgen.CreateStaffUserTokenParams) (dbgen.CreateStaffUserTokenRow, error) {
-	args := m.Called(ctx, arg)
-	return args.Get(0).(dbgen.CreateStaffUserTokenRow), args.Error(1)
-}
-
-func (m *MockQuerier) CheckStaffUserExists(ctx context.Context, arg dbgen.CheckStaffUserExistsParams) (bool, error) {
-	args := m.Called(ctx, arg)
-	return args.Bool(0), args.Error(1)
-}
-
-func (m *MockQuerier) CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (dbgen.CheckStoresExistAndActiveRow, error) {
-	args := m.Called(ctx, storeIDs)
-	return args.Get(0).(dbgen.CheckStoresExistAndActiveRow), args.Error(1)
-}
-
-func (m *MockQuerier) CreateStaffUser(ctx context.Context, arg dbgen.CreateStaffUserParams) (dbgen.CreateStaffUserRow, error) {
-	args := m.Called(ctx, arg)
-	return args.Get(0).(dbgen.CreateStaffUserRow), args.Error(1)
-}
-
-func (m *MockQuerier) CreateStaffUserStoreAccess(ctx context.Context, arg dbgen.CreateStaffUserStoreAccessParams) error {
-	args := m.Called(ctx, arg)
-	return args.Error(0)
-}
-
-func (m *MockQuerier) GetStoresByIDs(ctx context.Context, storeIDs []int64) ([]dbgen.GetStoresByIDsRow, error) {
-	args := m.Called(ctx, storeIDs)
-	return args.Get(0).([]dbgen.GetStoresByIDsRow), args.Error(1)
-}
-
-func (m *MockQuerier) BatchCreateStaffUserStoreAccess(ctx context.Context, arg dbgen.BatchCreateStaffUserStoreAccessParams) error {
-	args := m.Called(ctx, arg)
-	return args.Error(0)
-}
-
-func (m *MockQuerier) GetStoreByID(ctx context.Context, id int64) (dbgen.GetStoreByIDRow, error) {
-	args := m.Called(ctx, id)
-	return args.Get(0).(dbgen.GetStoreByIDRow), args.Error(1)
-}
-
-func (m *MockQuerier) CheckStoreAccessExists(ctx context.Context, arg dbgen.CheckStoreAccessExistsParams) (bool, error) {
-	args := m.Called(ctx, arg)
-	return args.Bool(0), args.Error(1)
-}
-
-func setupTestEnvironment(t *testing.T) func() {
-	// Set up JWT secret for testing
-	originalSecret := os.Getenv("JWT_SECRET")
-	os.Setenv("JWT_SECRET", "test-secret-key-for-staff-service-testing")
-
-	// Initialize snowflake for testing
-	err := utils.InitSnowflake(1)
-	require.NoError(t, err)
-
-	// Load error definitions for testing
-	errorManager := errorCodes.GetManager()
-	err = errorManager.LoadFromFile("../../errors/errors.yaml")
-	require.NoError(t, err)
-
-	return func() {
-		os.Setenv("JWT_SECRET", originalSecret)
-	}
-}
 
 func TestLoginService_Login_Success(t *testing.T) {
-	cleanup := setupTestEnvironment(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockQuerier)
-	jwtConfig := config.JWTConfig{
-		Secret:      "test-secret-key-for-staff-service-testing",
-		ExpiryHours: 1,
-	}
-	service := NewLoginService(mockQuerier, jwtConfig)
+	mockQuerier := mocks.NewMockQuerier()
+	service := NewLoginService(mockQuerier, env.Config.JWT)
 
 	// Hash password for test user
 	hashedPassword, err := utils.HashPassword("testpassword")
@@ -183,16 +89,12 @@ func TestLoginService_Login_Success(t *testing.T) {
 }
 
 func TestLoginService_Login_SuperAdmin(t *testing.T) {
-	cleanup := setupTestEnvironment(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockQuerier)
-	jwtConfig := config.JWTConfig{
-		Secret:      "test-secret-key-for-staff-service-testing",
-		ExpiryHours: 1,
-	}
-	service := NewLoginService(mockQuerier, jwtConfig)
+	mockQuerier := mocks.NewMockQuerier()
+	service := NewLoginService(mockQuerier, env.Config.JWT)
 
 	// Hash password for test user
 	hashedPassword, err := utils.HashPassword("adminpassword")
@@ -253,16 +155,12 @@ func TestLoginService_Login_SuperAdmin(t *testing.T) {
 }
 
 func TestLoginService_Login_InvalidCredentials(t *testing.T) {
-	cleanup := setupTestEnvironment(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockQuerier)
-	jwtConfig := config.JWTConfig{
-		Secret:      "test-secret-key-for-staff-service-testing",
-		ExpiryHours: 1,
-	}
-	service := NewLoginService(mockQuerier, jwtConfig)
+	mockQuerier := mocks.NewMockQuerier()
+	service := NewLoginService(mockQuerier, env.Config.JWT)
 
 	// Set up mock expectations - user not found
 	mockQuerier.On("GetStaffUserByUsername", mock.Anything, "nonexistent").Return(dbgen.StaffUser{}, assert.AnError)
@@ -292,16 +190,12 @@ func TestLoginService_Login_InvalidCredentials(t *testing.T) {
 }
 
 func TestLoginService_Login_WrongPassword(t *testing.T) {
-	cleanup := setupTestEnvironment(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockQuerier)
-	jwtConfig := config.JWTConfig{
-		Secret:      "test-secret-key-for-staff-service-testing",
-		ExpiryHours: 1,
-	}
-	service := NewLoginService(mockQuerier, jwtConfig)
+	mockQuerier := mocks.NewMockQuerier()
+	service := NewLoginService(mockQuerier, env.Config.JWT)
 
 	// Hash a different password
 	hashedPassword, err := utils.HashPassword("correctpassword")

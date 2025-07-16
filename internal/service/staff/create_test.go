@@ -7,58 +7,15 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
-	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/mocks"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
 )
 
-// MockCreateStaffQuerier extends the mock for create staff specific queries
-type MockCreateStaffQuerier struct {
-	MockQuerier
-}
 
-func (m *MockCreateStaffQuerier) CheckStaffUserExists(ctx context.Context, arg dbgen.CheckStaffUserExistsParams) (bool, error) {
-	args := m.Called(ctx, arg)
-	return args.Bool(0), args.Error(1)
-}
 
-func (m *MockCreateStaffQuerier) CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (dbgen.CheckStoresExistAndActiveRow, error) {
-	args := m.Called(ctx, storeIDs)
-	return args.Get(0).(dbgen.CheckStoresExistAndActiveRow), args.Error(1)
-}
-
-func (m *MockCreateStaffQuerier) CreateStaffUser(ctx context.Context, arg dbgen.CreateStaffUserParams) (dbgen.CreateStaffUserRow, error) {
-	args := m.Called(ctx, arg)
-	return args.Get(0).(dbgen.CreateStaffUserRow), args.Error(1)
-}
-
-func (m *MockCreateStaffQuerier) GetStoresByIDs(ctx context.Context, storeIDs []int64) ([]dbgen.GetStoresByIDsRow, error) {
-	args := m.Called(ctx, storeIDs)
-	return args.Get(0).([]dbgen.GetStoresByIDsRow), args.Error(1)
-}
-
-func (m *MockCreateStaffQuerier) BatchCreateStaffUserStoreAccess(ctx context.Context, arg dbgen.BatchCreateStaffUserStoreAccessParams) error {
-	args := m.Called(ctx, arg)
-	return args.Error(0)
-}
-
-func setupTestEnvironmentForCreate(t *testing.T) func() {
-	// Initialize snowflake for testing
-	err := utils.InitSnowflake(1)
-	require.NoError(t, err)
-
-	// Load error definitions for testing
-	errorManager := errorCodes.GetManager()
-	err = errorManager.LoadFromFile("../../errors/errors.yaml")
-	require.NoError(t, err)
-
-	return func() {
-		// cleanup if needed
-	}
-}
 
 // Note: Full integration tests for CreateStaff would require mocking the database transaction
 // For now, we'll focus on testing the validation logic and error scenarios
@@ -67,11 +24,11 @@ func setupTestEnvironmentForCreate(t *testing.T) func() {
 // Focus on testing validation logic and error scenarios that don't require database transactions
 
 func TestCreateStaffService_CreateStaff_PermissionDenied(t *testing.T) {
-	cleanup := setupTestEnvironmentForCreate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStaffQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := NewCreateStaffService(mockQuerier, nil)
 
 	tests := []struct {
@@ -134,11 +91,11 @@ func TestCreateStaffService_CreateStaff_PermissionDenied(t *testing.T) {
 }
 
 func TestCreateStaffService_CreateStaff_InvalidRole(t *testing.T) {
-	cleanup := setupTestEnvironmentForCreate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStaffQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := NewCreateStaffService(mockQuerier, nil)
 
 	// Test data with invalid role
@@ -160,11 +117,11 @@ func TestCreateStaffService_CreateStaff_InvalidRole(t *testing.T) {
 }
 
 func TestCreateStaffService_CreateStaff_UserAlreadyExists(t *testing.T) {
-	cleanup := setupTestEnvironmentForCreate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStaffQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := NewCreateStaffService(mockQuerier, nil)
 
 	// Test data
@@ -195,11 +152,11 @@ func TestCreateStaffService_CreateStaff_UserAlreadyExists(t *testing.T) {
 }
 
 func TestCreateStaffService_CreateStaff_StoreNotExist(t *testing.T) {
-	cleanup := setupTestEnvironmentForCreate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStaffQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := NewCreateStaffService(mockQuerier, nil)
 
 	// Test data
@@ -237,11 +194,11 @@ func TestCreateStaffService_CreateStaff_StoreNotExist(t *testing.T) {
 }
 
 func TestCreateStaffService_CreateStaff_StoreNotActive(t *testing.T) {
-	cleanup := setupTestEnvironmentForCreate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStaffQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := NewCreateStaffService(mockQuerier, nil)
 
 	// Test data
@@ -279,11 +236,11 @@ func TestCreateStaffService_CreateStaff_StoreNotActive(t *testing.T) {
 }
 
 func TestCreateStaffService_CreateStaff_StoreAccessDenied(t *testing.T) {
-	cleanup := setupTestEnvironmentForCreate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStaffQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := NewCreateStaffService(mockQuerier, nil)
 
 	// Test data
@@ -305,11 +262,11 @@ func TestCreateStaffService_CreateStaff_StoreAccessDenied(t *testing.T) {
 }
 
 func TestCreateStaffService_CreateStaff_DatabaseError(t *testing.T) {
-	cleanup := setupTestEnvironmentForCreate(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStaffQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := NewCreateStaffService(mockQuerier, nil)
 
 	// Test data

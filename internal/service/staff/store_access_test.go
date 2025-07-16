@@ -8,66 +8,21 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
-	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/mocks"
+	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// MockCreateStoreAccessQuerier mocks the querier for create store access
-type MockCreateStoreAccessQuerier struct {
-	MockQuerier
-}
-
-func (m *MockCreateStoreAccessQuerier) GetStaffUserByID(ctx context.Context, id int64) (dbgen.StaffUser, error) {
-	args := m.Called(ctx, id)
-	return args.Get(0).(dbgen.StaffUser), args.Error(1)
-}
-
-func (m *MockCreateStoreAccessQuerier) GetStoreByID(ctx context.Context, id int64) (dbgen.GetStoreByIDRow, error) {
-	args := m.Called(ctx, id)
-	return args.Get(0).(dbgen.GetStoreByIDRow), args.Error(1)
-}
-
-func (m *MockCreateStoreAccessQuerier) CheckStoreAccessExists(ctx context.Context, arg dbgen.CheckStoreAccessExistsParams) (bool, error) {
-	args := m.Called(ctx, arg)
-	return args.Bool(0), args.Error(1)
-}
-
-func (m *MockCreateStoreAccessQuerier) CreateStaffUserStoreAccess(ctx context.Context, arg dbgen.CreateStaffUserStoreAccessParams) error {
-	args := m.Called(ctx, arg)
-	return args.Error(0)
-}
-
-func (m *MockCreateStoreAccessQuerier) GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]dbgen.GetStaffUserStoreAccessRow, error) {
-	args := m.Called(ctx, staffUserID)
-	return args.Get(0).([]dbgen.GetStaffUserStoreAccessRow), args.Error(1)
-}
-
-func setupTestEnvironmentForStoreAccess(t *testing.T) func() {
-	// Initialize snowflake for testing
-	err := utils.InitSnowflake(1)
-	require.NoError(t, err)
-
-	// Load error definitions for testing
-	errorManager := errorCodes.GetManager()
-	err = errorManager.LoadFromFile("../../errors/errors.yaml")
-	require.NoError(t, err)
-
-	return func() {
-		// cleanup if needed
-	}
-}
 
 func TestCreateStoreAccessService_CreateStoreAccess_Success_NewlyCreated(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -128,11 +83,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_NewlyCreated(t *test
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_Success_AlreadyExists(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -185,11 +140,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_AlreadyExists(t *tes
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_InvalidID(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -208,11 +163,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_InvalidID(t *testing.T) {
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_StaffNotFound(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -237,11 +192,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_StaffNotFound(t *testing.T) 
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSelf(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -274,11 +229,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSelf(t *testing.
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSuperAdmin(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -311,11 +266,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSuperAdmin(t *te
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_StoreNotFound(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -349,11 +304,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotFound(t *testing.T) 
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_StoreNotActive(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -393,11 +348,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotActive(t *testing.T)
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_AdminNoPermission(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
@@ -437,11 +392,11 @@ func TestCreateStoreAccessService_CreateStoreAccess_AdminNoPermission(t *testing
 }
 
 func TestCreateStoreAccessService_CreateStoreAccess_DatabaseError(t *testing.T) {
-	cleanup := setupTestEnvironmentForStoreAccess(t)
-	defer cleanup()
+	env := setup.SetupTestEnvironmentForService(t)
+	defer env.Cleanup()
 
 	// Create mock querier
-	mockQuerier := new(MockCreateStoreAccessQuerier)
+	mockQuerier := mocks.NewMockQuerier()
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
