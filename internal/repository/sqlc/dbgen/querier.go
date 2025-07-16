@@ -16,6 +16,7 @@ type Querier interface {
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
+	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)

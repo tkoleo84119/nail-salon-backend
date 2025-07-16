@@ -76,3 +76,63 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 		c.JSON(http.StatusOK, common.SuccessResponse(response))
 	}
 }
+
+type DeleteStoreAccessHandler struct {
+	service staffService.DeleteStoreAccessServiceInterface
+}
+
+func NewDeleteStoreAccessHandler(service staffService.DeleteStoreAccessServiceInterface) *DeleteStoreAccessHandler {
+	return &DeleteStoreAccessHandler{service: service}
+}
+
+func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		return
+	}
+
+	// Get target staff ID from path parameter
+	targetID := c.Param("id")
+	if targetID == "" {
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+			"id": "員工ID為必填項目",
+		})
+		return
+	}
+
+	// Parse and validate request
+	var req staff.DeleteStoreAccessRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		return
+	}
+
+	// Convert UserID to int64
+	creatorID, err := utils.ParseID(staffContext.UserID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		return
+	}
+
+	// Convert store IDs to int64 for permission check
+	var creatorStoreIDs []int64
+	for _, storeStr := range staffContext.StoreList {
+		storeID, err := utils.ParseID(storeStr.ID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+			return
+		}
+		creatorStoreIDs = append(creatorStoreIDs, storeID)
+	}
+
+	// Call service
+	response, err := h.service.DeleteStoreAccess(c.Request.Context(), targetID, req, creatorID, staffContext.Role, creatorStoreIDs)
+	if err != nil {
+		errorCodes.RespondWithServiceError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, common.SuccessResponse(response))
+}

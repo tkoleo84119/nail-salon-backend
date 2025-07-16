@@ -56,12 +56,14 @@ func main() {
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 	staffStoreAccessService := staffService.NewCreateStoreAccessService(queries)
+	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessService(queries)
 
 	// initialize handlers
 	staffLoginHandler := staffHandler.NewLoginHandler(staffLoginService)
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 	staffStoreAccessHandler := staffHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
+	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
 
 	router := gin.Default()
 
@@ -75,6 +77,7 @@ func main() {
 			staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffCreateHandler.CreateStaff)
 			staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffUpdateHandler.UpdateStaff)
 			staff.POST("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffStoreAccessHandler.CreateStoreAccess)
+			staff.DELETE("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffDeleteStoreAccessHandler.DeleteStoreAccess)
 		}
 	}
 

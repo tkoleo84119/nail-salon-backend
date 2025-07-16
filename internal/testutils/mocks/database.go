@@ -89,3 +89,8 @@ func (m *MockQuerier) CheckStoreAccessExists(ctx context.Context, arg dbgen.Chec
 	args := m.Called(ctx, arg)
 	return args.Bool(0), args.Error(1)
 }
+
+func (m *MockQuerier) DeleteStaffUserStoreAccess(ctx context.Context, arg dbgen.DeleteStaffUserStoreAccessParams) error {
+	args := m.Called(ctx, arg)
+	return args.Error(0)
+}

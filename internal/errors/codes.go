@@ -13,17 +13,17 @@ const (
 	AuthPermissionDenied   = "AUTH_PERMISSION_DENIED"
 
 	// USER - User operation errors
-	UserInvalidRole    = "USER_INVALID_ROLE"
-	UserStoreNotExist  = "USER_STORE_NOT_EXIST"
-	UserStoreNotActive = "USER_STORE_NOT_ACTIVE"
-	UserInactive       = "USER_INACTIVE"
-	UserNotFound       = "USER_NOT_FOUND"
-	UserAlreadyExists  = "USER_ALREADY_EXISTS"
-	UserEmailExists    = "USER_EMAIL_EXISTS"
-	UserUsernameExists = "USER_USERNAME_EXISTS"
-	UserNotUpdateSelf  = "USER_NOT_UPDATE_SELF"
-	UserStaffNotFound  = "USER_STAFF_NOT_FOUND"
-	UserStoreNotFound  = "USER_STORE_NOT_FOUND"
+	UserInvalidRole            = "USER_INVALID_ROLE"
+	UserStoreNotExist          = "USER_STORE_NOT_EXIST"
+	UserStoreNotActive         = "USER_STORE_NOT_ACTIVE"
+	UserInactive               = "USER_INACTIVE"
+	UserNotFound               = "USER_NOT_FOUND"
+	UserAlreadyExists          = "USER_ALREADY_EXISTS"
+	UserEmailExists            = "USER_EMAIL_EXISTS"
+	UserUsernameExists         = "USER_USERNAME_EXISTS"
+	UserNotUpdateSelf          = "USER_NOT_UPDATE_SELF"
+	UserStaffNotFound          = "USER_STAFF_NOT_FOUND"
+	UserStoreNotFound          = "USER_STORE_NOT_FOUND"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"

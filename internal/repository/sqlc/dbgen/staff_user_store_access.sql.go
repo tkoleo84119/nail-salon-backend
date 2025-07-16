@@ -73,6 +73,21 @@ func (q *Queries) CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaf
 	return err
 }
 
+const deleteStaffUserStoreAccess = `-- name: DeleteStaffUserStoreAccess :exec
+DELETE FROM staff_user_store_access 
+WHERE staff_user_id = $1 AND store_id = ANY($2::bigint[])
+`
+
+type DeleteStaffUserStoreAccessParams struct {
+	StaffUserID int64   `db:"staff_user_id" json:"staff_user_id"`
+	Column2     []int64 `db:"column_2" json:"column_2"`
+}
+
+func (q *Queries) DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error {
+	_, err := q.db.Exec(ctx, deleteStaffUserStoreAccess, arg.StaffUserID, arg.Column2)
+	return err
+}
+
 const getStaffUserStoreAccess = `-- name: GetStaffUserStoreAccess :many
 SELECT
     sa.store_id,
