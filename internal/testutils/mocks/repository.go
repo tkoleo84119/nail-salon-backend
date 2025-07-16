@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 )
 
@@ -28,4 +29,25 @@ func (m *MockStaffUserRepository) UpdateStaffUser(ctx context.Context, id int64,
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*staff.UpdateStaffResponse), args.Error(1)
+}
+
+// MockStylistRepository mocks the sqlx repository for testing
+type MockStylistRepository struct {
+	mock.Mock
+}
+
+// Ensure MockStylistRepository implements the interface
+var _ sqlxRepo.StylistRepositoryInterface = (*MockStylistRepository)(nil)
+
+// NewMockStylistRepository creates a new instance of MockStylistRepository
+func NewMockStylistRepository() *MockStylistRepository {
+	return &MockStylistRepository{}
+}
+
+func (m *MockStylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateStylistRequest) (*stylist.UpdateStylistResponse, error) {
+	args := m.Called(ctx, staffUserID, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*stylist.UpdateStylistResponse), args.Error(1)
 }

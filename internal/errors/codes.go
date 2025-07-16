@@ -28,6 +28,7 @@ const (
 	// STYLIST - Stylist operation errors
 	StylistAlreadyExists         = "STYLIST_ALREADY_EXISTS"
 	StylistNotFound              = "STYLIST_NOT_FOUND"
+	StylistNotCreated            = "STYLIST_NOT_CREATED"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"

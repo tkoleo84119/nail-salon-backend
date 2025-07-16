@@ -16,6 +16,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	staffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
@@ -58,6 +59,9 @@ func main() {
 	// initialize sqlc queries
 	queries := dbgen.New(database.PgxPool)
 
+	// initialize repositories
+	stylistRepository := sqlx.NewStylistRepository(database.Sqlx)
+
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
@@ -65,6 +69,7 @@ func main() {
 	staffStoreAccessService := storeAccessService.NewCreateStoreAccessService(queries)
 	staffDeleteStoreAccessService := storeAccessService.NewDeleteStoreAccessService(queries)
 	stylistCreateService := stylistService.NewCreateStylistService(queries)
+	stylistUpdateService := stylistService.NewUpdateStylistService(queries, stylistRepository)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -73,6 +78,7 @@ func main() {
 	staffStoreAccessHandler := storeAccessHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
 	staffDeleteStoreAccessHandler := storeAccessHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
 	stylistCreateHandler := stylistHandler.NewCreateStylistHandler(stylistCreateService)
+	stylistUpdateHandler := stylistHandler.NewUpdateStylistHandler(stylistUpdateService)
 
 	router := gin.Default()
 
@@ -92,6 +98,7 @@ func main() {
 		stylists := api.Group("/stylists")
 		{
 			stylists.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistCreateHandler.CreateStylist)
+			stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistUpdateHandler.UpdateStylist)
 		}
 	}
 

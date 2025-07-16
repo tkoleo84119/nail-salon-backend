@@ -77,6 +77,9 @@ STYLIST:
   STYLIST_NOT_FOUND:
     message: 美甲師資料不存在
     status: 404
+  STYLIST_NOT_CREATED:
+    message: 尚未建立美甲師資料，請先新增
+    status: 404
 
 SYS:
   SYS_INTERNAL_ERROR:
