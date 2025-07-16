@@ -14,6 +14,7 @@ import (
 // StaffUserRepositoryInterface defines the interface for staff user repository
 type StaffUserRepositoryInterface interface {
 	UpdateStaffUser(ctx context.Context, id int64, req staff.UpdateStaffRequest) (*staff.UpdateStaffResponse, error)
+	UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateStaffMeRequest) (*staff.UpdateStaffMeResponse, error)
 }
 
 type StaffUserRepository struct {
@@ -76,6 +77,54 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 		Email:    result.Email,
 		Role:     result.Role,
 		IsActive: result.IsActive.Bool,
+	}
+
+	return response, nil
+}
+
+// UpdateStaffMe updates current staff user's information with dynamic fields
+func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateStaffMeRequest) (*staff.UpdateStaffMeResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := map[string]interface{}{
+		"id": id,
+	}
+
+	if req.Email != nil {
+		setParts = append(setParts, "email = :email")
+		args["email"] = *req.Email
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE staff_users
+		SET %s
+		WHERE id = :id
+		RETURNING
+			id,
+			username,
+			email,
+			role
+	`, strings.Join(setParts, ", "))
+
+	var result dbgen.StaffUser
+	rows, err := r.db.NamedQuery(query, args)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute update query: %w", err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, fmt.Errorf("no rows returned from update")
+	}
+
+	if err := rows.StructScan(&result); err != nil {
+		return nil, fmt.Errorf("failed to scan result: %w", err)
+	}
+
+	response := &staff.UpdateStaffMeResponse{
+		ID:       utils.FormatID(result.ID),
+		Username: result.Username,
+		Email:    result.Email,
+		Role:     result.Role,
 	}
 
 	return response, nil

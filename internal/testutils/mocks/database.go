@@ -43,6 +43,11 @@ func (m *MockQuerier) CheckStaffUserExists(ctx context.Context, arg dbgen.CheckS
 	return args.Bool(0), args.Error(1)
 }
 
+func (m *MockQuerier) CheckEmailUniqueForUpdate(ctx context.Context, arg dbgen.CheckEmailUniqueForUpdateParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}
+
 // Staff User Token related mock methods
 func (m *MockQuerier) CreateStaffUserToken(ctx context.Context, arg dbgen.CreateStaffUserTokenParams) (dbgen.CreateStaffUserTokenRow, error) {
 	args := m.Called(ctx, arg)

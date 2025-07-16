@@ -61,11 +61,13 @@ func main() {
 
 	// initialize repositories
 	stylistRepository := sqlx.NewStylistRepository(database.Sqlx)
+	staffUserRepository := sqlx.NewStaffUserRepository(database.Sqlx)
 
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
+	staffUpdateMeService := staffService.NewUpdateStaffMeService(queries, staffUserRepository)
 	staffStoreAccessService := storeAccessService.NewCreateStoreAccessService(queries)
 	staffDeleteStoreAccessService := storeAccessService.NewDeleteStoreAccessService(queries)
 	stylistCreateService := stylistService.NewCreateStylistService(queries)
@@ -75,6 +77,7 @@ func main() {
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
+	staffUpdateMeHandler := staffHandler.NewUpdateStaffMeHandler(staffUpdateMeService)
 	staffStoreAccessHandler := storeAccessHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
 	staffDeleteStoreAccessHandler := storeAccessHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
 	stylistCreateHandler := stylistHandler.NewCreateStylistHandler(stylistCreateService)
@@ -91,6 +94,7 @@ func main() {
 			staff.POST("/login", authLoginHandler.Login)
 			staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffCreateHandler.CreateStaff)
 			staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffUpdateHandler.UpdateStaff)
+			staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), staffUpdateMeHandler.UpdateStaffMe)
 			staff.POST("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffStoreAccessHandler.CreateStoreAccess)
 			staff.DELETE("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffDeleteStoreAccessHandler.DeleteStoreAccess)
 		}

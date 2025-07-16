@@ -12,6 +12,7 @@ import (
 
 type Querier interface {
 	BatchCreateStaffUserStoreAccess(ctx context.Context, arg BatchCreateStaffUserStoreAccessParams) error
+	CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailUniqueForUpdateParams) (bool, error)
 	CheckStaffUserExists(ctx context.Context, arg CheckStaffUserExistsParams) (bool, error)
 	CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
