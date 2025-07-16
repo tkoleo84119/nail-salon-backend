@@ -33,16 +33,16 @@ Authorization: Bearer <access_token>
 ```json
 {
   "role": "MANAGER",
-  "is_active": false
+  "isActive": false
 }
 ```
 
 ### 驗證規則
 
-| 欄位      | 規則                                         | 說明               |
-| --------- | -------------------------------------------- | ------------------ |
-| role      | <li>可選<li>值只能為 ADMIN、MANAGER、STYLIST | 欲變更的角色       |
-| is_active | <li>可選<li>布林值                           | 是否啟用該員工帳號 |
+| 欄位     | 規則                                         | 說明               |
+| -------- | -------------------------------------------- | ------------------ |
+| role     | <li>可選<li>值只能為 ADMIN、MANAGER、STYLIST | 欲變更的角色       |
+| isActive | <li>可選<li>布林值                           | 是否啟用該員工帳號 |
 
 ---
 
@@ -57,7 +57,7 @@ Authorization: Bearer <access_token>
     "username": "staff_amy",
     "email": "amy@example.com",
     "role": "MANAGER",
-    "is_active": false
+    "isActive": false
   }
 }
 ```
@@ -79,7 +79,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "無效的 access_token"
+  "message": "無效的 accessToken"
 }
 ```
 

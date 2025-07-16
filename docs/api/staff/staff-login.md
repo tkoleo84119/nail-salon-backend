@@ -55,16 +55,16 @@ Content-Type: application/json
 ```json
 {
   "data": {
-    "access_token": "<jwt_access_token>",
-    "refresh_token": "<secure_refresh_token>",
-    "expires_in": 3600,
+    "accessToken": "<jwt_access_token>",
+    "refreshToken": "<secure_refresh_token>",
+    "expiresIn": 3600,
     "user": {
       "id": "139842394",
       "username": "admin001",
       "role": "ADMIN",
-      "store_list": [
+      "storeList": [
         {
-          "id": 1,
+          "id": "1",
           "name": "門市1"
         }
       ]
@@ -141,4 +141,4 @@ Content-Type: application/json
 - 密碼不可回傳（僅比對）
 - `refresh_token` 儲存於 DB，並設置 `expired_at` / `user_agent` / `ip`
 - `expires_in` 表示 Access Token 的有效秒數
-- `store_list` 為該員工有權限的門市列表
+- `storeList` 為該員工有權限的門市列表

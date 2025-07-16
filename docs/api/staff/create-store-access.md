@@ -30,7 +30,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "store_id": 2
+  "storeId": "2"
 }
 ```
 
@@ -38,7 +38,7 @@ Authorization: Bearer <access_token>
 
 | 欄位     | 規則     | 說明         |
 | -------- | -------- | ------------ |
-| store_id | <li>必填 | 欲新增的門市 |
+| storeId | <li>必填 | 欲新增的門市 |
 
 ---
 
@@ -49,10 +49,10 @@ Authorization: Bearer <access_token>
 ```json
 {
   "data": {
-    "staff_user_id": "928374234",
-    "store_list": [
+    "staffUserId": "928374234",
+    "storeList": [
       {
-        "id": 2,
+        "id": "2",
         "name": "新竹巨城店"
       }
     ]
@@ -65,10 +65,10 @@ Authorization: Bearer <access_token>
 ```json
 {
   "data": {
-    "staff_user_id": "928374234",
-    "store_list": [
+    "staffUserId": "928374234",
+    "storeList": [
       {
-        "id": 2,
+        "id": "2",
         "name": "新竹巨城店"
       }
     ]
@@ -84,7 +84,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "store_id": "門市ID為必填項目"
+    "storeId": "門市ID為必填項目"
   }
 }
 ```

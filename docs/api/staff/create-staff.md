@@ -39,19 +39,19 @@ Authorization: Bearer <access_token>
   "email": "jane@example.com",
   "password": "hunter2",
   "role": "STYLIST",
-  "store_ids": [1, 2]
+  "storeIds": ["1", "2"]
 }
 ```
 
 ### 驗證規則
 
-| 欄位      | 規則                                        | 說明                   |
-| --------- | ------------------------------------------- | ---------------------- |
-| username  | <li>必填<li>唯一<li>長度大於1<li>長度小於30 | 員工帳號               |
-| email     | <li>必填<li>email格式                       | 員工 Email             |
-| password  | <li>必填<li>長度大於1<li>長度小於50         | 登入密碼（將加密儲存） |
-| role      | <li>必填<li>值只能為ADMIN、MANAGER、STYLIST | 角色                   |
-| store_ids | <li>必填<li>值只能為門市ID(陣列)            | 有權限的門市 ID 清單   |
+| 欄位     | 規則                                        | 說明                   |
+| -------- | ------------------------------------------- | ---------------------- |
+| username | <li>必填<li>唯一<li>長度大於1<li>長度小於30 | 員工帳號               |
+| email    | <li>必填<li>email格式                       | 員工 Email             |
+| password | <li>必填<li>長度大於1<li>長度小於50         | 登入密碼（將加密儲存） |
+| role     | <li>必填<li>值只能為ADMIN、MANAGER、STYLIST | 角色                   |
+| storeIds | <li>必填                                    | 有權限的門市 ID 清單   |
 
 ---
 
@@ -66,13 +66,13 @@ Authorization: Bearer <access_token>
     "username": "stylist_jane",
     "email": "jane@example.com",
     "role": "STYLIST",
-    "store_list": [
+    "storeList": [
       {
-        "id": 1,
+        "id": "1",
         "name": "台北忠孝店"
       },
       {
-        "id": 2,
+        "id": "2",
         "name": "新竹巨城店"
       }
     ]
@@ -98,7 +98,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "無效的 access_token"
+  "message": "無效的 accessToken"
 }
 ```
 
@@ -130,9 +130,9 @@ Authorization: Bearer <access_token>
 
 ### Service 邏輯
 
-1. 檢查傳入的 `store_ids` 是否是該管理員有權限的門市
+1. 檢查傳入的 `storeIds` 是否是該管理員有權限的門市
 2. 檢查帳號與 Email 是否唯一（`username`, `email`）
-3. 檢查 `store_ids` 是否存在且為啟用中（`is_active = true`）
+3. 檢查 `storeIds` 是否存在且為啟用中（`is_active = true`）
 4. 將密碼加密（bcrypt）後儲存至 `staff_users`
 5. 新增 `staff_user_store_access` 多筆紀錄，綁定可控門市
 6. 回傳創建成功之帳號資訊（不含密碼）

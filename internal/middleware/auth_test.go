@@ -15,7 +15,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
 )
 
-
 func TestJWTAuth_MissingToken(t *testing.T) {
 	env := setup.SetupTestEnvironmentForMiddleware(t)
 	defer env.Cleanup()
@@ -40,7 +39,7 @@ func TestJWTAuth_MissingToken(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "access_token 缺失")
+	assert.Contains(t, w.Body.String(), "accessToken 缺失")
 }
 
 func TestJWTAuth_InvalidTokenFormat(t *testing.T) {
@@ -68,7 +67,7 @@ func TestJWTAuth_InvalidTokenFormat(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "access_token 格式錯誤")
+	assert.Contains(t, w.Body.String(), "accessToken 格式錯誤")
 }
 
 func TestGetStaffFromContext(t *testing.T) {

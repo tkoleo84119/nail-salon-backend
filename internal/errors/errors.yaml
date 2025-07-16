@@ -6,13 +6,13 @@ AUTH:
     message: 登入已過期，請重新登入
     status: 401
   AUTH_TOKEN_INVALID:
-    message: 無效的 access_token
+    message: 無效的 accessToken
     status: 401
   AUTH_TOKEN_MISSING:
-    message: access_token 缺失
+    message: accessToken 缺失
     status: 401
   AUTH_TOKEN_FORMAT_ERROR:
-    message: access_token 格式錯誤
+    message: accessToken 格式錯誤
     status: 401
   AUTH_STAFF_FAILED:
     message: 未找到員工資訊

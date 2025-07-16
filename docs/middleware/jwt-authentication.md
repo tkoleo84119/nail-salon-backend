@@ -67,21 +67,21 @@ middleware 會根據不同的認證失敗情況返回相應的錯誤訊息：
 ### 缺少認證令牌
 ```json
 {
-  "message": "access_token 缺失"
+  "message": "accessToken 缺失"
 }
 ```
 
 ### 令牌格式錯誤
 ```json
 {
-  "message": "access_token 格式錯誤"
+  "message": "accessToken 格式錯誤"
 }
 ```
 
 ### 令牌無效或過期
 ```json
 {
-  "message": "無效的 access_token"
+  "message": "無效的 accessToken"
 }
 ```
 
