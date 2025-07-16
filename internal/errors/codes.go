@@ -25,6 +25,10 @@ const (
 	UserStaffNotFound          = "USER_STAFF_NOT_FOUND"
 	UserStoreNotFound          = "USER_STORE_NOT_FOUND"
 
+	// STYLIST - Stylist operation errors
+	StylistAlreadyExists         = "STYLIST_ALREADY_EXISTS"
+	StylistNotFound              = "STYLIST_NOT_FOUND"
+
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"

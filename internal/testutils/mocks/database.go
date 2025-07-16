@@ -3,6 +3,7 @@ package mocks
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -93,4 +94,20 @@ func (m *MockQuerier) CheckStoreAccessExists(ctx context.Context, arg dbgen.Chec
 func (m *MockQuerier) DeleteStaffUserStoreAccess(ctx context.Context, arg dbgen.DeleteStaffUserStoreAccessParams) error {
 	args := m.Called(ctx, arg)
 	return args.Error(0)
+}
+
+// Stylist related mock methods
+func (m *MockQuerier) GetStylistByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (dbgen.Stylist, error) {
+	args := m.Called(ctx, staffUserID)
+	return args.Get(0).(dbgen.Stylist), args.Error(1)
+}
+
+func (m *MockQuerier) CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (bool, error) {
+	args := m.Called(ctx, staffUserID)
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockQuerier) CreateStylist(ctx context.Context, arg dbgen.CreateStylistParams) (dbgen.Stylist, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.Stylist), args.Error(1)
 }

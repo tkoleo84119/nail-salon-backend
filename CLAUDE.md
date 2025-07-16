@@ -82,3 +82,7 @@ Follow Conventional Commits format: `<type>: <description>`
 ### Development Notes
 - If needs new SQL query, look up current SQL query first (in `internal/repository/sqlc/` and `internal/repository/sqlx/`), not create duplicate SQL
 - Handler & service & model need to use modules struct by business domain (separate by folder)
+
+### Error Handling Patterns
+- Use predefined error constants for consistent error management
+- For permission issues, use `AUTH.AUTH_PERMISSION_DENIED` instead of creating new error

@@ -6,6 +6,8 @@ package dbgen
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
@@ -13,9 +15,11 @@ type Querier interface {
 	CheckStaffUserExists(ctx context.Context, arg CheckStaffUserExistsParams) (bool, error)
 	CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
+	CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (bool, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
+	CreateStylist(ctx context.Context, arg CreateStylistParams) (Stylist, error)
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
@@ -23,6 +27,7 @@ type Querier interface {
 	GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]GetStaffUserStoreAccessRow, error)
 	GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error)
 	GetStoresByIDs(ctx context.Context, dollar_1 []int64) ([]GetStoresByIDsRow, error)
+	GetStylistByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (Stylist, error)
 }
 
 var _ Querier = (*Queries)(nil)

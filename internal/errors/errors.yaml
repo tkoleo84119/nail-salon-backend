@@ -70,6 +70,14 @@ VAL:
     message: 至少需要提供一個欄位進行更新
     status: 400
 
+STYLIST:
+  STYLIST_ALREADY_EXISTS:
+    message: 該員工已建立過美甲師資料，請使用修改功能
+    status: 409
+  STYLIST_NOT_FOUND:
+    message: 美甲師資料不存在
+    status: 404
+
 SYS:
   SYS_INTERNAL_ERROR:
     message: 系統發生錯誤，請稍後再試

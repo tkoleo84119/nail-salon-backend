@@ -12,12 +12,15 @@ import (
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
 	storeAccessHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store-access"
+	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	staffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
+	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -61,6 +64,7 @@ func main() {
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 	staffStoreAccessService := storeAccessService.NewCreateStoreAccessService(queries)
 	staffDeleteStoreAccessService := storeAccessService.NewDeleteStoreAccessService(queries)
+	stylistCreateService := stylistService.NewCreateStylistService(queries)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -68,6 +72,7 @@ func main() {
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 	staffStoreAccessHandler := storeAccessHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
 	staffDeleteStoreAccessHandler := storeAccessHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
+	stylistCreateHandler := stylistHandler.NewCreateStylistHandler(stylistCreateService)
 
 	router := gin.Default()
 
@@ -82,6 +87,11 @@ func main() {
 			staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffUpdateHandler.UpdateStaff)
 			staff.POST("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffStoreAccessHandler.CreateStoreAccess)
 			staff.DELETE("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffDeleteStoreAccessHandler.DeleteStoreAccess)
+		}
+
+		stylists := api.Group("/stylists")
+		{
+			stylists.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistCreateHandler.CreateStylist)
 		}
 	}
 
