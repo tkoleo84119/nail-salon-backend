@@ -43,6 +43,35 @@ func (q *Queries) CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOve
 	return has_overlap, err
 }
 
+const checkTimeSlotOverlapExcluding = `-- name: CheckTimeSlotOverlapExcluding :one
+SELECT EXISTS(
+    SELECT 1 FROM time_slots
+    WHERE schedule_id = $1
+    AND id != $2
+    AND start_time < $4
+    AND end_time > $3
+) AS has_overlap
+`
+
+type CheckTimeSlotOverlapExcludingParams struct {
+	ScheduleID int64       `db:"schedule_id" json:"schedule_id"`
+	ID         int64       `db:"id" json:"id"`
+	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
+	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
+}
+
+func (q *Queries) CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkTimeSlotOverlapExcluding,
+		arg.ScheduleID,
+		arg.ID,
+		arg.EndTime,
+		arg.StartTime,
+	)
+	var has_overlap bool
+	err := row.Scan(&has_overlap)
+	return has_overlap, err
+}
+
 const createTimeSlot = `-- name: CreateTimeSlot :one
 INSERT INTO time_slots (
     id,
@@ -99,6 +128,34 @@ WHERE schedule_id = ANY($1::bigint[])
 func (q *Queries) DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error {
 	_, err := q.db.Exec(ctx, deleteTimeSlotsByScheduleIDs, dollar_1)
 	return err
+}
+
+const getTimeSlotByID = `-- name: GetTimeSlotByID :one
+SELECT
+    id,
+    schedule_id,
+    start_time,
+    end_time,
+    is_available,
+    created_at,
+    updated_at
+FROM time_slots
+WHERE id = $1
+`
+
+func (q *Queries) GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error) {
+	row := q.db.QueryRow(ctx, getTimeSlotByID, id)
+	var i TimeSlot
+	err := row.Scan(
+		&i.ID,
+		&i.ScheduleID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.IsAvailable,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getTimeSlotsByScheduleID = `-- name: GetTimeSlotsByScheduleID :many

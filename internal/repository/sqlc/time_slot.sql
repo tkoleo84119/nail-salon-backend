@@ -45,6 +45,18 @@ FROM time_slots
 WHERE schedule_id = $1
 ORDER BY start_time;
 
+-- name: GetTimeSlotByID :one
+SELECT
+    id,
+    schedule_id,
+    start_time,
+    end_time,
+    is_available,
+    created_at,
+    updated_at
+FROM time_slots
+WHERE id = $1;
+
 -- name: DeleteTimeSlotsByScheduleIDs :exec
 DELETE FROM time_slots
 WHERE schedule_id = ANY($1::bigint[]);
@@ -55,4 +67,13 @@ SELECT EXISTS(
     WHERE schedule_id = $1
     AND start_time < $3
     AND end_time > $2
+) AS has_overlap;
+
+-- name: CheckTimeSlotOverlapExcluding :one
+SELECT EXISTS(
+    SELECT 1 FROM time_slots
+    WHERE schedule_id = $1
+    AND id != $2
+    AND start_time < $4
+    AND end_time > $3
 ) AS has_overlap;

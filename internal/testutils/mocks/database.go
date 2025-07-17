@@ -182,3 +182,15 @@ func (m *MockQuerier) CheckTimeSlotOverlap(ctx context.Context, arg dbgen.CheckT
 	args := m.Called(ctx, arg)
 	return args.Bool(0), args.Error(1)
 }
+
+func (m *MockQuerier) GetTimeSlotByID(ctx context.Context, id int64) (dbgen.TimeSlot, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.TimeSlot), args.Error(1)
+}
+
+func (m *MockQuerier) CheckTimeSlotOverlapExcluding(ctx context.Context, arg dbgen.CheckTimeSlotOverlapExcludingParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}
+
+

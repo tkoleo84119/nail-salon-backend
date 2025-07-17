@@ -95,6 +95,17 @@ SCHEDULE:
     message: 部分班表已被預約，無法刪除
     status: 400
 
+TIME_SLOT:
+  TIME_SLOT_CANNOT_UPDATE_SEPARATELY:
+    message: 時段起始時間和結束時間必須同時傳入
+    status: 400
+  TIME_SLOT_NOT_FOUND:
+    message: 時段不存在或已被刪除
+    status: 404
+  TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE:
+    message: 時段已被預約，無法更新
+    status: 400
+
 SYS:
   SYS_INTERNAL_ERROR:
     message: 系統發生錯誤，請稍後再試

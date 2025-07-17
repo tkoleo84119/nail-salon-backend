@@ -36,6 +36,11 @@ const (
 	ScheduleTimeConflict             = "SCHEDULE_TIME_CONFLICT"
 	ScheduleAlreadyBookedDoNotDelete = "SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE"
 
+	// TIME_SLOT - Time slot operation errors
+	TimeSlotCannotUpdateSeparately   = "TIME_SLOT_CANNOT_UPDATE_SEPARATELY"
+	TimeSlotNotFound                 = "TIME_SLOT_NOT_FOUND"
+	TimeSlotAlreadyBookedDoNotUpdate = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE"
+
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"

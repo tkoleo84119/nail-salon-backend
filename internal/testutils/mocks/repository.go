@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
@@ -58,4 +59,23 @@ func (m *MockStylistRepository) UpdateStylist(ctx context.Context, staffUserID i
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*stylist.UpdateStylistResponse), args.Error(1)
+}
+
+// MockTimeSlotRepository is a mock implementation of TimeSlotRepositoryInterface
+type MockTimeSlotRepository struct {
+	mock.Mock
+}
+
+var _ sqlxRepo.TimeSlotRepositoryInterface = (*MockTimeSlotRepository)(nil)
+
+func NewMockTimeSlotRepository() *MockTimeSlotRepository {
+	return &MockTimeSlotRepository{}
+}
+
+func (m *MockTimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int64, req schedule.UpdateTimeSlotRequest) (*schedule.UpdateTimeSlotResponse, error) {
+	args := m.Called(ctx, timeSlotID, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*schedule.UpdateTimeSlotResponse), args.Error(1)
 }
