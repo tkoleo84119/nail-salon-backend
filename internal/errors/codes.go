@@ -30,6 +30,11 @@ const (
 	StylistNotFound              = "STYLIST_NOT_FOUND"
 	StylistNotCreated            = "STYLIST_NOT_CREATED"
 
+	// SCHEDULE - Schedule operation errors
+	ScheduleAlreadyExists        = "SCHEDULE_ALREADY_EXISTS"
+	ScheduleNotFound             = "SCHEDULE_NOT_FOUND"
+	ScheduleTimeConflict         = "SCHEDULE_TIME_CONFLICT"
+
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"

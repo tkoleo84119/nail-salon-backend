@@ -81,6 +81,17 @@ STYLIST:
     message: 尚未建立美甲師資料，請先新增
     status: 404
 
+SCHEDULE:
+  SCHEDULE_ALREADY_EXISTS:
+    message: 美甲師班表已存在
+    status: 409
+  SCHEDULE_NOT_FOUND:
+    message: 班表不存在
+    status: 404
+  SCHEDULE_TIME_CONFLICT:
+    message: 時間區段重疊
+    status: 400
+
 SYS:
   SYS_INTERNAL_ERROR:
     message: 系統發生錯誤，請稍後再試

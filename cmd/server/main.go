@@ -10,15 +10,17 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
+	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
 	storeAccessHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store-access"
 	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
+	staffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
-	staffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
+	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
@@ -72,6 +74,7 @@ func main() {
 	staffDeleteStoreAccessService := storeAccessService.NewDeleteStoreAccessService(queries)
 	stylistCreateService := stylistService.NewCreateStylistService(queries)
 	stylistUpdateService := stylistService.NewUpdateStylistService(queries, stylistRepository)
+	scheduleCreateBulkService := scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -82,6 +85,7 @@ func main() {
 	staffDeleteStoreAccessHandler := storeAccessHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
 	stylistCreateHandler := stylistHandler.NewCreateStylistHandler(stylistCreateService)
 	stylistUpdateHandler := stylistHandler.NewUpdateStylistHandler(stylistUpdateService)
+	scheduleCreateBulkHandler := scheduleHandler.NewCreateSchedulesBulkHandler(scheduleCreateBulkService)
 
 	router := gin.Default()
 
@@ -103,6 +107,11 @@ func main() {
 		{
 			stylists.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistCreateHandler.CreateStylist)
 			stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistUpdateHandler.UpdateStylist)
+		}
+
+		schedules := api.Group("/schedules")
+		{
+			schedules.POST("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleCreateBulkHandler.CreateSchedulesBulk)
 		}
 	}
 

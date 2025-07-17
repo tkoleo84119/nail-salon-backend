@@ -116,3 +116,44 @@ func (m *MockQuerier) CreateStylist(ctx context.Context, arg dbgen.CreateStylist
 	args := m.Called(ctx, arg)
 	return args.Get(0).(dbgen.Stylist), args.Error(1)
 }
+
+// Schedule related mock methods
+func (m *MockQuerier) GetStylistByID(ctx context.Context, id int64) (dbgen.Stylist, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.Stylist), args.Error(1)
+}
+
+func (m *MockQuerier) CheckScheduleExists(ctx context.Context, arg dbgen.CheckScheduleExistsParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockQuerier) CreateSchedule(ctx context.Context, arg dbgen.CreateScheduleParams) (dbgen.Schedule, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.Schedule), args.Error(1)
+}
+
+func (m *MockQuerier) CreateTimeSlot(ctx context.Context, arg dbgen.CreateTimeSlotParams) (dbgen.TimeSlot, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.TimeSlot), args.Error(1)
+}
+
+func (m *MockQuerier) GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]dbgen.TimeSlot, error) {
+	args := m.Called(ctx, scheduleID)
+	return args.Get(0).([]dbgen.TimeSlot), args.Error(1)
+}
+
+func (m *MockQuerier) BatchCreateSchedules(ctx context.Context, arg []dbgen.BatchCreateSchedulesParams) (int64, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockQuerier) BatchCreateTimeSlots(ctx context.Context, arg []dbgen.BatchCreateTimeSlotsParams) (int64, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockQuerier) GetSchedulesByStoreAndStylist(ctx context.Context, arg dbgen.GetSchedulesByStoreAndStylistParams) ([]dbgen.Schedule, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).([]dbgen.Schedule), args.Error(1)
+}

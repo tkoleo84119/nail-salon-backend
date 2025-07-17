@@ -82,6 +82,7 @@ Follow Conventional Commits format: `<type>: <description>`
 ### Development Notes
 - If needs new SQL query, look up current SQL query first (in `internal/repository/sqlc/` and `internal/repository/sqlx/`), not create duplicate SQL
 - If sql is update optional columns(dynamic), use sqlx not sqlc
+- When adding a new SQL for batch insert operations, use sqlc's :copyfrom
 - Handler & service & model need to use modules struct by business domain (separate by folder)
 
 ### Error Handling Patterns
