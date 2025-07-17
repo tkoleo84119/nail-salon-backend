@@ -10,14 +10,14 @@ type TimeSlotRequest struct {
 type ScheduleRequest struct {
 	WorkDate  string            `json:"workDate" binding:"required"`
 	Note      *string           `json:"note,omitempty" binding:"omitempty,max=100"`
-	TimeSlots []TimeSlotRequest `json:"timeSlots" binding:"required,min=1,dive"`
+	TimeSlots []TimeSlotRequest `json:"timeSlots" binding:"required,min=1,max=30"`
 }
 
 // CreateSchedulesBulkRequest represents the request to create multiple schedules
 type CreateSchedulesBulkRequest struct {
 	StylistID string            `json:"stylistId" binding:"required"`
 	StoreID   string            `json:"storeId" binding:"required"`
-	Schedules []ScheduleRequest `json:"schedules" binding:"required,min=1,dive"`
+	Schedules []ScheduleRequest `json:"schedules" binding:"required,min=1,max=50"`
 }
 
 // TimeSlotResponse represents a time slot in the response

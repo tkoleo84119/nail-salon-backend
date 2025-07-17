@@ -31,7 +31,7 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 	targetID := c.Param("id")
 	if targetID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
-			"id": "員工ID為必填項目",
+			"id": "id為必填項目",
 		})
 		return
 	}

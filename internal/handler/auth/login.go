@@ -28,15 +28,8 @@ func NewLoginHandler(loginService authService.LoginServiceInterface) *LoginHandl
 func (h *LoginHandler) Login(c *gin.Context) {
 	var req auth.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		// Handle validation errors
-		if utils.IsValidationError(err) {
-			validationErrors := utils.ExtractValidationErrors(err)
-			errorCodes.RespondWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
-		} else {
-			// Handle JSON parsing errors
-			fieldErrors := map[string]string{"request": "JSON格式錯誤"}
-			errorCodes.RespondWithError(c, errorCodes.ValJsonFormat, fieldErrors)
-		}
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}
 

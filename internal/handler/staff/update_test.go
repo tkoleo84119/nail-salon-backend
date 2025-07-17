@@ -163,7 +163,7 @@ func TestUpdateStaffHandler_UpdateStaff_MissingID(t *testing.T) {
 	assert.Equal(t, "輸入驗證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "員工ID為必填項目", response.Errors["id"])
+	assert.Equal(t, "id為必填項目", response.Errors["id"])
 }
 
 func TestUpdateStaffHandler_UpdateStaff_MissingStaffContext(t *testing.T) {
@@ -341,7 +341,7 @@ func TestUpdateStaffHandler_UpdateStaff_InvalidRole(t *testing.T) {
 	assert.Equal(t, "輸入驗證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "角色格式不正確", response.Errors["role"])
+	assert.Equal(t, "role只可以傳入特定值", response.Errors["role"])
 }
 
 func TestUpdateStaffHandler_UpdateStaff_ServiceError(t *testing.T) {

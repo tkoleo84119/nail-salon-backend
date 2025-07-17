@@ -37,7 +37,7 @@ func (m *MockCreateStaffService) CreateStaff(ctx context.Context, req staff.Crea
 
 func setupTestGinForCreate() {
 	gin.SetMode(gin.TestMode)
-	
+
 	// Load error definitions for testing
 	errorManager := errorCodes.GetManager()
 	_ = errorManager.LoadFromFile("../../errors/errors.yaml")
@@ -277,7 +277,7 @@ func TestCreateStaffHandler_CreateStaff_InvalidJSON(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "JSON格式錯誤", response.Message)
+	assert.Equal(t, "輸入驗證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
 	assert.Equal(t, "JSON格式錯誤", response.Errors["request"])

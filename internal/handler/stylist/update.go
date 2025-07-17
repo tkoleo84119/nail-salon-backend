@@ -26,13 +26,8 @@ func NewUpdateStylistHandler(updateStylistService stylistService.UpdateStylistSe
 func (h *UpdateStylistHandler) UpdateStylist(c *gin.Context) {
 	var req stylist.UpdateStylistRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		if utils.IsValidationError(err) {
-			validationErrors := utils.ExtractValidationErrors(err)
-			errorCodes.RespondWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
-		} else {
-			fieldErrors := map[string]string{"request": "JSON格式錯誤"}
-			errorCodes.RespondWithError(c, errorCodes.ValJsonFormat, fieldErrors)
-		}
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}
 

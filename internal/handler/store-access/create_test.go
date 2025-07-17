@@ -16,7 +16,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
+	storeAccess "github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
 	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
 )
 
@@ -221,7 +221,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingID(t *testing.T) {
 	assert.Equal(t, "輸入驗證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "員工ID為必填項目", response.Errors["id"])
+	assert.Equal(t, "id為必填項目", response.Errors["id"])
 }
 
 func TestCreateStoreAccessHandler_CreateStoreAccess_MissingStaffContext(t *testing.T) {
@@ -345,7 +345,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingStoreID(t *testing.T)
 	assert.Equal(t, "輸入驗證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "門市ID為必填項目", response.Errors["storeId"])
+	assert.Equal(t, "storeId為必填項目", response.Errors["storeId"])
 }
 
 func TestCreateStoreAccessHandler_CreateStoreAccess_ServiceError(t *testing.T) {

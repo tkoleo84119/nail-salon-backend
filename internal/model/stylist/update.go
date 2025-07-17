@@ -3,10 +3,10 @@ package stylist
 // UpdateStylistRequest represents the request to update a stylist
 type UpdateStylistRequest struct {
 	StylistName  *string   `json:"stylistName,omitempty" binding:"omitempty,min=1,max=50"`
-	GoodAtShapes *[]string `json:"goodAtShapes,omitempty"`
-	GoodAtColors *[]string `json:"goodAtColors,omitempty"`
-	GoodAtStyles *[]string `json:"goodAtStyles,omitempty"`
-	IsIntrovert  *bool     `json:"isIntrovert,omitempty"`
+	GoodAtShapes *[]string `json:"goodAtShapes,omitempty" binding:"omitempty,max=100"`
+	GoodAtColors *[]string `json:"goodAtColors,omitempty" binding:"omitempty,max=100"`
+	GoodAtStyles *[]string `json:"goodAtStyles,omitempty" binding:"omitempty,max=100"`
+	IsIntrovert  *bool     `json:"isIntrovert,omitempty" binding:"omitempty"`
 }
 
 // UpdateStylistResponse represents the response after updating a stylist

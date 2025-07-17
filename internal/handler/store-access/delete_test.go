@@ -16,7 +16,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
+	storeAccess "github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
 	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
 )
 
@@ -198,7 +198,7 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_MissingStaffID(t *testing.T)
 	assert.Equal(t, "輸入驗證失敗", response.Message)
 	assert.Nil(t, response.Data)
 	assert.NotNil(t, response.Errors)
-	assert.Equal(t, "員工ID為必填項目", response.Errors["id"])
+	assert.Equal(t, "id為必填項目", response.Errors["id"])
 
 	// Verify service was not called
 	mockService.AssertNotCalled(t, "DeleteStoreAccess")
@@ -420,21 +420,21 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_InvalidStoreIDsInRequest(t *
 	handler := NewDeleteStoreAccessHandler(mockService)
 
 	tests := []struct {
-		name        string
-		requestBody string
-		expectCode  int
+		name              string
+		requestBody       string
+		expectCode        int
 		shouldCallService bool
 	}{
 		{
-			name:        "empty string in storeIds - service layer handles validation",
-			requestBody: `{"storeIds": [""]}`,
-			expectCode:  http.StatusInternalServerError, // Service layer will handle ID parsing validation
+			name:              "empty string in storeIds - service layer handles validation",
+			requestBody:       `{"storeIds": [""]}`,
+			expectCode:        http.StatusInternalServerError, // Service layer will handle ID parsing validation
 			shouldCallService: true,
 		},
 		{
-			name:        "mixed valid and empty storeIds - service layer handles validation",
-			requestBody: `{"storeIds": ["1", "", "3"]}`,
-			expectCode:  http.StatusInternalServerError, // Service layer will handle ID parsing validation
+			name:              "mixed valid and empty storeIds - service layer handles validation",
+			requestBody:       `{"storeIds": ["1", "", "3"]}`,
+			expectCode:        http.StatusInternalServerError, // Service layer will handle ID parsing validation
 			shouldCallService: true,
 		},
 	}

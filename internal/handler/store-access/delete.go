@@ -7,7 +7,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
+	storeAccess "github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
 	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -31,7 +31,7 @@ func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
 	targetID := c.Param("id")
 	if targetID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
-			"id": "員工ID為必填項目",
+			"id": "id為必填項目",
 		})
 		return
 	}

@@ -205,7 +205,7 @@ func TestCreateStylistHandler_CreateStylist_InvalidJSON(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "JSON格式錯誤", response["message"])
+	assert.Equal(t, "輸入驗證失敗", response["message"])
 
 	// Service should not be called
 	mockService.AssertNotCalled(t, "CreateStylist")

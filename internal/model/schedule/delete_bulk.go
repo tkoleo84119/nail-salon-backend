@@ -4,7 +4,7 @@ package schedule
 type DeleteSchedulesBulkRequest struct {
 	StylistID   string   `json:"stylistId" binding:"required"`
 	StoreID     string   `json:"storeId" binding:"required"`
-	ScheduleIDs []string `json:"scheduleIds" binding:"required,min=1,dive,required"`
+	ScheduleIDs []string `json:"scheduleIds" binding:"required,min=1,max=50"`
 }
 
 // DeleteSchedulesBulkResponse represents the response after deleting multiple schedules

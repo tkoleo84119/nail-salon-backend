@@ -16,18 +16,18 @@ func TestExtractValidationErrors(t *testing.T) {
 	validate := validator.New()
 
 	tests := []struct {
-		name          string
-		input         TestStruct
-		expectedKeys  []string
-		expectedMsgs  map[string]string
+		name         string
+		input        TestStruct
+		expectedKeys []string
+		expectedMsgs map[string]string
 	}{
 		{
 			name:         "required fields missing",
 			input:        TestStruct{},
 			expectedKeys: []string{"username", "password"},
 			expectedMsgs: map[string]string{
-				"username": "帳號為必填項目",
-				"password": "密碼為必填項目",
+				"username": "username為必填項目",
+				"password": "password為必填項目",
 			},
 		},
 		{
@@ -38,8 +38,8 @@ func TestExtractValidationErrors(t *testing.T) {
 			},
 			expectedKeys: []string{"username", "password"},
 			expectedMsgs: map[string]string{
-				"username": "帳號為必填項目",
-				"password": "密碼為必填項目",
+				"username": "username為必填項目",
+				"password": "password為必填項目",
 			},
 		},
 	}
@@ -49,12 +49,12 @@ func TestExtractValidationErrors(t *testing.T) {
 			err := validate.Struct(tt.input)
 			if err != nil {
 				errors := ExtractValidationErrors(err)
-				
+
 				// Check that all expected keys are present
 				for _, key := range tt.expectedKeys {
 					assert.Contains(t, errors, key, "Expected key %s not found", key)
 				}
-				
+
 				// Check specific error messages
 				for key, expectedMsg := range tt.expectedMsgs {
 					assert.Equal(t, expectedMsg, errors[key], "Error message mismatch for key %s", key)
@@ -87,7 +87,7 @@ func TestIsValidationError(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validate.Struct(tt.input)
-			
+
 			if tt.expected {
 				assert.Error(t, err)
 				assert.True(t, IsValidationError(err))
