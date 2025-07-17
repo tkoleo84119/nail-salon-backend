@@ -103,8 +103,8 @@ func TestCreateTimeSlotHandler_CreateTimeSlot_NoStaffContext(t *testing.T) {
 	// Execute
 	handler.CreateTimeSlot(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 401 for missing staff context
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -133,8 +133,8 @@ func TestCreateTimeSlotHandler_CreateTimeSlot_InvalidJSON(t *testing.T) {
 	// Execute
 	handler.CreateTimeSlot(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for invalid JSON
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -171,8 +171,8 @@ func TestCreateTimeSlotHandler_CreateTimeSlot_MissingScheduleID(t *testing.T) {
 	// Execute
 	handler.CreateTimeSlot(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for validation error
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -209,8 +209,8 @@ func TestCreateTimeSlotHandler_CreateTimeSlot_ValidationError(t *testing.T) {
 	// Execute
 	handler.CreateTimeSlot(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for validation error
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -251,8 +251,8 @@ func TestCreateTimeSlotHandler_CreateTimeSlot_ServiceError(t *testing.T) {
 	// Execute
 	handler.CreateTimeSlot(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 404 for SCHEDULE_NOT_FOUND error
+	assert.Equal(t, http.StatusNotFound, w.Code)
 
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -292,8 +292,8 @@ func TestCreateTimeSlotHandler_CreateTimeSlot_TimeSlotOverlap(t *testing.T) {
 	// Execute
 	handler.CreateTimeSlot(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for SCHEDULE_TIME_CONFLICT error
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -333,8 +333,8 @@ func TestCreateTimeSlotHandler_CreateTimeSlot_PermissionDenied(t *testing.T) {
 	// Execute
 	handler.CreateTimeSlot(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 403 for AUTH_PERMISSION_DENIED error
+	assert.Equal(t, http.StatusForbidden, w.Code)
 
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)

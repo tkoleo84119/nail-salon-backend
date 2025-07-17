@@ -47,6 +47,43 @@ func (q *Queries) BatchCreateSchedules(ctx context.Context, arg []BatchCreateSch
 	return q.db.CopyFrom(ctx, []string{"schedules"}, []string{"id", "store_id", "stylist_id", "work_date", "note", "created_at", "updated_at"}, &iteratorForBatchCreateSchedules{rows: arg})
 }
 
+// iteratorForBatchCreateTimeSlotTemplateItems implements pgx.CopyFromSource.
+type iteratorForBatchCreateTimeSlotTemplateItems struct {
+	rows                 []BatchCreateTimeSlotTemplateItemsParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForBatchCreateTimeSlotTemplateItems) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForBatchCreateTimeSlotTemplateItems) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].ID,
+		r.rows[0].TemplateID,
+		r.rows[0].StartTime,
+		r.rows[0].EndTime,
+		r.rows[0].CreatedAt,
+		r.rows[0].UpdatedAt,
+	}, nil
+}
+
+func (r iteratorForBatchCreateTimeSlotTemplateItems) Err() error {
+	return nil
+}
+
+func (q *Queries) BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"time_slot_template_items"}, []string{"id", "template_id", "start_time", "end_time", "created_at", "updated_at"}, &iteratorForBatchCreateTimeSlotTemplateItems{rows: arg})
+}
+
 // iteratorForBatchCreateTimeSlots implements pgx.CopyFromSource.
 type iteratorForBatchCreateTimeSlots struct {
 	rows                 []BatchCreateTimeSlotsParams

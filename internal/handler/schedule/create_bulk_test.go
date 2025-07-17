@@ -138,8 +138,8 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_NoStaffContext(t *testin
 	// Execute
 	handler.CreateSchedulesBulk(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 401 for missing staff context
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -167,8 +167,8 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_InvalidJSON(t *testing.T
 	// Execute
 	handler.CreateSchedulesBulk(c)
 
-	// Assert
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for invalid JSON
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -205,8 +205,8 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ValidationError(t *testi
 	// Execute
 	handler.CreateSchedulesBulk(c)
 
-	// Assert
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for validation errors
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -255,7 +255,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ServiceError(t *testing.
 	handler.CreateSchedulesBulk(c)
 
 	// Assert
-	assert.Equal(t, http.StatusInternalServerError, w.Code) // expect 500 since error manager isn't initialized in tests
+	assert.Equal(t, http.StatusNotFound, w.Code) // expect 404 for StylistNotFound
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -303,7 +303,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_PermissionDenied(t *test
 	handler.CreateSchedulesBulk(c)
 
 	// Assert
-	assert.Equal(t, http.StatusInternalServerError, w.Code) // expect 500 since error manager isn't initialized in tests
+	assert.Equal(t, http.StatusForbidden, w.Code) // expect 403 for permission denied
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)

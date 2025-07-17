@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	BatchCreateSchedules(ctx context.Context, arg []BatchCreateSchedulesParams) (int64, error)
 	BatchCreateStaffUserStoreAccess(ctx context.Context, arg BatchCreateStaffUserStoreAccessParams) error
+	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
 	CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailUniqueForUpdateParams) (bool, error)
 	CheckScheduleExists(ctx context.Context, arg CheckScheduleExistsParams) (bool, error)
@@ -28,6 +29,7 @@ type Querier interface {
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
 	CreateStylist(ctx context.Context, arg CreateStylistParams) (Stylist, error)
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
+	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
@@ -44,6 +46,8 @@ type Querier interface {
 	GetStylistByID(ctx context.Context, id int64) (Stylist, error)
 	GetStylistByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (Stylist, error)
 	GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error)
+	GetTimeSlotTemplateByID(ctx context.Context, id int64) (TimeSlotTemplate, error)
+	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]TimeSlotTemplateItem, error)
 	GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
 }
 

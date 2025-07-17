@@ -198,4 +198,25 @@ func (m *MockQuerier) DeleteTimeSlotByID(ctx context.Context, id int64) error {
 	return args.Error(0)
 }
 
+// Time Slot Template related mock methods
+func (m *MockQuerier) CreateTimeSlotTemplate(ctx context.Context, arg dbgen.CreateTimeSlotTemplateParams) (dbgen.TimeSlotTemplate, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.TimeSlotTemplate), args.Error(1)
+}
+
+func (m *MockQuerier) BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []dbgen.BatchCreateTimeSlotTemplateItemsParams) (int64, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockQuerier) GetTimeSlotTemplateByID(ctx context.Context, id int64) (dbgen.TimeSlotTemplate, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.TimeSlotTemplate), args.Error(1)
+}
+
+func (m *MockQuerier) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]dbgen.TimeSlotTemplateItem, error) {
+	args := m.Called(ctx, templateID)
+	return args.Get(0).([]dbgen.TimeSlotTemplateItem), args.Error(1)
+}
+
 

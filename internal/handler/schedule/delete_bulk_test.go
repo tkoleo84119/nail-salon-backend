@@ -100,8 +100,8 @@ func TestDeleteSchedulesBulkHandler_DeleteSchedulesBulk_NoStaffContext(t *testin
 	// Execute
 	handler.DeleteSchedulesBulk(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 401 for missing staff context (AUTH_CONTEXT_MISSING)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -129,8 +129,8 @@ func TestDeleteSchedulesBulkHandler_DeleteSchedulesBulk_InvalidJSON(t *testing.T
 	// Execute
 	handler.DeleteSchedulesBulk(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for invalid JSON (VAL_INPUT_VALIDATION_FAILED)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -167,8 +167,8 @@ func TestDeleteSchedulesBulkHandler_DeleteSchedulesBulk_ValidationError(t *testi
 	// Execute
 	handler.DeleteSchedulesBulk(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 400 for validation errors (VAL_INPUT_VALIDATION_FAILED)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -209,8 +209,8 @@ func TestDeleteSchedulesBulkHandler_DeleteSchedulesBulk_ServiceError(t *testing.
 	// Execute
 	handler.DeleteSchedulesBulk(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 404 for stylist not found (STYLIST_NOT_FOUND)
+	assert.Equal(t, http.StatusNotFound, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -250,8 +250,8 @@ func TestDeleteSchedulesBulkHandler_DeleteSchedulesBulk_PermissionDenied(t *test
 	// Execute
 	handler.DeleteSchedulesBulk(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 403 for permission denied (AUTH_PERMISSION_DENIED)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -294,8 +294,8 @@ func TestDeleteSchedulesBulkHandler_DeleteSchedulesBulk_SchedulesNotFound(t *tes
 	// Execute
 	handler.DeleteSchedulesBulk(c)
 
-	// Assert - expect 500 since error manager isn't initialized in tests
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// Assert - expect 404 for schedule not found (SCHEDULE_NOT_FOUND)
+	assert.Equal(t, http.StatusNotFound, w.Code)
 	
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
