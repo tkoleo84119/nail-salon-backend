@@ -91,6 +91,9 @@ SCHEDULE:
   SCHEDULE_TIME_CONFLICT:
     message: 時間區段重疊
     status: 400
+  SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE:
+    message: 部分班表已被預約，無法刪除
+    status: 400
 
 SYS:
   SYS_INTERNAL_ERROR:

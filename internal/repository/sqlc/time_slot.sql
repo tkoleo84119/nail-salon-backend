@@ -44,3 +44,7 @@ SELECT
 FROM time_slots
 WHERE schedule_id = $1
 ORDER BY start_time;
+
+-- name: DeleteTimeSlotsByScheduleIDs :exec
+DELETE FROM time_slots
+WHERE schedule_id = ANY($1::bigint[]);

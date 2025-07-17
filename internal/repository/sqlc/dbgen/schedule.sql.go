@@ -91,6 +91,16 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 	return i, err
 }
 
+const deleteSchedulesByIDs = `-- name: DeleteSchedulesByIDs :exec
+DELETE FROM schedules
+WHERE id = ANY($1::bigint[])
+`
+
+func (q *Queries) DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error {
+	_, err := q.db.Exec(ctx, deleteSchedulesByIDs, dollar_1)
+	return err
+}
+
 const getSchedulesByStoreAndStylist = `-- name: GetSchedulesByStoreAndStylist :many
 SELECT
     id,
@@ -127,6 +137,71 @@ func (q *Queries) GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSche
 			&i.Note,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSchedulesWithTimeSlotsByIDs = `-- name: GetSchedulesWithTimeSlotsByIDs :many
+SELECT
+    s.id,
+    s.store_id,
+    s.stylist_id,
+    s.work_date,
+    s.note,
+    s.created_at,
+    s.updated_at,
+    t.id as time_slot_id,
+    t.start_time,
+    t.end_time,
+    t.is_available
+FROM schedules s
+LEFT JOIN time_slots t ON s.id = t.schedule_id
+WHERE s.id = ANY($1::bigint[])
+ORDER BY s.work_date
+`
+
+type GetSchedulesWithTimeSlotsByIDsRow struct {
+	ID          int64              `db:"id" json:"id"`
+	StoreID     int64              `db:"store_id" json:"store_id"`
+	StylistID   int64              `db:"stylist_id" json:"stylist_id"`
+	WorkDate    pgtype.Date        `db:"work_date" json:"work_date"`
+	Note        pgtype.Text        `db:"note" json:"note"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	TimeSlotID  pgtype.Int8        `db:"time_slot_id" json:"time_slot_id"`
+	StartTime   pgtype.Time        `db:"start_time" json:"start_time"`
+	EndTime     pgtype.Time        `db:"end_time" json:"end_time"`
+	IsAvailable pgtype.Bool        `db:"is_available" json:"is_available"`
+}
+
+func (q *Queries) GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error) {
+	rows, err := q.db.Query(ctx, getSchedulesWithTimeSlotsByIDs, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetSchedulesWithTimeSlotsByIDsRow{}
+	for rows.Next() {
+		var i GetSchedulesWithTimeSlotsByIDsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.StoreID,
+			&i.StylistID,
+			&i.WorkDate,
+			&i.Note,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.TimeSlotID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.IsAvailable,
 		); err != nil {
 			return nil, err
 		}

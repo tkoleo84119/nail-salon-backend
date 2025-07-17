@@ -75,6 +75,7 @@ func main() {
 	stylistCreateService := stylistService.NewCreateStylistService(queries)
 	stylistUpdateService := stylistService.NewUpdateStylistService(queries, stylistRepository)
 	scheduleCreateBulkService := scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool)
+	scheduleDeleteBulkService := scheduleService.NewDeleteSchedulesBulkService(queries, database.PgxPool)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -86,6 +87,7 @@ func main() {
 	stylistCreateHandler := stylistHandler.NewCreateStylistHandler(stylistCreateService)
 	stylistUpdateHandler := stylistHandler.NewUpdateStylistHandler(stylistUpdateService)
 	scheduleCreateBulkHandler := scheduleHandler.NewCreateSchedulesBulkHandler(scheduleCreateBulkService)
+	scheduleDeleteBulkHandler := scheduleHandler.NewDeleteSchedulesBulkHandler(scheduleDeleteBulkService)
 
 	router := gin.Default()
 
@@ -112,6 +114,7 @@ func main() {
 		schedules := api.Group("/schedules")
 		{
 			schedules.POST("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleCreateBulkHandler.CreateSchedulesBulk)
+			schedules.DELETE("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleDeleteBulkHandler.DeleteSchedulesBulk)
 		}
 	}
 

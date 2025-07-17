@@ -157,3 +157,18 @@ func (m *MockQuerier) GetSchedulesByStoreAndStylist(ctx context.Context, arg dbg
 	args := m.Called(ctx, arg)
 	return args.Get(0).([]dbgen.Schedule), args.Error(1)
 }
+
+func (m *MockQuerier) GetSchedulesWithTimeSlotsByIDs(ctx context.Context, scheduleIDs []int64) ([]dbgen.GetSchedulesWithTimeSlotsByIDsRow, error) {
+	args := m.Called(ctx, scheduleIDs)
+	return args.Get(0).([]dbgen.GetSchedulesWithTimeSlotsByIDsRow), args.Error(1)
+}
+
+func (m *MockQuerier) DeleteSchedulesByIDs(ctx context.Context, scheduleIDs []int64) error {
+	args := m.Called(ctx, scheduleIDs)
+	return args.Error(0)
+}
+
+func (m *MockQuerier) DeleteTimeSlotsByScheduleIDs(ctx context.Context, scheduleIDs []int64) error {
+	args := m.Called(ctx, scheduleIDs)
+	return args.Error(0)
+}
