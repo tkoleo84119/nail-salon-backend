@@ -79,6 +79,7 @@ func main() {
 	scheduleCreateTimeSlotService := scheduleService.NewCreateTimeSlotService(queries)
 	timeSlotRepository := sqlx.NewTimeSlotRepository(database.Sqlx)
 	scheduleUpdateTimeSlotService := scheduleService.NewUpdateTimeSlotService(queries, timeSlotRepository)
+	scheduleDeleteTimeSlotService := scheduleService.NewDeleteTimeSlotService(queries)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -93,6 +94,7 @@ func main() {
 	scheduleDeleteBulkHandler := scheduleHandler.NewDeleteSchedulesBulkHandler(scheduleDeleteBulkService)
 	scheduleCreateTimeSlotHandler := scheduleHandler.NewCreateTimeSlotHandler(scheduleCreateTimeSlotService)
 	scheduleUpdateTimeSlotHandler := scheduleHandler.NewUpdateTimeSlotHandler(scheduleUpdateTimeSlotService)
+	scheduleDeleteTimeSlotHandler := scheduleHandler.NewDeleteTimeSlotHandler(scheduleDeleteTimeSlotService)
 
 	router := gin.Default()
 
@@ -122,6 +124,7 @@ func main() {
 			schedules.DELETE("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleDeleteBulkHandler.DeleteSchedulesBulk)
 			schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleCreateTimeSlotHandler.CreateTimeSlot)
 			schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleUpdateTimeSlotHandler.UpdateTimeSlot)
+			schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleDeleteTimeSlotHandler.DeleteTimeSlot)
 		}
 	}
 

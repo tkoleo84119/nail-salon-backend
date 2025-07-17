@@ -120,6 +120,16 @@ func (q *Queries) CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) 
 	return i, err
 }
 
+const deleteTimeSlotByID = `-- name: DeleteTimeSlotByID :exec
+DELETE FROM time_slots
+WHERE id = $1
+`
+
+func (q *Queries) DeleteTimeSlotByID(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteTimeSlotByID, id)
+	return err
+}
+
 const deleteTimeSlotsByScheduleIDs = `-- name: DeleteTimeSlotsByScheduleIDs :exec
 DELETE FROM time_slots
 WHERE schedule_id = ANY($1::bigint[])

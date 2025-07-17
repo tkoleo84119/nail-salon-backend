@@ -105,6 +105,9 @@ TIME_SLOT:
   TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE:
     message: 時段已被預約，無法更新
     status: 400
+  TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE:
+    message: 該時段已被預約，無法刪除
+    status: 409
 
 SYS:
   SYS_INTERNAL_ERROR:

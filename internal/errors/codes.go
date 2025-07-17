@@ -40,6 +40,7 @@ const (
 	TimeSlotCannotUpdateSeparately   = "TIME_SLOT_CANNOT_UPDATE_SEPARATELY"
 	TimeSlotNotFound                 = "TIME_SLOT_NOT_FOUND"
 	TimeSlotAlreadyBookedDoNotUpdate = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE"
+	TimeSlotAlreadyBookedDoNotDelete = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"

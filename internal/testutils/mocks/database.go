@@ -193,4 +193,9 @@ func (m *MockQuerier) CheckTimeSlotOverlapExcluding(ctx context.Context, arg dbg
 	return args.Bool(0), args.Error(1)
 }
 
+func (m *MockQuerier) DeleteTimeSlotByID(ctx context.Context, id int64) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
 

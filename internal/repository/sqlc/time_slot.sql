@@ -57,6 +57,10 @@ SELECT
 FROM time_slots
 WHERE id = $1;
 
+-- name: DeleteTimeSlotByID :exec
+DELETE FROM time_slots
+WHERE id = $1;
+
 -- name: DeleteTimeSlotsByScheduleIDs :exec
 DELETE FROM time_slots
 WHERE schedule_id = ANY($1::bigint[]);

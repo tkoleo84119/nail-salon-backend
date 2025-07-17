@@ -30,6 +30,7 @@ type Querier interface {
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
+	DeleteTimeSlotByID(ctx context.Context, id int64) error
 	DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
 	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)
