@@ -21,6 +21,28 @@ type BatchCreateTimeSlotsParams struct {
 	UpdatedAt   pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
+const checkTimeSlotOverlap = `-- name: CheckTimeSlotOverlap :one
+SELECT EXISTS(
+    SELECT 1 FROM time_slots
+    WHERE schedule_id = $1
+    AND start_time < $3
+    AND end_time > $2
+) AS has_overlap
+`
+
+type CheckTimeSlotOverlapParams struct {
+	ScheduleID int64       `db:"schedule_id" json:"schedule_id"`
+	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
+	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
+}
+
+func (q *Queries) CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkTimeSlotOverlap, arg.ScheduleID, arg.EndTime, arg.StartTime)
+	var has_overlap bool
+	err := row.Scan(&has_overlap)
+	return has_overlap, err
+}
+
 const createTimeSlot = `-- name: CreateTimeSlot :one
 INSERT INTO time_slots (
     id,

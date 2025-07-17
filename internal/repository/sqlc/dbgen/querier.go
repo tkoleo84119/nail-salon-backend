@@ -20,6 +20,7 @@ type Querier interface {
 	CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
 	CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (bool, error)
+	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
@@ -30,6 +31,7 @@ type Querier interface {
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
+	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)
 	GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSchedulesByStoreAndStylistParams) ([]Schedule, error)
 	GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)

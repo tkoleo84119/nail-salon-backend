@@ -172,3 +172,13 @@ func (m *MockQuerier) DeleteTimeSlotsByScheduleIDs(ctx context.Context, schedule
 	args := m.Called(ctx, scheduleIDs)
 	return args.Error(0)
 }
+
+func (m *MockQuerier) GetScheduleByID(ctx context.Context, id int64) (dbgen.Schedule, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.Schedule), args.Error(1)
+}
+
+func (m *MockQuerier) CheckTimeSlotOverlap(ctx context.Context, arg dbgen.CheckTimeSlotOverlapParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}

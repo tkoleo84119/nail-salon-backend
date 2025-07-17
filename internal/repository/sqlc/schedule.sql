@@ -50,6 +50,18 @@ FROM schedules
 WHERE store_id = $1 AND stylist_id = $2
 ORDER BY work_date;
 
+-- name: GetScheduleByID :one
+SELECT
+    id,
+    store_id,
+    stylist_id,
+    work_date,
+    note,
+    created_at,
+    updated_at
+FROM schedules
+WHERE id = $1;
+
 -- name: GetSchedulesWithTimeSlotsByIDs :many
 SELECT
     s.id,

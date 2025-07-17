@@ -78,6 +78,7 @@ Follow Conventional Commits format: `<type>: <description>`
 ### Testing Guidelines
 - For handler & service, always write corresponding test files
 - All test files need to passed before commit
+- Only write test when @internal/model/ files have function
 
 ### Development Notes
 - If needs new SQL query, look up current SQL query first (in `internal/repository/sqlc/` and `internal/repository/sqlx/`), not create duplicate SQL

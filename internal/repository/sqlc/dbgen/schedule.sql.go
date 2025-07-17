@@ -101,6 +101,34 @@ func (q *Queries) DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) er
 	return err
 }
 
+const getScheduleByID = `-- name: GetScheduleByID :one
+SELECT
+    id,
+    store_id,
+    stylist_id,
+    work_date,
+    note,
+    created_at,
+    updated_at
+FROM schedules
+WHERE id = $1
+`
+
+func (q *Queries) GetScheduleByID(ctx context.Context, id int64) (Schedule, error) {
+	row := q.db.QueryRow(ctx, getScheduleByID, id)
+	var i Schedule
+	err := row.Scan(
+		&i.ID,
+		&i.StoreID,
+		&i.StylistID,
+		&i.WorkDate,
+		&i.Note,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getSchedulesByStoreAndStylist = `-- name: GetSchedulesByStoreAndStylist :many
 SELECT
     id,
