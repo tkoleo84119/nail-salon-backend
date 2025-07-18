@@ -194,12 +194,12 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.Sched
 
 		// Prepare time slot rows
 		for _, timeSlotReq := range scheduleReq.TimeSlots {
-			startTime, err := schedule.ParseTimeSlot(timeSlotReq.StartTime)
+			startTime, err := common.ParseTimeSlot(timeSlotReq.StartTime)
 			if err != nil {
 				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 			}
 
-			endTime, err := schedule.ParseTimeSlot(timeSlotReq.EndTime)
+			endTime, err := common.ParseTimeSlot(timeSlotReq.EndTime)
 			if err != nil {
 				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 			}
@@ -243,8 +243,8 @@ func (s *CreateSchedulesBulkService) buildResponse(ctx context.Context, qtx dbge
 
 			timeSlotResponses = append(timeSlotResponses, schedule.TimeSlotResponse{
 				ID:        utils.FormatID(timeSlot.ID),
-				StartTime: schedule.FormatTimeSlot(startTimeFormatted),
-				EndTime:   schedule.FormatTimeSlot(endTimeFormatted),
+				StartTime: common.FormatTimeSlot(startTimeFormatted),
+				EndTime:   common.FormatTimeSlot(endTimeFormatted),
 			})
 		}
 
@@ -301,12 +301,12 @@ func (s *CreateSchedulesBulkService) validateTimeSlots(timeSlots []schedule.Time
 
 	var parsedSlots []timeSlotParsed
 	for _, slot := range timeSlots {
-		startTime, err := schedule.ParseTimeSlot(slot.StartTime)
+		startTime, err := common.ParseTimeSlot(slot.StartTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, fmt.Sprintf("invalid start time format: %s", slot.StartTime), err)
 		}
 
-		endTime, err := schedule.ParseTimeSlot(slot.EndTime)
+		endTime, err := common.ParseTimeSlot(slot.EndTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, fmt.Sprintf("invalid end time format: %s", slot.EndTime), err)
 		}

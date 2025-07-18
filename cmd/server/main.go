@@ -15,6 +15,7 @@ import (
 	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
+	timeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/time-slot-template"
 	staffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
@@ -22,6 +23,7 @@ import (
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
+	timeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -78,12 +80,12 @@ func main() {
 	timeSlotRepository := sqlx.NewTimeSlotRepository(database.Sqlx)
 	scheduleUpdateTimeSlotService := scheduleService.NewUpdateTimeSlotService(queries, timeSlotRepository)
 	scheduleDeleteTimeSlotService := scheduleService.NewDeleteTimeSlotService(queries)
-	scheduleCreateTimeSlotTemplateService := scheduleService.NewCreateTimeSlotTemplateService(queries, database.PgxPool)
+	timeSlotTemplateCreateService := timeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool)
 	timeSlotTemplateRepository := sqlx.NewTimeSlotTemplateRepository(database.Sqlx)
-	scheduleUpdateTimeSlotTemplateService := scheduleService.NewUpdateTimeSlotTemplateService(queries, timeSlotTemplateRepository)
-	scheduleCreateTimeSlotTemplateItemService := scheduleService.NewCreateTimeSlotTemplateItemService(queries)
-	scheduleUpdateTimeSlotTemplateItemService := scheduleService.NewUpdateTimeSlotTemplateItemService(queries)
-	scheduleDeleteTimeSlotTemplateItemService := scheduleService.NewDeleteTimeSlotTemplateItemService(queries)
+	timeSlotTemplateUpdateService := timeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, timeSlotTemplateRepository)
+	timeSlotTemplateCreateItemService := timeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries)
+	timeSlotTemplateUpdateItemService := timeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries)
+	timeSlotTemplateDeleteItemService := timeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -99,11 +101,11 @@ func main() {
 	scheduleCreateTimeSlotHandler := scheduleHandler.NewCreateTimeSlotHandler(scheduleCreateTimeSlotService)
 	scheduleUpdateTimeSlotHandler := scheduleHandler.NewUpdateTimeSlotHandler(scheduleUpdateTimeSlotService)
 	scheduleDeleteTimeSlotHandler := scheduleHandler.NewDeleteTimeSlotHandler(scheduleDeleteTimeSlotService)
-	scheduleCreateTimeSlotTemplateHandler := scheduleHandler.NewCreateTimeSlotTemplateHandler(scheduleCreateTimeSlotTemplateService)
-	scheduleUpdateTimeSlotTemplateHandler := scheduleHandler.NewUpdateTimeSlotTemplateHandler(scheduleUpdateTimeSlotTemplateService)
-	scheduleCreateTimeSlotTemplateItemHandler := scheduleHandler.NewCreateTimeSlotTemplateItemHandler(scheduleCreateTimeSlotTemplateItemService)
-	scheduleUpdateTimeSlotTemplateItemHandler := scheduleHandler.NewUpdateTimeSlotTemplateItemHandler(scheduleUpdateTimeSlotTemplateItemService)
-	scheduleDeleteTimeSlotTemplateItemHandler := scheduleHandler.NewDeleteTimeSlotTemplateItemHandler(scheduleDeleteTimeSlotTemplateItemService)
+	timeSlotTemplateCreateHandler := timeSlotTemplateHandler.NewCreateTimeSlotTemplateHandler(timeSlotTemplateCreateService)
+	timeSlotTemplateUpdateHandler := timeSlotTemplateHandler.NewUpdateTimeSlotTemplateHandler(timeSlotTemplateUpdateService)
+	timeSlotTemplateCreateItemHandler := timeSlotTemplateHandler.NewCreateTimeSlotTemplateItemHandler(timeSlotTemplateCreateItemService)
+	timeSlotTemplateUpdateItemHandler := timeSlotTemplateHandler.NewUpdateTimeSlotTemplateItemHandler(timeSlotTemplateUpdateItemService)
+	timeSlotTemplateDeleteItemHandler := timeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(timeSlotTemplateDeleteItemService)
 
 	router := gin.Default()
 
@@ -138,11 +140,11 @@ func main() {
 
 		timeSlotTemplates := api.Group("/time-slot-templates")
 		{
-			timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleCreateTimeSlotTemplateHandler.CreateTimeSlotTemplate)
-			timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleUpdateTimeSlotTemplateHandler.UpdateTimeSlotTemplate)
-			timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleCreateTimeSlotTemplateItemHandler.CreateTimeSlotTemplateItem)
-			timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleUpdateTimeSlotTemplateItemHandler.UpdateTimeSlotTemplateItem)
-			timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleDeleteTimeSlotTemplateItemHandler.DeleteTimeSlotTemplateItem)
+			timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateCreateHandler.CreateTimeSlotTemplate)
+			timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateUpdateHandler.UpdateTimeSlotTemplate)
+			timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateCreateItemHandler.CreateTimeSlotTemplateItem)
+			timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateUpdateItemHandler.UpdateTimeSlotTemplateItem)
+			timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateDeleteItemHandler.DeleteTimeSlotTemplateItem)
 		}
 	}
 

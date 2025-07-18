@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
+	timeSlotTemplate "github.com/tkoleo84119/nail-salon-backend/internal/model/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // TimeSlotTemplateRepositoryInterface defines the interface for time slot template repository
 type TimeSlotTemplateRepositoryInterface interface {
-	UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req schedule.UpdateTimeSlotTemplateRequest) (*schedule.UpdateTimeSlotTemplateResponse, error)
+	UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req timeSlotTemplate.UpdateTimeSlotTemplateRequest) (*timeSlotTemplate.UpdateTimeSlotTemplateResponse, error)
 }
 
 type TimeSlotTemplateRepository struct {
@@ -24,7 +24,7 @@ func NewTimeSlotTemplateRepository(db *sqlx.DB) *TimeSlotTemplateRepository {
 }
 
 // UpdateTimeSlotTemplate updates time slot template with dynamic fields
-func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req schedule.UpdateTimeSlotTemplateRequest) (*schedule.UpdateTimeSlotTemplateResponse, error) {
+func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req timeSlotTemplate.UpdateTimeSlotTemplateRequest) (*timeSlotTemplate.UpdateTimeSlotTemplateResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": templateID,
@@ -41,9 +41,9 @@ func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context,
 	}
 
 	query := fmt.Sprintf(`
-		UPDATE time_slot_templates 
-		SET %s 
-		WHERE id = :id 
+		UPDATE time_slot_templates
+		SET %s
+		WHERE id = :id
 		RETURNING id, name, note, updater, created_at, updated_at`,
 		strings.Join(setParts, ", "))
 
@@ -70,7 +70,7 @@ func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context,
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	return &schedule.UpdateTimeSlotTemplateResponse{
+	return &timeSlotTemplate.UpdateTimeSlotTemplateResponse{
 		ID:   utils.FormatID(result.ID),
 		Name: result.Name,
 		Note: result.Note,

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -35,7 +36,7 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 	if req.StartTime != nil {
 		setParts = append(setParts, "start_time = :start_time")
 		// Convert time string to pgtype.Time
-		startTime, err := schedule.ParseTimeSlot(*req.StartTime)
+		startTime, err := common.ParseTimeSlot(*req.StartTime)
 		if err != nil {
 			return nil, fmt.Errorf("invalid start time format: %w", err)
 		}
@@ -45,7 +46,7 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 	if req.EndTime != nil {
 		setParts = append(setParts, "end_time = :end_time")
 		// Convert time string to pgtype.Time
-		endTime, err := schedule.ParseTimeSlot(*req.EndTime)
+		endTime, err := common.ParseTimeSlot(*req.EndTime)
 		if err != nil {
 			return nil, fmt.Errorf("invalid end time format: %w", err)
 		}
@@ -93,8 +94,8 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 	response := &schedule.UpdateTimeSlotResponse{
 		ID:          utils.FormatID(result.ID),
 		ScheduleID:  utils.FormatID(result.ScheduleID),
-		StartTime:   schedule.FormatTimeSlot(startTimeFormatted),
-		EndTime:     schedule.FormatTimeSlot(endTimeFormatted),
+		StartTime:   common.FormatTimeSlot(startTimeFormatted),
+		EndTime:     common.FormatTimeSlot(endTimeFormatted),
 		IsAvailable: result.IsAvailable.Bool,
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
+	timeSlotTemplate "github.com/tkoleo84119/nail-salon-backend/internal/model/time-slot-template"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 )
 
@@ -91,10 +92,10 @@ func NewMockUpdateTimeSlotTemplateRepository() *MockUpdateTimeSlotTemplateReposi
 	return &MockUpdateTimeSlotTemplateRepository{}
 }
 
-func (m *MockUpdateTimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req schedule.UpdateTimeSlotTemplateRequest) (*schedule.UpdateTimeSlotTemplateResponse, error) {
+func (m *MockUpdateTimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req timeSlotTemplate.UpdateTimeSlotTemplateRequest) (*timeSlotTemplate.UpdateTimeSlotTemplateResponse, error) {
 	args := m.Called(ctx, templateID, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*schedule.UpdateTimeSlotTemplateResponse), args.Error(1)
+	return args.Get(0).(*timeSlotTemplate.UpdateTimeSlotTemplateResponse), args.Error(1)
 }
