@@ -13,7 +13,7 @@ import (
 
 // StylistRepositoryInterface defines the interface for stylist repository
 type StylistRepositoryInterface interface {
-	UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateStylistRequest) (*stylist.UpdateStylistResponse, error)
+	UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateMyStylistRequest) (*stylist.UpdateMyStylistResponse, error)
 }
 
 type StylistRepository struct {
@@ -25,7 +25,7 @@ func NewStylistRepository(db *sqlx.DB) *StylistRepository {
 }
 
 // UpdateStylist updates stylist with dynamic fields
-func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateStylistRequest) (*stylist.UpdateStylistResponse, error) {
+func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateMyStylistRequest) (*stylist.UpdateMyStylistResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"staff_user_id": staffUserID,
@@ -87,7 +87,7 @@ func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &stylist.UpdateStylistResponse{
+	response := &stylist.UpdateMyStylistResponse{
 		ID:           utils.FormatID(result.ID),
 		StaffUserID:  utils.FormatID(staffUserID),
 		StylistName:  result.Name.String,

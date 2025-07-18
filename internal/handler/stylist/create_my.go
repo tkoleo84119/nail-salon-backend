@@ -13,18 +13,18 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateStylistHandler struct {
-	createStylistService stylistService.CreateStylistServiceInterface
+type CreateMyStylistHandler struct {
+	createStylistService stylistService.CreateMyStylistServiceInterface
 }
 
-func NewCreateStylistHandler(createStylistService stylistService.CreateStylistServiceInterface) *CreateStylistHandler {
-	return &CreateStylistHandler{
+func NewCreateMyStylistHandler(createStylistService stylistService.CreateMyStylistServiceInterface) *CreateMyStylistHandler {
+	return &CreateMyStylistHandler{
 		createStylistService: createStylistService,
 	}
 }
 
-func (h *CreateStylistHandler) CreateStylist(c *gin.Context) {
-	var req stylist.CreateStylistRequest
+func (h *CreateMyStylistHandler) CreateMyStylist(c *gin.Context) {
+	var req stylist.CreateMyStylistRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
@@ -43,7 +43,7 @@ func (h *CreateStylistHandler) CreateStylist(c *gin.Context) {
 		return
 	}
 
-	response, err := h.createStylistService.CreateStylist(c.Request.Context(), req, staffUserID)
+	response, err := h.createStylistService.CreateMyStylist(c.Request.Context(), req, staffUserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

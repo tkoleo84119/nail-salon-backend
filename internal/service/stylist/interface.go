@@ -6,10 +6,10 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
 )
 
-type CreateStylistServiceInterface interface {
-	CreateStylist(ctx context.Context, req stylist.CreateStylistRequest, staffUserID int64) (*stylist.CreateStylistResponse, error)
+type CreateMyStylistServiceInterface interface {
+	CreateMyStylist(ctx context.Context, req stylist.CreateMyStylistRequest, staffUserID int64) (*stylist.CreateMyStylistResponse, error)
 }
 
-type UpdateStylistServiceInterface interface {
-	UpdateStylist(ctx context.Context, req stylist.UpdateStylistRequest, staffUserID int64) (*stylist.UpdateStylistResponse, error)
+type UpdateMyStylistServiceInterface interface {
+	UpdateMyStylist(ctx context.Context, req stylist.UpdateMyStylistRequest, staffUserID int64) (*stylist.UpdateMyStylistResponse, error)
 }

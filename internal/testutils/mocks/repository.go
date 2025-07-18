@@ -54,12 +54,12 @@ func NewMockStylistRepository() *MockStylistRepository {
 	return &MockStylistRepository{}
 }
 
-func (m *MockStylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateStylistRequest) (*stylist.UpdateStylistResponse, error) {
+func (m *MockStylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateMyStylistRequest) (*stylist.UpdateMyStylistResponse, error) {
 	args := m.Called(ctx, staffUserID, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*stylist.UpdateStylistResponse), args.Error(1)
+	return args.Get(0).(*stylist.UpdateMyStylistResponse), args.Error(1)
 }
 
 // MockTimeSlotRepository is a mock implementation of TimeSlotRepositoryInterface

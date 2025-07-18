@@ -6,34 +6,22 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateStylistService struct {
+type CreateMyStylistService struct {
 	queries dbgen.Querier
 }
 
-func NewCreateStylistService(queries dbgen.Querier) *CreateStylistService {
-	return &CreateStylistService{
+func NewCreateMyStylistService(queries dbgen.Querier) *CreateMyStylistService {
+	return &CreateMyStylistService{
 		queries: queries,
 	}
 }
 
-func (s *CreateStylistService) CreateStylist(ctx context.Context, req stylist.CreateStylistRequest, staffUserID int64) (*stylist.CreateStylistResponse, error) {
-	// Get staff user info to check role
-	staffUser, err := s.queries.GetStaffUserByID(ctx, staffUserID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "failed to get staff user", err)
-	}
-
-	// Check if user is SUPER_ADMIN (not allowed to create stylist)
-	if staffUser.Role == staff.RoleSuperAdmin {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-	}
-
+func (s *CreateMyStylistService) CreateMyStylist(ctx context.Context, req stylist.CreateMyStylistRequest, staffUserID int64) (*stylist.CreateMyStylistResponse, error) {
 	// Check if stylist already exists for this staff user
 	exists, err := s.queries.CheckStylistExistsByStaffUserID(ctx, pgtype.Int8{Int64: staffUserID, Valid: true})
 	if err != nil {
@@ -81,7 +69,7 @@ func (s *CreateStylistService) CreateStylist(ctx context.Context, req stylist.Cr
 	}
 
 	// Build response
-	response := &stylist.CreateStylistResponse{
+	response := &stylist.CreateMyStylistResponse{
 		ID:           utils.FormatID(createdStylist.ID),
 		StaffUserID:  utils.FormatID(staffUserID),
 		StylistName:  createdStylist.Name.String,

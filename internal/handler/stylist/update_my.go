@@ -13,21 +13,29 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateStylistHandler struct {
-	updateStylistService stylistService.UpdateStylistServiceInterface
+type UpdateMyStylistHandler struct {
+	updateStylistService stylistService.UpdateMyStylistServiceInterface
 }
 
-func NewUpdateStylistHandler(updateStylistService stylistService.UpdateStylistServiceInterface) *UpdateStylistHandler {
-	return &UpdateStylistHandler{
+func NewUpdateMyStylistHandler(updateStylistService stylistService.UpdateMyStylistServiceInterface) *UpdateMyStylistHandler {
+	return &UpdateMyStylistHandler{
 		updateStylistService: updateStylistService,
 	}
 }
 
-func (h *UpdateStylistHandler) UpdateStylist(c *gin.Context) {
-	var req stylist.UpdateStylistRequest
+func (h *UpdateMyStylistHandler) UpdateMyStylist(c *gin.Context) {
+	var req stylist.UpdateMyStylistRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		return
+	}
+
+	// Additional validation: ensure at least one field is provided for update
+	if req.StylistName == nil && req.GoodAtShapes == nil && req.GoodAtColors == nil && req.GoodAtStyles == nil && req.IsIntrovert == nil {
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
+			"request": "至少需要提供一個欄位進行更新",
+		})
 		return
 	}
 
@@ -43,7 +51,7 @@ func (h *UpdateStylistHandler) UpdateStylist(c *gin.Context) {
 		return
 	}
 
-	response, err := h.updateStylistService.UpdateStylist(c.Request.Context(), req, staffUserID)
+	response, err := h.updateStylistService.UpdateMyStylist(c.Request.Context(), req, staffUserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

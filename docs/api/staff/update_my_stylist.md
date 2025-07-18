@@ -1,18 +1,18 @@
 ## User Story
 
-作為一位員工（`ADMIN` / `MANAGER` / `STYLIST`，不含 `SUPER_ADMIN`），我希望可以為自己新增美甲師個人資料（stylists），讓顧客預約時能看到我的專長與風格。
+作為一位員工（`ADMIN` / `MANAGER` / `STYLIST`，不含 `SUPER_ADMIN`），我希望可以更新自己的美甲師個人資料（stylists），讓顧客可以看到我最新的專長與風格。
 
 ---
 
 ## Endpoint
 
-**POST** `/api/stylists`
+**PATCH** `/api/stylists/me`
 
 ---
 
 ## 說明
 
-每位員工（`staff_user`）只能有一筆對應的 `stylist` 資料。
+每位員工（`staff_user`）僅能更新自己所屬的 `stylist` 資料。
 
 ---
 
@@ -31,15 +31,15 @@ Content-Type: application/json
 Authorization: Bearer <access_token>
 ```
 
-### Body
+### Body（可傳任一欄位，僅更新指定內容）
 
 ```json
 {
   "stylistName": "Jane 美甲師",
-  "goodAtShapes": ["方形", "圓形"],
-  "goodAtColors": ["裸色系", "粉嫩系"],
-  "goodAtStyles": ["手繪", "簡約"],
-  "isIntrovert": false
+  "goodAtShapes": ["方形", "橢圓形"],
+  "goodAtColors": ["粉嫩系"],
+  "goodAtStyles": ["簡約", "法式"],
+  "isIntrovert": true
 }
 ```
 
@@ -47,7 +47,7 @@ Authorization: Bearer <access_token>
 
 | 欄位         | 規則                                | 說明           |
 | ------------ | ----------------------------------- | -------------- |
-| stylistName  | <li>必填<li>長度大於1<li>長度小於50 | 美甲師顯示姓名 |
+| stylistName  | <li>可選<li>長度大於1<li>長度小於50 | 美甲師顯示姓名 |
 | goodAtShapes | <li>可選                            | 擅長指型       |
 | goodAtColors | <li>可選                            | 擅長色系       |
 | goodAtStyles | <li>可選                            | 擅長款式       |
@@ -57,7 +57,7 @@ Authorization: Bearer <access_token>
 
 ## Response
 
-### 成功 201 Created
+### 成功 200 OK
 
 ```json
 {
@@ -65,10 +65,10 @@ Authorization: Bearer <access_token>
     "id": "18000000001",
     "staffUserId": "13984392823",
     "stylistName": "Jane 美甲師",
-    "goodAtShapes": ["方形", "圓形"],
-    "goodAtColors": ["裸色系", "粉嫩系"],
-    "goodAtStyles": [],
-    "isIntrovert": false
+    "goodAtShapes": ["方形", "橢圓形"],
+    "goodAtColors": ["粉嫩系"],
+    "goodAtStyles": ["簡約", "法式"],
+    "isIntrovert": true
   }
 }
 ```
@@ -81,7 +81,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "stylistName": "美甲師姓名為必填"
+    "stylistName": "美甲師姓名長度不可超過50字"
   }
 }
 ```
@@ -102,11 +102,11 @@ Authorization: Bearer <access_token>
 }
 ```
 
-#### 409 Conflict - 已存在
+#### 404 Not Found - 尚未建立美甲師資料
 
 ```json
 {
-  "message": "該員工已建立過美甲師資料，請使用修改功能"
+  "message": "尚未建立美甲師資料，請先新增"
 }
 ```
 
@@ -129,17 +129,13 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 從 `Authorization` 解析的 JWT 取得 `staff_user_id`
-2. 檢查 `stylists` 是否已有該 `staff_user_id` 對應資料：
-   - 若已存在，回傳 409 Conflict。
-   - 若尚未建立，執行新增。
-3. 新增一筆 stylist 資料，並回傳。
+1. 檢查 `stylists` 表是否有該 `staff_user_id` 對應資料：
+   - 若尚未建立，回傳 404 Not Found。
+2. 更新 `stylists` 表的指定欄位。
+3. 回傳更新後的 stylist 資料。
 
 ---
 
 ## 注意事項
 
-- 一個 staff_user 只可對應一筆 stylist 資料（由 DB unique 約束）。
-- 欲修改資料時，請呼叫 PATCH 而非重複新增。
-
----
+- 一個 `staff_user` 只可對應一筆 `stylist` 資料。

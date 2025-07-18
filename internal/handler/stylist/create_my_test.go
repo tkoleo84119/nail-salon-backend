@@ -19,20 +19,20 @@ import (
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
 )
 
-// MockCreateStylistService implements the CreateStylistServiceInterface for testing
-type MockCreateStylistService struct {
+// MockCreateMyStylistService implements the CreateStylistServiceInterface for testing
+type MockCreateMyStylistService struct {
 	mock.Mock
 }
 
 // Ensure MockCreateStylistService implements the interface
-var _ stylistService.CreateStylistServiceInterface = (*MockCreateStylistService)(nil)
+var _ stylistService.CreateMyStylistServiceInterface = (*MockCreateMyStylistService)(nil)
 
-func (m *MockCreateStylistService) CreateStylist(ctx context.Context, req stylist.CreateStylistRequest, staffUserID int64) (*stylist.CreateStylistResponse, error) {
+func (m *MockCreateMyStylistService) CreateMyStylist(ctx context.Context, req stylist.CreateMyStylistRequest, staffUserID int64) (*stylist.CreateMyStylistResponse, error) {
 	args := m.Called(ctx, req, staffUserID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*stylist.CreateStylistResponse), args.Error(1)
+	return args.Get(0).(*stylist.CreateMyStylistResponse), args.Error(1)
 }
 
 func setupTestGinForStylist() {
@@ -43,15 +43,15 @@ func setupTestGinForStylist() {
 	_ = errorManager.LoadFromFile("../../errors/errors.yaml")
 }
 
-func TestCreateStylistHandler_CreateStylist_Success(t *testing.T) {
+func TestCreateMyStylistHandler_CreateMyStylist_Success(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockCreateStylistService)
-	handler := NewCreateStylistHandler(mockService)
+	mockService := new(MockCreateMyStylistService)
+	handler := NewCreateMyStylistHandler(mockService)
 
 	// Create test request
-	req := stylist.CreateStylistRequest{
+	req := stylist.CreateMyStylistRequest{
 		StylistName:  "Jane 美甲師",
 		GoodAtShapes: []string{"方形", "圓形"},
 		GoodAtColors: []string{"裸色系", "粉嫩系"},
@@ -60,7 +60,7 @@ func TestCreateStylistHandler_CreateStylist_Success(t *testing.T) {
 	}
 
 	// Create expected response
-	expectedResponse := &stylist.CreateStylistResponse{
+	expectedResponse := &stylist.CreateMyStylistResponse{
 		ID:           "18000000001",
 		StaffUserID:  "12345",
 		StylistName:  "Jane 美甲師",
@@ -71,7 +71,7 @@ func TestCreateStylistHandler_CreateStylist_Success(t *testing.T) {
 	}
 
 	// Mock service call
-	mockService.On("CreateStylist", mock.Anything, req, int64(12345)).Return(expectedResponse, nil)
+	mockService.On("CreateMyStylist", mock.Anything, req, int64(12345)).Return(expectedResponse, nil)
 
 	// Create HTTP request
 	jsonData, _ := json.Marshal(req)
@@ -94,7 +94,7 @@ func TestCreateStylistHandler_CreateStylist_Success(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.CreateStylist(c)
+	handler.CreateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusCreated, w.Code)
@@ -116,15 +116,15 @@ func TestCreateStylistHandler_CreateStylist_Success(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
-func TestCreateStylistHandler_CreateStylist_ValidationError(t *testing.T) {
+func TestCreateMyStylistHandler_CreateMyStylist_ValidationError(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockCreateStylistService)
-	handler := NewCreateStylistHandler(mockService)
+	mockService := new(MockCreateMyStylistService)
+	handler := NewCreateMyStylistHandler(mockService)
 
 	// Create invalid request (missing required name)
-	req := stylist.CreateStylistRequest{
+	req := stylist.CreateMyStylistRequest{
 		// Name is required but missing
 		GoodAtShapes: []string{"方形"},
 	}
@@ -150,7 +150,7 @@ func TestCreateStylistHandler_CreateStylist_ValidationError(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.CreateStylist(c)
+	handler.CreateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -166,12 +166,12 @@ func TestCreateStylistHandler_CreateStylist_ValidationError(t *testing.T) {
 	mockService.AssertNotCalled(t, "CreateStylist")
 }
 
-func TestCreateStylistHandler_CreateStylist_InvalidJSON(t *testing.T) {
+func TestCreateMyStylistHandler_CreateMyStylist_InvalidJSON(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockCreateStylistService)
-	handler := NewCreateStylistHandler(mockService)
+	mockService := new(MockCreateMyStylistService)
+	handler := NewCreateMyStylistHandler(mockService)
 
 	// Create invalid JSON
 	invalidJSON := `{"name": "Jane 美甲師", "goodAtShapes": [`
@@ -196,7 +196,7 @@ func TestCreateStylistHandler_CreateStylist_InvalidJSON(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.CreateStylist(c)
+	handler.CreateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -208,18 +208,18 @@ func TestCreateStylistHandler_CreateStylist_InvalidJSON(t *testing.T) {
 	assert.Equal(t, "輸入驗證失敗", response["message"])
 
 	// Service should not be called
-	mockService.AssertNotCalled(t, "CreateStylist")
+	mockService.AssertNotCalled(t, "CreateMyStylist")
 }
 
-func TestCreateStylistHandler_CreateStylist_NoStaffContext(t *testing.T) {
+func TestCreateMyStylistHandler_CreateMyStylist_NoStaffContext(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockCreateStylistService)
-	handler := NewCreateStylistHandler(mockService)
+	mockService := new(MockCreateMyStylistService)
+	handler := NewCreateMyStylistHandler(mockService)
 
 	// Create test request
-	req := stylist.CreateStylistRequest{
+	req := stylist.CreateMyStylistRequest{
 		StylistName: "Jane 美甲師",
 	}
 
@@ -236,7 +236,7 @@ func TestCreateStylistHandler_CreateStylist_NoStaffContext(t *testing.T) {
 	c.Request = httpReq
 
 	// Call handler
-	handler.CreateStylist(c)
+	handler.CreateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -248,24 +248,24 @@ func TestCreateStylistHandler_CreateStylist_NoStaffContext(t *testing.T) {
 	assert.Equal(t, "未找到使用者認證資訊", response["message"])
 
 	// Service should not be called
-	mockService.AssertNotCalled(t, "CreateStylist")
+	mockService.AssertNotCalled(t, "CreateMyStylist")
 }
 
-func TestCreateStylistHandler_CreateStylist_ServiceError(t *testing.T) {
+func TestCreateMyStylistHandler_CreateMyStylist_ServiceError(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockCreateStylistService)
-	handler := NewCreateStylistHandler(mockService)
+	mockService := new(MockCreateMyStylistService)
+	handler := NewCreateMyStylistHandler(mockService)
 
 	// Create test request
-	req := stylist.CreateStylistRequest{
+	req := stylist.CreateMyStylistRequest{
 		StylistName: "Jane 美甲師",
 	}
 
 	// Mock service error
 	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.StylistAlreadyExists)
-	mockService.On("CreateStylist", mock.Anything, req, int64(12345)).Return(nil, serviceError)
+	mockService.On("CreateMyStylist", mock.Anything, req, int64(12345)).Return(nil, serviceError)
 
 	// Create HTTP request
 	jsonData, _ := json.Marshal(req)
@@ -288,7 +288,7 @@ func TestCreateStylistHandler_CreateStylist_ServiceError(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.CreateStylist(c)
+	handler.CreateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusConflict, w.Code)

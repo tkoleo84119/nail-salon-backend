@@ -13,9 +13,9 @@ import (
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
 	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
+	timeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	timeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/time-slot-template"
 	staffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
@@ -72,8 +72,8 @@ func main() {
 	staffUpdateMeService := staffService.NewUpdateStaffMeService(queries, staffUserRepository)
 	staffStoreAccessService := staffService.NewCreateStoreAccessService(queries)
 	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessService(queries)
-	stylistCreateService := stylistService.NewCreateStylistService(queries)
-	stylistUpdateService := stylistService.NewUpdateStylistService(queries, stylistRepository)
+	stylistCreateService := stylistService.NewCreateMyStylistService(queries)
+	stylistUpdateService := stylistService.NewUpdateMyStylistService(queries, stylistRepository)
 	scheduleCreateBulkService := scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool)
 	scheduleDeleteBulkService := scheduleService.NewDeleteSchedulesBulkService(queries, database.PgxPool)
 	scheduleCreateTimeSlotService := scheduleService.NewCreateTimeSlotService(queries)
@@ -94,8 +94,8 @@ func main() {
 	staffUpdateMeHandler := staffHandler.NewUpdateStaffMeHandler(staffUpdateMeService)
 	staffStoreAccessHandler := staffHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
 	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
-	stylistCreateHandler := stylistHandler.NewCreateStylistHandler(stylistCreateService)
-	stylistUpdateHandler := stylistHandler.NewUpdateStylistHandler(stylistUpdateService)
+	stylistCreateHandler := stylistHandler.NewCreateMyStylistHandler(stylistCreateService)
+	stylistUpdateHandler := stylistHandler.NewUpdateMyStylistHandler(stylistUpdateService)
 	scheduleCreateBulkHandler := scheduleHandler.NewCreateSchedulesBulkHandler(scheduleCreateBulkService)
 	scheduleDeleteBulkHandler := scheduleHandler.NewDeleteSchedulesBulkHandler(scheduleDeleteBulkService)
 	scheduleCreateTimeSlotHandler := scheduleHandler.NewCreateTimeSlotHandler(scheduleCreateTimeSlotService)
@@ -125,8 +125,8 @@ func main() {
 
 		stylists := api.Group("/stylists")
 		{
-			stylists.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistCreateHandler.CreateStylist)
-			stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistUpdateHandler.UpdateStylist)
+			stylists.POST("me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistCreateHandler.CreateMyStylist)
+			stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistUpdateHandler.UpdateMyStylist)
 		}
 
 		schedules := api.Group("/schedules")

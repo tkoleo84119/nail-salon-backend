@@ -19,42 +19,42 @@ import (
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
 )
 
-// MockUpdateStylistService implements the UpdateStylistServiceInterface for testing
-type MockUpdateStylistService struct {
+// MockUpdateMyStylistService implements the UpdateStylistServiceInterface for testing
+type MockUpdateMyStylistService struct {
 	mock.Mock
 }
 
 // Ensure MockUpdateStylistService implements the interface
-var _ stylistService.UpdateStylistServiceInterface = (*MockUpdateStylistService)(nil)
+var _ stylistService.UpdateMyStylistServiceInterface = (*MockUpdateMyStylistService)(nil)
 
-func (m *MockUpdateStylistService) UpdateStylist(ctx context.Context, req stylist.UpdateStylistRequest, staffUserID int64) (*stylist.UpdateStylistResponse, error) {
+func (m *MockUpdateMyStylistService) UpdateMyStylist(ctx context.Context, req stylist.UpdateMyStylistRequest, staffUserID int64) (*stylist.UpdateMyStylistResponse, error) {
 	args := m.Called(ctx, req, staffUserID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*stylist.UpdateStylistResponse), args.Error(1)
+	return args.Get(0).(*stylist.UpdateMyStylistResponse), args.Error(1)
 }
 
-func TestUpdateStylistHandler_UpdateStylist_Success(t *testing.T) {
+func TestUpdateMyStylistHandler_UpdateMyStylist_Success(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockUpdateStylistService)
-	handler := NewUpdateStylistHandler(mockService)
+	mockService := new(MockUpdateMyStylistService)
+	handler := NewUpdateMyStylistHandler(mockService)
 
 	// Create test request
 	stylistName := "Jane Updated"
 	goodAtShapes := []string{"橢圓形", "方形"}
 	isIntrovert := true
 
-	req := stylist.UpdateStylistRequest{
+	req := stylist.UpdateMyStylistRequest{
 		StylistName:  &stylistName,
 		GoodAtShapes: &goodAtShapes,
 		IsIntrovert:  &isIntrovert,
 	}
 
 	// Create expected response
-	expectedResponse := &stylist.UpdateStylistResponse{
+	expectedResponse := &stylist.UpdateMyStylistResponse{
 		ID:           "18000000001",
 		StaffUserID:  "12345",
 		StylistName:  "Jane Updated",
@@ -65,7 +65,7 @@ func TestUpdateStylistHandler_UpdateStylist_Success(t *testing.T) {
 	}
 
 	// Mock service call
-	mockService.On("UpdateStylist", mock.Anything, req, int64(12345)).Return(expectedResponse, nil)
+	mockService.On("UpdateMyStylist", mock.Anything, req, int64(12345)).Return(expectedResponse, nil)
 
 	// Create HTTP request
 	jsonData, _ := json.Marshal(req)
@@ -88,7 +88,7 @@ func TestUpdateStylistHandler_UpdateStylist_Success(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.UpdateStylist(c)
+	handler.UpdateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -111,16 +111,16 @@ func TestUpdateStylistHandler_UpdateStylist_Success(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
-func TestUpdateStylistHandler_UpdateStylist_ValidationError(t *testing.T) {
+func TestUpdateMyStylistHandler_UpdateMyStylist_ValidationError(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockUpdateStylistService)
-	handler := NewUpdateStylistHandler(mockService)
+	mockService := new(MockUpdateMyStylistService)
+	handler := NewUpdateMyStylistHandler(mockService)
 
 	// Create invalid request (stylistName too long)
 	longName := string(make([]byte, 51)) // 51 characters, exceeds max of 50
-	req := stylist.UpdateStylistRequest{
+	req := stylist.UpdateMyStylistRequest{
 		StylistName: &longName,
 	}
 
@@ -145,7 +145,7 @@ func TestUpdateStylistHandler_UpdateStylist_ValidationError(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.UpdateStylist(c)
+	handler.UpdateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -158,15 +158,15 @@ func TestUpdateStylistHandler_UpdateStylist_ValidationError(t *testing.T) {
 	assert.Contains(t, response, "errors")
 
 	// Service should not be called
-	mockService.AssertNotCalled(t, "UpdateStylist")
+	mockService.AssertNotCalled(t, "UpdateMyStylist")
 }
 
-func TestUpdateStylistHandler_UpdateStylist_InvalidJSON(t *testing.T) {
+func TestUpdateMyStylistHandler_UpdateMyStylist_InvalidJSON(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockUpdateStylistService)
-	handler := NewUpdateStylistHandler(mockService)
+	mockService := new(MockUpdateMyStylistService)
+	handler := NewUpdateMyStylistHandler(mockService)
 
 	// Create invalid JSON
 	invalidJSON := `{"stylistName": "Jane Updated", "goodAtShapes": [`
@@ -191,7 +191,7 @@ func TestUpdateStylistHandler_UpdateStylist_InvalidJSON(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.UpdateStylist(c)
+	handler.UpdateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -203,19 +203,66 @@ func TestUpdateStylistHandler_UpdateStylist_InvalidJSON(t *testing.T) {
 	assert.Equal(t, "輸入驗證失敗", response["message"])
 
 	// Service should not be called
-	mockService.AssertNotCalled(t, "UpdateStylist")
+	mockService.AssertNotCalled(t, "UpdateMyStylist")
 }
 
-func TestUpdateStylistHandler_UpdateStylist_NoStaffContext(t *testing.T) {
+func TestUpdateMyStylistHandler_UpdateMyStylist_EmptyRequest(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockUpdateStylistService)
-	handler := NewUpdateStylistHandler(mockService)
+	mockService := new(MockUpdateMyStylistService)
+	handler := NewUpdateMyStylistHandler(mockService)
+
+	// Create empty request
+	req := stylist.UpdateMyStylistRequest{}
+
+	// Create HTTP request
+	jsonData, _ := json.Marshal(req)
+	httpReq := httptest.NewRequest(http.MethodPatch, "/api/stylists/me", bytes.NewBuffer(jsonData))
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	// Create response recorder
+	w := httptest.NewRecorder()
+
+	// Setup Gin context with staff context
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httpReq
+
+	// Set staff context
+	staffContext := common.StaffContext{
+		UserID:   "12345",
+		Username: "testuser",
+		Role:     staff.RoleAdmin,
+	}
+	c.Set("user", staffContext)
+
+	// Call handler
+	handler.UpdateMyStylist(c)
+
+	// Assert response
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	responseError, ok := response["errors"].(map[string]interface{})
+	assert.True(t, ok)
+	assert.Equal(t, "至少需要提供一個欄位進行更新", responseError["request"])
+
+	mockService.AssertExpectations(t)
+}
+
+func TestUpdateMyStylistHandler_UpdateMyStylist_NoStaffContext(t *testing.T) {
+	setupTestGinForStylist()
+
+	// Create mock service
+	mockService := new(MockUpdateMyStylistService)
+	handler := NewUpdateMyStylistHandler(mockService)
 
 	// Create test request
 	stylistName := "Jane Updated"
-	req := stylist.UpdateStylistRequest{
+	req := stylist.UpdateMyStylistRequest{
 		StylistName: &stylistName,
 	}
 
@@ -232,7 +279,7 @@ func TestUpdateStylistHandler_UpdateStylist_NoStaffContext(t *testing.T) {
 	c.Request = httpReq
 
 	// Call handler
-	handler.UpdateStylist(c)
+	handler.UpdateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -244,25 +291,25 @@ func TestUpdateStylistHandler_UpdateStylist_NoStaffContext(t *testing.T) {
 	assert.Equal(t, "未找到使用者認證資訊", response["message"])
 
 	// Service should not be called
-	mockService.AssertNotCalled(t, "UpdateStylist")
+	mockService.AssertNotCalled(t, "UpdateMyStylist")
 }
 
-func TestUpdateStylistHandler_UpdateStylist_ServiceError(t *testing.T) {
+func TestUpdateMyStylistHandler_UpdateMyStylist_ServiceError(t *testing.T) {
 	setupTestGinForStylist()
 
 	// Create mock service
-	mockService := new(MockUpdateStylistService)
-	handler := NewUpdateStylistHandler(mockService)
+	mockService := new(MockUpdateMyStylistService)
+	handler := NewUpdateMyStylistHandler(mockService)
 
 	// Create test request
 	stylistName := "Jane Updated"
-	req := stylist.UpdateStylistRequest{
+	req := stylist.UpdateMyStylistRequest{
 		StylistName: &stylistName,
 	}
 
 	// Mock service error
 	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotCreated)
-	mockService.On("UpdateStylist", mock.Anything, req, int64(12345)).Return(nil, serviceError)
+	mockService.On("UpdateMyStylist", mock.Anything, req, int64(12345)).Return(nil, serviceError)
 
 	// Create HTTP request
 	jsonData, _ := json.Marshal(req)
@@ -285,7 +332,7 @@ func TestUpdateStylistHandler_UpdateStylist_ServiceError(t *testing.T) {
 	c.Set("user", staffContext)
 
 	// Call handler
-	handler.UpdateStylist(c)
+	handler.UpdateMyStylist(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusNotFound, w.Code)
@@ -295,55 +342,6 @@ func TestUpdateStylistHandler_UpdateStylist_ServiceError(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "尚未建立美甲師資料，請先新增", response["message"])
-
-	mockService.AssertExpectations(t)
-}
-
-func TestUpdateStylistHandler_UpdateStylist_EmptyRequest(t *testing.T) {
-	setupTestGinForStylist()
-
-	// Create mock service
-	mockService := new(MockUpdateStylistService)
-	handler := NewUpdateStylistHandler(mockService)
-
-	// Create empty request
-	req := stylist.UpdateStylistRequest{}
-
-	// Mock service error for empty fields
-	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
-	mockService.On("UpdateStylist", mock.Anything, req, int64(12345)).Return(nil, serviceError)
-
-	// Create HTTP request
-	jsonData, _ := json.Marshal(req)
-	httpReq := httptest.NewRequest(http.MethodPatch, "/api/stylists/me", bytes.NewBuffer(jsonData))
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	// Create response recorder
-	w := httptest.NewRecorder()
-
-	// Setup Gin context with staff context
-	c, _ := gin.CreateTestContext(w)
-	c.Request = httpReq
-
-	// Set staff context
-	staffContext := common.StaffContext{
-		UserID:   "12345",
-		Username: "testuser",
-		Role:     staff.RoleAdmin,
-	}
-	c.Set("user", staffContext)
-
-	// Call handler
-	handler.UpdateStylist(c)
-
-	// Assert response
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	var response map[string]interface{}
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-
-	assert.Equal(t, "至少需要提供一個欄位進行更新", response["message"])
 
 	mockService.AssertExpectations(t)
 }
