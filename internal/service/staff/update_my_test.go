@@ -14,19 +14,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
 )
 
-func TestUpdateStaffMeService_UpdateStaffMe_Success(t *testing.T) {
+func TestUpdateMyStaffService_UpdateMyStaff_Success(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	mockQuerier := mocks.NewMockQuerier()
 	mockRepository := mocks.NewMockStaffUserRepository()
-	service := NewUpdateStaffMeService(mockQuerier, mockRepository)
+	service := NewUpdateMyStaffService(mockQuerier, mockRepository)
 
 	ctx := context.Background()
 	staffUserID := int64(12345)
 	email := "new-email@example.com"
 
-	req := staff.UpdateStaffMeRequest{
+	req := staff.UpdateMyStaffRequest{
 		Email: &email,
 	}
 
@@ -45,7 +45,7 @@ func TestUpdateStaffMeService_UpdateStaffMe_Success(t *testing.T) {
 	}).Return(false, nil)
 
 	// Mock repository update
-	expectedResponse := &staff.UpdateStaffMeResponse{
+	expectedResponse := &staff.UpdateMyStaffResponse{
 		ID:       "12345",
 		Username: "staff_amy",
 		Email:    "new-email@example.com",
@@ -53,7 +53,7 @@ func TestUpdateStaffMeService_UpdateStaffMe_Success(t *testing.T) {
 	}
 	mockRepository.On("UpdateStaffMe", ctx, staffUserID, req).Return(expectedResponse, nil)
 
-	response, err := service.UpdateStaffMe(ctx, req, staffUserID)
+	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
@@ -66,21 +66,21 @@ func TestUpdateStaffMeService_UpdateStaffMe_Success(t *testing.T) {
 	mockRepository.AssertExpectations(t)
 }
 
-func TestUpdateStaffMeService_UpdateStaffMe_NoFieldsToUpdate(t *testing.T) {
+func TestUpdateMyStaffService_UpdateMyStaff_NoFieldsToUpdate(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	mockQuerier := mocks.NewMockQuerier()
 	mockRepository := mocks.NewMockStaffUserRepository()
-	service := NewUpdateStaffMeService(mockQuerier, mockRepository)
+	service := NewUpdateMyStaffService(mockQuerier, mockRepository)
 
 	ctx := context.Background()
 	staffUserID := int64(12345)
-	req := staff.UpdateStaffMeRequest{
+	req := staff.UpdateMyStaffRequest{
 		// No fields to update
 	}
 
-	response, err := service.UpdateStaffMe(ctx, req, staffUserID)
+	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
 	assert.Error(t, err)
 	assert.Nil(t, response)
@@ -90,26 +90,26 @@ func TestUpdateStaffMeService_UpdateStaffMe_NoFieldsToUpdate(t *testing.T) {
 	assert.Equal(t, errorCodes.ValAllFieldsEmpty, serviceErr.Code)
 }
 
-func TestUpdateStaffMeService_UpdateStaffMe_StaffUserNotFound(t *testing.T) {
+func TestUpdateMyStaffService_UpdateMyStaff_StaffUserNotFound(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	mockQuerier := mocks.NewMockQuerier()
 	mockRepository := mocks.NewMockStaffUserRepository()
-	service := NewUpdateStaffMeService(mockQuerier, mockRepository)
+	service := NewUpdateMyStaffService(mockQuerier, mockRepository)
 
 	ctx := context.Background()
 	staffUserID := int64(12345)
 	email := "new-email@example.com"
 
-	req := staff.UpdateStaffMeRequest{
+	req := staff.UpdateMyStaffRequest{
 		Email: &email,
 	}
 
 	// Mock staff user lookup - not found
 	mockQuerier.On("GetStaffUserByID", ctx, staffUserID).Return(dbgen.StaffUser{}, errors.New("staff user not found"))
 
-	response, err := service.UpdateStaffMe(ctx, req, staffUserID)
+	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
 	assert.Error(t, err)
 	assert.Nil(t, response)
@@ -121,19 +121,19 @@ func TestUpdateStaffMeService_UpdateStaffMe_StaffUserNotFound(t *testing.T) {
 	mockQuerier.AssertExpectations(t)
 }
 
-func TestUpdateStaffMeService_UpdateStaffMe_EmailAlreadyExists(t *testing.T) {
+func TestUpdateMyStaffService_UpdateMyStaff_EmailAlreadyExists(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	mockQuerier := mocks.NewMockQuerier()
 	mockRepository := mocks.NewMockStaffUserRepository()
-	service := NewUpdateStaffMeService(mockQuerier, mockRepository)
+	service := NewUpdateMyStaffService(mockQuerier, mockRepository)
 
 	ctx := context.Background()
 	staffUserID := int64(12345)
 	email := "existing-email@example.com"
 
-	req := staff.UpdateStaffMeRequest{
+	req := staff.UpdateMyStaffRequest{
 		Email: &email,
 	}
 
@@ -151,7 +151,7 @@ func TestUpdateStaffMeService_UpdateStaffMe_EmailAlreadyExists(t *testing.T) {
 		ID:    staffUserID,
 	}).Return(true, nil)
 
-	response, err := service.UpdateStaffMe(ctx, req, staffUserID)
+	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
 	assert.Error(t, err)
 	assert.Nil(t, response)
@@ -163,19 +163,19 @@ func TestUpdateStaffMeService_UpdateStaffMe_EmailAlreadyExists(t *testing.T) {
 	mockQuerier.AssertExpectations(t)
 }
 
-func TestUpdateStaffMeService_UpdateStaffMe_EmailUniquenessCheckError(t *testing.T) {
+func TestUpdateMyStaffService_UpdateMyStaff_EmailUniquenessCheckError(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	mockQuerier := mocks.NewMockQuerier()
 	mockRepository := mocks.NewMockStaffUserRepository()
-	service := NewUpdateStaffMeService(mockQuerier, mockRepository)
+	service := NewUpdateMyStaffService(mockQuerier, mockRepository)
 
 	ctx := context.Background()
 	staffUserID := int64(12345)
 	email := "new-email@example.com"
 
-	req := staff.UpdateStaffMeRequest{
+	req := staff.UpdateMyStaffRequest{
 		Email: &email,
 	}
 
@@ -193,7 +193,7 @@ func TestUpdateStaffMeService_UpdateStaffMe_EmailUniquenessCheckError(t *testing
 		ID:    staffUserID,
 	}).Return(false, errors.New("database error"))
 
-	response, err := service.UpdateStaffMe(ctx, req, staffUserID)
+	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
 	assert.Error(t, err)
 	assert.Nil(t, response)
@@ -205,19 +205,19 @@ func TestUpdateStaffMeService_UpdateStaffMe_EmailUniquenessCheckError(t *testing
 	mockQuerier.AssertExpectations(t)
 }
 
-func TestUpdateStaffMeService_UpdateStaffMe_UpdateNoRows(t *testing.T) {
+func TestUpdateMyStaffService_UpdateMyStaff_UpdateNoRows(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	mockQuerier := mocks.NewMockQuerier()
 	mockRepository := mocks.NewMockStaffUserRepository()
-	service := NewUpdateStaffMeService(mockQuerier, mockRepository)
+	service := NewUpdateMyStaffService(mockQuerier, mockRepository)
 
 	ctx := context.Background()
 	staffUserID := int64(12345)
 	email := "new-email@example.com"
 
-	req := staff.UpdateStaffMeRequest{
+	req := staff.UpdateMyStaffRequest{
 		Email: &email,
 	}
 
@@ -238,7 +238,7 @@ func TestUpdateStaffMeService_UpdateStaffMe_UpdateNoRows(t *testing.T) {
 	// Mock repository update - no rows returned
 	mockRepository.On("UpdateStaffMe", ctx, staffUserID, req).Return(nil, errors.New("no rows returned from update"))
 
-	response, err := service.UpdateStaffMe(ctx, req, staffUserID)
+	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
 	assert.Error(t, err)
 	assert.Nil(t, response)
@@ -251,19 +251,19 @@ func TestUpdateStaffMeService_UpdateStaffMe_UpdateNoRows(t *testing.T) {
 	mockRepository.AssertExpectations(t)
 }
 
-func TestUpdateStaffMeService_UpdateStaffMe_DatabaseError(t *testing.T) {
+func TestUpdateMyStaffService_UpdateMyStaff_DatabaseError(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	mockQuerier := mocks.NewMockQuerier()
 	mockRepository := mocks.NewMockStaffUserRepository()
-	service := NewUpdateStaffMeService(mockQuerier, mockRepository)
+	service := NewUpdateMyStaffService(mockQuerier, mockRepository)
 
 	ctx := context.Background()
 	staffUserID := int64(12345)
 	email := "new-email@example.com"
 
-	req := staff.UpdateStaffMeRequest{
+	req := staff.UpdateMyStaffRequest{
 		Email: &email,
 	}
 
@@ -284,7 +284,7 @@ func TestUpdateStaffMeService_UpdateStaffMe_DatabaseError(t *testing.T) {
 	// Mock repository update - database error
 	mockRepository.On("UpdateStaffMe", ctx, staffUserID, req).Return(nil, errors.New("database error"))
 
-	response, err := service.UpdateStaffMe(ctx, req, staffUserID)
+	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
 	assert.Error(t, err)
 	assert.Nil(t, response)

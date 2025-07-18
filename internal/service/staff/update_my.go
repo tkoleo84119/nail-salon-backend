@@ -10,23 +10,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 )
 
-type UpdateStaffMeServiceInterface interface {
-	UpdateStaffMe(ctx context.Context, req staff.UpdateStaffMeRequest, staffUserID int64) (*staff.UpdateStaffMeResponse, error)
+type UpdateMyStaffService struct {
+	queries             dbgen.Querier
+	staffUserRepository sqlx.StaffUserRepositoryInterface
 }
 
-type UpdateStaffMeService struct {
-	queries              dbgen.Querier
-	staffUserRepository  sqlx.StaffUserRepositoryInterface
-}
-
-func NewUpdateStaffMeService(queries dbgen.Querier, staffUserRepository sqlx.StaffUserRepositoryInterface) *UpdateStaffMeService {
-	return &UpdateStaffMeService{
+func NewUpdateMyStaffService(queries dbgen.Querier, staffUserRepository sqlx.StaffUserRepositoryInterface) *UpdateMyStaffService {
+	return &UpdateMyStaffService{
 		queries:             queries,
 		staffUserRepository: staffUserRepository,
 	}
 }
 
-func (s *UpdateStaffMeService) UpdateStaffMe(ctx context.Context, req staff.UpdateStaffMeRequest, staffUserID int64) (*staff.UpdateStaffMeResponse, error) {
+func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req staff.UpdateMyStaffRequest, staffUserID int64) (*staff.UpdateMyStaffResponse, error) {
 	// Check if request has any fields to update
 	if !req.HasUpdates() {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)

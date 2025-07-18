@@ -14,6 +14,10 @@ type UpdateStaffServiceInterface interface {
 	UpdateStaff(ctx context.Context, targetID string, req staff.UpdateStaffRequest, updaterID int64, updaterRole string) (*staff.UpdateStaffResponse, error)
 }
 
+type UpdateMyStaffServiceInterface interface {
+	UpdateMyStaff(ctx context.Context, req staff.UpdateMyStaffRequest, staffUserID int64) (*staff.UpdateMyStaffResponse, error)
+}
+
 type CreateStoreAccessServiceInterface interface {
 	CreateStoreAccess(ctx context.Context, targetID string, req staff.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.CreateStoreAccessResponse, bool, error)
 }

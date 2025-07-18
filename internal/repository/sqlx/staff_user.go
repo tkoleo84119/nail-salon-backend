@@ -14,7 +14,7 @@ import (
 // StaffUserRepositoryInterface defines the interface for staff user repository
 type StaffUserRepositoryInterface interface {
 	UpdateStaffUser(ctx context.Context, id int64, req staff.UpdateStaffRequest) (*staff.UpdateStaffResponse, error)
-	UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateStaffMeRequest) (*staff.UpdateStaffMeResponse, error)
+	UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error)
 }
 
 type StaffUserRepository struct {
@@ -83,7 +83,7 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 }
 
 // UpdateStaffMe updates current staff user's information with dynamic fields
-func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateStaffMeRequest) (*staff.UpdateStaffMeResponse, error) {
+func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": id,
@@ -120,7 +120,7 @@ func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req s
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &staff.UpdateStaffMeResponse{
+	response := &staff.UpdateMyStaffResponse{
 		ID:       utils.FormatID(result.ID),
 		Username: result.Username,
 		Email:    result.Email,
@@ -129,4 +129,3 @@ func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req s
 
 	return response, nil
 }
-

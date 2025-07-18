@@ -33,12 +33,12 @@ func (m *MockStaffUserRepository) UpdateStaffUser(ctx context.Context, id int64,
 	return args.Get(0).(*staff.UpdateStaffResponse), args.Error(1)
 }
 
-func (m *MockStaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateStaffMeRequest) (*staff.UpdateStaffMeResponse, error) {
+func (m *MockStaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error) {
 	args := m.Called(ctx, id, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*staff.UpdateStaffMeResponse), args.Error(1)
+	return args.Get(0).(*staff.UpdateMyStaffResponse), args.Error(1)
 }
 
 // MockStylistRepository mocks the sqlx repository for testing

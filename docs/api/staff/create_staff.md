@@ -51,7 +51,7 @@ Authorization: Bearer <access_token>
 | email    | <li>必填<li>email格式                       | 員工 Email             |
 | password | <li>必填<li>長度大於1<li>長度小於50         | 登入密碼（將加密儲存） |
 | role     | <li>必填<li>值只能為ADMIN、MANAGER、STYLIST | 角色                   |
-| storeIds | <li>必填                                    | 有權限的門市 ID 清單   |
+| storeIds | <li>必填<li>至少一筆                        | 有權限的門市 ID 清單   |
 
 ---
 

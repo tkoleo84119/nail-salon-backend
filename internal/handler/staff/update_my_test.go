@@ -18,20 +18,20 @@ import (
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 )
 
-// MockUpdateStaffMeService implements the UpdateStaffMeServiceInterface for testing
-type MockUpdateStaffMeService struct {
+// MockUpdateMyStaffService implements the UpdateMyStaffServiceInterface for testing
+type MockUpdateMyStaffService struct {
 	mock.Mock
 }
 
 // Ensure MockUpdateStaffMeService implements the interface
-var _ staffService.UpdateStaffMeServiceInterface = (*MockUpdateStaffMeService)(nil)
+var _ staffService.UpdateMyStaffServiceInterface = (*MockUpdateMyStaffService)(nil)
 
-func (m *MockUpdateStaffMeService) UpdateStaffMe(ctx context.Context, req staff.UpdateStaffMeRequest, staffUserID int64) (*staff.UpdateStaffMeResponse, error) {
+func (m *MockUpdateMyStaffService) UpdateMyStaff(ctx context.Context, req staff.UpdateMyStaffRequest, staffUserID int64) (*staff.UpdateMyStaffResponse, error) {
 	args := m.Called(ctx, req, staffUserID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*staff.UpdateStaffMeResponse), args.Error(1)
+	return args.Get(0).(*staff.UpdateMyStaffResponse), args.Error(1)
 }
 
 func setupTestGinForUpdateMe() {
@@ -45,22 +45,22 @@ func setupTestGinForUpdateMe() {
 func TestUpdateStaffMeHandler_UpdateStaffMe_Success(t *testing.T) {
 	setupTestGinForUpdateMe()
 
-	mockService := new(MockUpdateStaffMeService)
-	handler := NewUpdateStaffMeHandler(mockService)
+	mockService := new(MockUpdateMyStaffService)
+	handler := NewUpdateMyStaffHandler(mockService)
 
-	reqBody := staff.UpdateStaffMeRequest{
+	reqBody := staff.UpdateMyStaffRequest{
 		Email: stringPtr("new-email@example.com"),
 	}
 	jsonBody, _ := json.Marshal(reqBody)
 
-	expectedResponse := &staff.UpdateStaffMeResponse{
+	expectedResponse := &staff.UpdateMyStaffResponse{
 		ID:       "12345",
 		Username: "staff_amy",
 		Email:    "new-email@example.com",
 		Role:     staff.RoleAdmin,
 	}
 
-	mockService.On("UpdateStaffMe", mock.Anything, reqBody, int64(12345)).Return(expectedResponse, nil)
+	mockService.On("UpdateMyStaff", mock.Anything, reqBody, int64(12345)).Return(expectedResponse, nil)
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -78,20 +78,20 @@ func TestUpdateStaffMeHandler_UpdateStaffMe_Success(t *testing.T) {
 	}
 	c.Set("user", staffContext)
 
-	handler.UpdateStaffMe(c)
+	handler.UpdateMyStaff(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	mockService.AssertExpectations(t)
 }
 
-func TestUpdateStaffMeHandler_UpdateStaffMe_MissingStaffUserID(t *testing.T) {
+func TestUpdateMyStaffHandler_UpdateMyStaff_MissingStaffUserID(t *testing.T) {
 	setupTestGinForUpdateMe()
 
-	mockService := new(MockUpdateStaffMeService)
-	handler := NewUpdateStaffMeHandler(mockService)
+	mockService := new(MockUpdateMyStaffService)
+	handler := NewUpdateMyStaffHandler(mockService)
 
-	reqBody := staff.UpdateStaffMeRequest{
+	reqBody := staff.UpdateMyStaffRequest{
 		Email: stringPtr("new-email@example.com"),
 	}
 	jsonBody, _ := json.Marshal(reqBody)
@@ -102,23 +102,23 @@ func TestUpdateStaffMeHandler_UpdateStaffMe_MissingStaffUserID(t *testing.T) {
 	c.Request.Header.Set("Content-Type", "application/json")
 	// Missing staff_user_id in context
 
-	handler.UpdateStaffMe(c)
+	handler.UpdateMyStaff(c)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-func TestUpdateStaffMeHandler_UpdateStaffMe_ServiceError(t *testing.T) {
+func TestUpdateMyStaffHandler_UpdateMyStaff_ServiceError(t *testing.T) {
 	setupTestGinForUpdateMe()
 
-	mockService := new(MockUpdateStaffMeService)
-	handler := NewUpdateStaffMeHandler(mockService)
+	mockService := new(MockUpdateMyStaffService)
+	handler := NewUpdateMyStaffHandler(mockService)
 
-	reqBody := staff.UpdateStaffMeRequest{
+	reqBody := staff.UpdateMyStaffRequest{
 		Email: stringPtr("existing-email@example.com"),
 	}
 	jsonBody, _ := json.Marshal(reqBody)
 
-	mockService.On("UpdateStaffMe", mock.Anything, reqBody, int64(12345)).Return(nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserEmailExists))
+	mockService.On("UpdateMyStaff", mock.Anything, reqBody, int64(12345)).Return(nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserEmailExists))
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -136,7 +136,7 @@ func TestUpdateStaffMeHandler_UpdateStaffMe_ServiceError(t *testing.T) {
 	}
 	c.Set("user", staffContext)
 
-	handler.UpdateStaffMe(c)
+	handler.UpdateMyStaff(c)
 
 	assert.Equal(t, http.StatusConflict, w.Code)
 

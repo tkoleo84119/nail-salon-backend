@@ -13,17 +13,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateStaffMeHandler struct {
-	service staffService.UpdateStaffMeServiceInterface
+type UpdateMyStaffHandler struct {
+	service staffService.UpdateMyStaffServiceInterface
 }
 
-func NewUpdateStaffMeHandler(service staffService.UpdateStaffMeServiceInterface) *UpdateStaffMeHandler {
-	return &UpdateStaffMeHandler{
+func NewUpdateMyStaffHandler(service staffService.UpdateMyStaffServiceInterface) *UpdateMyStaffHandler {
+	return &UpdateMyStaffHandler{
 		service: service,
 	}
 }
 
-func (h *UpdateStaffMeHandler) UpdateStaffMe(c *gin.Context) {
+func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
 	// Get staff user ID from JWT context
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
@@ -31,7 +31,7 @@ func (h *UpdateStaffMeHandler) UpdateStaffMe(c *gin.Context) {
 		return
 	}
 
-	var req staff.UpdateStaffMeRequest
+	var req staff.UpdateMyStaffRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
@@ -52,7 +52,7 @@ func (h *UpdateStaffMeHandler) UpdateStaffMe(c *gin.Context) {
 		return
 	}
 
-	response, err := h.service.UpdateStaffMe(c.Request.Context(), req, staffUserID)
+	response, err := h.service.UpdateMyStaff(c.Request.Context(), req, staffUserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
