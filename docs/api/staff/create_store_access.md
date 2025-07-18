@@ -30,14 +30,14 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "storeId": "2"
+  "storeId": "1"
 }
 ```
 
 ### 驗證規則
 
-| 欄位     | 規則     | 說明         |
-| -------- | -------- | ------------ |
+| 欄位    | 規則     | 說明         |
+| ------- | -------- | ------------ |
 | storeId | <li>必填 | 欲新增的門市 |
 
 ---
@@ -51,6 +51,10 @@ Authorization: Bearer <access_token>
   "data": {
     "staffUserId": "928374234",
     "storeList": [
+      {
+        "id": "1",
+        "name": "台北總店"
+      },
       {
         "id": "2",
         "name": "新竹巨城店"
@@ -68,6 +72,10 @@ Authorization: Bearer <access_token>
     "staffUserId": "928374234",
     "storeList": [
       {
+        "id": "1",
+        "name": "台北總店"
+      },
+      {
         "id": "2",
         "name": "新竹巨城店"
       }
@@ -84,7 +92,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "storeId": "門市ID為必填項目"
+    "storeId": "storeId為必填項目"
   }
 }
 ```
@@ -134,12 +142,14 @@ Authorization: Bearer <access_token>
 ## Service 邏輯
 
 
-1. 驗證目標員工是否存在，且非 `SUPER_ADMIN`
-2. 驗證門市是否存在
-3. 檢查門市是否啟用中，且是否是該管理員有權限的門市
-4. 查詢是否已有相同的門市設定
-   - 若有：回傳 200，帶出原 store access 資訊
-   - 若無：新增一筆 `staff_user_store_access` 記錄，回傳 201
+1. 驗證目標員工是否存在
+2. 不能新增自己的 store access
+3. 目標員工不能為 `SUPER_ADMIN`
+4. 驗證門市是否存在
+5. 檢查門市是否啟用中，且是否是該管理員有權限的門市
+6. 查詢是否已有相同的門市權限
+   - 若有：不新增，回傳 200 (全部的 store access)
+   - 若無：新增一筆 `staff_user_store_access` 記錄，回傳 201 (全部的 store access)
 
 ---
 
@@ -147,4 +157,5 @@ Authorization: Bearer <access_token>
 
 - 僅能操作他人帳號（不可修改自己）
 - 一次僅能新增一筆 store access（非批次）
+- 會回傳全部的 store access 資訊
 

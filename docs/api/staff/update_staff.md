@@ -97,7 +97,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "使用者不存在"
+  "message": "指定的員工不存在"
 }
 ```
 

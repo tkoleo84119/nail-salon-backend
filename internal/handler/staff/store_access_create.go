@@ -21,9 +21,11 @@ func NewCreateStoreAccessHandler(service staffService.CreateStoreAccessServiceIn
 }
 
 func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+	// Parse and validate request
+	var req staff.CreateStoreAccessRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}
 
@@ -36,11 +38,9 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 		return
 	}
 
-	// Parse and validate request
-	var req staff.CreateStoreAccessRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 

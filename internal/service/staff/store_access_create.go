@@ -63,7 +63,6 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, target
 		}
 		return nil, false, fmt.Errorf("failed to get store: %w", err)
 	}
-
 	if !store.IsActive.Bool {
 		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotActive)
 	}
