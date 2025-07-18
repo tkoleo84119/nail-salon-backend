@@ -41,6 +41,7 @@ const (
 	TimeSlotNotFound                 = "TIME_SLOT_NOT_FOUND"
 	TimeSlotAlreadyBookedDoNotUpdate = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE"
 	TimeSlotAlreadyBookedDoNotDelete = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE"
+	TimeSlotTemplateNotFound         = "TIME_SLOT_TEMPLATE_NOT_FOUND"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"

@@ -108,6 +108,9 @@ TIME_SLOT:
   TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE:
     message: 該時段已被預約，無法刪除
     status: 409
+  TIME_SLOT_TEMPLATE_NOT_FOUND:
+    message: 範本不存在或已被刪除
+    status: 404
 
 SYS:
   SYS_INTERNAL_ERROR:

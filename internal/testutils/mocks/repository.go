@@ -79,3 +79,22 @@ func (m *MockTimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID 
 	}
 	return args.Get(0).(*schedule.UpdateTimeSlotResponse), args.Error(1)
 }
+
+// MockUpdateTimeSlotTemplateRepository implements the UpdateTimeSlotTemplateRepositoryInterface for testing
+type MockUpdateTimeSlotTemplateRepository struct {
+	mock.Mock
+}
+
+var _ sqlxRepo.TimeSlotTemplateRepositoryInterface = (*MockUpdateTimeSlotTemplateRepository)(nil)
+
+func NewMockUpdateTimeSlotTemplateRepository() *MockUpdateTimeSlotTemplateRepository {
+	return &MockUpdateTimeSlotTemplateRepository{}
+}
+
+func (m *MockUpdateTimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req schedule.UpdateTimeSlotTemplateRequest) (*schedule.UpdateTimeSlotTemplateResponse, error) {
+	args := m.Called(ctx, templateID, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*schedule.UpdateTimeSlotTemplateResponse), args.Error(1)
+}

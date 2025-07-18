@@ -79,6 +79,7 @@ Follow Conventional Commits format: `<type>: <description>`
 - For handler & service, always write corresponding test files
 - All test files need to passed before commit
 - Only write test when @internal/model/ files have function
+- If service use sqlx, the mock repository need to write in @internal/testutils/mocks/repository.go 
 
 ### Development Notes
 - If needs new SQL query, look up current SQL query first (in `internal/repository/sqlc/` and `internal/repository/sqlx/`), not create duplicate SQL
