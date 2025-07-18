@@ -83,6 +83,7 @@ func main() {
 	scheduleCreateTimeSlotTemplateService := scheduleService.NewCreateTimeSlotTemplateService(queries, database.PgxPool)
 	timeSlotTemplateRepository := sqlx.NewTimeSlotTemplateRepository(database.Sqlx)
 	scheduleUpdateTimeSlotTemplateService := scheduleService.NewUpdateTimeSlotTemplateService(queries, timeSlotTemplateRepository)
+	scheduleCreateTimeSlotTemplateItemService := scheduleService.NewCreateTimeSlotTemplateItemService(queries)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -100,6 +101,7 @@ func main() {
 	scheduleDeleteTimeSlotHandler := scheduleHandler.NewDeleteTimeSlotHandler(scheduleDeleteTimeSlotService)
 	scheduleCreateTimeSlotTemplateHandler := scheduleHandler.NewCreateTimeSlotTemplateHandler(scheduleCreateTimeSlotTemplateService)
 	scheduleUpdateTimeSlotTemplateHandler := scheduleHandler.NewUpdateTimeSlotTemplateHandler(scheduleUpdateTimeSlotTemplateService)
+	scheduleCreateTimeSlotTemplateItemHandler := scheduleHandler.NewCreateTimeSlotTemplateItemHandler(scheduleCreateTimeSlotTemplateItemService)
 
 	router := gin.Default()
 
@@ -136,6 +138,7 @@ func main() {
 		{
 			timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleCreateTimeSlotTemplateHandler.CreateTimeSlotTemplate)
 			timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleUpdateTimeSlotTemplateHandler.UpdateTimeSlotTemplate)
+			timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleCreateTimeSlotTemplateItemHandler.CreateTimeSlotTemplateItem)
 		}
 	}
 

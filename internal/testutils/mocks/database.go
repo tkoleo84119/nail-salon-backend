@@ -204,6 +204,11 @@ func (m *MockQuerier) CreateTimeSlotTemplate(ctx context.Context, arg dbgen.Crea
 	return args.Get(0).(dbgen.TimeSlotTemplate), args.Error(1)
 }
 
+func (m *MockQuerier) CreateTimeSlotTemplateItem(ctx context.Context, arg dbgen.CreateTimeSlotTemplateItemParams) (dbgen.TimeSlotTemplateItem, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.TimeSlotTemplateItem), args.Error(1)
+}
+
 func (m *MockQuerier) BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []dbgen.BatchCreateTimeSlotTemplateItemsParams) (int64, error) {
 	args := m.Called(ctx, arg)
 	return args.Get(0).(int64), args.Error(1)
@@ -216,6 +221,9 @@ func (m *MockQuerier) GetTimeSlotTemplateByID(ctx context.Context, id int64) (db
 
 func (m *MockQuerier) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]dbgen.TimeSlotTemplateItem, error) {
 	args := m.Called(ctx, templateID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]dbgen.TimeSlotTemplateItem), args.Error(1)
 }
 
