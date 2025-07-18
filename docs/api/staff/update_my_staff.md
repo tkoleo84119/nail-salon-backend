@@ -13,6 +13,7 @@
 ## 說明
 
 - 僅允許員工更新自己的資料
+- 目前僅支援更新 Email
 
 ---
 
@@ -31,13 +32,15 @@ Content-Type: application/json
 Authorization: Bearer <access_token>
 ```
 
-### Body（可傳任一欄位，僅更新指定內容）
+### Body
 
 ```json
 {
   "email": "new-email@example.com"
 }
 ```
+
+- 至少需要提供一個欄位進行更新
 
 ### 驗證規則
 
@@ -57,7 +60,8 @@ Authorization: Bearer <access_token>
     "id": "13984392823",
     "username": "staff_amy",
     "email": "new-email@example.com",
-    "role": "STYLIST"
+    "role": "STYLIST",
+    "isActive": true
   }
 }
 ```
@@ -70,7 +74,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "email": "Email格式錯誤"
+    "email": "email格式不正確"
   }
 }
 ```
@@ -87,7 +91,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "Email已被其他帳號使用"
+  "message": "此電子郵件已被註冊"
 }
 ```
 
@@ -109,10 +113,11 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 解析 JWT，取得當前 `staff_user id`
-2. 驗證 Email 是否唯一（其他人不可用，不包含自己）
-3. 更新 `staff_users` 的欄位
-4. 回傳更新後資訊
+1. 驗證請求至少需要提供一個欄位進行更新
+2. 驗證 `staff_users` 是否存在
+3. 如果有傳入 `email`，驗證 Email 是否唯一（其他人不可用，不包含自己）
+4. 更新 `staff_users` 的欄位
+5. 回傳更新後資訊
 
 ---
 

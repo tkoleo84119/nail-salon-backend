@@ -49,7 +49,7 @@ func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req staff.Upda
 	}
 
 	// Update staff user record using repository
-	response, err := s.staffUserRepository.UpdateStaffMe(ctx, staffUserID, req)
+	response, err := s.staffUserRepository.UpdateMyStaff(ctx, staffUserID, req)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows returned") {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthStaffFailed)

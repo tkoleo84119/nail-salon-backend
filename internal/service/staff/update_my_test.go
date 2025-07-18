@@ -51,7 +51,7 @@ func TestUpdateMyStaffService_UpdateMyStaff_Success(t *testing.T) {
 		Email:    "new-email@example.com",
 		Role:     staff.RoleAdmin,
 	}
-	mockRepository.On("UpdateStaffMe", ctx, staffUserID, req).Return(expectedResponse, nil)
+	mockRepository.On("UpdateMyStaff", ctx, staffUserID, req).Return(expectedResponse, nil)
 
 	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
@@ -236,7 +236,7 @@ func TestUpdateMyStaffService_UpdateMyStaff_UpdateNoRows(t *testing.T) {
 	}).Return(false, nil)
 
 	// Mock repository update - no rows returned
-	mockRepository.On("UpdateStaffMe", ctx, staffUserID, req).Return(nil, errors.New("no rows returned from update"))
+	mockRepository.On("UpdateMyStaff", ctx, staffUserID, req).Return(nil, errors.New("no rows returned from update"))
 
 	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 
@@ -282,7 +282,7 @@ func TestUpdateMyStaffService_UpdateMyStaff_DatabaseError(t *testing.T) {
 	}).Return(false, nil)
 
 	// Mock repository update - database error
-	mockRepository.On("UpdateStaffMe", ctx, staffUserID, req).Return(nil, errors.New("database error"))
+	mockRepository.On("UpdateMyStaff", ctx, staffUserID, req).Return(nil, errors.New("database error"))
 
 	response, err := service.UpdateMyStaff(ctx, req, staffUserID)
 

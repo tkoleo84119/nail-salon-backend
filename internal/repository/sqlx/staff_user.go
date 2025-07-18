@@ -14,7 +14,7 @@ import (
 // StaffUserRepositoryInterface defines the interface for staff user repository
 type StaffUserRepositoryInterface interface {
 	UpdateStaffUser(ctx context.Context, id int64, req staff.UpdateStaffRequest) (*staff.UpdateStaffResponse, error)
-	UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error)
+	UpdateMyStaff(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error)
 }
 
 type StaffUserRepository struct {
@@ -82,8 +82,8 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 	return response, nil
 }
 
-// UpdateStaffMe updates current staff user's information with dynamic fields
-func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error) {
+// UpdateMyStaff updates current staff user's information with dynamic fields
+func (r *StaffUserRepository) UpdateMyStaff(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": id,
@@ -102,7 +102,8 @@ func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req s
 			id,
 			username,
 			email,
-			role
+			role,
+			is_active
 	`, strings.Join(setParts, ", "))
 
 	var result dbgen.StaffUser
@@ -125,6 +126,7 @@ func (r *StaffUserRepository) UpdateStaffMe(ctx context.Context, id int64, req s
 		Username: result.Username,
 		Email:    result.Email,
 		Role:     result.Role,
+		IsActive: result.IsActive.Bool,
 	}
 
 	return response, nil

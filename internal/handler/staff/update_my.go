@@ -24,13 +24,6 @@ func NewUpdateMyStaffHandler(service staffService.UpdateMyStaffServiceInterface)
 }
 
 func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
-	// Get staff user ID from JWT context
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
-		return
-	}
-
 	var req staff.UpdateMyStaffRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
@@ -43,6 +36,13 @@ func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
 			"request": "至少需要提供一個欄位進行更新",
 		})
+		return
+	}
+
+	// Get staff user ID from JWT context
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 
