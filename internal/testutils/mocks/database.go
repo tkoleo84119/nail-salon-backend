@@ -86,9 +86,9 @@ func (m *MockQuerier) CreateStaffUserStoreAccess(ctx context.Context, arg dbgen.
 	return args.Error(0)
 }
 
-func (m *MockQuerier) BatchCreateStaffUserStoreAccess(ctx context.Context, arg dbgen.BatchCreateStaffUserStoreAccessParams) error {
+func (m *MockQuerier) BatchCreateStaffUserStoreAccess(ctx context.Context, arg []dbgen.BatchCreateStaffUserStoreAccessParams) (int64, error) {
 	args := m.Called(ctx, arg)
-	return args.Error(0)
+	return args.Get(0).(int64), args.Error(1)
 }
 
 func (m *MockQuerier) CheckStoreAccessExists(ctx context.Context, arg dbgen.CheckStoreAccessExistsParams) (bool, error) {
@@ -249,5 +249,3 @@ func (m *MockQuerier) DeleteTimeSlotTemplateItem(ctx context.Context, id int64) 
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
-
-

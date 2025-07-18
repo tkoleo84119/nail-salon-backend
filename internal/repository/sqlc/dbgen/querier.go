@@ -12,7 +12,7 @@ import (
 
 type Querier interface {
 	BatchCreateSchedules(ctx context.Context, arg []BatchCreateSchedulesParams) (int64, error)
-	BatchCreateStaffUserStoreAccess(ctx context.Context, arg BatchCreateStaffUserStoreAccessParams) error
+	BatchCreateStaffUserStoreAccess(ctx context.Context, arg []BatchCreateStaffUserStoreAccessParams) (int64, error)
 	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
 	CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailUniqueForUpdateParams) (bool, error)

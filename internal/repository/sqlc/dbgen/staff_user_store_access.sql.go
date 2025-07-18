@@ -7,35 +7,20 @@ package dbgen
 
 import (
 	"context"
-)
 
-const batchCreateStaffUserStoreAccess = `-- name: BatchCreateStaffUserStoreAccess :exec
-INSERT INTO staff_user_store_access (
-    store_id,
-    staff_user_id,
-    created_at,
-    updated_at
+	"github.com/jackc/pgx/v5/pgtype"
 )
-SELECT 
-    unnest($1::bigint[]) as store_id,
-    $2 as staff_user_id,
-    NOW() as created_at,
-    NOW() as updated_at
-`
 
 type BatchCreateStaffUserStoreAccessParams struct {
-	Column1     []int64 `db:"column_1" json:"column_1"`
-	StaffUserID int64   `db:"staff_user_id" json:"staff_user_id"`
-}
-
-func (q *Queries) BatchCreateStaffUserStoreAccess(ctx context.Context, arg BatchCreateStaffUserStoreAccessParams) error {
-	_, err := q.db.Exec(ctx, batchCreateStaffUserStoreAccess, arg.Column1, arg.StaffUserID)
-	return err
+	StoreID     int64              `db:"store_id" json:"store_id"`
+	StaffUserID int64              `db:"staff_user_id" json:"staff_user_id"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
 const checkStoreAccessExists = `-- name: CheckStoreAccessExists :one
 SELECT EXISTS(
-    SELECT 1 FROM staff_user_store_access 
+    SELECT 1 FROM staff_user_store_access
     WHERE staff_user_id = $1 AND store_id = $2
 ) as exists
 `
@@ -74,7 +59,7 @@ func (q *Queries) CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaf
 }
 
 const deleteStaffUserStoreAccess = `-- name: DeleteStaffUserStoreAccess :exec
-DELETE FROM staff_user_store_access 
+DELETE FROM staff_user_store_access
 WHERE staff_user_id = $1 AND store_id = ANY($2::bigint[])
 `
 

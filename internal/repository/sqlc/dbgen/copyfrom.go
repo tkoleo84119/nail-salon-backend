@@ -47,6 +47,41 @@ func (q *Queries) BatchCreateSchedules(ctx context.Context, arg []BatchCreateSch
 	return q.db.CopyFrom(ctx, []string{"schedules"}, []string{"id", "store_id", "stylist_id", "work_date", "note", "created_at", "updated_at"}, &iteratorForBatchCreateSchedules{rows: arg})
 }
 
+// iteratorForBatchCreateStaffUserStoreAccess implements pgx.CopyFromSource.
+type iteratorForBatchCreateStaffUserStoreAccess struct {
+	rows                 []BatchCreateStaffUserStoreAccessParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForBatchCreateStaffUserStoreAccess) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForBatchCreateStaffUserStoreAccess) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].StoreID,
+		r.rows[0].StaffUserID,
+		r.rows[0].CreatedAt,
+		r.rows[0].UpdatedAt,
+	}, nil
+}
+
+func (r iteratorForBatchCreateStaffUserStoreAccess) Err() error {
+	return nil
+}
+
+func (q *Queries) BatchCreateStaffUserStoreAccess(ctx context.Context, arg []BatchCreateStaffUserStoreAccessParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"staff_user_store_access"}, []string{"store_id", "staff_user_id", "created_at", "updated_at"}, &iteratorForBatchCreateStaffUserStoreAccess{rows: arg})
+}
+
 // iteratorForBatchCreateTimeSlotTemplateItems implements pgx.CopyFromSource.
 type iteratorForBatchCreateTimeSlotTemplateItems struct {
 	rows                 []BatchCreateTimeSlotTemplateItemsParams

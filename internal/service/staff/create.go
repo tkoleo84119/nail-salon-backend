@@ -2,7 +2,9 @@ package staff
 
 import (
 	"context"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -30,18 +32,19 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store IDs", err)
 	}
-	if err := s.validatePermissions(creatorRole, req.Role); err != nil {
-		return nil, err
-	}
 
+	// validate role is valid
 	if !staff.IsValidRole(req.Role) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserInvalidRole)
 	}
-
 	if req.Role == staff.RoleSuperAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
+	// validate permissions
+	if err := s.validatePermissions(creatorRole, req.Role); err != nil {
+		return nil, err
+	}
 	if err := s.validateStoreAccess(creatorRole, creatorStoreIDs, storeIDs); err != nil {
 		return nil, err
 	}
@@ -75,6 +78,20 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to hash password", err)
 	}
 
+	// prepare of insert data
+	now := time.Now()
+	staffID := utils.GenerateID()
+
+	storeAccessParams := make([]dbgen.BatchCreateStaffUserStoreAccessParams, 0, len(storeIDs))
+	for _, storeID := range storeIDs {
+		storeAccessParams = append(storeAccessParams, dbgen.BatchCreateStaffUserStoreAccessParams{
+			StoreID:     storeID,
+			StaffUserID: staffID,
+			CreatedAt:   pgtype.Timestamptz{Time: now, Valid: true},
+			UpdatedAt:   pgtype.Timestamptz{Time: now, Valid: true},
+		})
+	}
+
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
@@ -82,7 +99,6 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 	defer tx.Rollback(ctx)
 	qtx := dbgen.New(tx)
 
-	staffID := utils.GenerateID()
 	createdStaff, err := qtx.CreateStaffUser(ctx, dbgen.CreateStaffUserParams{
 		ID:           staffID,
 		Username:     req.Username,
@@ -95,10 +111,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 	}
 
 	// batch create store access records
-	err = qtx.BatchCreateStaffUserStoreAccess(ctx, dbgen.BatchCreateStaffUserStoreAccessParams{
-		Column1:     storeIDs,
-		StaffUserID: staffID,
-	})
+	_, err = qtx.BatchCreateStaffUserStoreAccess(ctx, storeAccessParams)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store access", err)
 	}
@@ -126,6 +139,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 		Username:  createdStaff.Username,
 		Email:     createdStaff.Email,
 		Role:      createdStaff.Role,
+		IsActive:  createdStaff.IsActive.Bool,
 		StoreList: storeList,
 	}
 

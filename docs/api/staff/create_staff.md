@@ -66,6 +66,7 @@ Authorization: Bearer <access_token>
     "username": "stylist_jane",
     "email": "jane@example.com",
     "role": "STYLIST",
+    "isActive": true,
     "storeList": [
       {
         "id": "1",
@@ -88,8 +89,8 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "username": "帳號已存在",
-    "password": "密碼至少需 6 個字元"
+    "username": "username為必填項目",
+    "password": "password為必填項目"
   }
 }
 ```
@@ -130,12 +131,15 @@ Authorization: Bearer <access_token>
 
 ### Service 邏輯
 
-1. 檢查傳入的 `storeIds` 是否是該管理員有權限的門市
-2. 檢查帳號與 Email 是否唯一（`username`, `email`）
-3. 檢查 `storeIds` 是否存在且為啟用中（`is_active = true`）
-4. 將密碼加密（bcrypt）後儲存至 `staff_users`
-5. 新增 `staff_user_store_access` 多筆紀錄，綁定可控門市
-6. 回傳創建成功之帳號資訊（不含密碼）
+1. 檢查 `role` 是否為合法值
+2. 檢查 `role` 不可為 `SUPER_ADMIN`
+3. 根據 creator 的 `role` 檢查是否可以新增 `targetRole` 的帳號
+4. 檢查傳入的 `storeIds` 是否是該管理員有權限的門市
+5. 檢查帳號與 Email 是否唯一（`username`, `email`）
+6. 檢查 `storeIds` 是否存在且為啟用中（`is_active = true`）
+7. 將密碼加密（bcrypt）後儲存至 `staff_users`
+8. 新增 `staff_user_store_access` 多筆紀錄，綁定可控門市
+9. 回傳創建成功之帳號資訊（不含密碼）
 
 ---
 

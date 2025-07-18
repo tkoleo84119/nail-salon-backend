@@ -81,17 +81,15 @@ Content-Type: application/json
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "username": "帳號為必填項目",
-    "password": "密碼長度至少需要1個字元"
+    "username": "username為必填項目",
+    "password": "password為必填項目"
   }
 }
 ```
 
-#### 400 Bad Request - JSON 格式錯誤
-
 ```json
 {
-  "message": "JSON格式錯誤",
+  "message": "輸入驗證失敗",
   "errors": {
     "request": "JSON格式錯誤"
   }
@@ -128,7 +126,7 @@ Content-Type: application/json
 ### Service 邏輯
 
 1. 根據 `username` 和 `is_active = true` 查詢 `staff_users`
-2. 檢查 `password_hash`（bcrypt）
+2. 檢查 `password_hash`（bcrypt）是否與 `password` 相符
 3. 產生 JWT（`access_token`）與 `refresh_token`（儲存於 `staff_user_tokens`）
 4. 查詢該員工可存取的店家（`staff_user_store_access`）
   - 如果是 `SUPER_ADMIN`，則查詢 `stores` 回傳所有店家

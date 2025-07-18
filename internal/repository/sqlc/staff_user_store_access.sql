@@ -16,25 +16,22 @@ INSERT INTO staff_user_store_access (
     $1, $2, NOW(), NOW()
 );
 
--- name: BatchCreateStaffUserStoreAccess :exec
+-- name: BatchCreateStaffUserStoreAccess :copyfrom
 INSERT INTO staff_user_store_access (
     store_id,
     staff_user_id,
     created_at,
     updated_at
-)
-SELECT 
-    unnest($1::bigint[]) as store_id,
-    $2 as staff_user_id,
-    NOW() as created_at,
-    NOW() as updated_at;
+) VALUES (
+    $1, $2, $3, $4
+);
 
 -- name: CheckStoreAccessExists :one
 SELECT EXISTS(
-    SELECT 1 FROM staff_user_store_access 
+    SELECT 1 FROM staff_user_store_access
     WHERE staff_user_id = $1 AND store_id = $2
 ) as exists;
 
 -- name: DeleteStaffUserStoreAccess :exec
-DELETE FROM staff_user_store_access 
+DELETE FROM staff_user_store_access
 WHERE staff_user_id = $1 AND store_id = ANY($2::bigint[]);
