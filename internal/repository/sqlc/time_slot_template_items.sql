@@ -35,3 +35,7 @@ SET
     updated_at = NOW()
 WHERE id = $1
 RETURNING id, template_id, start_time, end_time, created_at, updated_at;
+
+-- name: DeleteTimeSlotTemplateItem :exec
+DELETE FROM time_slot_template_items
+WHERE id = $1;

@@ -85,6 +85,7 @@ func main() {
 	scheduleUpdateTimeSlotTemplateService := scheduleService.NewUpdateTimeSlotTemplateService(queries, timeSlotTemplateRepository)
 	scheduleCreateTimeSlotTemplateItemService := scheduleService.NewCreateTimeSlotTemplateItemService(queries)
 	scheduleUpdateTimeSlotTemplateItemService := scheduleService.NewUpdateTimeSlotTemplateItemService(queries)
+	scheduleDeleteTimeSlotTemplateItemService := scheduleService.NewDeleteTimeSlotTemplateItemService(queries)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -104,6 +105,7 @@ func main() {
 	scheduleUpdateTimeSlotTemplateHandler := scheduleHandler.NewUpdateTimeSlotTemplateHandler(scheduleUpdateTimeSlotTemplateService)
 	scheduleCreateTimeSlotTemplateItemHandler := scheduleHandler.NewCreateTimeSlotTemplateItemHandler(scheduleCreateTimeSlotTemplateItemService)
 	scheduleUpdateTimeSlotTemplateItemHandler := scheduleHandler.NewUpdateTimeSlotTemplateItemHandler(scheduleUpdateTimeSlotTemplateItemService)
+	scheduleDeleteTimeSlotTemplateItemHandler := scheduleHandler.NewDeleteTimeSlotTemplateItemHandler(scheduleDeleteTimeSlotTemplateItemService)
 
 	router := gin.Default()
 
@@ -142,6 +144,7 @@ func main() {
 			timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleUpdateTimeSlotTemplateHandler.UpdateTimeSlotTemplate)
 			timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleCreateTimeSlotTemplateItemHandler.CreateTimeSlotTemplateItem)
 			timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleUpdateTimeSlotTemplateItemHandler.UpdateTimeSlotTemplateItem)
+			timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), scheduleDeleteTimeSlotTemplateItemHandler.DeleteTimeSlotTemplateItem)
 		}
 	}
 

@@ -56,6 +56,16 @@ func (q *Queries) CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTime
 	return i, err
 }
 
+const deleteTimeSlotTemplateItem = `-- name: DeleteTimeSlotTemplateItem :exec
+DELETE FROM time_slot_template_items
+WHERE id = $1
+`
+
+func (q *Queries) DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteTimeSlotTemplateItem, id)
+	return err
+}
+
 const getTimeSlotTemplateItemByID = `-- name: GetTimeSlotTemplateItemByID :one
 SELECT id, template_id, start_time, end_time, created_at, updated_at
 FROM time_slot_template_items
