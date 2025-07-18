@@ -227,4 +227,22 @@ func (m *MockQuerier) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, 
 	return args.Get(0).([]dbgen.TimeSlotTemplateItem), args.Error(1)
 }
 
+func (m *MockQuerier) GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (dbgen.TimeSlotTemplateItem, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.TimeSlotTemplateItem), args.Error(1)
+}
+
+func (m *MockQuerier) UpdateTimeSlotTemplateItem(ctx context.Context, arg dbgen.UpdateTimeSlotTemplateItemParams) (dbgen.TimeSlotTemplateItem, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.TimeSlotTemplateItem), args.Error(1)
+}
+
+func (m *MockQuerier) GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg dbgen.GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]dbgen.TimeSlotTemplateItem, error) {
+	args := m.Called(ctx, arg)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]dbgen.TimeSlotTemplateItem), args.Error(1)
+}
+
 

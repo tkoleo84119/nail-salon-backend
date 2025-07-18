@@ -111,6 +111,9 @@ TIME_SLOT:
   TIME_SLOT_TEMPLATE_NOT_FOUND:
     message: 範本不存在或已被刪除
     status: 404
+  TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND:
+    message: 範本項目不存在或已被刪除
+    status: 404
 
 SYS:
   SYS_INTERNAL_ERROR:

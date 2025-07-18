@@ -48,8 +48,11 @@ type Querier interface {
 	GetStylistByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (Stylist, error)
 	GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error)
 	GetTimeSlotTemplateByID(ctx context.Context, id int64) (TimeSlotTemplate, error)
+	GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (TimeSlotTemplateItem, error)
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]TimeSlotTemplateItem, error)
+	GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]TimeSlotTemplateItem, error)
 	GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
+	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (TimeSlotTemplateItem, error)
 }
 
 var _ Querier = (*Queries)(nil)

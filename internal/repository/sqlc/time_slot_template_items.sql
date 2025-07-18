@@ -16,3 +16,22 @@ INSERT INTO time_slot_template_items (
     end_time,
     created_at,
     updated_at;
+
+-- name: GetTimeSlotTemplateItemsByTemplateIDExcluding :many
+SELECT id, template_id, start_time, end_time, created_at, updated_at
+FROM time_slot_template_items
+WHERE template_id = $1 AND id != $2;
+
+-- name: GetTimeSlotTemplateItemByID :one
+SELECT id, template_id, start_time, end_time, created_at, updated_at
+FROM time_slot_template_items
+WHERE id = $1;
+
+-- name: UpdateTimeSlotTemplateItem :one
+UPDATE time_slot_template_items
+SET
+    start_time = $2,
+    end_time = $3,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, template_id, start_time, end_time, created_at, updated_at;

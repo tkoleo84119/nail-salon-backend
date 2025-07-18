@@ -55,3 +55,91 @@ func (q *Queries) CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTime
 	)
 	return i, err
 }
+
+const getTimeSlotTemplateItemByID = `-- name: GetTimeSlotTemplateItemByID :one
+SELECT id, template_id, start_time, end_time, created_at, updated_at
+FROM time_slot_template_items
+WHERE id = $1
+`
+
+func (q *Queries) GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (TimeSlotTemplateItem, error) {
+	row := q.db.QueryRow(ctx, getTimeSlotTemplateItemByID, id)
+	var i TimeSlotTemplateItem
+	err := row.Scan(
+		&i.ID,
+		&i.TemplateID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getTimeSlotTemplateItemsByTemplateIDExcluding = `-- name: GetTimeSlotTemplateItemsByTemplateIDExcluding :many
+SELECT id, template_id, start_time, end_time, created_at, updated_at
+FROM time_slot_template_items
+WHERE template_id = $1 AND id != $2
+`
+
+type GetTimeSlotTemplateItemsByTemplateIDExcludingParams struct {
+	TemplateID int64 `db:"template_id" json:"template_id"`
+	ID         int64 `db:"id" json:"id"`
+}
+
+func (q *Queries) GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]TimeSlotTemplateItem, error) {
+	rows, err := q.db.Query(ctx, getTimeSlotTemplateItemsByTemplateIDExcluding, arg.TemplateID, arg.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TimeSlotTemplateItem{}
+	for rows.Next() {
+		var i TimeSlotTemplateItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.TemplateID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateTimeSlotTemplateItem = `-- name: UpdateTimeSlotTemplateItem :one
+UPDATE time_slot_template_items
+SET
+    start_time = $2,
+    end_time = $3,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, template_id, start_time, end_time, created_at, updated_at
+`
+
+type UpdateTimeSlotTemplateItemParams struct {
+	ID        int64       `db:"id" json:"id"`
+	StartTime pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime   pgtype.Time `db:"end_time" json:"end_time"`
+}
+
+func (q *Queries) UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (TimeSlotTemplateItem, error) {
+	row := q.db.QueryRow(ctx, updateTimeSlotTemplateItem, arg.ID, arg.StartTime, arg.EndTime)
+	var i TimeSlotTemplateItem
+	err := row.Scan(
+		&i.ID,
+		&i.TemplateID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
