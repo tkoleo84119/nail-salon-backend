@@ -13,13 +13,13 @@ type CreateStoreAccessResponse struct {
 	StoreList   []common.Store `json:"storeList"`
 }
 
-// DeleteStoreAccessRequest represents the request for deleting store access
-type DeleteStoreAccessRequest struct {
+// DeleteStoreAccessBulkRequest represents the request for deleting store access
+type DeleteStoreAccessBulkRequest struct {
 	StoreIDs []string `json:"storeIds" binding:"required,min=1,max=100"`
 }
 
-// DeleteStoreAccessResponse represents the response for deleting store access
-type DeleteStoreAccessResponse struct {
+// DeleteStoreAccessBulkResponse represents the response for deleting store access
+type DeleteStoreAccessBulkResponse struct {
 	StaffUserID string         `json:"staffUserId"`
 	StoreList   []common.Store `json:"storeList"`
 }

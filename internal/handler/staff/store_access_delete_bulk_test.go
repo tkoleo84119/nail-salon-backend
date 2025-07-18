@@ -19,20 +19,20 @@ import (
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 )
 
-// MockDeleteStoreAccessService implements the DeleteStoreAccessServiceInterface for testing
-type MockDeleteStoreAccessService struct {
+// MockDeleteStoreAccessBulkService implements the DeleteStoreAccessServiceInterface for testing
+type MockDeleteStoreAccessBulkService struct {
 	mock.Mock
 }
 
 // Ensure MockDeleteStoreAccessService implements the interface
-var _ staffService.DeleteStoreAccessServiceInterface = (*MockDeleteStoreAccessService)(nil)
+var _ staffService.DeleteStoreAccessBulkServiceInterface = (*MockDeleteStoreAccessBulkService)(nil)
 
-func (m *MockDeleteStoreAccessService) DeleteStoreAccess(ctx context.Context, targetID string, req staff.DeleteStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.DeleteStoreAccessResponse, error) {
+func (m *MockDeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context, targetID string, req staff.DeleteStoreAccessBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.DeleteStoreAccessBulkResponse, error) {
 	args := m.Called(ctx, targetID, req, creatorID, creatorRole, creatorStoreIDs)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*staff.DeleteStoreAccessResponse), args.Error(1)
+	return args.Get(0).(*staff.DeleteStoreAccessBulkResponse), args.Error(1)
 }
 
 func setupTestContextWithStaffForDelete(method, path string, body []byte) (*gin.Context, *httptest.ResponseRecorder) {
@@ -63,16 +63,16 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_Success(t *testing.T) {
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 	reqBody, _ := json.Marshal(req)
 
-	expectedResponse := &staff.DeleteStoreAccessResponse{
+	expectedResponse := &staff.DeleteStoreAccessBulkResponse{
 		StaffUserID: "987654321",
 		StoreList: []common.Store{
 			{ID: "3", Name: "Store 3"},
@@ -80,13 +80,13 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_Success(t *testing.T) {
 	}
 
 	// Set up mock expectations
-	mockService.On("DeleteStoreAccess", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(expectedResponse, nil)
+	mockService.On("DeleteStoreAccessBulk", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(expectedResponse, nil)
 
 	// Create test context
 	c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/987654321/store-access", reqBody)
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -102,7 +102,7 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_Success(t *testing.T) {
 
 	// Parse the data field
 	dataBytes, _ := json.Marshal(response.Data)
-	var deleteResponse staff.DeleteStoreAccessResponse
+	var deleteResponse staff.DeleteStoreAccessBulkResponse
 	err = json.Unmarshal(dataBytes, &deleteResponse)
 	assert.NoError(t, err)
 
@@ -117,11 +117,11 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_MissingStaffContext(t *testi
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(req)
@@ -134,7 +134,7 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_MissingStaffContext(t *testi
 	c.Params = []gin.Param{{Key: "id", Value: "123"}}
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
@@ -148,18 +148,18 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_MissingStaffContext(t *testi
 	assert.Nil(t, response.Errors)
 
 	// Verify service was not called
-	mockService.AssertNotCalled(t, "DeleteStoreAccess")
+	mockService.AssertNotCalled(t, "DeleteStoreAccessBulk")
 }
 
 func TestDeleteStoreAccessHandler_DeleteStoreAccess_MissingStaffID(t *testing.T) {
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(req)
@@ -185,7 +185,7 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_MissingStaffID(t *testing.T)
 	c.Params = []gin.Param{{Key: "id", Value: ""}}
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -200,15 +200,15 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_MissingStaffID(t *testing.T)
 	assert.Equal(t, "id為必填項目", response.Errors["id"])
 
 	// Verify service was not called
-	mockService.AssertNotCalled(t, "DeleteStoreAccess")
+	mockService.AssertNotCalled(t, "DeleteStoreAccessBulk")
 }
 
 func TestDeleteStoreAccessHandler_DeleteStoreAccess_InvalidRequestBody(t *testing.T) {
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	tests := []struct {
 		name        string
@@ -241,7 +241,7 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_InvalidRequestBody(t *testin
 		t.Run(tt.name, func(t *testing.T) {
 			c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/123/store-access", []byte(tt.requestBody))
 
-			handler.DeleteStoreAccess(c)
+			handler.DeleteStoreAccessBulk(c)
 
 			assert.Equal(t, tt.expectCode, w.Code)
 
@@ -264,24 +264,24 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_ServiceError_PermissionDenie
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(req)
 
 	// Set up mock expectations - permission denied
 	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-	mockService.On("DeleteStoreAccess", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, serviceError)
+	mockService.On("DeleteStoreAccessBulk", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, serviceError)
 
 	// Create test context
 	c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/987654321/store-access", reqBody)
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusForbidden, w.Code)
@@ -302,24 +302,24 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_ServiceError_StaffNotFound(t
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(req)
 
 	// Set up mock expectations - staff not found
 	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.UserStaffNotFound)
-	mockService.On("DeleteStoreAccess", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, serviceError)
+	mockService.On("DeleteStoreAccessBulk", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, serviceError)
 
 	// Create test context
 	c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/987654321/store-access", reqBody)
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusNotFound, w.Code)
@@ -340,24 +340,24 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_ServiceError_CannotModifySel
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(req)
 
 	// Set up mock expectations - cannot modify self
 	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.UserNotUpdateSelf)
-	mockService.On("DeleteStoreAccess", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, serviceError)
+	mockService.On("DeleteStoreAccessBulk", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, serviceError)
 
 	// Create test context
 	c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/987654321/store-access", reqBody)
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -378,23 +378,23 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_InternalError(t *testing.T) 
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1"},
 	}
 	reqBody, _ := json.Marshal(req)
 
 	// Set up mock expectations - internal error
-	mockService.On("DeleteStoreAccess", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, errors.New("database connection failed"))
+	mockService.On("DeleteStoreAccessBulk", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, errors.New("database connection failed"))
 
 	// Create test context
 	c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/987654321/store-access", reqBody)
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
@@ -415,8 +415,8 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_InvalidStoreIDsInRequest(t *
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	tests := []struct {
 		name              string
@@ -442,14 +442,14 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_InvalidStoreIDsInRequest(t *
 		t.Run(tt.name, func(t *testing.T) {
 			// For tests that might call the service, set up a mock expectation
 			if tt.shouldCallService {
-				var req staff.DeleteStoreAccessRequest
+				var req staff.DeleteStoreAccessBulkRequest
 				_ = json.Unmarshal([]byte(tt.requestBody), &req)
-				mockService.On("DeleteStoreAccess", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, errors.New("invalid store IDs"))
+				mockService.On("DeleteStoreAccessBulk", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(nil, errors.New("invalid store IDs"))
 			}
 
 			c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/987654321/store-access", []byte(tt.requestBody))
 
-			handler.DeleteStoreAccess(c)
+			handler.DeleteStoreAccessBulk(c)
 
 			assert.Equal(t, tt.expectCode, w.Code)
 
@@ -471,28 +471,28 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_ValidRequestWithMultipleStor
 	setupTestGinForStoreAccess()
 
 	// Create mock service
-	mockService := new(MockDeleteStoreAccessService)
-	handler := NewDeleteStoreAccessHandler(mockService)
+	mockService := new(MockDeleteStoreAccessBulkService)
+	handler := NewDeleteStoreAccessBulkHandler(mockService)
 
 	// Test data with multiple stores
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1", "2", "3"},
 	}
 	reqBody, _ := json.Marshal(req)
 
-	expectedResponse := &staff.DeleteStoreAccessResponse{
+	expectedResponse := &staff.DeleteStoreAccessBulkResponse{
 		StaffUserID: "987654321",
 		StoreList:   []common.Store{}, // No stores left after deletion
 	}
 
 	// Set up mock expectations
-	mockService.On("DeleteStoreAccess", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(expectedResponse, nil)
+	mockService.On("DeleteStoreAccessBulk", mock.Anything, "987654321", req, int64(123456789), staff.RoleAdmin, []int64{1, 2}).Return(expectedResponse, nil)
 
 	// Create test context
 	c, w := setupTestContextWithStaffForDelete("DELETE", "/api/staff/987654321/store-access", reqBody)
 
 	// Call handler
-	handler.DeleteStoreAccess(c)
+	handler.DeleteStoreAccessBulk(c)
 
 	// Assert response
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -507,7 +507,7 @@ func TestDeleteStoreAccessHandler_DeleteStoreAccess_ValidRequestWithMultipleStor
 
 	// Parse the data field
 	dataBytes, _ := json.Marshal(response.Data)
-	var deleteResponse staff.DeleteStoreAccessResponse
+	var deleteResponse staff.DeleteStoreAccessBulkResponse
 	err = json.Unmarshal(dataBytes, &deleteResponse)
 	assert.NoError(t, err)
 

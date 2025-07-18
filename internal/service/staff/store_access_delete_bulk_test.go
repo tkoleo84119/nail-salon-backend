@@ -14,13 +14,13 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
 )
 
-func TestDeleteStoreAccessService_DeleteStoreAccess_Success(t *testing.T) {
+func TestDeleteStoreAccessBulkService_DeleteStoreAccessBulk_Success(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	// Create mock querier
 	mockQuerier := mocks.NewMockQuerier()
-	service := NewDeleteStoreAccessService(mockQuerier)
+	service := NewDeleteStoreAccessBulkService(mockQuerier)
 
 	// Test data
 	targetID := "123456789"
@@ -29,7 +29,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_Success(t *testing.T) {
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -52,7 +52,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_Success(t *testing.T) {
 	mockQuerier.On("GetStaffUserStoreAccess", mock.Anything, targetStaffID).Return(remainingStoreAccess, nil)
 
 	// Call service
-	response, err := service.DeleteStoreAccess(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
+	response, err := service.DeleteStoreAccessBulk(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
 
 	// Assert results
 	assert.NoError(t, err)
@@ -66,13 +66,13 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_Success(t *testing.T) {
 	mockQuerier.AssertExpectations(t)
 }
 
-func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySelf(t *testing.T) {
+func TestDeleteStoreAccessBulkService_DeleteStoreAccessBulk_CannotModifySelf(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	// Create mock querier
 	mockQuerier := mocks.NewMockQuerier()
-	service := NewDeleteStoreAccessService(mockQuerier)
+	service := NewDeleteStoreAccessBulkService(mockQuerier)
 
 	// Test data - same ID for target and creator
 	targetID := "123456789"
@@ -81,7 +81,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySelf(t *testing.
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -97,7 +97,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySelf(t *testing.
 	mockQuerier.On("GetStaffUserByID", mock.Anything, targetStaffID).Return(targetStaff, nil)
 
 	// Call service
-	response, err := service.DeleteStoreAccess(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
+	response, err := service.DeleteStoreAccessBulk(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
 
 	// Assert results
 	assert.Error(t, err)
@@ -108,13 +108,13 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySelf(t *testing.
 	mockQuerier.AssertExpectations(t)
 }
 
-func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySuperAdmin(t *testing.T) {
+func TestDeleteStoreAccessBulkService_DeleteStoreAccessBulk_CannotModifySuperAdmin(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	// Create mock querier
 	mockQuerier := mocks.NewMockQuerier()
-	service := NewDeleteStoreAccessService(mockQuerier)
+	service := NewDeleteStoreAccessBulkService(mockQuerier)
 
 	// Test data
 	targetID := "123456789"
@@ -123,7 +123,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySuperAdmin(t *te
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -139,7 +139,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySuperAdmin(t *te
 	mockQuerier.On("GetStaffUserByID", mock.Anything, targetStaffID).Return(targetStaff, nil)
 
 	// Call service
-	response, err := service.DeleteStoreAccess(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
+	response, err := service.DeleteStoreAccessBulk(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
 
 	// Assert results
 	assert.Error(t, err)
@@ -150,13 +150,13 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySuperAdmin(t *te
 	mockQuerier.AssertExpectations(t)
 }
 
-func TestDeleteStoreAccessService_DeleteStoreAccess_StaffNotFound(t *testing.T) {
+func TestDeleteStoreAccessBulkService_DeleteStoreAccessBulk_StaffNotFound(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	// Create mock querier
 	mockQuerier := mocks.NewMockQuerier()
-	service := NewDeleteStoreAccessService(mockQuerier)
+	service := NewDeleteStoreAccessBulkService(mockQuerier)
 
 	// Test data
 	targetID := "123456789"
@@ -165,7 +165,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_StaffNotFound(t *testing.T) 
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -173,7 +173,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_StaffNotFound(t *testing.T) 
 	mockQuerier.On("GetStaffUserByID", mock.Anything, targetStaffID).Return(dbgen.StaffUser{}, sql.ErrNoRows)
 
 	// Call service
-	response, err := service.DeleteStoreAccess(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
+	response, err := service.DeleteStoreAccessBulk(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
 
 	// Assert results
 	assert.Error(t, err)
@@ -184,13 +184,13 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_StaffNotFound(t *testing.T) 
 	mockQuerier.AssertExpectations(t)
 }
 
-func TestDeleteStoreAccessService_DeleteStoreAccess_PermissionDenied(t *testing.T) {
+func TestDeleteStoreAccessBulkService_DeleteStoreAccessBulk_PermissionDenied(t *testing.T) {
 	env := setup.SetupTestEnvironmentForService(t)
 	defer env.Cleanup()
 
 	// Create mock querier
 	mockQuerier := mocks.NewMockQuerier()
-	service := NewDeleteStoreAccessService(mockQuerier)
+	service := NewDeleteStoreAccessBulkService(mockQuerier)
 
 	// Test data - creator doesn't have access to store being deleted
 	targetID := "123456789"
@@ -199,7 +199,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_PermissionDenied(t *testing.
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2} // Only has access to store 1 and 2
 
-	req := staff.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessBulkRequest{
 		StoreIDs: []string{"1", "3"}, // Trying to delete store 3 which creator doesn't have access to
 	}
 
@@ -215,7 +215,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_PermissionDenied(t *testing.
 	mockQuerier.On("GetStaffUserByID", mock.Anything, targetStaffID).Return(targetStaff, nil)
 
 	// Call service
-	response, err := service.DeleteStoreAccess(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
+	response, err := service.DeleteStoreAccessBulk(context.Background(), targetID, req, creatorID, creatorRole, creatorStoreIDs)
 
 	// Assert results
 	assert.Error(t, err)

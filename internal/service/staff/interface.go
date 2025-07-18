@@ -22,6 +22,6 @@ type CreateStoreAccessServiceInterface interface {
 	CreateStoreAccess(ctx context.Context, targetID string, req staff.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.CreateStoreAccessResponse, bool, error)
 }
 
-type DeleteStoreAccessServiceInterface interface {
-	DeleteStoreAccess(ctx context.Context, targetID string, req staff.DeleteStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.DeleteStoreAccessResponse, error)
+type DeleteStoreAccessBulkServiceInterface interface {
+	DeleteStoreAccessBulk(ctx context.Context, targetID string, req staff.DeleteStoreAccessBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.DeleteStoreAccessBulkResponse, error)
 }

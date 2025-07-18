@@ -71,7 +71,7 @@ func main() {
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 	staffUpdateMeService := staffService.NewUpdateMyStaffService(queries, staffUserRepository)
 	staffStoreAccessService := staffService.NewCreateStoreAccessService(queries)
-	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessService(queries)
+	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessBulkService(queries)
 	stylistCreateService := stylistService.NewCreateMyStylistService(queries)
 	stylistUpdateService := stylistService.NewUpdateMyStylistService(queries, stylistRepository)
 	scheduleCreateBulkService := scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool)
@@ -93,7 +93,7 @@ func main() {
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 	staffUpdateMeHandler := staffHandler.NewUpdateMyStaffHandler(staffUpdateMeService)
 	staffStoreAccessHandler := staffHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
-	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
+	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessBulkHandler(staffDeleteStoreAccessService)
 	stylistCreateHandler := stylistHandler.NewCreateMyStylistHandler(stylistCreateService)
 	stylistUpdateHandler := stylistHandler.NewUpdateMyStylistHandler(stylistUpdateService)
 	scheduleCreateBulkHandler := scheduleHandler.NewCreateSchedulesBulkHandler(scheduleCreateBulkService)
@@ -120,7 +120,7 @@ func main() {
 			staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffUpdateHandler.UpdateStaff)
 			staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), staffUpdateMeHandler.UpdateMyStaff)
 			staff.POST("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffStoreAccessHandler.CreateStoreAccess)
-			staff.DELETE("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffDeleteStoreAccessHandler.DeleteStoreAccess)
+			staff.DELETE("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), staffDeleteStoreAccessHandler.DeleteStoreAccessBulk)
 		}
 
 		stylists := api.Group("/stylists")

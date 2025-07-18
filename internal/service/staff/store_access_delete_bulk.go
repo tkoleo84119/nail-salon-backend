@@ -12,18 +12,18 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteStoreAccessService struct {
+type DeleteStoreAccessBulkService struct {
 	queries dbgen.Querier
 }
 
-func NewDeleteStoreAccessService(queries dbgen.Querier) *DeleteStoreAccessService {
-	return &DeleteStoreAccessService{
+func NewDeleteStoreAccessBulkService(queries dbgen.Querier) *DeleteStoreAccessBulkService {
+	return &DeleteStoreAccessBulkService{
 		queries: queries,
 	}
 }
 
-// DeleteStoreAccess deletes store access for a staff member
-func (s *DeleteStoreAccessService) DeleteStoreAccess(ctx context.Context, targetID string, req staff.DeleteStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.DeleteStoreAccessResponse, error) {
+// DeleteStoreAccessBulk deletes store access for a staff member
+func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context, targetID string, req staff.DeleteStoreAccessBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.DeleteStoreAccessBulkResponse, error) {
 	// Parse target staff ID
 	targetStaffID, err := utils.ParseID(targetID)
 	if err != nil {
@@ -43,7 +43,6 @@ func (s *DeleteStoreAccessService) DeleteStoreAccess(ctx context.Context, target
 	if targetStaffID == creatorID {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotUpdateSelf)
 	}
-
 	// Cannot modify SUPER_ADMIN store access
 	if targetStaff.Role == staff.RoleSuperAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
@@ -99,7 +98,7 @@ func (s *DeleteStoreAccessService) DeleteStoreAccess(ctx context.Context, target
 		})
 	}
 
-	response := &staff.DeleteStoreAccessResponse{
+	response := &staff.DeleteStoreAccessBulkResponse{
 		StaffUserID: utils.FormatID(targetStaffID),
 		StoreList:   storeList,
 	}

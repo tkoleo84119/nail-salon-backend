@@ -12,18 +12,20 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteStoreAccessHandler struct {
-	service staffService.DeleteStoreAccessServiceInterface
+type DeleteStoreAccessBulkHandler struct {
+	service staffService.DeleteStoreAccessBulkServiceInterface
 }
 
-func NewDeleteStoreAccessHandler(service staffService.DeleteStoreAccessServiceInterface) *DeleteStoreAccessHandler {
-	return &DeleteStoreAccessHandler{service: service}
+func NewDeleteStoreAccessBulkHandler(service staffService.DeleteStoreAccessBulkServiceInterface) *DeleteStoreAccessBulkHandler {
+	return &DeleteStoreAccessBulkHandler{service: service}
 }
 
-func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+func (h *DeleteStoreAccessBulkHandler) DeleteStoreAccessBulk(c *gin.Context) {
+	// Parse and validate request
+	var req staff.DeleteStoreAccessBulkRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}
 
@@ -36,11 +38,9 @@ func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
 		return
 	}
 
-	// Parse and validate request
-	var req staff.DeleteStoreAccessRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 
@@ -63,7 +63,7 @@ func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.DeleteStoreAccess(c.Request.Context(), targetID, req, creatorID, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.DeleteStoreAccessBulk(c.Request.Context(), targetID, req, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
