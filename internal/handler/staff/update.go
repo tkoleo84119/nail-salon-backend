@@ -21,12 +21,6 @@ func NewUpdateStaffHandler(service staffService.UpdateStaffServiceInterface) *Up
 }
 
 func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
-		return
-	}
-
 	// Get target staff ID from path parameter
 	targetID := c.Param("id")
 	if targetID == "" {
@@ -45,10 +39,16 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 	}
 
 	// Additional validation: ensure at least one field is provided for update
-	if req.Role == nil && req.IsActive == nil {
+	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
 			"request": "至少需要提供一個欄位進行更新",
 		})
+		return
+	}
+
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 

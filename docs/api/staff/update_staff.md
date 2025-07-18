@@ -28,7 +28,7 @@ Content-Type: application/json
 Authorization: Bearer <access_token>
 ```
 
-### Body（可傳任一欄位，僅更新指定內容）
+### Body
 
 ```json
 {
@@ -36,6 +36,8 @@ Authorization: Bearer <access_token>
   "isActive": false
 }
 ```
+
+- 至少需要提供一個欄位進行更新
 
 ### 驗證規則
 
@@ -70,7 +72,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "role": "不允許的角色"
+    "role": "role只可以傳入特定值"
   }
 }
 ```
@@ -95,7 +97,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "指定的員工帳號不存在"
+  "message": "使用者不存在"
 }
 ```
 
@@ -117,10 +119,12 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 確認目標員工是否存在
-2. 驗證傳入的欄位是否合法（如角色值）
-3. 更新 `staff_users` 的 `role` 與 `is_active` 欄位
-4. 回傳更新後資訊
+1. 驗證請求至少需要提供一個欄位進行更新
+2. 當 `role` 有傳入時，驗證 `role` 是否為合法值
+3. 確認目標員工是否存在
+4. 根據角色檢查是否可以更新
+5. 更新 `staff_users` 的 `role` 與 `is_active` 欄位
+6. 回傳更新後資訊
 
 ---
 

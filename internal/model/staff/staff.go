@@ -36,6 +36,10 @@ type UpdateStaffResponse struct {
 	IsActive bool   `json:"isActive"`
 }
 
+func (r UpdateStaffRequest) HasUpdates() bool {
+	return r.Role != nil || r.IsActive != nil
+}
+
 // UpdateMyStaffRequest represents the request to update current staff user's information
 type UpdateMyStaffRequest struct {
 	Email *string `json:"email,omitempty" binding:"omitempty,email"`

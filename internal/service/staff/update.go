@@ -25,14 +25,14 @@ func NewUpdateStaffService(queries dbgen.Querier, db *sqlx.DB) *UpdateStaffServi
 }
 
 func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, req staff.UpdateStaffRequest, updaterID int64, updaterRole string) (*staff.UpdateStaffResponse, error) {
+	// validate request has at least one field to update
+	if !req.HasUpdates() {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
+	}
+
 	targetIDInt, err := utils.ParseID(targetID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid target ID", err)
-	}
-
-	// Validate request has at least one field to update
-	if req.Role == nil && req.IsActive == nil {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
 	}
 
 	// Validate role if provided
