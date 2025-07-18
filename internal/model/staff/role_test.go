@@ -59,14 +59,14 @@ func TestIsValidRole(t *testing.T) {
 
 func TestGetAllRoles(t *testing.T) {
 	roles := GetAllRoles()
-	
+
 	expectedRoles := []string{
 		RoleSuperAdmin,
 		RoleAdmin,
 		RoleManager,
 		RoleStylist,
 	}
-	
+
 	assert.Equal(t, expectedRoles, roles)
 	assert.Len(t, roles, 4)
 }

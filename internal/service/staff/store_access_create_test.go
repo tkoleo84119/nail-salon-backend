@@ -1,4 +1,4 @@
-package storeAccess
+package staff
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/mocks"
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
@@ -26,7 +25,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_NewlyCreated(t *test
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -91,7 +90,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_Success_AlreadyExists(t *tes
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -148,7 +147,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_InvalidID(t *testing.T) {
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -171,7 +170,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_StaffNotFound(t *testing.T) 
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -200,7 +199,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSelf(t *testing.
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -237,7 +236,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_CannotUpdateSuperAdmin(t *te
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -274,7 +273,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotFound(t *testing.T) 
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -312,7 +311,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_StoreNotActive(t *testing.T)
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -356,7 +355,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_AdminNoPermission(t *testing
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "3", // Admin doesn't have access to store 3
 	}
 
@@ -400,7 +399,7 @@ func TestCreateStoreAccessService_CreateStoreAccess_DatabaseError(t *testing.T) 
 	service := &CreateStoreAccessService{queries: mockQuerier}
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 

@@ -1,4 +1,4 @@
-package storeAccess
+package staff
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -24,7 +23,7 @@ func NewDeleteStoreAccessService(queries dbgen.Querier) *DeleteStoreAccessServic
 }
 
 // DeleteStoreAccess deletes store access for a staff member
-func (s *DeleteStoreAccessService) DeleteStoreAccess(ctx context.Context, targetID string, req storeAccess.DeleteStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*storeAccess.DeleteStoreAccessResponse, error) {
+func (s *DeleteStoreAccessService) DeleteStoreAccess(ctx context.Context, targetID string, req staff.DeleteStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.DeleteStoreAccessResponse, error) {
 	// Parse target staff ID
 	targetStaffID, err := utils.ParseID(targetID)
 	if err != nil {
@@ -100,7 +99,7 @@ func (s *DeleteStoreAccessService) DeleteStoreAccess(ctx context.Context, target
 		})
 	}
 
-	response := &storeAccess.DeleteStoreAccessResponse{
+	response := &staff.DeleteStoreAccessResponse{
 		StaffUserID: utils.FormatID(targetStaffID),
 		StoreList:   storeList,
 	}

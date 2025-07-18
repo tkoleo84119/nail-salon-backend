@@ -1,4 +1,4 @@
-package storeAccess
+package staff
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -24,7 +23,7 @@ func NewCreateStoreAccessService(queries dbgen.Querier) *CreateStoreAccessServic
 }
 
 // CreateStoreAccess creates store access for a staff member
-func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, targetID string, req storeAccess.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*storeAccess.CreateStoreAccessResponse, bool, error) {
+func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, targetID string, req staff.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.CreateStoreAccessResponse, bool, error) {
 	// Parse target staff ID
 	targetStaffID, err := utils.ParseID(targetID)
 	if err != nil {
@@ -120,7 +119,7 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, target
 		})
 	}
 
-	response := &storeAccess.CreateStoreAccessResponse{
+	response := &staff.CreateStoreAccessResponse{
 		StaffUserID: targetID,
 		StoreList:   storeList,
 	}

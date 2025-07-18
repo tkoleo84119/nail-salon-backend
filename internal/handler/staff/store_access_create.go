@@ -1,4 +1,4 @@
-package storeAccess
+package staff
 
 import (
 	"net/http"
@@ -7,20 +7,20 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	storeAccess "github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
-	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
+	staff "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
+	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteStoreAccessHandler struct {
-	service storeAccessService.DeleteStoreAccessServiceInterface
+type CreateStoreAccessHandler struct {
+	service staffService.CreateStoreAccessServiceInterface
 }
 
-func NewDeleteStoreAccessHandler(service storeAccessService.DeleteStoreAccessServiceInterface) *DeleteStoreAccessHandler {
-	return &DeleteStoreAccessHandler{service: service}
+func NewCreateStoreAccessHandler(service staffService.CreateStoreAccessServiceInterface) *CreateStoreAccessHandler {
+	return &CreateStoreAccessHandler{service: service}
 }
 
-func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
+func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
 		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
@@ -37,7 +37,7 @@ func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
 	}
 
 	// Parse and validate request
-	var req storeAccess.DeleteStoreAccessRequest
+	var req staff.CreateStoreAccessRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
@@ -51,10 +51,10 @@ func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
 		return
 	}
 
-	// Convert store IDs to int64 for permission check
+	// Extract store IDs from staff context
 	var creatorStoreIDs []int64
-	for _, storeStr := range staffContext.StoreList {
-		storeID, err := utils.ParseID(storeStr.ID)
+	for _, store := range staffContext.StoreList {
+		storeID, err := utils.ParseID(store.ID)
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 			return
@@ -63,11 +63,16 @@ func (h *DeleteStoreAccessHandler) DeleteStoreAccess(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.DeleteStoreAccess(c.Request.Context(), targetID, req, creatorID, staffContext.Role, creatorStoreIDs)
+	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), targetID, req, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, common.SuccessResponse(response))
+	// Return success response with appropriate status code
+	if isNewlyCreated {
+		c.JSON(http.StatusCreated, common.SuccessResponse(response))
+	} else {
+		c.JSON(http.StatusOK, common.SuccessResponse(response))
+	}
 }

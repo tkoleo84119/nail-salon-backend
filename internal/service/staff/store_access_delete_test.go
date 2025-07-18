@@ -1,4 +1,4 @@
-package storeAccess
+package staff
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	storeAccess "github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/mocks"
 	"github.com/tkoleo84119/nail-salon-backend/internal/testutils/setup"
@@ -30,7 +29,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_Success(t *testing.T) {
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := storeAccess.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -82,7 +81,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySelf(t *testing.
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := storeAccess.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -124,7 +123,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_CannotModifySuperAdmin(t *te
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := storeAccess.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -166,7 +165,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_StaffNotFound(t *testing.T) 
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2, 3}
 
-	req := storeAccess.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessRequest{
 		StoreIDs: []string{"1", "2"},
 	}
 
@@ -200,7 +199,7 @@ func TestDeleteStoreAccessService_DeleteStoreAccess_PermissionDenied(t *testing.
 	creatorRole := staff.RoleAdmin
 	creatorStoreIDs := []int64{1, 2} // Only has access to store 1 and 2
 
-	req := storeAccess.DeleteStoreAccessRequest{
+	req := staff.DeleteStoreAccessRequest{
 		StoreIDs: []string{"1", "3"}, // Trying to delete store 3 which creator doesn't have access to
 	}
 

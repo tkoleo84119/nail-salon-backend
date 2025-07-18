@@ -12,7 +12,6 @@ import (
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
-	storeAccessHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store-access"
 	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
@@ -22,7 +21,6 @@ import (
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
-	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -70,8 +68,8 @@ func main() {
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 	staffUpdateMeService := staffService.NewUpdateStaffMeService(queries, staffUserRepository)
-	staffStoreAccessService := storeAccessService.NewCreateStoreAccessService(queries)
-	staffDeleteStoreAccessService := storeAccessService.NewDeleteStoreAccessService(queries)
+	staffStoreAccessService := staffService.NewCreateStoreAccessService(queries)
+	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessService(queries)
 	stylistCreateService := stylistService.NewCreateStylistService(queries)
 	stylistUpdateService := stylistService.NewUpdateStylistService(queries, stylistRepository)
 	scheduleCreateBulkService := scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool)
@@ -92,8 +90,8 @@ func main() {
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 	staffUpdateMeHandler := staffHandler.NewUpdateStaffMeHandler(staffUpdateMeService)
-	staffStoreAccessHandler := storeAccessHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
-	staffDeleteStoreAccessHandler := storeAccessHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
+	staffStoreAccessHandler := staffHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
+	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessHandler(staffDeleteStoreAccessService)
 	stylistCreateHandler := stylistHandler.NewCreateStylistHandler(stylistCreateService)
 	stylistUpdateHandler := stylistHandler.NewUpdateStylistHandler(stylistUpdateService)
 	scheduleCreateBulkHandler := scheduleHandler.NewCreateSchedulesBulkHandler(scheduleCreateBulkService)

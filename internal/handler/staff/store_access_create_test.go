@@ -1,4 +1,4 @@
-package storeAccess
+package staff
 
 import (
 	"bytes"
@@ -16,8 +16,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	storeAccess "github.com/tkoleo84119/nail-salon-backend/internal/model/store-access"
-	storeAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/store-access"
+	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 )
 
 // MockCreateStoreAccessService implements the CreateStoreAccessServiceInterface for testing
@@ -26,14 +25,14 @@ type MockCreateStoreAccessService struct {
 }
 
 // Ensure MockCreateStoreAccessService implements the interface
-var _ storeAccessService.CreateStoreAccessServiceInterface = (*MockCreateStoreAccessService)(nil)
+var _ staffService.CreateStoreAccessServiceInterface = (*MockCreateStoreAccessService)(nil)
 
-func (m *MockCreateStoreAccessService) CreateStoreAccess(ctx context.Context, targetID string, req storeAccess.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*storeAccess.CreateStoreAccessResponse, bool, error) {
+func (m *MockCreateStoreAccessService) CreateStoreAccess(ctx context.Context, targetID string, req staff.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*staff.CreateStoreAccessResponse, bool, error) {
 	args := m.Called(ctx, targetID, req, creatorID, creatorRole, creatorStoreIDs)
 	if args.Get(0) == nil {
 		return nil, args.Bool(1), args.Error(2)
 	}
-	return args.Get(0).(*storeAccess.CreateStoreAccessResponse), args.Bool(1), args.Error(2)
+	return args.Get(0).(*staff.CreateStoreAccessResponse), args.Bool(1), args.Error(2)
 }
 
 func setupTestGinForStoreAccess() {
@@ -52,11 +51,11 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_Success_Created(t *testing.T
 	handler := NewCreateStoreAccessHandler(mockService)
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
-	expectedResponse := &storeAccess.CreateStoreAccessResponse{
+	expectedResponse := &staff.CreateStoreAccessResponse{
 		StaffUserID: "123456789",
 		StoreList: []common.Store{
 			{ID: "1", Name: "Store 1"},
@@ -120,11 +119,11 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_Success_AlreadyExists(t *tes
 	handler := NewCreateStoreAccessHandler(mockService)
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
-	expectedResponse := &storeAccess.CreateStoreAccessResponse{
+	expectedResponse := &staff.CreateStoreAccessResponse{
 		StaffUserID: "123456789",
 		StoreList: []common.Store{
 			{ID: "1", Name: "Store 1"},
@@ -183,7 +182,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingID(t *testing.T) {
 	handler := NewCreateStoreAccessHandler(mockService)
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -232,7 +231,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_MissingStaffContext(t *testi
 	handler := NewCreateStoreAccessHandler(mockService)
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -356,7 +355,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_ServiceError(t *testing.T) {
 	handler := NewCreateStoreAccessHandler(mockService)
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
@@ -412,7 +411,7 @@ func TestCreateStoreAccessHandler_CreateStoreAccess_InternalError(t *testing.T) 
 	handler := NewCreateStoreAccessHandler(mockService)
 
 	// Test data
-	req := storeAccess.CreateStoreAccessRequest{
+	req := staff.CreateStoreAccessRequest{
 		StoreID: "2",
 	}
 
