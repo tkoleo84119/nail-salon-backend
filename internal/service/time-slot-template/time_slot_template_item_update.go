@@ -13,10 +13,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateTimeSlotTemplateItemServiceInterface interface {
-	UpdateTimeSlotTemplateItem(ctx context.Context, templateID string, itemID string, req timeSlotTemplate.UpdateTimeSlotTemplateItemRequest, staffContext common.StaffContext) (*timeSlotTemplate.UpdateTimeSlotTemplateItemResponse, error)
-}
-
 type UpdateTimeSlotTemplateItemService struct {
 	queries dbgen.Querier
 }

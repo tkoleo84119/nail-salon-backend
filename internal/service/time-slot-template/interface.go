@@ -18,3 +18,7 @@ type UpdateTimeSlotTemplateServiceInterface interface {
 type CreateTimeSlotTemplateItemServiceInterface interface {
 	CreateTimeSlotTemplateItem(ctx context.Context, templateID string, req timeSlotTemplate.CreateTimeSlotTemplateItemRequest, staffContext common.StaffContext) (*timeSlotTemplate.CreateTimeSlotTemplateItemResponse, error)
 }
+
+type UpdateTimeSlotTemplateItemServiceInterface interface {
+	UpdateTimeSlotTemplateItem(ctx context.Context, templateID string, itemID string, req timeSlotTemplate.UpdateTimeSlotTemplateItemRequest, staffContext common.StaffContext) (*timeSlotTemplate.UpdateTimeSlotTemplateItemResponse, error)
+}

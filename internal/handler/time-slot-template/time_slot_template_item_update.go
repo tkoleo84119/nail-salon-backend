@@ -23,6 +23,13 @@ func NewUpdateTimeSlotTemplateItemHandler(service timeSlotTemplateService.Update
 }
 
 func (h *UpdateTimeSlotTemplateItemHandler) UpdateTimeSlotTemplateItem(c *gin.Context) {
+	var req timeSlotTemplate.UpdateTimeSlotTemplateItemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		return
+	}
+
 	templateID := c.Param("templateId")
 	if templateID == "" {
 		validationErrors := map[string]string{
@@ -37,13 +44,6 @@ func (h *UpdateTimeSlotTemplateItemHandler) UpdateTimeSlotTemplateItem(c *gin.Co
 		validationErrors := map[string]string{
 			"itemId": "itemId為必填項目",
 		}
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
-		return
-	}
-
-	var req timeSlotTemplate.UpdateTimeSlotTemplateItemRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}

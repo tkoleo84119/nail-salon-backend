@@ -13,7 +13,7 @@
 ## 說明
 
 - 僅限管理員可針對指定範本（template）下的特定時段（time_slot_template_item）進行更新。
-- 僅支援更新 `startTime` 與 `endTime`。
+- 僅支援同時更新 `startTime` 與 `endTime`。
 
 ---
 
@@ -74,13 +74,13 @@ Authorization: Bearer <access_token>
 
 ### 失敗
 
-#### 400 Bad Request - 驗證錯誤 / 時段重疊
+#### 400 Bad Request - 驗證錯誤
 
 ```json
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "startTime": "格式錯誤"
+    "startTime": "startTime為必填項目"
   }
 }
 ```
@@ -138,10 +138,12 @@ Authorization: Bearer <access_token>
 
 1. 驗證 `templateId` 是否存在。
 2. 驗證 `itemId` 是否存在。
-3. 驗證 `startTime`/`endTime` 格式。
-4. 檢查新時間是否與同範本其他時段重疊。
-5. 更新 `time_slot_template_items` 資料。
-6. 回傳更新結果。
+3. 驗證 `itemId` 是否屬於 `templateId`。
+4. 驗證 `startTime`/`endTime` 格式。
+5. 驗證 `startTime` 必須在 `endTime` 之前。
+6. 驗證新時間是否與同範本其他時段重疊。
+7. 更新 `time_slot_template_items` 資料。
+8. 回傳更新結果。
 
 ---
 
