@@ -10,3 +10,7 @@ import (
 type CreateStoreServiceInterface interface {
 	CreateStore(ctx context.Context, req store.CreateStoreRequest, staffContext common.StaffContext) (*store.CreateStoreResponse, error)
 }
+
+type UpdateStoreServiceInterface interface {
+	UpdateStore(ctx context.Context, storeID string, req store.UpdateStoreRequest, staffContext common.StaffContext) (*store.UpdateStoreResponse, error)
+}

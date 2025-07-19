@@ -24,6 +24,24 @@ func (q *Queries) CheckStoreNameExists(ctx context.Context, name string) (bool, 
 	return exists, err
 }
 
+const checkStoreNameExistsExcluding = `-- name: CheckStoreNameExistsExcluding :one
+SELECT EXISTS(
+    SELECT 1 FROM stores WHERE name = $1 AND id != $2
+)
+`
+
+type CheckStoreNameExistsExcludingParams struct {
+	Name string `db:"name" json:"name"`
+	ID   int64  `db:"id" json:"id"`
+}
+
+func (q *Queries) CheckStoreNameExistsExcluding(ctx context.Context, arg CheckStoreNameExistsExcludingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStoreNameExistsExcluding, arg.Name, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkStoresExistAndActive = `-- name: CheckStoresExistAndActive :one
 SELECT
     COUNT(*) as total_count,
@@ -147,6 +165,34 @@ func (q *Queries) GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, 
 	row := q.db.QueryRow(ctx, getStoreByID, id)
 	var i GetStoreByIDRow
 	err := row.Scan(&i.ID, &i.Name, &i.IsActive)
+	return i, err
+}
+
+const getStoreDetailByID = `-- name: GetStoreDetailByID :one
+SELECT
+    id,
+    name,
+    address,
+    phone,
+    is_active,
+    created_at,
+    updated_at
+FROM stores
+WHERE id = $1
+`
+
+func (q *Queries) GetStoreDetailByID(ctx context.Context, id int64) (Store, error) {
+	row := q.db.QueryRow(ctx, getStoreDetailByID, id)
+	var i Store
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Address,
+		&i.Phone,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }
 

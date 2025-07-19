@@ -73,6 +73,7 @@ func main() {
 	// initialize repositories
 	stylistRepository := sqlx.NewStylistRepository(database.Sqlx)
 	staffUserRepository := sqlx.NewStaffUserRepository(database.Sqlx)
+	storeRepository := sqlx.NewStoreRepository(database.Sqlx)
 
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
@@ -82,6 +83,7 @@ func main() {
 	staffStoreAccessService := staffService.NewCreateStoreAccessService(queries)
 	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessBulkService(queries)
 	storeCreateService := storeService.NewCreateStoreService(queries, database.PgxPool)
+	storeUpdateService := storeService.NewUpdateStoreService(queries, storeRepository)
 	stylistCreateService := stylistService.NewCreateMyStylistService(queries)
 	stylistUpdateService := stylistService.NewUpdateMyStylistService(queries, stylistRepository)
 	scheduleCreateBulkService := scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool)
@@ -106,6 +108,7 @@ func main() {
 	staffStoreAccessHandler := staffHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
 	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessBulkHandler(staffDeleteStoreAccessService)
 	storeCreateHandler := storeHandler.NewCreateStoreHandler(storeCreateService)
+	storeUpdateHandler := storeHandler.NewUpdateStoreHandler(storeUpdateService)
 	stylistCreateHandler := stylistHandler.NewCreateMyStylistHandler(stylistCreateService)
 	stylistUpdateHandler := stylistHandler.NewUpdateMyStylistHandler(stylistUpdateService)
 	scheduleCreateBulkHandler := scheduleHandler.NewCreateSchedulesBulkHandler(scheduleCreateBulkService)
@@ -154,6 +157,7 @@ func main() {
 		stores := api.Group("/stores")
 		{
 			stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), storeCreateHandler.CreateStore)
+			stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), storeUpdateHandler.UpdateStore)
 		}
 
 		timeSlotTemplates := api.Group("/time-slot-templates")

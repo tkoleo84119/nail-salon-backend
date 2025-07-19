@@ -7,6 +7,7 @@ import (
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
 	timeSlotTemplate "github.com/tkoleo84119/nail-salon-backend/internal/model/time-slot-template"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
@@ -98,4 +99,25 @@ func (m *MockUpdateTimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx contex
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*timeSlotTemplate.UpdateTimeSlotTemplateResponse), args.Error(1)
+}
+
+// MockStoreRepository mocks the sqlx repository for testing
+type MockStoreRepository struct {
+	mock.Mock
+}
+
+// Ensure MockStoreRepository implements the interface
+var _ sqlxRepo.StoreRepositoryInterface = (*MockStoreRepository)(nil)
+
+// NewMockStoreRepository creates a new instance of MockStoreRepository
+func NewMockStoreRepository() *MockStoreRepository {
+	return &MockStoreRepository{}
+}
+
+func (m *MockStoreRepository) UpdateStore(ctx context.Context, storeID int64, req store.UpdateStoreRequest) (*store.UpdateStoreResponse, error) {
+	args := m.Called(ctx, storeID, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*store.UpdateStoreResponse), args.Error(1)
 }

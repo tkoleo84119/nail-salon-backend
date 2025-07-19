@@ -43,6 +43,19 @@ SELECT
 FROM stores
 WHERE id = ANY($1::bigint[]);
 
+
+-- name: GetStoreDetailByID :one
+SELECT
+    id,
+    name,
+    address,
+    phone,
+    is_active,
+    created_at,
+    updated_at
+FROM stores
+WHERE id = $1;
+
 -- name: CheckStoresExistAndActive :one
 SELECT
     COUNT(*) as total_count,
@@ -53,4 +66,9 @@ WHERE id = ANY($1::bigint[]);
 -- name: CheckStoreNameExists :one
 SELECT EXISTS(
     SELECT 1 FROM stores WHERE name = $1
+);
+
+-- name: CheckStoreNameExistsExcluding :one
+SELECT EXISTS(
+    SELECT 1 FROM stores WHERE name = $1 AND id != $2
 );

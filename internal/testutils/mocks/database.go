@@ -265,3 +265,13 @@ func (m *MockQuerier) CreateStore(ctx context.Context, arg dbgen.CreateStorePara
 	args := m.Called(ctx, arg)
 	return args.Get(0).(dbgen.Store), args.Error(1)
 }
+
+func (m *MockQuerier) CheckStoreNameExistsExcluding(ctx context.Context, arg dbgen.CheckStoreNameExistsExcludingParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockQuerier) GetStoreDetailByID(ctx context.Context, id int64) (dbgen.Store, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.Store), args.Error(1)
+}
