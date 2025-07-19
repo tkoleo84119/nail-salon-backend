@@ -22,12 +22,6 @@ func NewDeleteTimeSlotHandler(service scheduleService.DeleteTimeSlotServiceInter
 }
 
 func (h *DeleteTimeSlotHandler) DeleteTimeSlot(c *gin.Context) {
-	// Get staff context from middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
-		return
-	}
 
 	// Get path parameters
 	scheduleID := c.Param("scheduleId")
@@ -43,6 +37,13 @@ func (h *DeleteTimeSlotHandler) DeleteTimeSlot(c *gin.Context) {
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
 			"timeSlotId": "timeSlotId為必填項目",
 		})
+		return
+	}
+
+	// Get staff context from middleware
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 

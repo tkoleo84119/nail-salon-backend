@@ -120,14 +120,15 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 檢查 `scheduleId` 是否存在。
-2. 檢查 `timeSlotId` 是否存在。
-3. 檢查 `timeSlotId` 是否屬於 `scheduleId`。
-4. 判斷身分是否可操作指定 time_slot（員工僅可刪除自己的 time_slot，管理員可刪除任一美甲師 time_slot）。
-5. 檢查是否有權限操作該 store。
-6. 檢查 `timeSlotId` 是否已被預約。(被預約時，isAvailable = false，不可刪除)
-7. 執行刪除。
-8. 回傳已刪除 id。
+1. 檢查 `timeSlotId` 是否存在。
+2. 確認 `timeSlotId` 是否屬於指定 schedule。
+3. 確認 `timeSlotId` 是否已被預約。(被預約時，isAvailable = false，不可刪除)
+4. 取得 schedule 資訊。
+5. 取得 stylist 資訊。
+7. 判斷身分是否可操作指定 time_slot（員工僅可刪除自己的 time_slot，管理員可刪除任一美甲師 time_slot）。
+8. 檢查是否有權限操作該 store。
+9. 執行刪除。
+10. 回傳已刪除 id。
 
 ---
 
