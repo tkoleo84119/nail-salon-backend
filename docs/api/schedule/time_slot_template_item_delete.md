@@ -33,8 +33,8 @@ Authorization: Bearer <access_token>
 
 ### Path Parameter
 
-| 參數         | 說明   |
-| ---------- | ---- |
+| 參數       | 說明   |
+| ---------- | ------ |
 | templateId | 範本ID |
 | itemId     | 項目ID |
 
@@ -107,8 +107,9 @@ Authorization: Bearer <access_token>
 
 1. 驗證 `templateId` 是否存在。
 2. 驗證 `itemId` 是否存在。
-3. 刪除 `time_slot_template_items` 資料。
-4. 回傳已刪除 id。
+3. 驗證 `itemId` 是否屬於 `templateId`。
+4. 刪除 `time_slot_template_items` 資料。
+5. 回傳已刪除 id。
 
 ---
 

@@ -10,10 +10,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteTimeSlotTemplateItemServiceInterface interface {
-	DeleteTimeSlotTemplateItem(ctx context.Context, templateID string, itemID string, staffContext common.StaffContext) (*timeSlotTemplate.DeleteTimeSlotTemplateItemResponse, error)
-}
-
 type DeleteTimeSlotTemplateItemService struct {
 	queries dbgen.Querier
 }
