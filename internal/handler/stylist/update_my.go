@@ -14,12 +14,12 @@ import (
 )
 
 type UpdateMyStylistHandler struct {
-	updateStylistService stylistService.UpdateMyStylistServiceInterface
+	updateMyStylistService stylistService.UpdateMyStylistServiceInterface
 }
 
-func NewUpdateMyStylistHandler(updateStylistService stylistService.UpdateMyStylistServiceInterface) *UpdateMyStylistHandler {
+func NewUpdateMyStylistHandler(updateMyStylistService stylistService.UpdateMyStylistServiceInterface) *UpdateMyStylistHandler {
 	return &UpdateMyStylistHandler{
-		updateStylistService: updateStylistService,
+		updateMyStylistService: updateMyStylistService,
 	}
 }
 
@@ -32,7 +32,7 @@ func (h *UpdateMyStylistHandler) UpdateMyStylist(c *gin.Context) {
 	}
 
 	// Additional validation: ensure at least one field is provided for update
-	if req.StylistName == nil && req.GoodAtShapes == nil && req.GoodAtColors == nil && req.GoodAtStyles == nil && req.IsIntrovert == nil {
+	if !req.HasUpdate() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
 			"request": "至少需要提供一個欄位進行更新",
 		})
@@ -51,7 +51,7 @@ func (h *UpdateMyStylistHandler) UpdateMyStylist(c *gin.Context) {
 		return
 	}
 
-	response, err := h.updateStylistService.UpdateMyStylist(c.Request.Context(), req, staffUserID)
+	response, err := h.updateMyStylistService.UpdateMyStylist(c.Request.Context(), req, staffUserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

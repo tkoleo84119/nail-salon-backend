@@ -31,7 +31,7 @@ Content-Type: application/json
 Authorization: Bearer <access_token>
 ```
 
-### Body（可傳任一欄位，僅更新指定內容）
+### Body
 
 ```json
 {
@@ -42,6 +42,8 @@ Authorization: Bearer <access_token>
   "isIntrovert": true
 }
 ```
+
+- 可傳任一欄位，僅更新指定內容
 
 ### 驗證規則
 
@@ -81,7 +83,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "stylistName": "美甲師姓名長度不可超過50字"
+    "request": "至少需要提供一個欄位進行更新"
   }
 }
 ```
@@ -129,10 +131,11 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 檢查 `stylists` 表是否有該 `staff_user_id` 對應資料：
+1. 驗證至少一個欄位有更新
+2. 檢查 `stylists` 表是否有該 `staff_user_id` 對應資料：
    - 若尚未建立，回傳 404 Not Found。
-2. 更新 `stylists` 表的指定欄位。
-3. 回傳更新後的 stylist 資料。
+3. 更新 `stylists` 表的指定欄位。
+4. 回傳更新後的 stylist 資料。
 
 ---
 

@@ -39,3 +39,7 @@ type UpdateMyStylistResponse struct {
 	GoodAtStyles []string `json:"goodAtStyles"`
 	IsIntrovert  bool     `json:"isIntrovert"`
 }
+
+func (r *UpdateMyStylistRequest) HasUpdate() bool {
+	return r.StylistName != nil || r.GoodAtShapes != nil || r.GoodAtColors != nil || r.GoodAtStyles != nil || r.IsIntrovert != nil
+}
