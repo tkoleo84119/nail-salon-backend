@@ -84,7 +84,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "name": "名稱為必填"
+    "name": "name為必填"
   }
 }
 ```
@@ -124,7 +124,10 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 驗證 `timeSlots` 不可重疊。
+1. 驗證 `timeSlots` 相關邏輯。
+   1. 驗證 startTime/endTime 格式是否正確。
+   2. startTime 必須在 endTime 之前。
+   3. 驗證 timeSlots 之間不可重疊。
 2. 建立 `time_slot_templates` 資料。
 3. 建立對應多筆 `time_slot_template_items` 資料。
 4. 回傳建立結果。

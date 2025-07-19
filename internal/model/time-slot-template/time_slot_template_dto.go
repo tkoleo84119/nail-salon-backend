@@ -10,7 +10,7 @@ type TimeSlotItem struct {
 type CreateTimeSlotTemplateRequest struct {
 	Name      string         `json:"name" binding:"required,min=1,max=50"`
 	Note      string         `json:"note" binding:"max=100"`
-	TimeSlots []TimeSlotItem `json:"timeSlots" binding:"required,min=1"`
+	TimeSlots []TimeSlotItem `json:"timeSlots" binding:"required,min=1,max=50"`
 }
 
 // TimeSlotItemResponse represents a time slot in the response

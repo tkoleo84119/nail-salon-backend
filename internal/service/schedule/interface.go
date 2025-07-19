@@ -22,3 +22,7 @@ type CreateTimeSlotServiceInterface interface {
 type UpdateTimeSlotServiceInterface interface {
 	UpdateTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, req schedule.UpdateTimeSlotRequest, staffContext common.StaffContext) (*schedule.UpdateTimeSlotResponse, error)
 }
+
+type DeleteTimeSlotServiceInterface interface {
+	DeleteTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, staffContext common.StaffContext) (*schedule.DeleteTimeSlotResponse, error)
+}

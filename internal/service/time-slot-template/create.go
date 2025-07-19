@@ -14,10 +14,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateTimeSlotTemplateServiceInterface interface {
-	CreateTimeSlotTemplate(ctx context.Context, req timeSlotTemplate.CreateTimeSlotTemplateRequest, staffContext common.StaffContext) (*timeSlotTemplate.CreateTimeSlotTemplateResponse, error)
-}
-
 type CreateTimeSlotTemplateService struct {
 	queries dbgen.Querier
 	db      *pgxpool.Pool
@@ -31,15 +27,15 @@ func NewCreateTimeSlotTemplateService(queries dbgen.Querier, db *pgxpool.Pool) *
 }
 
 func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Context, req timeSlotTemplate.CreateTimeSlotTemplateRequest, staffContext common.StaffContext) (*timeSlotTemplate.CreateTimeSlotTemplateResponse, error) {
-	// Validate time slots
-	if err := s.validateTimeSlots(req.TimeSlots); err != nil {
-		return nil, err
-	}
-
 	// Parse staff user ID
 	staffUserID, err := utils.ParseID(staffContext.UserID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
+	}
+
+	// Validate time slots
+	if err := s.validateTimeSlots(req.TimeSlots); err != nil {
+		return nil, err
 	}
 
 	// Generate template ID

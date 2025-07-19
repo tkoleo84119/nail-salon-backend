@@ -11,10 +11,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteTimeSlotServiceInterface interface {
-	DeleteTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, staffContext common.StaffContext) (*schedule.DeleteTimeSlotResponse, error)
-}
-
 type DeleteTimeSlotService struct {
 	queries dbgen.Querier
 }
