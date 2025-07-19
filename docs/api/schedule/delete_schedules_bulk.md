@@ -76,7 +76,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "scheduleIds": "班表編號清單最小值為1"
+    "scheduleIds": "scheduleIds最小值為1"
   }
 }
 ```

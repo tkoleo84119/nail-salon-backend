@@ -161,7 +161,7 @@ Authorization: Bearer <access_token>
 2. 判斷身分是否可操作指定 stylistId (員工只能建立自己的班表，管理員可建立任一美甲師班表)。
 3. 檢查 `storeId` 是否存在。
 4. 判斷是否有權限操作指定 `storeId`。
-5. 驗證每筆 schedule 的日期、timeSlots（不可重複）。
+5. 驗證每筆 schedule 的日期、timeSlots（不可重複，且時間區段不得重疊）。
 6. 檢查同一天同店同美甲師是否已有班表（不可重複排班）。
 7. 新增 `schedules` 資料。
 8. 批次建立對應的多筆 `time_slots`。
