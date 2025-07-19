@@ -73,13 +73,13 @@ Authorization: Bearer <access_token>
 
 ### 失敗
 
-#### 400 Bad Request - 驗證錯誤 / 時段重疊
+#### 400 Bad Request - 驗證錯誤
 
 ```json
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "startTime": "格式錯誤"
+    "startTime": "startTime為必填項目"
   }
 }
 ```
@@ -137,9 +137,10 @@ Authorization: Bearer <access_token>
 
 1. 驗證 `templateId` 是否存在。
 2. 驗證 `startTime`/`endTime` 格式。
-3. 檢查新時段是否與範本內其他時段重疊。
-4. 建立 `time_slot_template_item`。
-5. 回傳建立結果。
+3. 驗證 `startTime` 必須在 `endTime` 之前。
+4. 驗證新時段是否與範本內其他時段重疊。
+5. 建立 `time_slot_template_item`。
+6. 回傳建立結果。
 
 ---
 

@@ -24,10 +24,11 @@ func NewCreateTimeSlotTemplateItemHandler(service timeSlotTemplateService.Create
 }
 
 func (h *CreateTimeSlotTemplateItemHandler) CreateTimeSlotTemplateItem(c *gin.Context) {
-	// Get staff context from middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+	// Parse and validate request
+	var req timeSlotTemplate.CreateTimeSlotTemplateItemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}
 
@@ -41,11 +42,10 @@ func (h *CreateTimeSlotTemplateItemHandler) CreateTimeSlotTemplateItem(c *gin.Co
 		return
 	}
 
-	// Parse and validate request
-	var req timeSlotTemplate.CreateTimeSlotTemplateItemRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+	// Get staff context from middleware
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 
