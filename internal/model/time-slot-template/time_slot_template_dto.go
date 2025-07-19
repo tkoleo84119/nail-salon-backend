@@ -44,3 +44,8 @@ type UpdateTimeSlotTemplateResponse struct {
 func (r *UpdateTimeSlotTemplateRequest) HasUpdate() bool {
 	return r.Name != nil || r.Note != nil
 }
+
+// DeleteTimeSlotTemplateResponse represents the response after deleting a time slot template
+type DeleteTimeSlotTemplateResponse struct {
+	Deleted []string `json:"deleted"`
+}

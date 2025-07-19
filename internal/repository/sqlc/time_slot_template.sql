@@ -50,3 +50,7 @@ SELECT
 FROM time_slot_template_items
 WHERE template_id = $1
 ORDER BY start_time;
+
+-- name: DeleteTimeSlotTemplate :exec
+DELETE FROM time_slot_templates
+WHERE id = $1;

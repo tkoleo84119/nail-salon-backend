@@ -23,6 +23,10 @@ type UpdateTimeSlotTemplateItemServiceInterface interface {
 	UpdateTimeSlotTemplateItem(ctx context.Context, templateID string, itemID string, req timeSlotTemplate.UpdateTimeSlotTemplateItemRequest, staffContext common.StaffContext) (*timeSlotTemplate.UpdateTimeSlotTemplateItemResponse, error)
 }
 
+type DeleteTimeSlotTemplateServiceInterface interface {
+	DeleteTimeSlotTemplate(ctx context.Context, templateID string, staffContext common.StaffContext) (*timeSlotTemplate.DeleteTimeSlotTemplateResponse, error)
+}
+
 type DeleteTimeSlotTemplateItemServiceInterface interface {
 	DeleteTimeSlotTemplateItem(ctx context.Context, templateID string, itemID string, staffContext common.StaffContext) (*timeSlotTemplate.DeleteTimeSlotTemplateItemResponse, error)
 }

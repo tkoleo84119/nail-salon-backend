@@ -87,6 +87,32 @@ Follow Conventional Commits format: `<type>: <description>`
 - When adding a new SQL for batch insert operations, use sqlc's :copyfrom
 - Handler & service & model need to use modules struct by business domain (separate by folder)
 
+### Validation Patterns
+
+#### Handler Layer Validation (Fixed Order)
+1. **Input JSON Validation** - Always first, using `c.ShouldBindJSON(&req)`
+2. **Path Parameter Validation** - Validate required URL parameters
+3. **Business Logic Validation** - Check if update requests have fields using `req.HasUpdates()` or `req.HasUpdate()`
+4. **Authentication Context Validation** - Use `middleware.GetStaffFromContext(c)` (not legacy `c.Get("staffContext")`)
+5. **ID Parsing Validation** - Convert string IDs using `utils.ParseID()`
+6. **Service Layer Call** - Pass validated data to service
+
+#### Service Layer Validation (Fixed Order)
+1. **Input Data Validation** - Parse IDs using `utils.ParseID()` and `utils.ParseIDSlice()`
+2. **Request Completeness** - Validate update requests have at least one field
+3. **Business Logic Validation** - Role validation, time ranges, entity existence
+4. **Permission & Authorization** - Role-based checks, store access, ownership validation
+5. **Data Integrity Validation** - Uniqueness, conflict prevention, entity state
+
+#### Validation Guidelines
+- **Handler Validation**: Focus on input format, authentication context, and basic parameter validation
+- **Service Validation**: Handle business logic, permissions, and data integrity
+- **Error Handling**: Use `errorCodes.AbortWithError()` in handlers, `errorCodes.NewServiceError()` in services
+- **Context Extraction**: Always use `middleware.GetStaffFromContext(c)` for staff context
+- **ID Parsing**: Use `utils.ParseID()` for string to int64 conversion with validation
+- **Time Validation**: Use `common.ParseTimeSlot()` for time format validation
+- **Update Validation**: Implement `HasUpdates()` or `HasUpdate()` methods on request models
+
 ### Error Handling Patterns
 - Use predefined error constants for consistent error management
 - For permission issues, use `AUTH.AUTH_PERMISSION_DENIED` instead of creating new error

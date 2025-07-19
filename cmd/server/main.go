@@ -83,6 +83,7 @@ func main() {
 	timeSlotTemplateCreateService := timeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool)
 	timeSlotTemplateRepository := sqlx.NewTimeSlotTemplateRepository(database.Sqlx)
 	timeSlotTemplateUpdateService := timeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, timeSlotTemplateRepository)
+	timeSlotTemplateDeleteService := timeSlotTemplateService.NewDeleteTimeSlotTemplateService(queries)
 	timeSlotTemplateCreateItemService := timeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries)
 	timeSlotTemplateUpdateItemService := timeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries)
 	timeSlotTemplateDeleteItemService := timeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries)
@@ -103,6 +104,7 @@ func main() {
 	scheduleDeleteTimeSlotHandler := scheduleHandler.NewDeleteTimeSlotHandler(scheduleDeleteTimeSlotService)
 	timeSlotTemplateCreateHandler := timeSlotTemplateHandler.NewCreateTimeSlotTemplateHandler(timeSlotTemplateCreateService)
 	timeSlotTemplateUpdateHandler := timeSlotTemplateHandler.NewUpdateTimeSlotTemplateHandler(timeSlotTemplateUpdateService)
+	timeSlotTemplateDeleteHandler := timeSlotTemplateHandler.NewDeleteTimeSlotTemplateHandler(timeSlotTemplateDeleteService)
 	timeSlotTemplateCreateItemHandler := timeSlotTemplateHandler.NewCreateTimeSlotTemplateItemHandler(timeSlotTemplateCreateItemService)
 	timeSlotTemplateUpdateItemHandler := timeSlotTemplateHandler.NewUpdateTimeSlotTemplateItemHandler(timeSlotTemplateUpdateItemService)
 	timeSlotTemplateDeleteItemHandler := timeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(timeSlotTemplateDeleteItemService)
@@ -142,6 +144,7 @@ func main() {
 		{
 			timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateCreateHandler.CreateTimeSlotTemplate)
 			timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateUpdateHandler.UpdateTimeSlotTemplate)
+			timeSlotTemplates.DELETE("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateDeleteHandler.DeleteTimeSlotTemplate)
 			timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateCreateItemHandler.CreateTimeSlotTemplateItem)
 			timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateUpdateItemHandler.UpdateTimeSlotTemplateItem)
 			timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateDeleteItemHandler.DeleteTimeSlotTemplateItem)

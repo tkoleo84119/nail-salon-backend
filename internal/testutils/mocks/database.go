@@ -245,6 +245,11 @@ func (m *MockQuerier) GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.
 	return args.Get(0).([]dbgen.TimeSlotTemplateItem), args.Error(1)
 }
 
+func (m *MockQuerier) DeleteTimeSlotTemplate(ctx context.Context, id int64) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
 func (m *MockQuerier) DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
