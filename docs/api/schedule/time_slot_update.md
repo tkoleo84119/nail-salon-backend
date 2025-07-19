@@ -155,16 +155,21 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 驗證 startTime/endTime 格式 (不可單獨傳入，兩個都要傳入)。
-2. 檢查 `scheduleId` 是否存在。
+1. 驗證至少一個欄位有更新。
+2. 若 startTime/endTime 有傳入，另外一個欄位必須有傳入。
 3. 檢查 `timeSlotId` 是否存在。
-4. 檢查 `timeSlotId` 是否屬於 `scheduleId`。
-5. 判斷身分是否可操作指定 time_slot（員工僅可編輯自己的 time_slot，管理員可編輯任一美甲師 time_slot）。
-6. 檢查是否有權限操作該 store。
-7. 檢查 `timeSlotId` 是否已被預約。(被預約時，不可變更任何欄位)
-8. 若有更新時間，檢查是否與 schedule 下其他 time_slots 重疊。
-9. 更新 time_slot。
-10. 回傳更新結果。
+4. 判斷 time_slot 是否屬於指定 schedule。
+5. 檢查 `timeSlotId` 是否已被預約。(被預約時，不可變更任何欄位)
+6. 檢查 `scheduleId` 是否存在。
+7. 取得 stylist 資訊。
+8. 判斷身分是否可操作指定 time_slot（員工僅可編輯自己的 time_slot，管理員可編輯任一美甲師 time_slot）。
+9.  檢查是否有權限操作該 store。
+10. 若有更新時間，檢查是否時間相關邏輯
+    1.  startTime / endTime 格式是否正確。
+    2.  startTime 必須在 endTime 之前。
+    3.  startTime / endTime 是否與 schedule 下其他 time_slots 重疊。
+11. 更新 time_slot。
+12. 回傳更新結果。
 
 ---
 

@@ -18,3 +18,7 @@ type DeleteSchedulesBulkServiceInterface interface {
 type CreateTimeSlotServiceInterface interface {
 	CreateTimeSlot(ctx context.Context, scheduleID string, req schedule.CreateTimeSlotRequest, staffContext common.StaffContext) (*schedule.CreateTimeSlotResponse, error)
 }
+
+type UpdateTimeSlotServiceInterface interface {
+	UpdateTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, req schedule.UpdateTimeSlotRequest, staffContext common.StaffContext) (*schedule.UpdateTimeSlotResponse, error)
+}

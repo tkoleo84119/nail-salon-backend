@@ -14,10 +14,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateTimeSlotServiceInterface interface {
-	UpdateTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, req schedule.UpdateTimeSlotRequest, staffContext common.StaffContext) (*schedule.UpdateTimeSlotResponse, error)
-}
-
 type UpdateTimeSlotService struct {
 	queries      dbgen.Querier
 	timeSlotRepo sqlx.TimeSlotRepositoryInterface
@@ -32,7 +28,7 @@ func NewUpdateTimeSlotService(queries dbgen.Querier, timeSlotRepo sqlx.TimeSlotR
 
 func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, req schedule.UpdateTimeSlotRequest, staffContext common.StaffContext) (*schedule.UpdateTimeSlotResponse, error) {
 	// Validate at least one field is provided
-	if req.StartTime == nil && req.EndTime == nil && req.IsAvailable == nil {
+	if !req.HasUpdate() {
 		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
 	}
 

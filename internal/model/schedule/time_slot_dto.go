@@ -27,6 +27,10 @@ type UpdateTimeSlotResponse struct {
 	IsAvailable bool   `json:"isAvailable"`
 }
 
+func (r *UpdateTimeSlotRequest) HasUpdate() bool {
+	return r.StartTime != nil || r.EndTime != nil || r.IsAvailable != nil
+}
+
 type DeleteTimeSlotResponse struct {
 	Deleted []string `json:"deleted"`
 }

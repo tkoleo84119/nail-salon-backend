@@ -24,10 +24,11 @@ func NewUpdateTimeSlotHandler(service scheduleService.UpdateTimeSlotServiceInter
 }
 
 func (h *UpdateTimeSlotHandler) UpdateTimeSlot(c *gin.Context) {
-	// Get staff context from middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+	// Parse and validate request
+	var req scheduleModel.UpdateTimeSlotRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}
 
@@ -48,11 +49,17 @@ func (h *UpdateTimeSlotHandler) UpdateTimeSlot(c *gin.Context) {
 		return
 	}
 
-	// Parse and validate request
-	var req scheduleModel.UpdateTimeSlotRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+	if !req.HasUpdate() {
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
+			"request": "至少需要提供一個欄位進行更新",
+		})
+		return
+	}
+
+	// Get staff context from middleware
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 

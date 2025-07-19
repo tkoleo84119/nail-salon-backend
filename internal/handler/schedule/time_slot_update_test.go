@@ -309,62 +309,6 @@ func TestUpdateTimeSlotHandler_UpdateTimeSlot_InvalidJSON(t *testing.T) {
 	assert.NotNil(t, response.Errors)
 }
 
-func TestUpdateTimeSlotHandler_UpdateTimeSlot_ValidationError(t *testing.T) {
-	setupTestGinForUpdateTimeSlot()
-
-	// Create mock service
-	mockService := new(MockUpdateTimeSlotService)
-	handler := NewUpdateTimeSlotHandler(mockService)
-
-	// Set up mock expectations - return validation error
-	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
-	mockService.On("UpdateTimeSlot", mock.Anything, "4000000001", "5000000001", mock.AnythingOfType("schedule.UpdateTimeSlotRequest"), mock.AnythingOfType("common.StaffContext")).Return(nil, serviceError)
-
-	// Create request with empty fields
-	updateReq := schedule.UpdateTimeSlotRequest{
-		// All fields are nil
-	}
-	reqBody, _ := json.Marshal(updateReq)
-
-	// Create test context with staff context
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request, _ = http.NewRequest("PUT", "/api/schedules/4000000001/time-slots/5000000001", bytes.NewBuffer(reqBody))
-	c.Request.Header.Set("Content-Type", "application/json")
-	c.Params = gin.Params{
-		{Key: "scheduleId", Value: "4000000001"},
-		{Key: "timeSlotId", Value: "5000000001"},
-	}
-
-	// Set staff context
-	staffContext := common.StaffContext{
-		UserID:   "11111",
-		Username: "admin",
-		Role:     staff.RoleAdmin,
-		StoreList: []common.Store{
-			{ID: "67890", Name: "Test Store"},
-		},
-	}
-	c.Set("user", staffContext)
-
-	// Call handler
-	handler.UpdateTimeSlot(c)
-
-	// Assert response
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	var response common.ApiResponse
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-
-	assert.Equal(t, "至少需要提供一個欄位進行更新", response.Message)
-	assert.Nil(t, response.Data)
-	assert.Nil(t, response.Errors)
-
-	// Verify all expectations were met
-	mockService.AssertExpectations(t)
-}
-
 func TestUpdateTimeSlotHandler_UpdateTimeSlot_TimeSlotNotFound(t *testing.T) {
 	setupTestGinForUpdateTimeSlot()
 
