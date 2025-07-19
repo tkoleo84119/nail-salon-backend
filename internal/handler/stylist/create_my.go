@@ -14,12 +14,12 @@ import (
 )
 
 type CreateMyStylistHandler struct {
-	createStylistService stylistService.CreateMyStylistServiceInterface
+	createMyStylistService stylistService.CreateMyStylistServiceInterface
 }
 
-func NewCreateMyStylistHandler(createStylistService stylistService.CreateMyStylistServiceInterface) *CreateMyStylistHandler {
+func NewCreateMyStylistHandler(createMyStylistService stylistService.CreateMyStylistServiceInterface) *CreateMyStylistHandler {
 	return &CreateMyStylistHandler{
-		createStylistService: createStylistService,
+		createMyStylistService: createMyStylistService,
 	}
 }
 
@@ -43,7 +43,7 @@ func (h *CreateMyStylistHandler) CreateMyStylist(c *gin.Context) {
 		return
 	}
 
-	response, err := h.createStylistService.CreateMyStylist(c.Request.Context(), req, staffUserID)
+	response, err := h.createMyStylistService.CreateMyStylist(c.Request.Context(), req, staffUserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

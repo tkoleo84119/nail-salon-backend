@@ -81,7 +81,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "stylistName": "美甲師姓名為必填"
+    "stylistName": "stylistName為必填"
   }
 }
 ```

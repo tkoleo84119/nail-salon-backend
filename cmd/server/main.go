@@ -125,7 +125,7 @@ func main() {
 
 		stylists := api.Group("/stylists")
 		{
-			stylists.POST("me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistCreateHandler.CreateMyStylist)
+			stylists.POST("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistCreateHandler.CreateMyStylist)
 			stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), stylistUpdateHandler.UpdateMyStylist)
 		}
 
