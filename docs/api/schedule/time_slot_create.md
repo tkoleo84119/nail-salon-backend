@@ -70,7 +70,8 @@ Authorization: Bearer <access_token>
     "id": "5000000011",
     "scheduleId": "4000000001",
     "startTime": "14:00",
-    "endTime": "16:00"
+    "endTime": "16:00",
+    "isAvailable": true
   }
 }
 ```
@@ -83,7 +84,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "startTime": "格式錯誤"
+    "startTime": "startTime為必填項目"
   }
 }
 ```
@@ -122,7 +123,7 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "時段重疊，不可新增重複時間"
+  "message": "時間區段重疊"
 }
 ```
 
@@ -147,20 +148,21 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 檢查 `scheduleId` 是否存在。
-2. 檢查 schedule 所屬的 stylist/store 是否存在。
-3. 判斷身分是否可操作指定 schedule（員工只能新增自己的班表，管理員可新增任一美甲師班表）。
-4. 檢查是否有權限操作該 store。
-5. 驗證 startTime/endTime 格式。
-6. 檢查時間區間是否與該 schedule 下既有 time\_slots 重疊。
-7. 建立新的 time\_slot。
-8. 回傳新增結果。
+1. 檢查 startTime/endTime 格式。
+2. 確認 startTime 必須在 endTime 之前。
+3. 檢查 `scheduleId` 是否存在。
+4. 檢查 schedule 所屬的 stylist/store 是否存在。
+5. 判斷身分是否可操作指定 schedule（員工只能新增自己的班表，管理員可新增任一美甲師班表）。
+6. 檢查是否有權限操作該 store。
+7. 檢查時間區間是否與該 schedule 下既有 time_slots 重疊。
+8. 建立新的 time_slot，並設定 isAvailable 為 true。
+9. 回傳新增結果。
 
 ---
 
 ## 注意事項
 
 - 員工僅能針對自己的班表新增時段；管理員可針對任一美甲師的班表新增。
-- 不可新增重疊時段（需比對現有 time\_slots）。
+- 不可新增重疊時段（需比對現有 time_slots）。
 - 僅可操作自己有權限的 store。
 

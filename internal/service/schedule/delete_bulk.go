@@ -13,10 +13,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteSchedulesBulkServiceInterface interface {
-	DeleteSchedulesBulk(ctx context.Context, req schedule.DeleteSchedulesBulkRequest, staffContext common.StaffContext) (*schedule.DeleteSchedulesBulkResponse, error)
-}
-
 type DeleteSchedulesBulkService struct {
 	queries dbgen.Querier
 	db      *pgxpool.Pool

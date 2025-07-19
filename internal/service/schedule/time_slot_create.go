@@ -13,10 +13,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateTimeSlotServiceInterface interface {
-	CreateTimeSlot(ctx context.Context, scheduleID string, req schedule.CreateTimeSlotRequest, staffContext common.StaffContext) (*schedule.CreateTimeSlotResponse, error)
-}
-
 type CreateTimeSlotService struct {
 	queries dbgen.Querier
 }
@@ -121,10 +117,11 @@ func (s *CreateTimeSlotService) CreateTimeSlot(ctx context.Context, scheduleID s
 
 	// Build response
 	response := &schedule.CreateTimeSlotResponse{
-		ID:         utils.FormatID(createdTimeSlot.ID),
-		ScheduleID: scheduleID,
-		StartTime:  req.StartTime,
-		EndTime:    req.EndTime,
+		ID:          utils.FormatID(createdTimeSlot.ID),
+		ScheduleID:  scheduleID,
+		StartTime:   req.StartTime,
+		EndTime:     req.EndTime,
+		IsAvailable: createdTimeSlot.IsAvailable.Bool,
 	}
 
 	return response, nil

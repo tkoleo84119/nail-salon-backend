@@ -24,10 +24,11 @@ func NewCreateTimeSlotHandler(service scheduleService.CreateTimeSlotServiceInter
 }
 
 func (h *CreateTimeSlotHandler) CreateTimeSlot(c *gin.Context) {
-	// Get staff context from middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+	// Parse and validate request
+	var req scheduleModel.CreateTimeSlotRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
 		return
 	}
 
@@ -40,11 +41,10 @@ func (h *CreateTimeSlotHandler) CreateTimeSlot(c *gin.Context) {
 		return
 	}
 
-	// Parse and validate request
-	var req scheduleModel.CreateTimeSlotRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+	// Get staff context from middleware
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 

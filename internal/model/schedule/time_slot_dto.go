@@ -6,10 +6,11 @@ type CreateTimeSlotRequest struct {
 }
 
 type CreateTimeSlotResponse struct {
-	ID         string `json:"id"`
-	ScheduleID string `json:"scheduleId"`
-	StartTime  string `json:"startTime"`
-	EndTime    string `json:"endTime"`
+	ID          string `json:"id"`
+	ScheduleID  string `json:"scheduleId"`
+	StartTime   string `json:"startTime"`
+	EndTime     string `json:"endTime"`
+	IsAvailable bool   `json:"isAvailable"`
 }
 
 type UpdateTimeSlotRequest struct {

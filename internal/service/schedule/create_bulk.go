@@ -17,10 +17,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateSchedulesBulkServiceInterface interface {
-	CreateSchedulesBulk(ctx context.Context, req schedule.CreateSchedulesBulkRequest, staffContext common.StaffContext) (*schedule.CreateSchedulesBulkResponse, error)
-}
-
 type CreateSchedulesBulkService struct {
 	queries dbgen.Querier
 	db      *pgxpool.Pool
