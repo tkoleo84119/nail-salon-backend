@@ -109,7 +109,7 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 	}
 
 	// Prepare batch data for schedules and time slots
-	scheduleRows, timeSlotRows, scheduleMap, err := s.prepareBatchData(req.Schedules, storeID, stylistID)
+	scheduleRows, timeSlotRows, createdScheduleIDs, err := s.prepareBatchData(req.Schedules, storeID, stylistID)
 	if err != nil {
 		return nil, err
 	}
@@ -139,17 +139,14 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
-	// Get the created schedules with time slots to build response
-	createdSchedules, err := s.queries.GetSchedulesByStoreAndStylist(ctx, dbgen.GetSchedulesByStoreAndStylistParams{
-		StoreID:   storeID,
-		StylistID: stylistID,
-	})
+	// Get the created schedules with time slots using efficient join query
+	createdScheduleWithTimeSlots, err := s.queries.GetSchedulesWithTimeSlotsByIDs(ctx, createdScheduleIDs)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get created schedules", err)
 	}
 
 	// Build response
-	response, err = s.buildResponse(ctx, qtx, createdSchedules, scheduleMap, storeID, stylistID)
+	response, err = s.buildResponseFromScheduleRows(ctx, createdScheduleWithTimeSlots, storeID, stylistID)
 	if err != nil {
 		return nil, err
 	}
@@ -157,12 +154,12 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 	return &response, nil
 }
 
-// prepareBatchData prepares data for batch insertion and returns schedule rows, time slot rows, and a mapping
-func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.ScheduleRequest, storeID, stylistID int64) ([]dbgen.BatchCreateSchedulesParams, []dbgen.BatchCreateTimeSlotsParams, map[string]schedule.ScheduleRequest, error) {
+// prepareBatchData prepares data for batch insertion and returns schedule rows, time slot rows, a mapping, and created schedule IDs
+func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.ScheduleRequest, storeID, stylistID int64) ([]dbgen.BatchCreateSchedulesParams, []dbgen.BatchCreateTimeSlotsParams, []int64, error) {
 	now := time.Now()
 	var scheduleRows []dbgen.BatchCreateSchedulesParams
 	var timeSlotRows []dbgen.BatchCreateTimeSlotsParams
-	scheduleMap := make(map[string]schedule.ScheduleRequest)
+	var createdScheduleIDs []int64
 
 	for _, scheduleReq := range schedules {
 		// Parse work date
@@ -173,7 +170,7 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.Sched
 
 		// Generate schedule ID
 		scheduleID := utils.GenerateID()
-		scheduleMap[utils.FormatID(scheduleID)] = scheduleReq
+		createdScheduleIDs = append(createdScheduleIDs, scheduleID)
 
 		// Prepare schedule row
 		var noteValue pgtype.Text
@@ -218,31 +215,41 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.Sched
 		}
 	}
 
-	return scheduleRows, timeSlotRows, scheduleMap, nil
+	return scheduleRows, timeSlotRows, createdScheduleIDs, nil
 }
 
-// buildResponse builds the response from created schedules
-func (s *CreateSchedulesBulkService) buildResponse(ctx context.Context, qtx dbgen.Querier, createdSchedules []dbgen.Schedule, scheduleMap map[string]schedule.ScheduleRequest, storeID, stylistID int64) (schedule.CreateSchedulesBulkResponse, error) {
+// buildResponseFromScheduleRows builds the response from joined schedule and time slot data
+func (s *CreateSchedulesBulkService) buildResponseFromScheduleRows(ctx context.Context, scheduleRows []dbgen.GetSchedulesWithTimeSlotsByIDsRow, storeID, stylistID int64) (schedule.CreateSchedulesBulkResponse, error) {
 	var response schedule.CreateSchedulesBulkResponse
 
-	for _, createdSchedule := range createdSchedules {
-		scheduleIDStr := utils.FormatID(createdSchedule.ID)
+	// Group time slots by schedule ID
+	scheduleGroups := make(map[int64][]dbgen.GetSchedulesWithTimeSlotsByIDsRow)
+	scheduleData := make(map[int64]dbgen.GetSchedulesWithTimeSlotsByIDsRow)
 
-		// Get time slots for this schedule
-		timeSlots, err := qtx.GetTimeSlotsByScheduleID(ctx, createdSchedule.ID)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get time slots", err)
-		}
+	for _, row := range scheduleRows {
+		scheduleGroups[row.ID] = append(scheduleGroups[row.ID], row)
+		scheduleData[row.ID] = row
+	}
+
+	// Build response for each schedule
+	for scheduleID, rows := range scheduleGroups {
+		scheduleIDStr := utils.FormatID(scheduleID)
+		scheduleInfo := scheduleData[scheduleID]
 
 		// Convert time slots to response format
 		var timeSlotResponses []schedule.TimeSlotResponse
-		for _, timeSlot := range timeSlots {
+		for _, row := range rows {
+			// Skip rows without time slot data (can happen with LEFT JOIN if no time slots exist)
+			if !row.TimeSlotID.Valid {
+				continue
+			}
+
 			// Convert pgtype.Time back to time.Time for formatting
-			startTimeFormatted := time.Date(0, 1, 1, int(timeSlot.StartTime.Microseconds/3600000000), int((timeSlot.StartTime.Microseconds%3600000000)/60000000), int((timeSlot.StartTime.Microseconds%60000000)/1000000), 0, time.UTC)
-			endTimeFormatted := time.Date(0, 1, 1, int(timeSlot.EndTime.Microseconds/3600000000), int((timeSlot.EndTime.Microseconds%3600000000)/60000000), int((timeSlot.EndTime.Microseconds%60000000)/1000000), 0, time.UTC)
+			startTimeFormatted := time.Date(0, 1, 1, int(row.StartTime.Microseconds/3600000000), int((row.StartTime.Microseconds%3600000000)/60000000), int((row.StartTime.Microseconds%60000000)/1000000), 0, time.UTC)
+			endTimeFormatted := time.Date(0, 1, 1, int(row.EndTime.Microseconds/3600000000), int((row.EndTime.Microseconds%3600000000)/60000000), int((row.EndTime.Microseconds%60000000)/1000000), 0, time.UTC)
 
 			timeSlotResponses = append(timeSlotResponses, schedule.TimeSlotResponse{
-				ID:        utils.FormatID(timeSlot.ID),
+				ID:        utils.FormatID(row.TimeSlotID.Int64),
 				StartTime: common.FormatTimeSlot(startTimeFormatted),
 				EndTime:   common.FormatTimeSlot(endTimeFormatted),
 			})
@@ -250,15 +257,15 @@ func (s *CreateSchedulesBulkService) buildResponse(ctx context.Context, qtx dbge
 
 		// Build schedule response
 		var notePtr *string
-		if createdSchedule.Note.Valid {
-			notePtr = &createdSchedule.Note.String
+		if scheduleInfo.Note.Valid {
+			notePtr = &scheduleInfo.Note.String
 		}
 
 		scheduleResponse := schedule.ScheduleResponse{
 			ScheduleID: scheduleIDStr,
 			StylistID:  utils.FormatID(stylistID),
 			StoreID:    utils.FormatID(storeID),
-			WorkDate:   createdSchedule.WorkDate.Time.Format("2006-01-02"),
+			WorkDate:   scheduleInfo.WorkDate.Time.Format("2006-01-02"),
 			Note:       notePtr,
 			TimeSlots:  timeSlotResponses,
 		}

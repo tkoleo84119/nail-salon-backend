@@ -24,18 +24,18 @@ func NewCreateSchedulesBulkHandler(service scheduleService.CreateSchedulesBulkSe
 }
 
 func (h *CreateSchedulesBulkHandler) CreateSchedulesBulk(c *gin.Context) {
-	// Get staff context from middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
-		return
-	}
-
 	// Parse and validate request
 	var req schedule.CreateSchedulesBulkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		return
+	}
+
+	// Get staff context from middleware
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 

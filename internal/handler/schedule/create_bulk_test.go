@@ -32,20 +32,14 @@ func (m *MockCreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context
 	return args.Get(0).(*schedule.CreateSchedulesBulkResponse), args.Error(1)
 }
 
-func setupTestRouter() *gin.Engine {
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-	return router
-}
-
 func setupTestContext(staffContext *common.StaffContext) (*gin.Context, *httptest.ResponseRecorder) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	
+
 	if staffContext != nil {
 		c.Set(middleware.UserContextKey, *staffContext)
 	}
-	
+
 	return c, w
 }
 
@@ -98,7 +92,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_Success(t *testing.T) {
 
 	// Setup Gin context
 	c, w := setupTestContext(&staffContext)
-	
+
 	reqJSON, _ := json.Marshal(request)
 	c.Request = httptest.NewRequest("POST", "/api/schedules/bulk", bytes.NewBuffer(reqJSON))
 	c.Request.Header.Set("Content-Type", "application/json")
@@ -108,7 +102,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_Success(t *testing.T) {
 
 	// Assert
 	assert.Equal(t, http.StatusCreated, w.Code)
-	
+
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -125,12 +119,20 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_NoStaffContext(t *testin
 	request := schedule.CreateSchedulesBulkRequest{
 		StylistID: "12345",
 		StoreID:   "67890",
-		Schedules: []schedule.ScheduleRequest{},
+		Schedules: []schedule.ScheduleRequest{
+			{
+				WorkDate: "2023-12-01",
+				TimeSlots: []schedule.TimeSlotRequest{
+					{StartTime: "09:00", EndTime: "10:00"},
+					{StartTime: "14:00", EndTime: "15:00"},
+				},
+			},
+		},
 	}
 
 	// Setup Gin context without staff context
 	c, w := setupTestContext(nil)
-	
+
 	reqJSON, _ := json.Marshal(request)
 	c.Request = httptest.NewRequest("POST", "/api/schedules/bulk", bytes.NewBuffer(reqJSON))
 	c.Request.Header.Set("Content-Type", "application/json")
@@ -140,7 +142,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_NoStaffContext(t *testin
 
 	// Assert - expect 401 for missing staff context
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	
+
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -169,7 +171,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_InvalidJSON(t *testing.T
 
 	// Assert - expect 400 for invalid JSON
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	
+
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -197,7 +199,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ValidationError(t *testi
 
 	// Setup Gin context
 	c, w := setupTestContext(&staffContext)
-	
+
 	reqJSON, _ := json.Marshal(request)
 	c.Request = httptest.NewRequest("POST", "/api/schedules/bulk", bytes.NewBuffer(reqJSON))
 	c.Request.Header.Set("Content-Type", "application/json")
@@ -207,7 +209,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ValidationError(t *testi
 
 	// Assert - expect 400 for validation errors
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	
+
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -246,7 +248,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ServiceError(t *testing.
 
 	// Setup Gin context
 	c, w := setupTestContext(&staffContext)
-	
+
 	reqJSON, _ := json.Marshal(request)
 	c.Request = httptest.NewRequest("POST", "/api/schedules/bulk", bytes.NewBuffer(reqJSON))
 	c.Request.Header.Set("Content-Type", "application/json")
@@ -256,7 +258,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ServiceError(t *testing.
 
 	// Assert
 	assert.Equal(t, http.StatusNotFound, w.Code) // expect 404 for StylistNotFound
-	
+
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -294,7 +296,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_PermissionDenied(t *test
 
 	// Setup Gin context
 	c, w := setupTestContext(&staffContext)
-	
+
 	reqJSON, _ := json.Marshal(request)
 	c.Request = httptest.NewRequest("POST", "/api/schedules/bulk", bytes.NewBuffer(reqJSON))
 	c.Request.Header.Set("Content-Type", "application/json")
@@ -304,7 +306,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_PermissionDenied(t *test
 
 	// Assert
 	assert.Equal(t, http.StatusForbidden, w.Code) // expect 403 for permission denied
-	
+
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -399,7 +401,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ComplexRequest(t *testin
 
 	// Setup Gin context
 	c, w := setupTestContext(&staffContext)
-	
+
 	reqJSON, _ := json.Marshal(request)
 	c.Request = httptest.NewRequest("POST", "/api/schedules/bulk", bytes.NewBuffer(reqJSON))
 	c.Request.Header.Set("Content-Type", "application/json")
@@ -409,7 +411,7 @@ func TestCreateSchedulesBulkHandler_CreateSchedulesBulk_ComplexRequest(t *testin
 
 	// Assert
 	assert.Equal(t, http.StatusCreated, w.Code)
-	
+
 	var response common.ApiResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)

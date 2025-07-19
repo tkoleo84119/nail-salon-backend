@@ -41,12 +41,12 @@ func TestCreateSchedulesBulkService_prepareBatchData_DirectTest(t *testing.T) {
 	}
 
 	// Test the prepareBatchData method directly
-	scheduleRows, timeSlotRows, scheduleMap, err := service.prepareBatchData(schedules, storeID, stylistID)
+	scheduleRows, timeSlotRows, createdScheduleIDs, err := service.prepareBatchData(schedules, storeID, stylistID)
 
 	assert.NoError(t, err)
 	assert.Len(t, scheduleRows, 1)
 	assert.Len(t, timeSlotRows, 2)
-	assert.Len(t, scheduleMap, 1)
+	assert.Len(t, createdScheduleIDs, 1)
 
 	// Validate schedule row
 	scheduleRow := scheduleRows[0]
@@ -474,12 +474,12 @@ func TestCreateSchedulesBulkService_prepareBatchData_Success(t *testing.T) {
 	storeID := int64(67890)
 	stylistID := int64(12345)
 
-	scheduleRows, timeSlotRows, scheduleMap, err := service.prepareBatchData(schedules, storeID, stylistID)
+	scheduleRows, timeSlotRows, createdScheduleIDs, err := service.prepareBatchData(schedules, storeID, stylistID)
 
 	assert.NoError(t, err)
 	assert.Len(t, scheduleRows, 2)
 	assert.Len(t, timeSlotRows, 3) // 2 + 1 time slots
-	assert.Len(t, scheduleMap, 2)
+	assert.Len(t, createdScheduleIDs, 2)
 
 	// Check first schedule
 	assert.Equal(t, storeID, scheduleRows[0].StoreID)
@@ -515,11 +515,11 @@ func TestCreateSchedulesBulkService_prepareBatchData_InvalidWorkDate(t *testing.
 	storeID := int64(67890)
 	stylistID := int64(12345)
 
-	scheduleRows, timeSlotRows, scheduleMap, err := service.prepareBatchData(schedules, storeID, stylistID)
+	scheduleRows, timeSlotRows, createdScheduleIDs, err := service.prepareBatchData(schedules, storeID, stylistID)
 
 	assert.Nil(t, scheduleRows)
 	assert.Nil(t, timeSlotRows)
-	assert.Nil(t, scheduleMap)
+	assert.Nil(t, createdScheduleIDs)
 	assert.Error(t, err)
 
 	serviceErr, ok := err.(*errorCodes.ServiceError)
@@ -542,11 +542,11 @@ func TestCreateSchedulesBulkService_prepareBatchData_InvalidTimeSlot(t *testing.
 	storeID := int64(67890)
 	stylistID := int64(12345)
 
-	scheduleRows, timeSlotRows, scheduleMap, err := service.prepareBatchData(schedules, storeID, stylistID)
+	scheduleRows, timeSlotRows, createdScheduleIDs, err := service.prepareBatchData(schedules, storeID, stylistID)
 
 	assert.Nil(t, scheduleRows)
 	assert.Nil(t, timeSlotRows)
-	assert.Nil(t, scheduleMap)
+	assert.Nil(t, createdScheduleIDs)
 	assert.Error(t, err)
 
 	serviceErr, ok := err.(*errorCodes.ServiceError)
