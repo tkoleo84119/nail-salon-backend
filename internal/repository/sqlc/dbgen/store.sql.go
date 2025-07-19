@@ -11,6 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkStoreNameExists = `-- name: CheckStoreNameExists :one
+SELECT EXISTS(
+    SELECT 1 FROM stores WHERE name = $1
+)
+`
+
+func (q *Queries) CheckStoreNameExists(ctx context.Context, name string) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStoreNameExists, name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkStoresExistAndActive = `-- name: CheckStoresExistAndActive :one
 SELECT
     COUNT(*) as total_count,
@@ -28,6 +41,56 @@ func (q *Queries) CheckStoresExistAndActive(ctx context.Context, dollar_1 []int6
 	row := q.db.QueryRow(ctx, checkStoresExistAndActive, dollar_1)
 	var i CheckStoresExistAndActiveRow
 	err := row.Scan(&i.TotalCount, &i.ActiveCount)
+	return i, err
+}
+
+const createStore = `-- name: CreateStore :one
+INSERT INTO stores (
+    id,
+    name,
+    address,
+    phone,
+    is_active,
+    created_at,
+    updated_at
+) VALUES (
+    $1, $2, $3, $4, $5, NOW(), NOW()
+) RETURNING
+    id,
+    name,
+    address,
+    phone,
+    is_active,
+    created_at,
+    updated_at
+`
+
+type CreateStoreParams struct {
+	ID       int64       `db:"id" json:"id"`
+	Name     string      `db:"name" json:"name"`
+	Address  pgtype.Text `db:"address" json:"address"`
+	Phone    pgtype.Text `db:"phone" json:"phone"`
+	IsActive pgtype.Bool `db:"is_active" json:"is_active"`
+}
+
+func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store, error) {
+	row := q.db.QueryRow(ctx, createStore,
+		arg.ID,
+		arg.Name,
+		arg.Address,
+		arg.Phone,
+		arg.IsActive,
+	)
+	var i Store
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Address,
+		&i.Phone,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }
 

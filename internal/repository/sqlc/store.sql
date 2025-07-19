@@ -1,3 +1,24 @@
+
+-- name: CreateStore :one
+INSERT INTO stores (
+    id,
+    name,
+    address,
+    phone,
+    is_active,
+    created_at,
+    updated_at
+) VALUES (
+    $1, $2, $3, $4, $5, NOW(), NOW()
+) RETURNING
+    id,
+    name,
+    address,
+    phone,
+    is_active,
+    created_at,
+    updated_at;
+
 -- name: GetAllActiveStores :many
 SELECT
     id,
@@ -28,3 +49,8 @@ SELECT
     COUNT(CASE WHEN is_active = true THEN 1 END) as active_count
 FROM stores
 WHERE id = ANY($1::bigint[]);
+
+-- name: CheckStoreNameExists :one
+SELECT EXISTS(
+    SELECT 1 FROM stores WHERE name = $1
+);

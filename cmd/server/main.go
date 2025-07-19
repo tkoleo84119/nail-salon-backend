@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
@@ -12,6 +14,7 @@ import (
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
+	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
 	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
 	timeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
@@ -22,6 +25,7 @@ import (
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
+	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
 	timeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -58,6 +62,11 @@ func main() {
 		log.Fatalf("Failed to load error definitions: %v", err)
 	}
 
+	// register custom validators
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("taiwanlandline", utils.ValidateTaiwanLandline)
+	}
+
 	// initialize sqlc queries
 	queries := dbgen.New(database.PgxPool)
 
@@ -72,6 +81,7 @@ func main() {
 	staffUpdateMeService := staffService.NewUpdateMyStaffService(queries, staffUserRepository)
 	staffStoreAccessService := staffService.NewCreateStoreAccessService(queries)
 	staffDeleteStoreAccessService := staffService.NewDeleteStoreAccessBulkService(queries)
+	storeCreateService := storeService.NewCreateStoreService(queries, database.PgxPool)
 	stylistCreateService := stylistService.NewCreateMyStylistService(queries)
 	stylistUpdateService := stylistService.NewUpdateMyStylistService(queries, stylistRepository)
 	scheduleCreateBulkService := scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool)
@@ -95,6 +105,7 @@ func main() {
 	staffUpdateMeHandler := staffHandler.NewUpdateMyStaffHandler(staffUpdateMeService)
 	staffStoreAccessHandler := staffHandler.NewCreateStoreAccessHandler(staffStoreAccessService)
 	staffDeleteStoreAccessHandler := staffHandler.NewDeleteStoreAccessBulkHandler(staffDeleteStoreAccessService)
+	storeCreateHandler := storeHandler.NewCreateStoreHandler(storeCreateService)
 	stylistCreateHandler := stylistHandler.NewCreateMyStylistHandler(stylistCreateService)
 	stylistUpdateHandler := stylistHandler.NewUpdateMyStylistHandler(stylistUpdateService)
 	scheduleCreateBulkHandler := scheduleHandler.NewCreateSchedulesBulkHandler(scheduleCreateBulkService)
@@ -138,6 +149,11 @@ func main() {
 			schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleCreateTimeSlotHandler.CreateTimeSlot)
 			schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleUpdateTimeSlotHandler.UpdateTimeSlot)
 			schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), scheduleDeleteTimeSlotHandler.DeleteTimeSlot)
+		}
+
+		stores := api.Group("/stores")
+		{
+			stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), storeCreateHandler.CreateStore)
 		}
 
 		timeSlotTemplates := api.Group("/time-slot-templates")

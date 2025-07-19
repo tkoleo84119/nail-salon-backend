@@ -254,3 +254,14 @@ func (m *MockQuerier) DeleteTimeSlotTemplateItem(ctx context.Context, id int64) 
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
+
+// Store related mock methods
+func (m *MockQuerier) CheckStoreNameExists(ctx context.Context, name string) (bool, error) {
+	args := m.Called(ctx, name)
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockQuerier) CreateStore(ctx context.Context, arg dbgen.CreateStoreParams) (dbgen.Store, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.Store), args.Error(1)
+}
