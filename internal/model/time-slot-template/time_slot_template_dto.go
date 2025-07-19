@@ -40,3 +40,7 @@ type UpdateTimeSlotTemplateResponse struct {
 	Name string `json:"name"`
 	Note string `json:"note"`
 }
+
+func (r *UpdateTimeSlotTemplateRequest) HasUpdate() bool {
+	return r.Name != nil || r.Note != nil
+}

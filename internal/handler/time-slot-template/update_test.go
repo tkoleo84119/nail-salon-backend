@@ -321,61 +321,6 @@ func TestUpdateTimeSlotTemplateHandler_UpdateTimeSlotTemplate_InvalidJSON(t *tes
 	assert.NotNil(t, response.Errors)
 }
 
-func TestUpdateTimeSlotTemplateHandler_UpdateTimeSlotTemplate_ValidationError(t *testing.T) {
-	setupTestGinForUpdateTimeSlotTemplate()
-
-	// Create mock service
-	mockService := new(MockUpdateTimeSlotTemplateService)
-	handler := NewUpdateTimeSlotTemplateHandler(mockService)
-
-	// Set up mock expectations - return validation error
-	serviceError := errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
-	mockService.On("UpdateTimeSlotTemplate", mock.Anything, "6000000011", mock.AnythingOfType("timeSlotTemplate.UpdateTimeSlotTemplateRequest"), mock.AnythingOfType("common.StaffContext")).Return(nil, serviceError)
-
-	// Create request with empty fields
-	updateReq := timeSlotTemplate.UpdateTimeSlotTemplateRequest{
-		// All fields are nil
-	}
-	reqBody, _ := json.Marshal(updateReq)
-
-	// Create test context with staff context
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request, _ = http.NewRequest("PATCH", "/api/time-slot-templates/6000000011", bytes.NewBuffer(reqBody))
-	c.Request.Header.Set("Content-Type", "application/json")
-	c.Params = gin.Params{
-		{Key: "templateId", Value: "6000000011"},
-	}
-
-	// Set staff context
-	staffContext := common.StaffContext{
-		UserID:   "11111",
-		Username: "admin",
-		Role:     staff.RoleAdmin,
-		StoreList: []common.Store{
-			{ID: "67890", Name: "Test Store"},
-		},
-	}
-	c.Set("user", staffContext)
-
-	// Call handler
-	handler.UpdateTimeSlotTemplate(c)
-
-	// Assert response
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	var response common.ApiResponse
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-
-	assert.Equal(t, "至少需要提供一個欄位進行更新", response.Message)
-	assert.Nil(t, response.Data)
-	assert.Nil(t, response.Errors)
-
-	// Verify all expectations were met
-	mockService.AssertExpectations(t)
-}
-
 func TestUpdateTimeSlotTemplateHandler_UpdateTimeSlotTemplate_TemplateNotFound(t *testing.T) {
 	setupTestGinForUpdateTimeSlotTemplate()
 

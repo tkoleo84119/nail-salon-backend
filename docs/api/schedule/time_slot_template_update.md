@@ -47,7 +47,7 @@ Authorization: Bearer <access_token>
 }
 ```
 
-> 兩者皆為選填，但至少要有一項。
+- 兩者皆為選填，但至少要有一項。
 
 ### 驗證規則
 
@@ -80,7 +80,7 @@ Authorization: Bearer <access_token>
 {
   "message": "輸入驗證失敗",
   "errors": {
-    "name": "名稱長度不可超過100字"
+    "name": "name長度不可超過50字"
   }
 }
 ```
@@ -127,9 +127,10 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 驗證 `templateId` 是否存在。
-2. 更新 `time_slot_templates` 資料。
-3. 回傳更新結果。
+1. 驗證至少一個欄位有更新。
+2. 驗證 `templateId` 是否存在。
+3. 更新 `time_slot_templates` 資料。
+4. 回傳更新結果。
 
 ---
 

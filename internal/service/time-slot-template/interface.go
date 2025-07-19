@@ -10,3 +10,7 @@ import (
 type CreateTimeSlotTemplateServiceInterface interface {
 	CreateTimeSlotTemplate(ctx context.Context, req timeSlotTemplate.CreateTimeSlotTemplateRequest, staffContext common.StaffContext) (*timeSlotTemplate.CreateTimeSlotTemplateResponse, error)
 }
+
+type UpdateTimeSlotTemplateServiceInterface interface {
+	UpdateTimeSlotTemplate(ctx context.Context, templateID string, req timeSlotTemplate.UpdateTimeSlotTemplateRequest, staffContext common.StaffContext) (*timeSlotTemplate.UpdateTimeSlotTemplateResponse, error)
+}
