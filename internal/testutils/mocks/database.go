@@ -296,3 +296,49 @@ func (m *MockQuerier) CheckServiceNameExistsExcluding(ctx context.Context, arg d
 	args := m.Called(ctx, arg)
 	return args.Bool(0), args.Error(1)
 }
+
+// Customer related mock methods
+func (m *MockQuerier) GetCustomerByID(ctx context.Context, id int64) (dbgen.Customer, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.Customer), args.Error(1)
+}
+
+func (m *MockQuerier) GetCustomerAuthByProviderUid(ctx context.Context, arg dbgen.GetCustomerAuthByProviderUidParams) (dbgen.GetCustomerAuthByProviderUidRow, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.GetCustomerAuthByProviderUidRow), args.Error(1)
+}
+
+func (m *MockQuerier) CreateCustomer(ctx context.Context, arg dbgen.CreateCustomerParams) (dbgen.Customer, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.Customer), args.Error(1)
+}
+
+func (m *MockQuerier) CreateCustomerAuth(ctx context.Context, arg dbgen.CreateCustomerAuthParams) (dbgen.CustomerAuth, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.CustomerAuth), args.Error(1)
+}
+
+func (m *MockQuerier) CreateCustomerToken(ctx context.Context, arg dbgen.CreateCustomerTokenParams) (dbgen.CustomerToken, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.CustomerToken), args.Error(1)
+}
+
+func (m *MockQuerier) GetValidCustomerToken(ctx context.Context, refreshToken string) (dbgen.CustomerToken, error) {
+	args := m.Called(ctx, refreshToken)
+	return args.Get(0).(dbgen.CustomerToken), args.Error(1)
+}
+
+func (m *MockQuerier) RevokeCustomerToken(ctx context.Context, refreshToken string) error {
+	args := m.Called(ctx, refreshToken)
+	return args.Error(0)
+}
+
+func (m *MockQuerier) RevokeAllCustomerTokens(ctx context.Context, customerID int64) error {
+	args := m.Called(ctx, customerID)
+	return args.Error(0)
+}
+
+func (m *MockQuerier) DeleteExpiredCustomerTokens(ctx context.Context) error {
+	args := m.Called(ctx)
+	return args.Error(0)
+}

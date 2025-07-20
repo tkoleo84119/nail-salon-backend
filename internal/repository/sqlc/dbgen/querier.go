@@ -26,6 +26,9 @@ type Querier interface {
 	CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (bool, error)
 	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
+	CreateCustomer(ctx context.Context, arg CreateCustomerParams) (Customer, error)
+	CreateCustomerAuth(ctx context.Context, arg CreateCustomerAuthParams) (CustomerAuth, error)
+	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
 	CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
@@ -43,6 +46,8 @@ type Querier interface {
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
 	DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
+	GetCustomerAuthByProviderUid(ctx context.Context, arg GetCustomerAuthByProviderUidParams) (GetCustomerAuthByProviderUidRow, error)
+	GetCustomerByID(ctx context.Context, id int64) (Customer, error)
 	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)
 	GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSchedulesByStoreAndStylistParams) ([]Schedule, error)
 	GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error)
@@ -62,6 +67,7 @@ type Querier interface {
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]TimeSlotTemplateItem, error)
 	GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]TimeSlotTemplateItem, error)
 	GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
+	GetValidCustomerToken(ctx context.Context, refreshToken string) (CustomerToken, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (TimeSlotTemplateItem, error)
 }
 

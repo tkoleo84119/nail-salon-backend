@@ -27,6 +27,10 @@ type JWTConfig struct {
 	ExpiryHours int
 }
 
+type LineConfig struct {
+	ChannelID        string
+}
+
 type ServerConfig struct {
 	Port            string
 	SnowflakeNodeId int64
@@ -35,6 +39,7 @@ type ServerConfig struct {
 type Config struct {
 	DB     DBConfig
 	JWT    JWTConfig
+	Line   LineConfig
 	Server ServerConfig
 }
 
@@ -62,6 +67,10 @@ func Load() *Config {
 		ExpiryHours: getenvIntDefault("JWT_EXPIRY_HOURS", 1),
 	}
 
+	lineConfig := LineConfig{
+		ChannelID: getenvRequired("LINE_CHANNEL_ID"),
+	}
+
 	serverConfig := ServerConfig{
 		Port:            getenvDefault("PORT", "3000"),
 		SnowflakeNodeId: int64(getenvIntDefault("SNOWFLAKE_NODE_ID", 1)),
@@ -70,6 +79,7 @@ func Load() *Config {
 	return &Config{
 		DB:     dbConfig,
 		JWT:    jwtConfig,
+		Line:   lineConfig,
 		Server: serverConfig,
 	}
 }

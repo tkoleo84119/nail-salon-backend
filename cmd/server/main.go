@@ -12,6 +12,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
+	customerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer"
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	serviceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/service"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
@@ -24,6 +25,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
+	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	serviceService "github.com/tkoleo84119/nail-salon-backend/internal/service/service"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
@@ -80,6 +82,7 @@ func main() {
 
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
+	customerLineLoginService := customerService.NewLineLoginService(queries, cfg.Line, cfg.JWT)
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 	staffUpdateMeService := staffService.NewUpdateMyStaffService(queries, staffUserRepository)
@@ -107,6 +110,7 @@ func main() {
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
+	customerLineLoginHandler := customerHandler.NewLineLoginHandler(customerLineLoginService)
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 	staffUpdateMeHandler := staffHandler.NewUpdateMyStaffHandler(staffUpdateMeService)
@@ -136,6 +140,13 @@ func main() {
 	router.GET("/health", handler.Health)
 	api := router.Group("/api")
 	{
+		auth := api.Group("/auth")
+		{
+			customer := auth.Group("/customer")
+			{
+				customer.POST("/line/login", customerLineLoginHandler.LineLogin)
+			}
+		}
 		staff := api.Group("/staff")
 		{
 			staff.POST("/login", authLoginHandler.Login)

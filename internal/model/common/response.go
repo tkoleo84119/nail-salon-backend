@@ -25,6 +25,11 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
+type LineJWTClaims struct {
+	jwt.RegisteredClaims
+	CustomerID int64 `json:"customerId"`
+}
+
 func SuccessResponse(data interface{}) ApiResponse {
 	return ApiResponse{
 		Data: data,

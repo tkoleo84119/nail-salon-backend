@@ -11,6 +11,8 @@ const (
 	AuthStaffFailed        = "AUTH_STAFF_FAILED"
 	AuthContextMissing     = "AUTH_CONTEXT_MISSING"
 	AuthPermissionDenied   = "AUTH_PERMISSION_DENIED"
+	AuthLineTokenInvalid   = "AUTH_LINE_TOKEN_INVALID"
+	AuthLineTokenExpired   = "AUTH_LINE_TOKEN_EXPIRED"
 
 	// USER - User operation errors
 	UserInvalidRole    = "USER_INVALID_ROLE"
@@ -24,6 +26,11 @@ const (
 	UserNotUpdateSelf  = "USER_NOT_UPDATE_SELF"
 	UserStaffNotFound  = "USER_STAFF_NOT_FOUND"
 	UserStoreNotFound  = "USER_STORE_NOT_FOUND"
+
+	// CUSTOMER - Customer operation errors
+	CustomerNotFound      = "CUSTOMER_NOT_FOUND"
+	CustomerAuthNotFound  = "CUSTOMER_AUTH_NOT_FOUND"
+	CustomerAlreadyExists = "CUSTOMER_ALREADY_EXISTS"
 
 	// STYLIST - Stylist operation errors
 	StylistAlreadyExists = "STYLIST_ALREADY_EXISTS"

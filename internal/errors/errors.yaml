@@ -23,6 +23,12 @@ AUTH:
   AUTH_PERMISSION_DENIED:
     message: 權限不足，無法執行此操作
     status: 403
+  AUTH_LINE_TOKEN_INVALID:
+    message: idToken 驗證失敗
+    status: 400
+  AUTH_LINE_TOKEN_EXPIRED:
+    message: idToken 已過期
+    status: 400
 
 USER:
   USER_INVALID_ROLE:
@@ -58,6 +64,17 @@ USER:
   USER_STORE_NOT_FOUND:
     message: 指定的門市不存在
     status: 404
+
+CUSTOMER:
+  CUSTOMER_NOT_FOUND:
+    message: 客戶不存在
+    status: 404
+  CUSTOMER_AUTH_NOT_FOUND:
+    message: 客戶登入資訊不存在
+    status: 404
+  CUSTOMER_ALREADY_EXISTS:
+    message: 客戶已存在
+    status: 409
 
 VAL:
   VAL_JSON_FORMAT:

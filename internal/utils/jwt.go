@@ -46,3 +46,18 @@ func ValidateJWT(jwtConfig config.JWTConfig, tokenString string) (*common.JWTCla
 
 	return nil, fmt.Errorf("invalid token")
 }
+
+// GenerateCustomerJWT generates a JWT token for customer authentication
+func GenerateCustomerJWT(jwtConfig config.JWTConfig, customerID int64) (string, error) {
+	claims := common.LineJWTClaims{
+		CustomerID: customerID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtConfig.ExpiryHours) * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(jwtConfig.Secret))
+}
