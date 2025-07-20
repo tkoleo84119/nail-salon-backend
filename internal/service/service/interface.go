@@ -9,3 +9,7 @@ import (
 type CreateServiceInterface interface {
 	CreateService(ctx context.Context, req service.CreateServiceRequest, creatorRole string) (*service.CreateServiceResponse, error)
 }
+
+type UpdateServiceInterface interface {
+	UpdateService(ctx context.Context, serviceID string, req service.UpdateServiceRequest, updaterRole string) (*service.UpdateServiceResponse, error)
+}

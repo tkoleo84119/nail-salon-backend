@@ -291,3 +291,8 @@ func (m *MockQuerier) GetServiceByID(ctx context.Context, id int64) (dbgen.Servi
 	args := m.Called(ctx, id)
 	return args.Get(0).(dbgen.Service), args.Error(1)
 }
+
+func (m *MockQuerier) CheckServiceNameExistsExcluding(ctx context.Context, arg dbgen.CheckServiceNameExistsExcludingParams) (bool, error) {
+	args := m.Called(ctx, arg)
+	return args.Bool(0), args.Error(1)
+}

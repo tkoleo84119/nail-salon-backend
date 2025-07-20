@@ -46,6 +46,7 @@ const (
 
 	// SERVICE - Service operation errors
 	ServiceNameAlreadyExists = "SERVICE_NAME_ALREADY_EXISTS"
+	ServiceNotFound          = "SERVICE_NOT_FOUND"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"

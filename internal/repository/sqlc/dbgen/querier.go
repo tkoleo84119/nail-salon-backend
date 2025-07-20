@@ -17,6 +17,7 @@ type Querier interface {
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
 	CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailUniqueForUpdateParams) (bool, error)
 	CheckScheduleExists(ctx context.Context, arg CheckScheduleExistsParams) (bool, error)
+	CheckServiceNameExistsExcluding(ctx context.Context, arg CheckServiceNameExistsExcludingParams) (bool, error)
 	CheckStaffUserExists(ctx context.Context, arg CheckStaffUserExistsParams) (bool, error)
 	CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error)
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)

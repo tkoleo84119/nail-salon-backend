@@ -11,6 +11,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkServiceNameExistsExcluding = `-- name: CheckServiceNameExistsExcluding :one
+SELECT EXISTS(
+    SELECT 1 FROM services 
+    WHERE name = $1 AND id != $2
+) AS exists
+`
+
+type CheckServiceNameExistsExcludingParams struct {
+	Name string `db:"name" json:"name"`
+	ID   int64  `db:"id" json:"id"`
+}
+
+func (q *Queries) CheckServiceNameExistsExcluding(ctx context.Context, arg CheckServiceNameExistsExcludingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkServiceNameExistsExcluding, arg.Name, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createService = `-- name: CreateService :one
 INSERT INTO services (
     id,

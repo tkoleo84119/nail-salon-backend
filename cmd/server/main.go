@@ -76,6 +76,7 @@ func main() {
 	stylistRepository := sqlx.NewStylistRepository(database.Sqlx)
 	staffUserRepository := sqlx.NewStaffUserRepository(database.Sqlx)
 	storeRepository := sqlx.NewStoreRepository(database.Sqlx)
+	serviceRepository := sqlx.NewServiceRepository(database.Sqlx)
 
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
@@ -102,6 +103,7 @@ func main() {
 	timeSlotTemplateUpdateItemService := timeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries)
 	timeSlotTemplateDeleteItemService := timeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries)
 	serviceCreateService := serviceService.NewCreateServiceService(queries)
+	serviceUpdateService := serviceService.NewUpdateServiceService(queries, serviceRepository)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -126,6 +128,7 @@ func main() {
 	timeSlotTemplateUpdateItemHandler := timeSlotTemplateHandler.NewUpdateTimeSlotTemplateItemHandler(timeSlotTemplateUpdateItemService)
 	timeSlotTemplateDeleteItemHandler := timeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(timeSlotTemplateDeleteItemService)
 	serviceCreateHandler := serviceHandler.NewCreateServiceHandler(serviceCreateService)
+	serviceUpdateHandler := serviceHandler.NewUpdateServiceHandler(serviceUpdateService)
 
 	router := gin.Default()
 
@@ -177,6 +180,7 @@ func main() {
 		services := api.Group("/services")
 		{
 			services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), serviceCreateHandler.CreateService)
+			services.PATCH("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), serviceUpdateHandler.UpdateService)
 		}
 	}
 
