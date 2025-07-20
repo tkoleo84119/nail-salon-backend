@@ -115,6 +115,11 @@ TIME_SLOT:
     message: 範本項目不存在或已被刪除
     status: 404
 
+SERVICE:
+  SERVICE_NAME_ALREADY_EXISTS:
+    message: 服務名稱已存在
+    status: 409
+
 SYS:
   SYS_INTERNAL_ERROR:
     message: 系統發生錯誤，請稍後再試

@@ -26,6 +26,7 @@ type Querier interface {
 	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
 	CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error)
+	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
@@ -44,6 +45,8 @@ type Querier interface {
 	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)
 	GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSchedulesByStoreAndStylistParams) ([]Schedule, error)
 	GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error)
+	GetServiceByID(ctx context.Context, id int64) (Service, error)
+	GetServiceByName(ctx context.Context, name string) (Service, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]GetStaffUserStoreAccessRow, error)

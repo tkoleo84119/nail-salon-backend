@@ -44,6 +44,9 @@ const (
 	TimeSlotTemplateNotFound         = "TIME_SLOT_TEMPLATE_NOT_FOUND"
 	TimeSlotTemplateItemNotFound     = "TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND"
 
+	// SERVICE - Service operation errors
+	ServiceNameAlreadyExists = "SERVICE_NAME_ALREADY_EXISTS"
+
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"

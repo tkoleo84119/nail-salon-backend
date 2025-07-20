@@ -275,3 +275,19 @@ func (m *MockQuerier) GetStoreDetailByID(ctx context.Context, id int64) (dbgen.S
 	args := m.Called(ctx, id)
 	return args.Get(0).(dbgen.Store), args.Error(1)
 }
+
+// Service related mock methods
+func (m *MockQuerier) CreateService(ctx context.Context, arg dbgen.CreateServiceParams) (dbgen.Service, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.Service), args.Error(1)
+}
+
+func (m *MockQuerier) GetServiceByName(ctx context.Context, name string) (dbgen.Service, error) {
+	args := m.Called(ctx, name)
+	return args.Get(0).(dbgen.Service), args.Error(1)
+}
+
+func (m *MockQuerier) GetServiceByID(ctx context.Context, id int64) (dbgen.Service, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.Service), args.Error(1)
+}

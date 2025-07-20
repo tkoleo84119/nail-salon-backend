@@ -13,6 +13,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
+	serviceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/service"
 	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
 	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
 	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
@@ -24,6 +25,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
+	serviceService "github.com/tkoleo84119/nail-salon-backend/internal/service/service"
 	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
 	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
@@ -99,6 +101,7 @@ func main() {
 	timeSlotTemplateCreateItemService := timeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries)
 	timeSlotTemplateUpdateItemService := timeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries)
 	timeSlotTemplateDeleteItemService := timeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries)
+	serviceCreateService := serviceService.NewCreateServiceService(queries)
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
@@ -122,6 +125,7 @@ func main() {
 	timeSlotTemplateCreateItemHandler := timeSlotTemplateHandler.NewCreateTimeSlotTemplateItemHandler(timeSlotTemplateCreateItemService)
 	timeSlotTemplateUpdateItemHandler := timeSlotTemplateHandler.NewUpdateTimeSlotTemplateItemHandler(timeSlotTemplateUpdateItemService)
 	timeSlotTemplateDeleteItemHandler := timeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(timeSlotTemplateDeleteItemService)
+	serviceCreateHandler := serviceHandler.NewCreateServiceHandler(serviceCreateService)
 
 	router := gin.Default()
 
@@ -168,6 +172,11 @@ func main() {
 			timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateCreateItemHandler.CreateTimeSlotTemplateItem)
 			timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateUpdateItemHandler.UpdateTimeSlotTemplateItem)
 			timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), timeSlotTemplateDeleteItemHandler.DeleteTimeSlotTemplateItem)
+		}
+
+		services := api.Group("/services")
+		{
+			services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), serviceCreateHandler.CreateService)
 		}
 	}
 
