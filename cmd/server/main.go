@@ -80,11 +80,13 @@ func main() {
 	staffUserRepository := sqlx.NewStaffUserRepository(database.Sqlx)
 	storeRepository := sqlx.NewStoreRepository(database.Sqlx)
 	serviceRepository := sqlx.NewServiceRepository(database.Sqlx)
+	customerRepository := sqlx.NewCustomerRepository(database.Sqlx)
 
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
 	customerLineLoginService := customerService.NewLineLoginService(queries, cfg.Line, cfg.JWT)
 	customerLineRegisterService := customerService.NewLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT)
+	customerUpdateMyService := customerService.NewUpdateMyCustomerService(queries, customerRepository)
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 	staffUpdateMeService := staffService.NewUpdateMyStaffService(queries, staffUserRepository)
@@ -114,6 +116,7 @@ func main() {
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
 	customerLineLoginHandler := customerHandler.NewLineLoginHandler(customerLineLoginService)
 	customerLineRegisterHandler := customerHandler.NewLineRegisterHandler(customerLineRegisterService)
+	customerUpdateMyHandler := customerHandler.NewUpdateMyCustomerHandler(customerUpdateMyService)
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 	staffUpdateMeHandler := staffHandler.NewUpdateMyStaffHandler(staffUpdateMeService)
@@ -150,6 +153,10 @@ func main() {
 				customer.POST("/line/login", customerLineLoginHandler.LineLogin)
 				customer.POST("/line/register", customerLineRegisterHandler.LineRegister)
 			}
+		}
+		customer := api.Group("/customers")
+		{
+			customer.PATCH("/me", middleware.JWTAuth(*cfg, queries), customerUpdateMyHandler.UpdateMyCustomer)
 		}
 		staff := api.Group("/staff")
 		{

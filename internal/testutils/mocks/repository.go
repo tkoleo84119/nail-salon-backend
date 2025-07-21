@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/service"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
@@ -142,4 +143,25 @@ func (m *MockServiceRepository) UpdateService(ctx context.Context, serviceID int
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*service.UpdateServiceResponse), args.Error(1)
+}
+
+// MockCustomerRepository mocks the sqlx repository for testing
+type MockCustomerRepository struct {
+	mock.Mock
+}
+
+// Ensure MockCustomerRepository implements the interface
+var _ sqlxRepo.CustomerRepositoryInterface = (*MockCustomerRepository)(nil)
+
+// NewMockCustomerRepository creates a new instance of MockCustomerRepository
+func NewMockCustomerRepository() *MockCustomerRepository {
+	return &MockCustomerRepository{}
+}
+
+func (m *MockCustomerRepository) UpdateMyCustomer(ctx context.Context, customerID int64, req customer.UpdateMyCustomerRequest) (*customer.UpdateMyCustomerResponse, error) {
+	args := m.Called(ctx, customerID, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*customer.UpdateMyCustomerResponse), args.Error(1)
 }

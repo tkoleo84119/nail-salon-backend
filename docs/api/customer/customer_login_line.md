@@ -8,7 +8,7 @@
 
 ## Endpoint
 
-**POST** `/api/auth/customer/line/login`
+**POST** `/api/auth/customers/line/login`
 
 ---
 

@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**POST** `/api/auth/customer/line/register`
+**POST** `/api/auth/customers/line/register`
 
 ---
 
@@ -35,30 +35,30 @@ Content-Type: application/json
   "phone": "09xxxxxxxx",
   "birthday": "1990-01-01",
   "city": "台北市",
-  "favorite_shapes": ["圓形", "方形"],
-  "favorite_colors": ["黑色", "白色"],
-  "favorite_styles": ["自然", "韓式"],
-  "is_introvert": true,
-  "referral_source": ["朋友介紹", "網路廣告"],
+  "favoriteShapes": ["圓形", "方形"],
+  "favoriteColors": ["黑色", "白色"],
+  "favoriteStyles": ["自然", "韓式"],
+  "isIntrovert": true,
+  "referralSource": ["朋友介紹", "網路廣告"],
   "referrer": "1000000001",
-  "customer_note": "這是客戶的備註",
+  "customerNote": "這是客戶的備註",
 }
 ```
 
-| 欄位            | 規則                                                        | 說明             |
-| --------------- | ----------------------------------------------------------- | ---------------- |
-| idToken         | <li>必填<li>長度最小是1<li>長度最大是500                    | LINE idToken     |
-| name            | <li>必填<li>長度最小是1<li>長度最大是100                    | 姓名             |
-| phone           | <li>必填<li>長度最小是1<li>長度最大是20<li>格式是09xxxxxxxx | 電話             |
-| birthday        | <li>必填<li>格式是yyyy-MM-dd                                | 生日             |
-| city            | <li>選填<li>長度最小是1<li>長度最大是100                    | 城市             |
-| favorite_shapes | <li>選填<li>陣列<li>長度最小是1                             | 喜歡的指形       |
-| favorite_colors | <li>選填<li>陣列<li>長度最小是1                             | 喜歡的色系       |
-| favorite_styles | <li>選填<li>陣列<li>長度最小是1                             | 喜歡的款式       |
-| is_introvert    | <li>選填<li>布林值                                          | 是否是I人        |
-| referral_source | <li>選填<li>陣列<li>長度最小是1                             | 推薦來源         |
-| referrer        | <li>選填<li>長度最小是1                                     | 推薦人           |
-| customer_note   | <li>選填<li>長度最小是1<li>長度最大是1000                   | 使用者自己的備註 |
+| 欄位           | 規則                                                        | 說明             |
+| -------------- | ----------------------------------------------------------- | ---------------- |
+| idToken        | <li>必填<li>長度最小是1<li>長度最大是500                    | LINE idToken     |
+| name           | <li>必填<li>長度最小是1<li>長度最大是100                    | 姓名             |
+| phone          | <li>必填<li>長度最小是1<li>長度最大是20<li>格式是09xxxxxxxx | 電話             |
+| birthday       | <li>必填<li>格式是yyyy-MM-dd                                | 生日             |
+| city           | <li>選填<li>長度最小是1<li>長度最大是100                    | 城市             |
+| favoriteShapes | <li>選填<li>陣列<li>長度最小是1                             | 喜歡的指形       |
+| favoriteColors | <li>選填<li>陣列<li>長度最小是1                             | 喜歡的色系       |
+| favoriteStyles | <li>選填<li>陣列<li>長度最小是1                             | 喜歡的款式       |
+| isIntrovert    | <li>選填<li>布林值                                          | 是否是I人        |
+| referralSource | <li>選填<li>陣列<li>長度最小是1                             | 推薦來源         |
+| referrer       | <li>選填<li>長度最小是1                                     | 推薦人           |
+| customerNote   | <li>選填<li>長度最小是1<li>長度最大是1000                   | 使用者自己的備註 |
 
 ---
 

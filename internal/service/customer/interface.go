@@ -14,3 +14,7 @@ type LineLoginServiceInterface interface {
 type LineRegisterServiceInterface interface {
 	LineRegister(ctx context.Context, req customer.LineRegisterRequest, loginCtx customer.LoginContext) (*customer.LineRegisterResponse, error)
 }
+
+type UpdateMyCustomerServiceInterface interface {
+	UpdateMyCustomer(ctx context.Context, customerID int64, req customer.UpdateMyCustomerRequest) (*customer.UpdateMyCustomerResponse, error)
+}

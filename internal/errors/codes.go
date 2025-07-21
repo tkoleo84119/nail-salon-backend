@@ -59,6 +59,7 @@ const (
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"
 	ValAllFieldsEmpty        = "VAL_ALL_FIELDS_EMPTY"
+	ValDateFormatInvalid     = "VAL_DATE_FORMAT_INVALID"
 
 	// SYS - System errors
 	SysInternalError      = "SYS_INTERNAL_ERROR"

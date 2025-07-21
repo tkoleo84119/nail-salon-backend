@@ -86,6 +86,9 @@ VAL:
   VAL_ALL_FIELDS_EMPTY:
     message: 至少需要提供一個欄位進行更新
     status: 400
+  VAL_DATE_FORMAT_INVALID:
+    message: 日期格式錯誤，請使用 yyyy-MM-dd 格式
+    status: 400
 
 STYLIST:
   STYLIST_ALREADY_EXISTS:
