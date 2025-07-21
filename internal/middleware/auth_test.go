@@ -418,3 +418,119 @@ func TestHasRequiredRole(t *testing.T) {
 		})
 	}
 }
+
+// Customer Authentication Tests
+
+func TestCustomerJWTAuth_MissingToken(t *testing.T) {
+	env := setup.SetupTestEnvironmentForMiddleware(t)
+	defer env.Cleanup()
+
+	mockDB := mocks.NewMockQuerier()
+	cfg := config.Config{
+		JWT: config.JWTConfig{
+			Secret:      "test-secret",
+			ExpiryHours: 1,
+		},
+	}
+
+	router := gin.New()
+	router.Use(CustomerJWTAuth(cfg, mockDB))
+	router.GET("/test", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "success"})
+	})
+
+	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Contains(t, w.Body.String(), "accessToken 缺失")
+}
+
+func TestCustomerJWTAuth_InvalidTokenFormat(t *testing.T) {
+	env := setup.SetupTestEnvironmentForMiddleware(t)
+	defer env.Cleanup()
+
+	mockDB := mocks.NewMockQuerier()
+	cfg := config.Config{
+		JWT: config.JWTConfig{
+			Secret:      "test-secret",
+			ExpiryHours: 1,
+		},
+	}
+
+	router := gin.New()
+	router.Use(CustomerJWTAuth(cfg, mockDB))
+	router.GET("/test", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "success"})
+	})
+
+	req := httptest.NewRequest("GET", "/test", nil)
+	req.Header.Set("Authorization", "InvalidToken")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Contains(t, w.Body.String(), "accessToken 格式錯誤")
+}
+
+func TestCustomerJWTAuth_InvalidToken(t *testing.T) {
+	env := setup.SetupTestEnvironmentForMiddleware(t)
+	defer env.Cleanup()
+
+	mockDB := mocks.NewMockQuerier()
+	cfg := config.Config{
+		JWT: config.JWTConfig{
+			Secret:      "test-secret",
+			ExpiryHours: 1,
+		},
+	}
+
+	router := gin.New()
+	router.Use(CustomerJWTAuth(cfg, mockDB))
+	router.GET("/test", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "success"})
+	})
+
+	req := httptest.NewRequest("GET", "/test", nil)
+	req.Header.Set("Authorization", "Bearer invalid-token")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Contains(t, w.Body.String(), "無效的 accessToken")
+}
+
+func TestGetCustomerFromContext(t *testing.T) {
+	env := setup.SetupTestEnvironmentForMiddleware(t)
+	defer env.Cleanup()
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+
+	customerContext := common.CustomerContext{
+		CustomerID: 123,
+	}
+
+	c.Set(CustomerContextKey, customerContext)
+
+	result, exists := GetCustomerFromContext(c)
+
+	assert.True(t, exists)
+	assert.NotNil(t, result)
+	assert.Equal(t, int64(123), result.CustomerID)
+}
+
+func TestGetCustomerFromContext_NotExists(t *testing.T) {
+	env := setup.SetupTestEnvironmentForMiddleware(t)
+	defer env.Cleanup()
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+
+	result, exists := GetCustomerFromContext(c)
+
+	assert.False(t, exists)
+	assert.Nil(t, result)
+}

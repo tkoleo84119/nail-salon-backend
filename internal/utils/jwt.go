@@ -61,3 +61,23 @@ func GenerateCustomerJWT(jwtConfig config.JWTConfig, customerID int64) (string, 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(jwtConfig.Secret))
 }
+
+// ValidateCustomerJWT validates a customer JWT token and returns the claims
+func ValidateCustomerJWT(jwtConfig config.JWTConfig, tokenString string) (*common.LineJWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &common.LineJWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(jwtConfig.Secret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*common.LineJWTClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, fmt.Errorf("invalid token")
+}

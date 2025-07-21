@@ -25,6 +25,10 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
+type CustomerContext struct {
+	CustomerID int64 `json:"customerId"`
+}
+
 type LineJWTClaims struct {
 	jwt.RegisteredClaims
 	CustomerID int64 `json:"customerId"`
