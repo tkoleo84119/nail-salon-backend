@@ -10,3 +10,7 @@ import (
 type LineLoginServiceInterface interface {
 	LineLogin(ctx context.Context, req customer.LineLoginRequest, loginCtx customer.LoginContext) (*customer.LineLoginResponse, error)
 }
+
+type LineRegisterServiceInterface interface {
+	LineRegister(ctx context.Context, req customer.LineRegisterRequest, loginCtx customer.LoginContext) (*customer.LineRegisterResponse, error)
+}

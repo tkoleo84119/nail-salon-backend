@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/require"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
@@ -68,6 +70,12 @@ func SetupTestEnvironmentForService(t *testing.T) *TestEnvironment {
 func SetupTestEnvironmentForHandler(t *testing.T) *TestEnvironment {
 	// Set Gin to test mode
 	gin.SetMode(gin.TestMode)
+
+	// Register custom validators
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("taiwanlandline", utils.ValidateTaiwanLandline)
+		v.RegisterValidation("taiwanmobile", utils.ValidateTaiwanMobile)
+	}
 
 	// Load error definitions for testing
 	errorManager := errorCodes.GetManager()

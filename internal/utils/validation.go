@@ -44,6 +44,8 @@ func ExtractValidationErrors(err error) map[string]string {
 				errors[fieldName] = fieldName + "只可以傳入特定值"
 			case "taiwanlandline":
 				errors[fieldName] = fieldName + "必須為有效的台灣市話號碼格式 (例: 02-12345678)"
+			case "taiwanmobile":
+				errors[fieldName] = fieldName + "必須為有效的台灣手機號碼格式 (例: 09xxxxxxxx)"
 			default:
 				errors[fieldName] = fieldName + "格式不正確"
 			}
@@ -76,6 +78,22 @@ func ValidateTaiwanLandline(fl validator.FieldLevel) bool {
 	// Area codes: 02, 03, 04, 05, 06, 07, 08, 089
 	// Phone number: 7-8 digits
 	pattern := `^0[2-8]-\d{7,8}$|^089-\d{6}$`
+	matched, _ := regexp.MatchString(pattern, phone)
+	return matched
+}
+
+// ValidateTaiwanMobile validates Taiwan mobile phone numbers
+// Format: 09XXXXXXXX where X is any digit
+func ValidateTaiwanMobile(fl validator.FieldLevel) bool {
+	phone := fl.Field().String()
+	
+	// Allow empty string (use omitempty in binding tag if optional)
+	if phone == "" {
+		return true
+	}
+	
+	// Taiwan mobile format: 09XXXXXXXX (10 digits total)
+	pattern := `^09\d{8}$`
 	matched, _ := regexp.MatchString(pattern, phone)
 	return matched
 }

@@ -164,3 +164,68 @@ func TestExtractValidationErrors_TaiwanLandline(t *testing.T) {
 	assert.Contains(t, errors, "phone")
 	assert.Equal(t, "phone必須為有效的台灣市話號碼格式 (例: 02-12345678)", errors["phone"])
 }
+
+func TestValidateTaiwanMobile(t *testing.T) {
+	// Create a validator instance and register our custom validation
+	validate := validator.New()
+	validate.RegisterValidation("taiwanmobile", ValidateTaiwanMobile)
+
+	tests := []struct {
+		name     string
+		phone    string
+		expected bool
+	}{
+		// Valid cases
+		{"Valid mobile number", "0912345678", true},
+		{"Valid mobile number with different carrier", "0987654321", true},
+		{"Valid mobile number 0900000000", "0900000000", true},
+		{"Valid mobile number 0999999999", "0999999999", true},
+		{"Empty string should pass", "", true},
+
+		// Invalid cases
+		{"Too short", "091234567", false},
+		{"Too long", "09123456789", false},
+		{"Doesn't start with 09", "0812345678", false},
+		{"Starts with 08", "0812345678", false},
+		{"Contains non-digits", "091234567a", false},
+		{"With dash", "0912-345678", false},
+		{"With spaces", "0912 345 678", false},
+		{"Missing leading zero", "912345678", false},
+		{"Invalid start 01", "0112345678", false},
+		{"Special characters", "0912-345-678", false},
+	}
+
+	type TestStructMobile struct {
+		Phone string `validate:"taiwanmobile"`
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testStruct := TestStructMobile{Phone: tt.phone}
+			err := validate.Struct(testStruct)
+
+			if tt.expected {
+				assert.NoError(t, err, "Expected phone %s to be valid", tt.phone)
+			} else {
+				assert.Error(t, err, "Expected phone %s to be invalid", tt.phone)
+			}
+		})
+	}
+}
+
+func TestExtractValidationErrors_TaiwanMobile(t *testing.T) {
+	// Create a validator instance and register our custom validation
+	validate := validator.New()
+	validate.RegisterValidation("taiwanmobile", ValidateTaiwanMobile)
+
+	type TestStructMobile struct {
+		Phone string `validate:"taiwanmobile"`
+	}
+
+	testStruct := TestStructMobile{Phone: "invalid-phone"}
+	err := validate.Struct(testStruct)
+
+	errors := ExtractValidationErrors(err)
+	assert.Contains(t, errors, "phone")
+	assert.Equal(t, "phone必須為有效的台灣手機號碼格式 (例: 09xxxxxxxx)", errors["phone"])
+}

@@ -69,6 +69,7 @@ func main() {
 	// register custom validators
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("taiwanlandline", utils.ValidateTaiwanLandline)
+		v.RegisterValidation("taiwanmobile", utils.ValidateTaiwanMobile)
 	}
 
 	// initialize sqlc queries
@@ -83,6 +84,7 @@ func main() {
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
 	customerLineLoginService := customerService.NewLineLoginService(queries, cfg.Line, cfg.JWT)
+	customerLineRegisterService := customerService.NewLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT)
 	staffCreateService := staffService.NewCreateStaffService(queries, database.PgxPool)
 	staffUpdateService := staffService.NewUpdateStaffService(queries, database.Sqlx)
 	staffUpdateMeService := staffService.NewUpdateMyStaffService(queries, staffUserRepository)
@@ -111,6 +113,7 @@ func main() {
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
 	customerLineLoginHandler := customerHandler.NewLineLoginHandler(customerLineLoginService)
+	customerLineRegisterHandler := customerHandler.NewLineRegisterHandler(customerLineRegisterService)
 	staffCreateHandler := staffHandler.NewCreateStaffHandler(staffCreateService)
 	staffUpdateHandler := staffHandler.NewUpdateStaffHandler(staffUpdateService)
 	staffUpdateMeHandler := staffHandler.NewUpdateMyStaffHandler(staffUpdateMeService)
@@ -145,6 +148,7 @@ func main() {
 			customer := auth.Group("/customer")
 			{
 				customer.POST("/line/login", customerLineLoginHandler.LineLogin)
+				customer.POST("/line/register", customerLineRegisterHandler.LineRegister)
 			}
 		}
 		staff := api.Group("/staff")
