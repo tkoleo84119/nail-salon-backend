@@ -54,12 +54,22 @@ const (
 	// SERVICE - Service operation errors
 	ServiceNameAlreadyExists = "SERVICE_NAME_ALREADY_EXISTS"
 	ServiceNotFound          = "SERVICE_NOT_FOUND"
+	ServiceNotActive         = "SERVICE_NOT_ACTIVE"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"
 	ValAllFieldsEmpty        = "VAL_ALL_FIELDS_EMPTY"
 	ValDateFormatInvalid     = "VAL_DATE_FORMAT_INVALID"
+
+	// BOOKING - Booking operation errors
+	BookingNotFound            = "BOOKING_NOT_FOUND"
+	BookingTimeSlotNotFound    = "TIME_SLOT_NOT_FOUND"
+	BookingTimeSlotUnavailable = "TIME_SLOT_UNAVAILABLE"
+
+	// STORE - Store operation errors
+	StoreNotFound  = "STORE_NOT_FOUND"
+	StoreNotActive = "STORE_NOT_ACTIVE"
 
 	// SYS - System errors
 	SysInternalError      = "SYS_INTERNAL_ERROR"

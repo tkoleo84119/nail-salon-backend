@@ -292,6 +292,16 @@ func (m *MockQuerier) GetServiceByID(ctx context.Context, id int64) (dbgen.Servi
 	return args.Get(0).(dbgen.Service), args.Error(1)
 }
 
+func (m *MockQuerier) GetServiceDetailById(ctx context.Context, id int64) (dbgen.GetServiceDetailByIdRow, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(dbgen.GetServiceDetailByIdRow), args.Error(1)
+}
+
+func (m *MockQuerier) GetServiceByIds(ctx context.Context, ids []int64) ([]dbgen.GetServiceByIdsRow, error) {
+	args := m.Called(ctx, ids)
+	return args.Get(0).([]dbgen.GetServiceByIdsRow), args.Error(1)
+}
+
 func (m *MockQuerier) CheckServiceNameExistsExcluding(ctx context.Context, arg dbgen.CheckServiceNameExistsExcludingParams) (bool, error) {
 	args := m.Called(ctx, arg)
 	return args.Bool(0), args.Error(1)
@@ -341,4 +351,19 @@ func (m *MockQuerier) RevokeAllCustomerTokens(ctx context.Context, customerID in
 func (m *MockQuerier) DeleteExpiredCustomerTokens(ctx context.Context) error {
 	args := m.Called(ctx)
 	return args.Error(0)
+}
+
+func (m *MockQuerier) CreateBooking(ctx context.Context, arg dbgen.CreateBookingParams) (dbgen.Booking, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.Booking), args.Error(1)
+}
+
+func (m *MockQuerier) CreateBookingDetail(ctx context.Context, arg dbgen.CreateBookingDetailParams) (dbgen.BookingDetail, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(dbgen.BookingDetail), args.Error(1)
+}
+
+func (m *MockQuerier) CreateBookingDetails(ctx context.Context, arg []dbgen.CreateBookingDetailsParams) (int64, error) {
+	args := m.Called(ctx, arg)
+	return args.Get(0).(int64), args.Error(1)
 }

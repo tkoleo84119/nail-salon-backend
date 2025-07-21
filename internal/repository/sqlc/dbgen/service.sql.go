@@ -13,7 +13,7 @@ import (
 
 const checkServiceNameExistsExcluding = `-- name: CheckServiceNameExistsExcluding :one
 SELECT EXISTS(
-    SELECT 1 FROM services 
+    SELECT 1 FROM services
     WHERE name = $1 AND id != $2
 ) AS exists
 `
@@ -105,6 +105,60 @@ func (q *Queries) GetServiceByID(ctx context.Context, id int64) (Service, error)
 	return i, err
 }
 
+const getServiceByIds = `-- name: GetServiceByIds :many
+SELECT
+    id,
+    name,
+    price,
+    duration_minutes,
+    is_addon,
+    is_visible,
+    is_active,
+    note
+FROM services
+WHERE id = ANY($1::bigint[])
+`
+
+type GetServiceByIdsRow struct {
+	ID              int64          `db:"id" json:"id"`
+	Name            string         `db:"name" json:"name"`
+	Price           pgtype.Numeric `db:"price" json:"price"`
+	DurationMinutes int32          `db:"duration_minutes" json:"duration_minutes"`
+	IsAddon         pgtype.Bool    `db:"is_addon" json:"is_addon"`
+	IsVisible       pgtype.Bool    `db:"is_visible" json:"is_visible"`
+	IsActive        pgtype.Bool    `db:"is_active" json:"is_active"`
+	Note            pgtype.Text    `db:"note" json:"note"`
+}
+
+func (q *Queries) GetServiceByIds(ctx context.Context, dollar_1 []int64) ([]GetServiceByIdsRow, error) {
+	rows, err := q.db.Query(ctx, getServiceByIds, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetServiceByIdsRow{}
+	for rows.Next() {
+		var i GetServiceByIdsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Price,
+			&i.DurationMinutes,
+			&i.IsAddon,
+			&i.IsVisible,
+			&i.IsActive,
+			&i.Note,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getServiceByName = `-- name: GetServiceByName :one
 SELECT id, name, price, duration_minutes, is_addon, is_visible, is_active, note, created_at, updated_at FROM services WHERE name = $1 LIMIT 1
 `
@@ -123,6 +177,47 @@ func (q *Queries) GetServiceByName(ctx context.Context, name string) (Service, e
 		&i.Note,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getServiceDetailById = `-- name: GetServiceDetailById :one
+SELECT
+    id,
+    name,
+    price,
+    duration_minutes,
+    is_addon,
+    is_visible,
+    is_active,
+    note
+FROM services
+WHERE id = $1
+`
+
+type GetServiceDetailByIdRow struct {
+	ID              int64          `db:"id" json:"id"`
+	Name            string         `db:"name" json:"name"`
+	Price           pgtype.Numeric `db:"price" json:"price"`
+	DurationMinutes int32          `db:"duration_minutes" json:"duration_minutes"`
+	IsAddon         pgtype.Bool    `db:"is_addon" json:"is_addon"`
+	IsVisible       pgtype.Bool    `db:"is_visible" json:"is_visible"`
+	IsActive        pgtype.Bool    `db:"is_active" json:"is_active"`
+	Note            pgtype.Text    `db:"note" json:"note"`
+}
+
+func (q *Queries) GetServiceDetailById(ctx context.Context, id int64) (GetServiceDetailByIdRow, error) {
+	row := q.db.QueryRow(ctx, getServiceDetailById, id)
+	var i GetServiceDetailByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Price,
+		&i.DurationMinutes,
+		&i.IsAddon,
+		&i.IsVisible,
+		&i.IsActive,
+		&i.Note,
 	)
 	return i, err
 }

@@ -39,7 +39,6 @@ type Booking struct {
 	StylistID      int64              `db:"stylist_id" json:"stylist_id"`
 	TimeSlotID     int64              `db:"time_slot_id" json:"time_slot_id"`
 	IsChatEnabled  pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
-	NoShow         pgtype.Bool        `db:"no_show" json:"no_show"`
 	ActualDuration pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
 	Note           pgtype.Text        `db:"note" json:"note"`
 	UsedProducts   []string           `db:"used_products" json:"used_products"`

@@ -156,3 +156,38 @@ func (r iteratorForBatchCreateTimeSlots) Err() error {
 func (q *Queries) BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error) {
 	return q.db.CopyFrom(ctx, []string{"time_slots"}, []string{"id", "schedule_id", "start_time", "end_time", "is_available", "created_at", "updated_at"}, &iteratorForBatchCreateTimeSlots{rows: arg})
 }
+
+// iteratorForCreateBookingDetails implements pgx.CopyFromSource.
+type iteratorForCreateBookingDetails struct {
+	rows                 []CreateBookingDetailsParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForCreateBookingDetails) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForCreateBookingDetails) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].ID,
+		r.rows[0].BookingID,
+		r.rows[0].ServiceID,
+		r.rows[0].Price,
+	}, nil
+}
+
+func (r iteratorForCreateBookingDetails) Err() error {
+	return nil
+}
+
+func (q *Queries) CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"booking_details"}, []string{"id", "booking_id", "service_id", "price"}, &iteratorForCreateBookingDetails{rows: arg})
+}

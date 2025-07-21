@@ -142,6 +142,28 @@ SERVICE:
   SERVICE_NOT_FOUND:
     message: 服務不存在或已被刪除
     status: 404
+  SERVICE_NOT_ACTIVE:
+    message: 服務未啟用
+    status: 400
+
+BOOKING:
+  BOOKING_NOT_FOUND:
+    message: 預約不存在或已被取消
+    status: 404
+  TIME_SLOT_NOT_FOUND:
+    message: 指定時段不存在
+    status: 404
+  TIME_SLOT_UNAVAILABLE:
+    message: 該時段已被預約，請重新選擇
+    status: 409
+
+STORE:
+  STORE_NOT_FOUND:
+    message: 門市不存在或已被刪除
+    status: 404
+  STORE_NOT_ACTIVE:
+    message: 門市未啟用
+    status: 400
 
 SYS:
   SYS_INTERNAL_ERROR:

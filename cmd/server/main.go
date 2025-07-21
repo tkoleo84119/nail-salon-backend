@@ -12,6 +12,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
+	bookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/booking"
 	customerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer"
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	serviceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/service"
@@ -25,6 +26,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
+	bookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/booking"
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	serviceService "github.com/tkoleo84119/nail-salon-backend/internal/service/service"
@@ -84,6 +86,7 @@ func main() {
 
 	// initialize services
 	authLoginService := authService.NewLoginService(queries, cfg.JWT)
+	bookingCreateMyService := bookingService.NewCreateMyBookingService(queries, database.PgxPool)
 	customerLineLoginService := customerService.NewLineLoginService(queries, cfg.Line, cfg.JWT)
 	customerLineRegisterService := customerService.NewLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT)
 	customerUpdateMyService := customerService.NewUpdateMyCustomerService(queries, customerRepository)
@@ -114,6 +117,7 @@ func main() {
 
 	// initialize handlers
 	authLoginHandler := authHandler.NewLoginHandler(authLoginService)
+	bookingCreateMyHandler := bookingHandler.NewCreateMyBookingHandler(bookingCreateMyService)
 	customerLineLoginHandler := customerHandler.NewLineLoginHandler(customerLineLoginService)
 	customerLineRegisterHandler := customerHandler.NewLineRegisterHandler(customerLineRegisterService)
 	customerUpdateMyHandler := customerHandler.NewUpdateMyCustomerHandler(customerUpdateMyService)
@@ -157,6 +161,10 @@ func main() {
 		customer := api.Group("/customers")
 		{
 			customer.PATCH("/me", middleware.JWTAuth(*cfg, queries), customerUpdateMyHandler.UpdateMyCustomer)
+		}
+		bookings := api.Group("/bookings")
+		{
+			bookings.POST("/me", middleware.JWTAuth(*cfg, queries), bookingCreateMyHandler.CreateMyBooking)
 		}
 		staff := api.Group("/staff")
 		{
