@@ -1,4 +1,4 @@
-package customer
+package auth
 
 // Provider constants for customer providers
 const (

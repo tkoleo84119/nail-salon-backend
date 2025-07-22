@@ -1,4 +1,4 @@
-package customer
+package auth
 
 import (
 	"context"
@@ -7,26 +7,25 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type LineRegisterService struct {
+type CustomerLineRegisterService struct {
 	queries       dbgen.Querier
 	db            *pgxpool.Pool
 	lineValidator *utils.LineValidator
 	jwtConfig     config.JWTConfig
 }
 
-func NewLineRegisterService(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineRegisterService {
+func NewCustomerLineRegisterService(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *CustomerLineRegisterService {
 	lineValidator := utils.NewLineValidator(lineConfig.ChannelID)
-	return &LineRegisterService{
+	return &CustomerLineRegisterService{
 		queries:       queries,
 		db:            db,
 		lineValidator: lineValidator,
@@ -34,7 +33,7 @@ func NewLineRegisterService(queries dbgen.Querier, db *pgxpool.Pool, lineConfig 
 	}
 }
 
-func (s *LineRegisterService) LineRegister(ctx context.Context, req customer.LineRegisterRequest, loginCtx customer.LoginContext) (*customer.LineRegisterResponse, error) {
+func (s *CustomerLineRegisterService) CustomerLineRegister(ctx context.Context, req auth.CustomerLineRegisterRequest, loginCtx auth.CustomerLoginContext) (*auth.CustomerLineRegisterResponse, error) {
 	// Validate LINE ID token and get profile
 	profile, err := s.lineValidator.ValidateIdToken(req.IdToken)
 	if err != nil {
@@ -43,7 +42,7 @@ func (s *LineRegisterService) LineRegister(ctx context.Context, req customer.Lin
 
 	// Check if customer already exists
 	_, err = s.queries.GetCustomerAuthByProviderUid(ctx, dbgen.GetCustomerAuthByProviderUidParams{
-		Provider:    customer.ProviderLine,
+		Provider:    auth.ProviderLine,
 		ProviderUid: profile.ProviderUid,
 	})
 
@@ -55,14 +54,17 @@ func (s *LineRegisterService) LineRegister(ctx context.Context, req customer.Lin
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check customer existence", err)
 	}
 
-	// Create customer record
+	// Prepare customer record
 	customerID := utils.GenerateID()
 
-	// Parse and convert birthday to pgtype.Date
-	parsedBirthday, err := time.Parse("2006-01-02", req.Birthday)
+	birthday, err := utils.StringToPgDate(req.Birthday)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid birthday format", err)
 	}
+	city := utils.StringToText(&req.City)
+	referrer := utils.StringToText(&req.Referrer)
+	customerNote := utils.StringToText(&req.CustomerNote)
+	isIntrovert := utils.BoolPtrToPgBool(req.IsIntrovert)
 
 	// Convert favorite arrays to PostgreSQL text arrays
 	var favoriteShapes, favoriteColors, favoriteStyles, referralSource []string
@@ -79,30 +81,15 @@ func (s *LineRegisterService) LineRegister(ctx context.Context, req customer.Lin
 		referralSource = req.ReferralSource
 	}
 
-	// Prepare optional fields
-	var city pgtype.Text
-	if req.City != "" {
-		city = pgtype.Text{String: req.City, Valid: true}
-	}
-
-	var referrer pgtype.Text
-	if req.Referrer != "" {
-		referrer = pgtype.Text{String: req.Referrer, Valid: true}
-	}
-
-	var customerNote pgtype.Text
-	if req.CustomerNote != "" {
-		customerNote = pgtype.Text{String: req.CustomerNote, Valid: true}
-	}
-
-	var isIntrovert pgtype.Bool
-	if req.IsIntrovert != nil {
-		isIntrovert = pgtype.Bool{Bool: *req.IsIntrovert, Valid: true}
-	}
-
-	birthday := pgtype.Date{
-		Time:  parsedBirthday,
-		Valid: true,
+	// Create customer auth record
+	authID := utils.GenerateID()
+	var otherInfo []byte
+	if profile.Email != nil {
+		otherInfoMap := map[string]interface{}{
+			"name":  profile.Name,
+			"email": *profile.Email,
+		}
+		otherInfo, _ = json.Marshal(otherInfoMap)
 	}
 
 	// Start transaction
@@ -132,21 +119,10 @@ func (s *LineRegisterService) LineRegister(ctx context.Context, req customer.Lin
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create customer", err)
 	}
 
-	// Create customer auth record
-	authID := utils.GenerateID()
-	var otherInfo []byte
-	if profile.Email != nil {
-		otherInfoMap := map[string]interface{}{
-			"name":  profile.Name,
-			"email": *profile.Email,
-		}
-		otherInfo, _ = json.Marshal(otherInfoMap)
-	}
-
 	_, err = qtx.CreateCustomerAuth(ctx, dbgen.CreateCustomerAuthParams{
 		ID:          authID,
 		CustomerID:  customerID,
-		Provider:    customer.ProviderLine,
+		Provider:    auth.ProviderLine,
 		ProviderUid: profile.ProviderUid,
 		OtherInfo:   otherInfo,
 	})
@@ -171,10 +147,10 @@ func (s *LineRegisterService) LineRegister(ctx context.Context, req customer.Lin
 	}
 
 	// Build response
-	response := &customer.LineRegisterResponse{
+	response := &auth.CustomerLineRegisterResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		Customer: &customer.RegisteredCustomer{
+		Customer: &auth.CustomerRegisteredCustomer{
 			ID:       utils.FormatID(createdCustomer.ID),
 			Name:     createdCustomer.Name,
 			Phone:    createdCustomer.Phone,
@@ -186,7 +162,7 @@ func (s *LineRegisterService) LineRegister(ctx context.Context, req customer.Lin
 }
 
 // generateAccessToken generates a JWT access token for the customer
-func (s *LineRegisterService) generateAccessToken(customerID int64) (string, error) {
+func (s *CustomerLineRegisterService) generateAccessToken(customerID int64) (string, error) {
 	token, err := utils.GenerateCustomerJWT(s.jwtConfig, customerID)
 	if err != nil {
 		return "", errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate access token", err)
@@ -196,7 +172,7 @@ func (s *LineRegisterService) generateAccessToken(customerID int64) (string, err
 }
 
 // generateRefreshToken generates and stores a refresh token for the customer
-func (s *LineRegisterService) generateRefreshToken(ctx context.Context, queries dbgen.Querier, customerID int64, loginCtx customer.LoginContext) (string, error) {
+func (s *CustomerLineRegisterService) generateRefreshToken(ctx context.Context, queries dbgen.Querier, customerID int64, loginCtx auth.CustomerLoginContext) (string, error) {
 	// Generate refresh token
 	refreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
@@ -207,21 +183,14 @@ func (s *LineRegisterService) generateRefreshToken(ctx context.Context, queries 
 	tokenID := utils.GenerateID()
 
 	// Store refresh token in database
-	expiresAt := pgtype.Timestamptz{
-		Time:  time.Now().Add(30 * 24 * time.Hour), // 30 days
-		Valid: true,
-	}
+	expiresAt := utils.TimeToPgTimez(time.Now().Add(7 * 24 * time.Hour)) // 7 days
+	userAgent := utils.StringToText(&loginCtx.UserAgent)
 
 	var ipAddress *netip.Addr
 	if loginCtx.IPAddress != "" {
 		if addr, err := netip.ParseAddr(loginCtx.IPAddress); err == nil {
 			ipAddress = &addr
 		}
-	}
-
-	var userAgent pgtype.Text
-	if loginCtx.UserAgent != "" {
-		userAgent = pgtype.Text{String: loginCtx.UserAgent, Valid: true}
 	}
 
 	_, err = queries.CreateCustomerToken(ctx, dbgen.CreateCustomerTokenParams{

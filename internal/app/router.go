@@ -13,12 +13,12 @@ func SetupRoutes(container *Container) *gin.Engine {
 	cfg := container.GetConfig()
 	database := container.GetDatabase()
 	handlers := container.GetHandlers()
-	
+
 	queries := dbgen.New(database.PgxPool)
 	router := gin.Default()
 
 	router.GET("/health", handler.Health)
-	
+
 	api := router.Group("/api")
 	{
 		setupAuthRoutes(api, handlers)
@@ -38,10 +38,14 @@ func SetupRoutes(container *Container) *gin.Engine {
 func setupAuthRoutes(api *gin.RouterGroup, handlers Handlers) {
 	auth := api.Group("/auth")
 	{
-		customer := auth.Group("/customer")
+		staff := auth.Group("/staffs")
 		{
-			customer.POST("/line/login", handlers.CustomerLineLogin.LineLogin)
-			customer.POST("/line/register", handlers.CustomerLineRegister.LineRegister)
+			staff.POST("/login", handlers.AuthStaffLogin.StaffLogin)
+		}
+		customer := auth.Group("/customers")
+		{
+			customer.POST("/line/login", handlers.AuthCustomerLineLogin.CustomerLineLogin)
+			customer.POST("/line/register", handlers.AuthCustomerLineRegister.CustomerLineRegister)
 		}
 	}
 }
@@ -63,7 +67,6 @@ func setupBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen
 func setupStaffRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	staff := api.Group("/staff")
 	{
-		staff.POST("/login", handlers.AuthLogin.Login)
 		staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffCreate.CreateStaff)
 		staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffUpdate.UpdateStaff)
 		staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.StaffUpdateMe.UpdateMyStaff)

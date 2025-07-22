@@ -6,15 +6,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 )
 
-// LineLoginServiceInterface defines the interface for customer LINE login service
-type LineLoginServiceInterface interface {
-	LineLogin(ctx context.Context, req customer.LineLoginRequest, loginCtx customer.LoginContext) (*customer.LineLoginResponse, error)
-}
-
-type LineRegisterServiceInterface interface {
-	LineRegister(ctx context.Context, req customer.LineRegisterRequest, loginCtx customer.LoginContext) (*customer.LineRegisterResponse, error)
-}
-
 type UpdateMyCustomerServiceInterface interface {
 	UpdateMyCustomer(ctx context.Context, customerID int64, req customer.UpdateMyCustomerRequest) (*customer.UpdateMyCustomerResponse, error)
 }

@@ -7,26 +7,27 @@ import (
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type LoginHandler struct {
-	loginService authService.LoginServiceInterface
+type CustomerLineLoginHandler struct {
+	service authService.CustomerLineLoginServiceInterface
 }
 
-// NewLoginHandler creates a new login handler
-func NewLoginHandler(loginService authService.LoginServiceInterface) *LoginHandler {
-	return &LoginHandler{
-		loginService: loginService,
+// NewCustomerLineLoginHandler creates a new LINE login handler
+func NewCustomerLineLoginHandler(service authService.CustomerLineLoginServiceInterface) *CustomerLineLoginHandler {
+	return &CustomerLineLoginHandler{
+		service: service,
 	}
 }
 
-// Login handles the staff login endpoint
-func (h *LoginHandler) Login(c *gin.Context) {
-	var req auth.LoginRequest
+// CustomerLineLogin handles the customer LINE login endpoint
+func (h *CustomerLineLoginHandler) CustomerLineLogin(c *gin.Context) {
+	// Input JSON Validation
+	var req auth.CustomerLineLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
@@ -34,14 +35,14 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	}
 
 	// Extract login context
-	loginCtx := auth.LoginContext{
+	loginCtx := auth.CustomerLoginContext{
 		UserAgent: c.GetHeader("User-Agent"),
 		IPAddress: c.ClientIP(),
 		Timestamp: time.Now(),
 	}
 
 	// Call service layer
-	response, err := h.loginService.Login(c.Request.Context(), req, loginCtx)
+	response, err := h.service.CustomerLineLogin(c.Request.Context(), req, loginCtx)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -5,30 +5,28 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type LoginService struct {
+type StaffLoginService struct {
 	queries   dbgen.Querier
 	jwtConfig config.JWTConfig
 }
 
-func NewLoginService(queries dbgen.Querier, jwtConfig config.JWTConfig) *LoginService {
-	return &LoginService{
+func NewStaffLoginService(queries dbgen.Querier, jwtConfig config.JWTConfig) *StaffLoginService {
+	return &StaffLoginService{
 		queries:   queries,
 		jwtConfig: jwtConfig,
 	}
 }
 
-func (s *LoginService) Login(ctx context.Context, req auth.LoginRequest, loginCtx auth.LoginContext) (*auth.LoginResponse, error) {
+func (s *StaffLoginService) StaffLogin(ctx context.Context, req auth.StaffLoginRequest, loginCtx auth.StaffLoginContext) (*auth.StaffLoginResponse, error) {
 	staffUser, err := s.queries.GetStaffUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
@@ -57,7 +55,7 @@ func (s *LoginService) Login(ctx context.Context, req auth.LoginRequest, loginCt
 	}
 
 	// Store refresh token
-	tokenInfo := auth.TokenInfo{
+	tokenInfo := auth.StaffTokenInfo{
 		StaffUserID:  staffUser.ID,
 		RefreshToken: refreshToken,
 		Context:      loginCtx,
@@ -68,7 +66,7 @@ func (s *LoginService) Login(ctx context.Context, req auth.LoginRequest, loginCt
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to store refresh token", err)
 	}
 
-	response := &auth.LoginResponse{
+	response := &auth.StaffLoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
@@ -84,7 +82,7 @@ func (s *LoginService) Login(ctx context.Context, req auth.LoginRequest, loginCt
 }
 
 // getStoreAccess retrieves store access based on user role
-func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
+func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
 	var storeList []common.Store
 
 	// SUPER_ADMIN can access all stores
@@ -117,7 +115,7 @@ func (s *LoginService) getStoreAccess(ctx context.Context, staffUser dbgen.Staff
 }
 
 // storeRefreshToken stores the refresh token in database
-func (s *LoginService) storeRefreshToken(ctx context.Context, tokenInfo auth.TokenInfo) error {
+func (s *StaffLoginService) storeRefreshToken(ctx context.Context, tokenInfo auth.StaffTokenInfo) error {
 	// Parse IP address
 	var ipAddr *netip.Addr
 	if addr, err := netip.ParseAddr(tokenInfo.Context.IPAddress); err == nil {
@@ -125,14 +123,15 @@ func (s *LoginService) storeRefreshToken(ctx context.Context, tokenInfo auth.Tok
 	}
 
 	tokenID := utils.GenerateID()
+	userAgent := utils.StringToText(&tokenInfo.Context.UserAgent)
 
 	_, err := s.queries.CreateStaffUserToken(ctx, dbgen.CreateStaffUserTokenParams{
 		ID:           tokenID,
 		StaffUserID:  tokenInfo.StaffUserID,
 		RefreshToken: tokenInfo.RefreshToken,
-		UserAgent:    pgtype.Text{String: tokenInfo.Context.UserAgent, Valid: tokenInfo.Context.UserAgent != ""},
+		UserAgent:    userAgent,
 		IpAddress:    ipAddr,
-		ExpiredAt:    pgtype.Timestamptz{Time: tokenInfo.ExpiresAt, Valid: true},
+		ExpiredAt:    utils.TimeToPgTimez(tokenInfo.ExpiresAt),
 	})
 
 	return err

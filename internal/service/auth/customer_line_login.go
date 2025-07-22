@@ -1,4 +1,4 @@
-package customer
+package auth
 
 import (
 	"context"
@@ -6,31 +6,30 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type LineLoginService struct {
+type CustomerLineLoginService struct {
 	queries       dbgen.Querier
 	lineValidator *utils.LineValidator
 	jwtConfig     config.JWTConfig
 }
 
-func NewLineLoginService(queries dbgen.Querier, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineLoginService {
+func NewCustomerLineLoginService(queries dbgen.Querier, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *CustomerLineLoginService {
 	lineValidator := utils.NewLineValidator(lineConfig.ChannelID)
-	return &LineLoginService{
+	return &CustomerLineLoginService{
 		queries:       queries,
 		lineValidator: lineValidator,
 		jwtConfig:     jwtConfig,
 	}
 }
 
-func (s *LineLoginService) LineLogin(ctx context.Context, req customer.LineLoginRequest, loginCtx customer.LoginContext) (*customer.LineLoginResponse, error) {
+func (s *CustomerLineLoginService) CustomerLineLogin(ctx context.Context, req auth.CustomerLineLoginRequest, loginCtx auth.CustomerLoginContext) (*auth.CustomerLineLoginResponse, error) {
 	// Validate LINE ID token and get profile
 	profile, err := s.lineValidator.ValidateIdToken(req.IdToken)
 	if err != nil {
@@ -39,16 +38,16 @@ func (s *LineLoginService) LineLogin(ctx context.Context, req customer.LineLogin
 
 	// Check if customer already exists
 	customerAuth, err := s.queries.GetCustomerAuthByProviderUid(ctx, dbgen.GetCustomerAuthByProviderUidParams{
-		Provider:    customer.ProviderLine,
+		Provider:    auth.ProviderLine,
 		ProviderUid: profile.ProviderUid,
 	})
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			// Customer not registered, return registration info
-			response := &customer.LineLoginResponse{
+			response := &auth.CustomerLineLoginResponse{
 				NeedRegister: true,
-				LineProfile: &customer.LineProfile{
+				LineProfile: &auth.CustomerLineProfile{
 					ProviderUid: profile.ProviderUid,
 					Name:        profile.Name,
 					Email:       profile.Email,
@@ -71,11 +70,11 @@ func (s *LineLoginService) LineLogin(ctx context.Context, req customer.LineLogin
 	}
 
 	// Build response
-	response := &customer.LineLoginResponse{
+	response := &auth.CustomerLineLoginResponse{
 		NeedRegister: false,
 		AccessToken:  &accessToken,
 		RefreshToken: &refreshToken,
-		Customer: &customer.Customer{
+		Customer: &auth.Customer{
 			ID:    utils.FormatID(customerAuth.CustomerID),
 			Name:  customerAuth.CustomerName,
 			Phone: customerAuth.CustomerPhone,
@@ -86,7 +85,7 @@ func (s *LineLoginService) LineLogin(ctx context.Context, req customer.LineLogin
 }
 
 // generateAccessToken generates a JWT access token for the customer
-func (s *LineLoginService) generateAccessToken(customerID int64) (string, error) {
+func (s *CustomerLineLoginService) generateAccessToken(customerID int64) (string, error) {
 	token, err := utils.GenerateCustomerJWT(s.jwtConfig, customerID)
 	if err != nil {
 		return "", errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate access token", err)
@@ -96,7 +95,7 @@ func (s *LineLoginService) generateAccessToken(customerID int64) (string, error)
 }
 
 // generateRefreshToken generates and stores a refresh token for the customer
-func (s *LineLoginService) generateRefreshToken(ctx context.Context, customerID int64, loginCtx customer.LoginContext) (string, error) {
+func (s *CustomerLineLoginService) generateRefreshToken(ctx context.Context, customerID int64, loginCtx auth.CustomerLoginContext) (string, error) {
 	// Generate refresh token
 	refreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
@@ -107,21 +106,14 @@ func (s *LineLoginService) generateRefreshToken(ctx context.Context, customerID 
 	tokenID := utils.GenerateID()
 
 	// Store refresh token in database
-	expiresAt := pgtype.Timestamptz{
-		Time:  time.Now().Add(30 * 24 * time.Hour), // 7 days
-		Valid: true,
-	}
+	expiresAt := utils.TimeToPgTimez(time.Now().Add(7 * 24 * time.Hour)) // 7 days
+	userAgent := utils.StringToText(&loginCtx.UserAgent)
 
 	var ipAddress *netip.Addr
 	if loginCtx.IPAddress != "" {
 		if addr, err := netip.ParseAddr(loginCtx.IPAddress); err == nil {
 			ipAddress = &addr
 		}
-	}
-
-	var userAgent pgtype.Text
-	if loginCtx.UserAgent != "" {
-		userAgent = pgtype.Text{String: loginCtx.UserAgent, Valid: true}
 	}
 
 	_, err = s.queries.CreateCustomerToken(ctx, dbgen.CreateCustomerTokenParams{

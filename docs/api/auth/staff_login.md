@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**POST** `/api/staff/login`
+**POST** `/api/auth/staffs/login`
 
 ---
 

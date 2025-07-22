@@ -11,20 +11,20 @@ import (
 	"time"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 )
 
 type LineVerifyResponse struct {
-	Iss     string `json:"iss"`
-	Sub     string `json:"sub"`
-	Aud     string `json:"aud"`
-	Exp     int64  `json:"exp"`
-	Iat     int64  `json:"iat"`
-	Nonce   string `json:"nonce,omitempty"`
+	Iss     string   `json:"iss"`
+	Sub     string   `json:"sub"`
+	Aud     string   `json:"aud"`
+	Exp     int64    `json:"exp"`
+	Iat     int64    `json:"iat"`
+	Nonce   string   `json:"nonce,omitempty"`
 	Amr     []string `json:"amr,omitempty"`
-	Name    string `json:"name"`
-	Picture string `json:"picture,omitempty"`
-	Email   string `json:"email,omitempty"`
+	Name    string   `json:"name"`
+	Picture string   `json:"picture,omitempty"`
+	Email   string   `json:"email,omitempty"`
 }
 
 type LineValidator struct {
@@ -43,7 +43,7 @@ func NewLineValidator(channelID string) *LineValidator {
 	}
 }
 
-func (v *LineValidator) ValidateIdToken(idToken string) (*customer.CustomerProfile, error) {
+func (v *LineValidator) ValidateIdToken(idToken string) (*auth.CustomerProfile, error) {
 	if v.channelID == "YOUR_LINE_CHANNEL_ID" || v.channelID == "" {
 		return MockValidateLineIdToken(idToken)
 	}
@@ -104,7 +104,7 @@ func (v *LineValidator) ValidateIdToken(idToken string) (*customer.CustomerProfi
 		return nil, errorCodes.NewServiceError(errorCodes.AuthLineTokenInvalid, "invalid audience", nil)
 	}
 
-	profile := &customer.CustomerProfile{
+	profile := &auth.CustomerProfile{
 		ProviderUid: verifyResp.Sub,
 		Name:        verifyResp.Name,
 	}
@@ -116,7 +116,7 @@ func (v *LineValidator) ValidateIdToken(idToken string) (*customer.CustomerProfi
 	return profile, nil
 }
 
-func MockValidateLineIdToken(idToken string) (*customer.CustomerProfile, error) {
+func MockValidateLineIdToken(idToken string) (*auth.CustomerProfile, error) {
 	if idToken == "" {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthLineTokenInvalid)
 	}
@@ -134,7 +134,7 @@ func MockValidateLineIdToken(idToken string) (*customer.CustomerProfile, error) 
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthLineTokenInvalid)
 	}
 
-	profile := &customer.CustomerProfile{
+	profile := &auth.CustomerProfile{
 		ProviderUid: "U12345678",
 		Name:        "Test User",
 	}

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -20,29 +21,6 @@ func TextToString(t pgtype.Text) string {
 		return ""
 	}
 	return t.String
-}
-
-// TimeToString converts pgtype.Time to string format HH:MM
-func TimeToString(t pgtype.Time) string {
-	if !t.Valid {
-		return ""
-	}
-
-	// Convert microseconds to time
-	totalMicros := t.Microseconds
-	hours := totalMicros / (60 * 60 * 1000000)
-	minutes := (totalMicros % (60 * 60 * 1000000)) / (60 * 1000000)
-
-	return fmt.Sprintf("%02d:%02d", hours, minutes)
-}
-
-// DateToString converts pgtype.Date to string format YYYY-MM-DD
-func DateToString(d pgtype.Date) string {
-	if !d.Valid {
-		return ""
-	}
-
-	return d.Time.Format("2006-01-02")
 }
 
 // NumericToFloat64 converts pgtype.Numeric to float64
@@ -75,4 +53,55 @@ func BoolPtrToPgBool(b *bool) pgtype.Bool {
 		return pgtype.Bool{Valid: false}
 	}
 	return pgtype.Bool{Bool: *b, Valid: true}
+}
+
+// TimeToPgTimez converts time.Time to pgtype.Timestamptz
+func TimeToPgTimez(t time.Time) pgtype.Timestamptz {
+	return pgtype.Timestamptz{Time: t, Valid: true}
+}
+
+// TimeToString converts pgtype.Time to string format HH:MM
+func TimeToString(t pgtype.Time) string {
+	if !t.Valid {
+		return ""
+	}
+
+	// Convert microseconds to time
+	totalMicros := t.Microseconds
+	hours := totalMicros / (60 * 60 * 1000000)
+	minutes := (totalMicros % (60 * 60 * 1000000)) / (60 * 1000000)
+
+	return fmt.Sprintf("%02d:%02d", hours, minutes)
+}
+
+// DateToString converts pgtype.Date to string format YYYY-MM-DD
+func DateToString(d pgtype.Date) string {
+	if !d.Valid {
+		return ""
+	}
+
+	return d.Time.Format("2006-01-02")
+}
+
+// StringToTime converts date string to time.Time
+func StringToTime(s string) (time.Time, error) {
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t, nil
+}
+
+// StringToPgDate converts date string to pgtype.Date
+func StringToPgDate(s string) (pgtype.Date, error) {
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return pgtype.Date{}, err
+	}
+	return pgtype.Date{Time: t, Valid: true}, nil
+}
+
+// TimeToPgDate converts time.Time to pgtype.Date
+func TimeToPgDate(t time.Time) pgtype.Date {
+	return pgtype.Date{Time: t, Valid: true}
 }
