@@ -54,7 +54,7 @@ internal/
 - **Testing**: Comprehensive unit tests with mocks for external dependencies
 
 ### Database Architecture
-- **PostgreSQL**: Primary database with connection pooling via `pgxpool.Pool` 
+- **PostgreSQL**: Primary database with connection pooling via `pgxpool.Pool`
 - **pgx/v5**: Primary driver for transactions and connection management
 - **SQLC**: Type-safe SQL query generation for standard CRUD operations
 - **SQLX**: Dynamic SQL queries for complex updates with optional fields
@@ -85,12 +85,6 @@ Follow Conventional Commits format: `<type>: <description>`
 - Types: feat, fix, refactor, perf, style, test, docs, build, ops, chore
 - Use imperative mood, present tense, no capitalization, no period
 - English language for descriptions
-
-### Testing Guidelines
-- For handler & service, always write corresponding test files
-- All test files need to passed before commit
-- Only write test when @internal/model/ files have function
-- If service use sqlx, the mock repository need to write in @internal/testutils/mocks/repository.go 
 
 ### Development Notes
 - If needs new SQL query, look up current SQL query first (in `internal/repository/sqlc/` and `internal/repository/sqlx/`), not create duplicate SQL
@@ -138,7 +132,7 @@ Follow Conventional Commits format: `<type>: <description>`
 #### Handler Pattern (Create)
 ```go
 func (h *Handler) CreateEntity(c *gin.Context) {
-    // 1. Input JSON validation (always first)
+    // Input JSON validation
     var req EntityCreateRequest
     if err := c.ShouldBindJSON(&req); err != nil {
         validationErrors := utils.ExtractValidationErrors(err)
@@ -146,40 +140,40 @@ func (h *Handler) CreateEntity(c *gin.Context) {
         return
     }
 
-    // 2. Authentication context validation
+    // Authentication context validation
     staffContext, exists := middleware.GetStaffFromContext(c)
     if !exists {
         errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
         return
     }
 
-    // 3. Service layer call
+    // Service layer call
     response, err := h.service.CreateEntity(c.Request.Context(), req, *staffContext)
     if err != nil {
         errorCodes.RespondWithServiceError(c, err)
         return
     }
 
-    // 4. Success response (201 Created)
+    // Success response (201 Created)
     c.JSON(http.StatusCreated, common.SuccessResponse(response))
 }
 ```
 
-#### Service Pattern (Create) 
+#### Service Pattern (Create)
 ```go
 func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffContext StaffContext) (*EntityResponse, error) {
-    // 1. Input validation & ID parsing
+    // Input validation & ID parsing
     entityID, err := utils.ParseID(req.ID)
     if err != nil {
         return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid ID", err)
     }
 
-    // 2. Business logic validation (permissions, role)
+    // Business logic validation (permissions, role)
     if err := s.validatePermissions(staffContext.Role, req); err != nil {
         return nil, err
     }
 
-    // 3. Data integrity validation (existence, uniqueness)
+    // Data integrity validation (existence, uniqueness)
     exists, err := s.queries.CheckEntityExists(ctx, req.Name)
     if err != nil {
         return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "check failed", err)
@@ -188,7 +182,7 @@ func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffCont
         return nil, errorCodes.NewServiceErrorWithCode(errorCodes.EntityAlreadyExists)
     }
 
-    // 4. Transaction-based creation
+    // Transaction-based creation
     tx, err := s.db.Begin(ctx)
     if err != nil {
         return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "transaction failed", err)
@@ -218,7 +212,7 @@ func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffCont
 
 #### Query Patterns
 - **Single Record**: `GetEntityByID :one`
-- **Multiple Records**: `GetEntitiesByIDs :many` 
+- **Multiple Records**: `GetEntitiesByIDs :many`
 - **List Operations**: `GetAllActiveEntities :many`
 - **Existence Checks**: `CheckEntityExists :one` returning boolean
 - **Complex Joins**: SQLC queries with relationships
@@ -233,7 +227,7 @@ func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffCont
 #### Handler Pattern (Update)
 ```go
 func (h *Handler) UpdateEntity(c *gin.Context) {
-    // 1. Path parameter validation
+    // Path parameter validation
     targetID := c.Param("id")
     if targetID == "" {
         errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
@@ -242,7 +236,7 @@ func (h *Handler) UpdateEntity(c *gin.Context) {
         return
     }
 
-    // 2. Input JSON validation
+    // Input JSON validation
     var req EntityUpdateRequest
     if err := c.ShouldBindJSON(&req); err != nil {
         validationErrors := utils.ExtractValidationErrors(err)
@@ -250,7 +244,7 @@ func (h *Handler) UpdateEntity(c *gin.Context) {
         return
     }
 
-    // 3. Business logic validation - HasUpdates check
+    // Business logic validation - HasUpdates check
     if !req.HasUpdates() {
         errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
             "request": "至少需要提供一個欄位進行更新",
@@ -258,14 +252,14 @@ func (h *Handler) UpdateEntity(c *gin.Context) {
         return
     }
 
-    // 4. Authentication context validation
+    // Authentication context validation
     staffContext, exists := middleware.GetStaffFromContext(c)
     if !exists {
         errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
         return
     }
 
-    // 5. Service call
+    // Service call
     response, err := h.service.UpdateEntity(c.Request.Context(), targetID, req, staffContext)
     if err != nil {
         errorCodes.RespondWithServiceError(c, err)
@@ -289,7 +283,7 @@ func (r *Repository) UpdateEntity(ctx context.Context, id int64, req UpdateReque
     }
 
     if req.Field2 != nil {
-        setParts = append(setParts, "field2 = :field2") 
+        setParts = append(setParts, "field2 = :field2")
         args["field2"] = *req.Field2
     }
 
@@ -328,13 +322,13 @@ func (r *Repository) UpdateEntity(ctx context.Context, id int64, req UpdateReque
 #### Service Pattern (Delete)
 ```go
 func (s *Service) DeleteEntity(ctx context.Context, entityID string, staffContext StaffContext) (*DeleteResponse, error) {
-    // 1. ID parsing and validation
+    // ID parsing and validation
     id, err := utils.ParseID(entityID)
     if err != nil {
         return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid ID", err)
     }
 
-    // 2. Entity existence check
+    // Entity existence check
     entity, err := s.queries.GetEntityByID(ctx, id)
     if err != nil {
         if err == sql.ErrNoRows {
@@ -343,12 +337,12 @@ func (s *Service) DeleteEntity(ctx context.Context, entityID string, staffContex
         return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "get failed", err)
     }
 
-    // 3. Permission validation
+    // Permission validation
     if err := s.validateDeletePermissions(staffContext, entity); err != nil {
         return nil, err
     }
 
-    // 4. Business constraint validation
+    // Business constraint validation
     hasConstraints, err := s.queries.CheckEntityConstraints(ctx, id)
     if err != nil {
         return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "constraint check failed", err)
@@ -357,7 +351,7 @@ func (s *Service) DeleteEntity(ctx context.Context, entityID string, staffContex
         return nil, errorCodes.NewServiceErrorWithCode(errorCodes.EntityConstraintViolation)
     }
 
-    // 5. Perform delete (usually soft delete)
+    // Perform delete (usually soft delete)
     if err := s.queries.DeleteEntity(ctx, id); err != nil {
         return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "delete failed", err)
     }
@@ -401,7 +395,7 @@ if !exists {
     return
 }
 
-// Customer authentication (customer endpoints)  
+// Customer authentication (customer endpoints)
 customerContext, exists := middleware.GetCustomerFromContext(c)
 if !exists {
     errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
@@ -468,12 +462,5 @@ errorCodes.AbortWithError(c, errorCodes.ErrorCode, details)
 errorCodes.RespondWithServiceError(c, serviceError)
 ```
 
-### Testing Patterns
-- **Handler Tests**: Test HTTP layer with mock services
-- **Service Tests**: Test business logic with mock repositories  
-- **Repository Tests**: Test data access with real database (when needed)
-- **Mock Interfaces**: Define interfaces for all external dependencies
-- **SQLX Mocks**: Use `testutils/mocks/repository.go` for dynamic query mocks
-
 ### Memories and Notes
-- When generate API, do not forget to add route in @cmd/server/main.go 
+- When generate API, do not forget to add route in @cmd/server/main.go
