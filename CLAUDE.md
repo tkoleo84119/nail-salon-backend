@@ -31,6 +31,7 @@ This is a Go web API for a nail salon management system using:
 ### Project Structure
 ```
 internal/
+├── app/             # Application layer (dependency injection, routing)
 ├── config/          # Environment configuration
 ├── errors/          # Centralized error management with YAML definitions
 ├── handler/         # HTTP handlers (auth, staff, store-access)
@@ -47,7 +48,8 @@ internal/
 
 ### Key Patterns
 - **Layered Architecture**: Handler → Service → Repository
-- **Dependency Injection**: Services injected into handlers via constructors
+- **Dependency Injection**: Centralized container manages all dependencies (`internal/app/container.go`)
+- **Route Organization**: Modular route setup by business domain (`internal/app/router.go`)
 - **Error Handling**: Centralized error codes in `internal/errors/errors.yaml`
 - **Authentication**: JWT middleware with role-based permissions
 - **Database**: Uses both SQLC (for type safety) and SQLX (for flexibility)
@@ -462,5 +464,42 @@ errorCodes.AbortWithError(c, errorCodes.ErrorCode, details)
 errorCodes.RespondWithServiceError(c, serviceError)
 ```
 
+### Application Architecture Patterns
+
+#### Dependency Injection Container (`internal/app/container.go`)
+- **Central Dependency Management**: All repositories, services, and handlers initialized in one place
+- **Structured Organization**: Dependencies grouped by layer (repositories, services, handlers)
+- **Clean Dependencies**: Each layer depends only on its immediate lower layer
+- **Easy Testing**: Container structure makes mocking and testing straightforward
+
+#### Route Organization (`internal/app/router.go`)
+- **Modular Route Setup**: Routes organized by business domain (auth, staff, customer, etc.)
+- **Consistent Middleware**: JWT authentication and role-based authorization applied consistently
+- **Separated Concerns**: Route logic separated from main application bootstrap
+
+#### Refactored Main (`cmd/server/main.go`)
+- **Minimal Bootstrap**: Only essential initialization (config, database, error manager, validators)
+- **Clean Separation**: Business logic moved to app layer, main focuses on startup
+- **Maintainable**: Easy to understand and modify application startup sequence
+
+### Development Patterns
+
+#### Adding New APIs
+1. **Create Handler**: Add new handler in appropriate domain folder
+2. **Create Service**: Add business logic in service layer
+3. **Update Container**: Add service and handler to container initialization
+4. **Update Router**: Add route in appropriate route setup function
+5. **No Main Changes**: Routes automatically available without modifying main.go
+
+#### Container Usage Pattern
+```go
+// Access dependencies through container
+container := app.NewContainer(cfg, database)
+handlers := container.GetHandlers()
+services := container.GetServices()
+repositories := container.GetRepositories()
+```
+
 ### Memories and Notes
-- When generate API, do not forget to add route in @cmd/server/main.go
+- When generating APIs, add routes in `@internal/app/router.go` in the appropriate setup function
+- Avoid commenting with numbered steps in code implementation
