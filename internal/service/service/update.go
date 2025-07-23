@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jackc/pgx/v5"
 
@@ -14,13 +15,13 @@ import (
 )
 
 type UpdateServiceService struct {
-	queries   dbgen.Querier
+	queries     dbgen.Querier
 	serviceRepo sqlx.ServiceRepositoryInterface
 }
 
 func NewUpdateServiceService(queries dbgen.Querier, serviceRepo sqlx.ServiceRepositoryInterface) *UpdateServiceService {
 	return &UpdateServiceService{
-		queries:   queries,
+		queries:     queries,
 		serviceRepo: serviceRepo,
 	}
 }
@@ -45,7 +46,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID stri
 	// Check if service exists
 	_, err = s.queries.GetServiceByID(ctx, parsedServiceID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceNotFound)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get service", err)
@@ -61,7 +62,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID stri
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check service name uniqueness", err)
 		}
 		if exists {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceNameAlreadyExists)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceAlreadyExists)
 		}
 	}
 

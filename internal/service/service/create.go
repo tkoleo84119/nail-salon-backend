@@ -3,8 +3,6 @@ package service
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/service"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
@@ -29,32 +27,25 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req service.Cr
 	}
 
 	// Check if service name already exists
-	checkService, err := s.queries.GetServiceByName(ctx, req.Name)
+	exists, err := s.queries.CheckServiceNameExists(ctx, req.Name)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check service existence", err)
 	}
-	if checkService.Name != "" {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceNameAlreadyExists)
+	if exists {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceAlreadyExists)
 	}
 
 	// Generate ID for the new service
 	serviceID := utils.GenerateID()
 
 	// Convert price to pgtype.Numeric
-	priceNumeric := pgtype.Numeric{}
-	err = priceNumeric.Scan(req.Price)
+	priceNumeric, err := utils.Int64ToPgNumeric(req.Price)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to convert price", err)
 	}
 
 	// Convert note to pgtype.Text
-	noteText := pgtype.Text{}
-	if req.Note != "" {
-		err = noteText.Scan(req.Note)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to convert note", err)
-		}
-	}
+	noteText := utils.StringToText(&req.Note)
 
 	// Create service
 	createdService, err := s.queries.CreateService(ctx, dbgen.CreateServiceParams{
@@ -62,9 +53,8 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req service.Cr
 		Name:            req.Name,
 		Price:           priceNumeric,
 		DurationMinutes: req.DurationMinutes,
-		IsAddon:         pgtype.Bool{Bool: req.IsAddon, Valid: true},
-		IsVisible:       pgtype.Bool{Bool: req.IsVisible, Valid: true},
-		IsActive:        pgtype.Bool{Bool: true, Valid: true}, // Default to true
+		IsAddon:         utils.BoolPtrToPgBool(&req.IsAddon),
+		IsVisible:       utils.BoolPtrToPgBool(&req.IsVisible),
 		Note:            noteText,
 	})
 	if err != nil {
@@ -75,7 +65,7 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req service.Cr
 	response := &service.CreateServiceResponse{
 		ID:              utils.FormatID(createdService.ID),
 		Name:            createdService.Name,
-		Price:           req.Price, // Use original request price as int64
+		Price:           req.Price,
 		DurationMinutes: createdService.DurationMinutes,
 		IsAddon:         createdService.IsAddon.Bool,
 		IsVisible:       createdService.IsVisible.Bool,

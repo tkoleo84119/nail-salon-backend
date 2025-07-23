@@ -31,9 +31,9 @@ const (
 	ScheduleAlreadyBookedDoNotDelete = "SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE"
 
 	// SERVICE - Service operation errors
-	ServiceNameAlreadyExists = "SERVICE_NAME_ALREADY_EXISTS"
-	ServiceNotFound          = "SERVICE_NOT_FOUND"
-	ServiceNotActive         = "SERVICE_NOT_ACTIVE"
+	ServiceNotFound      = "SERVICE_NOT_FOUND"
+	ServiceNotActive     = "SERVICE_NOT_ACTIVE"
+	ServiceAlreadyExists = "SERVICE_ALREADY_EXISTS"
 
 	// STORE - Store operation errors
 	StoreNotFound      = "STORE_NOT_FOUND"

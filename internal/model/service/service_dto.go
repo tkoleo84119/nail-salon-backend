@@ -22,6 +22,8 @@ type CreateServiceResponse struct {
 	Note            string `json:"note"`
 }
 
+// -------------------------------------------------------------------------------------
+
 // UpdateServiceRequest represents the request to update a service
 type UpdateServiceRequest struct {
 	Name            *string `json:"name" binding:"omitempty,min=1,max=100"`
@@ -31,12 +33,6 @@ type UpdateServiceRequest struct {
 	IsVisible       *bool   `json:"isVisible" binding:"omitempty"`
 	IsActive        *bool   `json:"isActive" binding:"omitempty"`
 	Note            *string `json:"note" binding:"omitempty,max=255"`
-}
-
-// HasUpdates checks if the request has any fields to update
-func (r UpdateServiceRequest) HasUpdates() bool {
-	return r.Name != nil || r.Price != nil || r.DurationMinutes != nil ||
-		r.IsAddon != nil || r.IsVisible != nil || r.IsActive != nil || r.Note != nil
 }
 
 // UpdateServiceResponse represents the response after updating a service
@@ -49,4 +45,10 @@ type UpdateServiceResponse struct {
 	IsVisible       bool   `json:"isVisible"`
 	IsActive        bool   `json:"isActive"`
 	Note            string `json:"note"`
+}
+
+// HasUpdates checks if the request has any fields to update
+func (r UpdateServiceRequest) HasUpdates() bool {
+	return r.Name != nil || r.Price != nil || r.DurationMinutes != nil ||
+		r.IsAddon != nil || r.IsVisible != nil || r.IsActive != nil || r.Note != nil
 }

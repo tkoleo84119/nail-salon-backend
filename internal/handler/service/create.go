@@ -14,12 +14,12 @@ import (
 )
 
 type CreateServiceHandler struct {
-	createServiceService serviceService.CreateServiceInterface
+	service serviceService.CreateServiceInterface
 }
 
-func NewCreateServiceHandler(createServiceService serviceService.CreateServiceInterface) *CreateServiceHandler {
+func NewCreateServiceHandler(service serviceService.CreateServiceInterface) *CreateServiceHandler {
 	return &CreateServiceHandler{
-		createServiceService: createServiceService,
+		service: service,
 	}
 }
 
@@ -37,7 +37,7 @@ func (h *CreateServiceHandler) CreateService(c *gin.Context) {
 		return
 	}
 
-	response, err := h.createServiceService.CreateService(c.Request.Context(), req, staffContext.Role)
+	response, err := h.service.CreateService(c.Request.Context(), req, staffContext.Role)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

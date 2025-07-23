@@ -14,12 +14,12 @@ import (
 )
 
 type UpdateServiceHandler struct {
-	updateServiceService serviceService.UpdateServiceInterface
+	service serviceService.UpdateServiceInterface
 }
 
-func NewUpdateServiceHandler(updateServiceService serviceService.UpdateServiceInterface) *UpdateServiceHandler {
+func NewUpdateServiceHandler(service serviceService.UpdateServiceInterface) *UpdateServiceHandler {
 	return &UpdateServiceHandler{
-		updateServiceService: updateServiceService,
+		service: service,
 	}
 }
 
@@ -42,9 +42,7 @@ func (h *UpdateServiceHandler) UpdateService(c *gin.Context) {
 
 	// Check if request has updates
 	if !req.HasUpdates() {
-		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
-			"request": "至少需要提供一個欄位進行更新",
-		})
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 
@@ -54,7 +52,7 @@ func (h *UpdateServiceHandler) UpdateService(c *gin.Context) {
 		return
 	}
 
-	response, err := h.updateServiceService.UpdateService(c.Request.Context(), serviceID, req, staffContext.Role)
+	response, err := h.service.UpdateService(c.Request.Context(), serviceID, req, staffContext.Role)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

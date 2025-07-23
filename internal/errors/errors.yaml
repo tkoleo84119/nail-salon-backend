@@ -67,15 +67,15 @@ SCHEDULE:
     status: 400
 
 SERVICE:
-  SERVICE_NAME_ALREADY_EXISTS:
-    message: 服務名稱已存在
-    status: 409
-  SERVICE_NOT_FOUND:
-    message: 服務不存在或已被刪除
-    status: 404
   SERVICE_NOT_ACTIVE:
     message: 服務未啟用
     status: 400
+  SERVICE_NOT_FOUND:
+    message: 服務不存在或已被刪除
+    status: 404
+  SERVICE_ALREADY_EXISTS:
+    message: 服務已存在
+    status: 409
 
 STORE:
   STORE_NOT_FOUND:

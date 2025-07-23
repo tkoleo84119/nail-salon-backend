@@ -47,6 +47,15 @@ func Float64ToNumeric(f float64) pgtype.Numeric {
 	return n
 }
 
+func Int64ToPgNumeric(i int64) (pgtype.Numeric, error) {
+	var n pgtype.Numeric
+	err := n.Scan(i)
+	if err != nil {
+		return pgtype.Numeric{Valid: false}, err
+	}
+	return n, nil
+}
+
 // BoolPtrToPgBool converts *bool to pgtype.Bool
 func BoolPtrToPgBool(b *bool) pgtype.Bool {
 	if b == nil {
