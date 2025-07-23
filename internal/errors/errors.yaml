@@ -30,6 +30,95 @@ AUTH:
     message: idToken 已過期
     status: 400
 
+BOOKING:
+  BOOKING_NOT_FOUND:
+    message: 預約不存在或已被取消
+    status: 404
+  TIME_SLOT_NOT_FOUND:
+    message: 指定時段不存在
+    status: 404
+  TIME_SLOT_UNAVAILABLE:
+    message: 該時段已被預約，請重新選擇
+    status: 409
+
+CUSTOMER:
+  CUSTOMER_NOT_FOUND:
+    message: 客戶不存在
+    status: 404
+  CUSTOMER_AUTH_NOT_FOUND:
+    message: 客戶登入資訊不存在
+    status: 404
+  CUSTOMER_ALREADY_EXISTS:
+    message: 客戶已存在
+    status: 409
+
+SCHEDULE:
+  SCHEDULE_ALREADY_EXISTS:
+    message: 美甲師班表已存在
+    status: 409
+  SCHEDULE_NOT_FOUND:
+    message: 班表不存在
+    status: 404
+  SCHEDULE_TIME_CONFLICT:
+    message: 時間區段重疊
+    status: 400
+  SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE:
+    message: 部分班表已被預約，無法刪除
+    status: 400
+
+SERVICE:
+  SERVICE_NAME_ALREADY_EXISTS:
+    message: 服務名稱已存在
+    status: 409
+  SERVICE_NOT_FOUND:
+    message: 服務不存在或已被刪除
+    status: 404
+  SERVICE_NOT_ACTIVE:
+    message: 服務未啟用
+    status: 400
+
+STORE:
+  STORE_NOT_FOUND:
+    message: 門市不存在或已被刪除
+    status: 404
+  STORE_NOT_ACTIVE:
+    message: 門市未啟用
+    status: 400
+  STORE_ALREADY_EXISTS:
+    message: 門市已存在
+    status: 409
+
+STYLIST:
+  STYLIST_ALREADY_EXISTS:
+    message: 該員工已建立過美甲師資料，請使用修改功能
+    status: 409
+  STYLIST_NOT_FOUND:
+    message: 美甲師資料不存在
+    status: 404
+  STYLIST_NOT_CREATED:
+    message: 尚未建立美甲師資料，請先新增
+    status: 404
+
+TIME_SLOT:
+  TIME_SLOT_CANNOT_UPDATE_SEPARATELY:
+    message: 時段起始時間和結束時間必須同時傳入
+    status: 400
+  TIME_SLOT_NOT_FOUND:
+    message: 時段不存在或已被刪除
+    status: 404
+  TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE:
+    message: 時段已被預約，無法更新
+    status: 400
+  TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE:
+    message: 該時段已被預約，無法刪除
+    status: 409
+  TIME_SLOT_TEMPLATE_NOT_FOUND:
+    message: 範本不存在或已被刪除
+    status: 404
+  TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND:
+    message: 範本項目不存在或已被刪除
+    status: 404
+
 USER:
   USER_INVALID_ROLE:
     message: 無效的角色
@@ -59,17 +148,6 @@ USER:
     message: 此帳號已被使用
     status: 409
 
-CUSTOMER:
-  CUSTOMER_NOT_FOUND:
-    message: 客戶不存在
-    status: 404
-  CUSTOMER_AUTH_NOT_FOUND:
-    message: 客戶登入資訊不存在
-    status: 404
-  CUSTOMER_ALREADY_EXISTS:
-    message: 客戶已存在
-    status: 409
-
 VAL:
   VAL_JSON_FORMAT:
     message: JSON格式錯誤
@@ -82,81 +160,6 @@ VAL:
     status: 400
   VAL_DATE_FORMAT_INVALID:
     message: 日期格式錯誤，請使用 yyyy-MM-dd 格式
-    status: 400
-
-STYLIST:
-  STYLIST_ALREADY_EXISTS:
-    message: 該員工已建立過美甲師資料，請使用修改功能
-    status: 409
-  STYLIST_NOT_FOUND:
-    message: 美甲師資料不存在
-    status: 404
-  STYLIST_NOT_CREATED:
-    message: 尚未建立美甲師資料，請先新增
-    status: 404
-
-SCHEDULE:
-  SCHEDULE_ALREADY_EXISTS:
-    message: 美甲師班表已存在
-    status: 409
-  SCHEDULE_NOT_FOUND:
-    message: 班表不存在
-    status: 404
-  SCHEDULE_TIME_CONFLICT:
-    message: 時間區段重疊
-    status: 400
-  SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE:
-    message: 部分班表已被預約，無法刪除
-    status: 400
-
-TIME_SLOT:
-  TIME_SLOT_CANNOT_UPDATE_SEPARATELY:
-    message: 時段起始時間和結束時間必須同時傳入
-    status: 400
-  TIME_SLOT_NOT_FOUND:
-    message: 時段不存在或已被刪除
-    status: 404
-  TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE:
-    message: 時段已被預約，無法更新
-    status: 400
-  TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE:
-    message: 該時段已被預約，無法刪除
-    status: 409
-  TIME_SLOT_TEMPLATE_NOT_FOUND:
-    message: 範本不存在或已被刪除
-    status: 404
-  TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND:
-    message: 範本項目不存在或已被刪除
-    status: 404
-
-SERVICE:
-  SERVICE_NAME_ALREADY_EXISTS:
-    message: 服務名稱已存在
-    status: 409
-  SERVICE_NOT_FOUND:
-    message: 服務不存在或已被刪除
-    status: 404
-  SERVICE_NOT_ACTIVE:
-    message: 服務未啟用
-    status: 400
-
-BOOKING:
-  BOOKING_NOT_FOUND:
-    message: 預約不存在或已被取消
-    status: 404
-  TIME_SLOT_NOT_FOUND:
-    message: 指定時段不存在
-    status: 404
-  TIME_SLOT_UNAVAILABLE:
-    message: 該時段已被預約，請重新選擇
-    status: 409
-
-STORE:
-  STORE_NOT_FOUND:
-    message: 門市不存在或已被刪除
-    status: 404
-  STORE_NOT_ACTIVE:
-    message: 門市未啟用
     status: 400
 
 SYS:

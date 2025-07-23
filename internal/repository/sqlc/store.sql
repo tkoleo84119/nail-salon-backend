@@ -5,11 +5,10 @@ INSERT INTO stores (
     name,
     address,
     phone,
-    is_active,
     created_at,
     updated_at
 ) VALUES (
-    $1, $2, $3, $4, $5, NOW(), NOW()
+    $1, $2, $3, $4, NOW(), NOW()
 ) RETURNING
     id,
     name,

@@ -14,6 +14,45 @@ const (
 	AuthLineTokenInvalid   = "AUTH_LINE_TOKEN_INVALID"
 	AuthLineTokenExpired   = "AUTH_LINE_TOKEN_EXPIRED"
 
+	// BOOKING - Booking operation errors
+	BookingNotFound            = "BOOKING_NOT_FOUND"
+	BookingTimeSlotNotFound    = "TIME_SLOT_NOT_FOUND"
+	BookingTimeSlotUnavailable = "TIME_SLOT_UNAVAILABLE"
+
+	// CUSTOMER - Customer operation errors
+	CustomerNotFound      = "CUSTOMER_NOT_FOUND"
+	CustomerAuthNotFound  = "CUSTOMER_AUTH_NOT_FOUND"
+	CustomerAlreadyExists = "CUSTOMER_ALREADY_EXISTS"
+
+	// SCHEDULE - Schedule operation errors
+	ScheduleAlreadyExists            = "SCHEDULE_ALREADY_EXISTS"
+	ScheduleNotFound                 = "SCHEDULE_NOT_FOUND"
+	ScheduleTimeConflict             = "SCHEDULE_TIME_CONFLICT"
+	ScheduleAlreadyBookedDoNotDelete = "SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE"
+
+	// SERVICE - Service operation errors
+	ServiceNameAlreadyExists = "SERVICE_NAME_ALREADY_EXISTS"
+	ServiceNotFound          = "SERVICE_NOT_FOUND"
+	ServiceNotActive         = "SERVICE_NOT_ACTIVE"
+
+	// STORE - Store operation errors
+	StoreNotFound      = "STORE_NOT_FOUND"
+	StoreNotActive     = "STORE_NOT_ACTIVE"
+	StoreAlreadyExists = "STORE_ALREADY_EXISTS"
+
+	// STYLIST - Stylist operation errors
+	StylistAlreadyExists = "STYLIST_ALREADY_EXISTS"
+	StylistNotFound      = "STYLIST_NOT_FOUND"
+	StylistNotCreated    = "STYLIST_NOT_CREATED"
+
+	// TIME_SLOT - Time slot operation errors
+	TimeSlotCannotUpdateSeparately   = "TIME_SLOT_CANNOT_UPDATE_SEPARATELY"
+	TimeSlotNotFound                 = "TIME_SLOT_NOT_FOUND"
+	TimeSlotAlreadyBookedDoNotUpdate = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE"
+	TimeSlotAlreadyBookedDoNotDelete = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE"
+	TimeSlotTemplateNotFound         = "TIME_SLOT_TEMPLATE_NOT_FOUND"
+	TimeSlotTemplateItemNotFound     = "TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND"
+
 	// USER - User operation errors
 	UserInvalidRole    = "USER_INVALID_ROLE"
 	UserStoreNotActive = "USER_STORE_NOT_ACTIVE"
@@ -25,49 +64,11 @@ const (
 	UserEmailExists    = "USER_EMAIL_EXISTS"
 	UserUsernameExists = "USER_USERNAME_EXISTS"
 
-	// CUSTOMER - Customer operation errors
-	CustomerNotFound      = "CUSTOMER_NOT_FOUND"
-	CustomerAuthNotFound  = "CUSTOMER_AUTH_NOT_FOUND"
-	CustomerAlreadyExists = "CUSTOMER_ALREADY_EXISTS"
-
-	// STYLIST - Stylist operation errors
-	StylistAlreadyExists = "STYLIST_ALREADY_EXISTS"
-	StylistNotFound      = "STYLIST_NOT_FOUND"
-	StylistNotCreated    = "STYLIST_NOT_CREATED"
-
-	// SCHEDULE - Schedule operation errors
-	ScheduleAlreadyExists            = "SCHEDULE_ALREADY_EXISTS"
-	ScheduleNotFound                 = "SCHEDULE_NOT_FOUND"
-	ScheduleTimeConflict             = "SCHEDULE_TIME_CONFLICT"
-	ScheduleAlreadyBookedDoNotDelete = "SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE"
-
-	// TIME_SLOT - Time slot operation errors
-	TimeSlotCannotUpdateSeparately   = "TIME_SLOT_CANNOT_UPDATE_SEPARATELY"
-	TimeSlotNotFound                 = "TIME_SLOT_NOT_FOUND"
-	TimeSlotAlreadyBookedDoNotUpdate = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE"
-	TimeSlotAlreadyBookedDoNotDelete = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE"
-	TimeSlotTemplateNotFound         = "TIME_SLOT_TEMPLATE_NOT_FOUND"
-	TimeSlotTemplateItemNotFound     = "TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND"
-
-	// SERVICE - Service operation errors
-	ServiceNameAlreadyExists = "SERVICE_NAME_ALREADY_EXISTS"
-	ServiceNotFound          = "SERVICE_NOT_FOUND"
-	ServiceNotActive         = "SERVICE_NOT_ACTIVE"
-
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
 	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"
 	ValAllFieldsEmpty        = "VAL_ALL_FIELDS_EMPTY"
 	ValDateFormatInvalid     = "VAL_DATE_FORMAT_INVALID"
-
-	// BOOKING - Booking operation errors
-	BookingNotFound            = "BOOKING_NOT_FOUND"
-	BookingTimeSlotNotFound    = "TIME_SLOT_NOT_FOUND"
-	BookingTimeSlotUnavailable = "TIME_SLOT_UNAVAILABLE"
-
-	// STORE - Store operation errors
-	StoreNotFound  = "STORE_NOT_FOUND"
-	StoreNotActive = "STORE_NOT_ACTIVE"
 
 	// SYS - System errors
 	SysInternalError      = "SYS_INTERNAL_ERROR"

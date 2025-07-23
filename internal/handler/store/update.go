@@ -43,7 +43,7 @@ func (h *UpdateStoreHandler) UpdateStore(c *gin.Context) {
 
 	// Business logic validation
 	if !req.HasUpdates() {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, nil)
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 

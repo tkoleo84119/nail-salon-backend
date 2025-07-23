@@ -33,7 +33,7 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 
 	// Validate that at least one field has updates
 	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "at least one field must be provided for update", nil)
+		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
 	}
 
 	// Validate role permissions (only SUPER_ADMIN and ADMIN can update stores)
@@ -81,7 +81,7 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name uniqueness", err)
 		}
 		if nameExists {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "store name already exists", nil)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreAlreadyExists)
 		}
 	}
 

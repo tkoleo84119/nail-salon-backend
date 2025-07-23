@@ -68,11 +68,10 @@ INSERT INTO stores (
     name,
     address,
     phone,
-    is_active,
     created_at,
     updated_at
 ) VALUES (
-    $1, $2, $3, $4, $5, NOW(), NOW()
+    $1, $2, $3, $4, NOW(), NOW()
 ) RETURNING
     id,
     name,
@@ -84,11 +83,10 @@ INSERT INTO stores (
 `
 
 type CreateStoreParams struct {
-	ID       int64       `db:"id" json:"id"`
-	Name     string      `db:"name" json:"name"`
-	Address  pgtype.Text `db:"address" json:"address"`
-	Phone    pgtype.Text `db:"phone" json:"phone"`
-	IsActive pgtype.Bool `db:"is_active" json:"is_active"`
+	ID      int64       `db:"id" json:"id"`
+	Name    string      `db:"name" json:"name"`
+	Address pgtype.Text `db:"address" json:"address"`
+	Phone   pgtype.Text `db:"phone" json:"phone"`
 }
 
 func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store, error) {
@@ -97,7 +95,6 @@ func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store
 		arg.Name,
 		arg.Address,
 		arg.Phone,
-		arg.IsActive,
 	)
 	var i Store
 	err := row.Scan(

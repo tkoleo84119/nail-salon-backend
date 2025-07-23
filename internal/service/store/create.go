@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -44,7 +43,7 @@ func (s *CreateStoreService) CreateStore(ctx context.Context, req store.CreateSt
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name existence", err)
 	}
 	if nameExists {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "store name already exists", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreAlreadyExists)
 	}
 
 	// Generate store ID
@@ -61,11 +60,10 @@ func (s *CreateStoreService) CreateStore(ctx context.Context, req store.CreateSt
 
 	// Create store
 	createdStore, err := qtx.CreateStore(ctx, dbgen.CreateStoreParams{
-		ID:       storeID,
-		Name:     req.Name,
-		Address:  pgtype.Text{String: req.Address, Valid: req.Address != ""},
-		Phone:    pgtype.Text{String: req.Phone, Valid: req.Phone != ""},
-		IsActive: pgtype.Bool{Bool: true, Valid: true},
+		ID:      storeID,
+		Name:    req.Name,
+		Address: utils.StringToText(&req.Address),
+		Phone:   utils.StringToText(&req.Phone),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store", err)
