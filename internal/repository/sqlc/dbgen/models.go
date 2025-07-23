@@ -274,7 +274,7 @@ type Store struct {
 
 type Stylist struct {
 	ID           int64              `db:"id" json:"id"`
-	StaffUserID  pgtype.Int8        `db:"staff_user_id" json:"staff_user_id"`
+	StaffUserID  int64              `db:"staff_user_id" json:"staff_user_id"`
 	Name         pgtype.Text        `db:"name" json:"name"`
 	GoodAtShapes []string           `db:"good_at_shapes" json:"good_at_shapes"`
 	GoodAtColors []string           `db:"good_at_colors" json:"good_at_colors"`

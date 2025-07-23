@@ -20,6 +20,8 @@ type CreateMyStylistResponse struct {
 	IsIntrovert  bool     `json:"isIntrovert"`
 }
 
+// -------------------------------------------------------------------------------------
+
 // UpdateMyStylistRequest represents the request to update a stylist
 type UpdateMyStylistRequest struct {
 	StylistName  *string   `json:"stylistName,omitempty" binding:"omitempty,min=1,max=50"`

@@ -6,8 +6,6 @@ package dbgen
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
@@ -23,7 +21,7 @@ type Querier interface {
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
 	CheckStoreNameExistsExcluding(ctx context.Context, arg CheckStoreNameExistsExcludingParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
-	CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (bool, error)
+	CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID int64) (bool, error)
 	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
@@ -65,7 +63,7 @@ type Querier interface {
 	GetStoreDetailByID(ctx context.Context, id int64) (Store, error)
 	GetStoresByIDs(ctx context.Context, dollar_1 []int64) ([]GetStoresByIDsRow, error)
 	GetStylistByID(ctx context.Context, id int64) (Stylist, error)
-	GetStylistByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (Stylist, error)
+	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (Stylist, error)
 	GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error)
 	GetTimeSlotTemplateByID(ctx context.Context, id int64) (TimeSlotTemplate, error)
 	GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (TimeSlotTemplateItem, error)

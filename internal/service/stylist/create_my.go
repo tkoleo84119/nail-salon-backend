@@ -3,8 +3,6 @@ package stylist
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -23,7 +21,7 @@ func NewCreateMyStylistService(queries dbgen.Querier) *CreateMyStylistService {
 
 func (s *CreateMyStylistService) CreateMyStylist(ctx context.Context, req stylist.CreateMyStylistRequest, staffUserID int64) (*stylist.CreateMyStylistResponse, error) {
 	// Check if stylist already exists for this staff user
-	exists, err := s.queries.CheckStylistExistsByStaffUserID(ctx, pgtype.Int8{Int64: staffUserID, Valid: true})
+	exists, err := s.queries.CheckStylistExistsByStaffUserID(ctx, staffUserID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check stylist existence", err)
 	}
@@ -57,12 +55,12 @@ func (s *CreateMyStylistService) CreateMyStylist(ctx context.Context, req stylis
 	// Create stylist record
 	createdStylist, err := s.queries.CreateStylist(ctx, dbgen.CreateStylistParams{
 		ID:           stylistID,
-		StaffUserID:  pgtype.Int8{Int64: staffUserID, Valid: true},
-		Name:         pgtype.Text{String: req.StylistName, Valid: true},
+		StaffUserID:  staffUserID,
+		Name:         utils.StringToText(&req.StylistName),
 		GoodAtShapes: goodAtShapes,
 		GoodAtColors: goodAtColors,
 		GoodAtStyles: goodAtStyles,
-		IsIntrovert:  pgtype.Bool{Bool: isIntrovert, Valid: true},
+		IsIntrovert:  utils.BoolPtrToPgBool(&isIntrovert),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create stylist", err)

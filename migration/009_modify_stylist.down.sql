@@ -1,0 +1,2 @@
+ALTER TABLE stylists
+ALTER COLUMN staff_user_id DROP NOT NULL;

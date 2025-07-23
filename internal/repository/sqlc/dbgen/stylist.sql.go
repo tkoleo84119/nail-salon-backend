@@ -18,7 +18,7 @@ SELECT EXISTS(
 ) as exists
 `
 
-func (q *Queries) CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (bool, error) {
+func (q *Queries) CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID int64) (bool, error) {
 	row := q.db.QueryRow(ctx, checkStylistExistsByStaffUserID, staffUserID)
 	var exists bool
 	err := row.Scan(&exists)
@@ -52,7 +52,7 @@ INSERT INTO stylists (
 
 type CreateStylistParams struct {
 	ID           int64       `db:"id" json:"id"`
-	StaffUserID  pgtype.Int8 `db:"staff_user_id" json:"staff_user_id"`
+	StaffUserID  int64       `db:"staff_user_id" json:"staff_user_id"`
 	Name         pgtype.Text `db:"name" json:"name"`
 	GoodAtShapes []string    `db:"good_at_shapes" json:"good_at_shapes"`
 	GoodAtColors []string    `db:"good_at_colors" json:"good_at_colors"`
@@ -132,7 +132,7 @@ FROM stylists
 WHERE staff_user_id = $1
 `
 
-func (q *Queries) GetStylistByStaffUserID(ctx context.Context, staffUserID pgtype.Int8) (Stylist, error) {
+func (q *Queries) GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (Stylist, error) {
 	row := q.db.QueryRow(ctx, getStylistByStaffUserID, staffUserID)
 	var i Stylist
 	err := row.Scan(

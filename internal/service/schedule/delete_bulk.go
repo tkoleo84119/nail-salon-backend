@@ -54,7 +54,7 @@ func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, re
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
 		}
-		if stylist.StaffUserID.Int64 != staffUserID {
+		if stylist.StaffUserID != staffUserID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 	}
