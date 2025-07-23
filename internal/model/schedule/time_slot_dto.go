@@ -13,6 +13,8 @@ type CreateTimeSlotResponse struct {
 	IsAvailable bool   `json:"isAvailable"`
 }
 
+// -------------------------------------------------------------------------------------
+
 type UpdateTimeSlotRequest struct {
 	StartTime   *string `json:"startTime,omitempty" binding:"omitempty"`
 	EndTime     *string `json:"endTime,omitempty" binding:"omitempty"`
@@ -31,6 +33,8 @@ func (r *UpdateTimeSlotRequest) HasUpdate() bool {
 	return r.StartTime != nil || r.EndTime != nil || r.IsAvailable != nil
 }
 
+// -------------------------------------------------------------------------------------
+
 type DeleteTimeSlotResponse struct {
-	Deleted []string `json:"deleted"`
+	Deleted string `json:"deleted"`
 }

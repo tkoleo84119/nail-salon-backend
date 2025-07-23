@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	timeSlotTemplate "github.com/tkoleo84119/nail-salon-backend/internal/model/time-slot-template"
@@ -37,19 +35,19 @@ func (s *CreateTimeSlotTemplateItemService) CreateTimeSlotTemplateItem(ctx conte
 	}
 
 	// Validate time format and range
-	startTime, err := common.ParseTimeSlot(req.StartTime)
+	startTime, err := utils.StringTimeToTime(req.StartTime)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 	}
 
-	endTime, err := common.ParseTimeSlot(req.EndTime)
+	endTime, err := utils.StringTimeToTime(req.EndTime)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 	}
 
 	// Validate time range
 	if !endTime.After(startTime) {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "end time must be after start time", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
 	}
 
 	// Get existing template items to check for conflicts
@@ -70,8 +68,8 @@ func (s *CreateTimeSlotTemplateItemService) CreateTimeSlotTemplateItem(ctx conte
 	item, err := s.queries.CreateTimeSlotTemplateItem(ctx, dbgen.CreateTimeSlotTemplateItemParams{
 		ID:         itemID,
 		TemplateID: templateIDInt,
-		StartTime:  pgtype.Time{Microseconds: int64(startTime.Hour()*3600+startTime.Minute()*60+startTime.Second()) * 1000000, Valid: true},
-		EndTime:    pgtype.Time{Microseconds: int64(endTime.Hour()*3600+endTime.Minute()*60+endTime.Second()) * 1000000, Valid: true},
+		StartTime:  utils.TimeToPgTime(startTime),
+		EndTime:    utils.TimeToPgTime(endTime),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create time slot template item", err)
@@ -89,12 +87,12 @@ func (s *CreateTimeSlotTemplateItemService) CreateTimeSlotTemplateItem(ctx conte
 func (s *CreateTimeSlotTemplateItemService) checkTimeConflicts(startTime, endTime time.Time, existingItems []dbgen.TimeSlotTemplateItem) error {
 	for _, item := range existingItems {
 		// Convert pgtype.Time to time.Time for comparison
-		existingStart := time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(item.StartTime.Microseconds) * time.Microsecond)
-		existingEnd := time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(item.EndTime.Microseconds) * time.Microsecond)
+		existingStart := utils.PgTimeToTime(item.StartTime)
+		existingEnd := utils.PgTimeToTime(item.EndTime)
 
 		// Check if new slot overlaps with existing slot
 		if startTime.Before(existingEnd) && endTime.After(existingStart) {
-			return errorCodes.NewServiceError(errorCodes.ScheduleTimeConflict, "time slot overlaps with existing template item", nil)
+			return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotConflict)
 		}
 	}
 	return nil

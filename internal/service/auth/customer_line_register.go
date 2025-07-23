@@ -58,7 +58,7 @@ func (s *CustomerLineRegisterService) CustomerLineRegister(ctx context.Context, 
 	// Prepare customer record
 	customerID := utils.GenerateID()
 
-	birthday, err := utils.StringToPgDate(req.Birthday)
+	birthday, err := utils.StringDateToPgDate(req.Birthday)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid birthday format", err)
 	}

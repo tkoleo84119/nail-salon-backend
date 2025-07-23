@@ -3,8 +3,6 @@ package schedule
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
@@ -34,7 +32,7 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 
 	// Validate that both start time and end time are provided together
 	if (req.StartTime != nil && req.EndTime == nil) || (req.StartTime == nil && req.EndTime != nil) {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotCannotUpdateSeparately, "start time and end time must be provided together", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotCannotUpdateSeparately)
 	}
 
 	// Parse IDs
@@ -56,12 +54,12 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 
 	// Verify time slot belongs to the specified schedule
 	if timeSlot.ScheduleID != scheduleIDInt {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotNotFound, "time slot does not belong to specified schedule", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotBelongToSchedule)
 	}
 
 	// Check if time slot is booked (cannot update booked time slots)
 	if !timeSlot.IsAvailable.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotAlreadyBookedDoNotUpdate, "cannot update booked time slot", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotUpdate)
 	}
 
 	// Get schedule information
@@ -109,36 +107,32 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
-	var startTime, endTime *pgtype.Time
 	if req.StartTime != nil && req.EndTime != nil {
-		startTimeParsed, err := common.ParseTimeSlot(*req.StartTime)
+		startTimeParsed, err := utils.StringTimeToTime(*req.StartTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 		}
-		endTimeParsed, err := common.ParseTimeSlot(*req.EndTime)
+		endTimeParsed, err := utils.StringTimeToTime(*req.EndTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 		}
 
 		// Validate time range
 		if !endTimeParsed.After(startTimeParsed) {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "end time must be after start time", nil)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
 		}
-
-		startTime = &pgtype.Time{Microseconds: int64(startTimeParsed.Hour()*3600+startTimeParsed.Minute()*60+startTimeParsed.Second()) * 1000000, Valid: true}
-		endTime = &pgtype.Time{Microseconds: int64(endTimeParsed.Hour()*3600+endTimeParsed.Minute()*60+endTimeParsed.Second()) * 1000000, Valid: true}
 
 		hasOverlap, err := s.queries.CheckTimeSlotOverlapExcluding(ctx, dbgen.CheckTimeSlotOverlapExcludingParams{
 			ScheduleID: scheduleIDInt,
 			ID:         timeSlotIDInt,
-			StartTime:  *startTime,
-			EndTime:    *endTime,
+			StartTime:  utils.TimeToPgTime(startTimeParsed),
+			EndTime:    utils.TimeToPgTime(endTimeParsed),
 		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check time slot overlap", err)
 		}
 		if hasOverlap {
-			return nil, errorCodes.NewServiceError(errorCodes.ScheduleTimeConflict, "time slot overlaps with existing time slots", nil)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotConflict)
 		}
 	}
 

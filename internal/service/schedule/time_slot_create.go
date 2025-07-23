@@ -3,8 +3,6 @@ package schedule
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
@@ -31,18 +29,18 @@ func (s *CreateTimeSlotService) CreateTimeSlot(ctx context.Context, scheduleID s
 	}
 
 	// Validate time format
-	startTime, err := common.ParseTimeSlot(req.StartTime)
+	startTime, err := utils.StringTimeToTime(req.StartTime)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 	}
-	endTime, err := common.ParseTimeSlot(req.EndTime)
+	endTime, err := utils.StringDateToTime(req.EndTime)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 	}
 
 	// Validate time range
 	if !endTime.After(startTime) {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "end time must be after start time", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
 	}
 
 	// Get schedule information
@@ -93,14 +91,14 @@ func (s *CreateTimeSlotService) CreateTimeSlot(ctx context.Context, scheduleID s
 	// Check for time slot overlap
 	hasOverlap, err := s.queries.CheckTimeSlotOverlap(ctx, dbgen.CheckTimeSlotOverlapParams{
 		ScheduleID: scheduleIDInt,
-		StartTime:  pgtype.Time{Microseconds: int64(startTime.Hour()*3600+startTime.Minute()*60) * 1000000, Valid: true},
-		EndTime:    pgtype.Time{Microseconds: int64(endTime.Hour()*3600+endTime.Minute()*60) * 1000000, Valid: true},
+		StartTime:  utils.TimeToPgTime(startTime),
+		EndTime:    utils.TimeToPgTime(endTime),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check time slot overlap", err)
 	}
 	if hasOverlap {
-		return nil, errorCodes.NewServiceError(errorCodes.ScheduleTimeConflict, "time slot overlaps with existing time slots", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotConflict)
 	}
 
 	// Create time slot
@@ -108,8 +106,8 @@ func (s *CreateTimeSlotService) CreateTimeSlot(ctx context.Context, scheduleID s
 	createdTimeSlot, err := s.queries.CreateTimeSlot(ctx, dbgen.CreateTimeSlotParams{
 		ID:         timeSlotID,
 		ScheduleID: scheduleIDInt,
-		StartTime:  pgtype.Time{Microseconds: int64(startTime.Hour()*3600+startTime.Minute()*60) * 1000000, Valid: true},
-		EndTime:    pgtype.Time{Microseconds: int64(endTime.Hour()*3600+endTime.Minute()*60) * 1000000, Valid: true},
+		StartTime:  utils.TimeToPgTime(startTime),
+		EndTime:    utils.TimeToPgTime(endTime),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create time slot", err)

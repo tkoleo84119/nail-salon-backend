@@ -47,25 +47,26 @@ func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Conte
 
 	for i, timeSlot := range req.TimeSlots {
 		// Parse time strings
-		startTime, err := common.ParseTimeSlot(timeSlot.StartTime)
+		startTime, err := utils.StringTimeToTime(timeSlot.StartTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 		}
 
-		endTime, err := common.ParseTimeSlot(timeSlot.EndTime)
+		endTime, err := utils.StringTimeToTime(timeSlot.EndTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 		}
 
 		itemID := utils.GenerateID()
 
+		now := time.Now()
 		templateItems[i] = dbgen.BatchCreateTimeSlotTemplateItemsParams{
 			ID:         itemID,
 			TemplateID: templateID,
-			StartTime:  pgtype.Time{Microseconds: int64(startTime.Hour()*3600+startTime.Minute()*60+startTime.Second()) * 1000000, Valid: true},
-			EndTime:    pgtype.Time{Microseconds: int64(endTime.Hour()*3600+endTime.Minute()*60+endTime.Second()) * 1000000, Valid: true},
-			CreatedAt:  pgtype.Timestamptz{Time: time.Now(), Valid: true},
-			UpdatedAt:  pgtype.Timestamptz{Time: time.Now(), Valid: true},
+			StartTime:  utils.TimeToPgTime(startTime),
+			EndTime:    utils.TimeToPgTime(endTime),
+			CreatedAt:  utils.TimeToPgTimez(now),
+			UpdatedAt:  utils.TimeToPgTimez(now),
 		}
 
 		responseTimeSlots[i] = timeSlotTemplate.TimeSlotItemResponse{
@@ -88,7 +89,7 @@ func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Conte
 	template, err := qtx.CreateTimeSlotTemplate(ctx, dbgen.CreateTimeSlotTemplateParams{
 		ID:      templateID,
 		Name:    req.Name,
-		Note:    pgtype.Text{String: req.Note, Valid: req.Note != ""},
+		Note:    utils.StringToText(&req.Note),
 		Updater: pgtype.Int8{Int64: staffUserID, Valid: true},
 	})
 	if err != nil {
@@ -116,7 +117,7 @@ func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Conte
 // validateTimeSlots validates that time slots don't overlap and have valid time ranges
 func (s *CreateTimeSlotTemplateService) validateTimeSlots(timeSlots []timeSlotTemplate.TimeSlotItem) error {
 	if len(timeSlots) == 0 {
-		return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "at least one time slot is required", nil)
+		return errorCodes.NewServiceErrorWithCode(errorCodes.ValTimeSlotRequired)
 	}
 
 	// Parse and validate each time slot
@@ -126,19 +127,19 @@ func (s *CreateTimeSlotTemplateService) validateTimeSlots(timeSlots []timeSlotTe
 	}, len(timeSlots))
 
 	for i, timeSlot := range timeSlots {
-		startTime, err := common.ParseTimeSlot(timeSlot.StartTime)
+		startTime, err := utils.StringTimeToTime(timeSlot.StartTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 		}
 
-		endTime, err := common.ParseTimeSlot(timeSlot.EndTime)
+		endTime, err := utils.StringTimeToTime(timeSlot.EndTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 		}
 
 		// Validate time range
 		if !endTime.After(startTime) {
-			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "end time must be after start time", nil)
+			return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
 		}
 
 		parsedTimeSlots[i] = struct {
@@ -155,7 +156,7 @@ func (s *CreateTimeSlotTemplateService) validateTimeSlots(timeSlots []timeSlotTe
 
 			// Check if slots overlap
 			if slot1.start.Before(slot2.end) && slot2.start.Before(slot1.end) {
-				return errorCodes.NewServiceError(errorCodes.ScheduleTimeConflict, "time slots cannot overlap", nil)
+				return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotConflict)
 			}
 		}
 	}

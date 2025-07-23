@@ -50,9 +50,7 @@ func (h *UpdateTimeSlotHandler) UpdateTimeSlot(c *gin.Context) {
 	}
 
 	if !req.HasUpdate() {
-		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
-			"request": "至少需要提供一個欄位進行更新",
-		})
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 

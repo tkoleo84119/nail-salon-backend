@@ -40,6 +40,8 @@ type ScheduleResponse struct {
 // CreateSchedulesBulkResponse represents the response after creating multiple schedules
 type CreateSchedulesBulkResponse []ScheduleResponse
 
+// -------------------------------------------------------------------------------------
+
 // DeleteSchedulesBulkRequest represents the request to delete multiple schedules
 type DeleteSchedulesBulkRequest struct {
 	StylistID   string   `json:"stylistId" binding:"required"`

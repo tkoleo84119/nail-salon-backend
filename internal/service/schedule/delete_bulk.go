@@ -91,13 +91,17 @@ func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, re
 		return nil, errorCodes.NewServiceError(errorCodes.ScheduleNotFound, "some schedules not found", nil)
 	}
 	for _, schedule := range schedules {
-		if schedule.StoreID != storeID || schedule.StylistID != stylistID {
-			return nil, errorCodes.NewServiceError(errorCodes.ScheduleNotFound, "some schedules do not belong to the specified stylist or store", nil)
+		if schedule.StoreID != storeID {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotBelongToStore)
+		}
+
+		if schedule.StylistID != stylistID {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotBelongToStylist)
 		}
 
 		// Check if time slots are not available => mean this schedule is already booked
 		if !schedule.IsAvailable.Bool {
-			return nil, errorCodes.NewServiceError(errorCodes.ScheduleAlreadyBookedDoNotDelete, "some schedules are already booked", nil)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleAlreadyBookedDoNotDelete)
 		}
 	}
 

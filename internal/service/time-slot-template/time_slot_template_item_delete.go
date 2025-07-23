@@ -47,7 +47,7 @@ func (s *DeleteTimeSlotTemplateItemService) DeleteTimeSlotTemplateItem(ctx conte
 
 	// Verify the item belongs to the specified template
 	if existingItem.TemplateID != templateIDInt {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotTemplateItemNotFound, "time slot template item not found in specified template", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotTemplateItemNotBelongToTemplate)
 	}
 
 	// Delete the time slot template item
@@ -57,6 +57,6 @@ func (s *DeleteTimeSlotTemplateItemService) DeleteTimeSlotTemplateItem(ctx conte
 	}
 
 	return &timeSlotTemplate.DeleteTimeSlotTemplateItemResponse{
-		Deleted: []string{itemID},
+		Deleted: itemID,
 	}, nil
 }

@@ -28,6 +28,8 @@ type CreateTimeSlotTemplateResponse struct {
 	TimeSlots []TimeSlotItemResponse `json:"timeSlots"`
 }
 
+// -------------------------------------------------------------------------------------
+
 // UpdateTimeSlotTemplateRequest represents the request to update a time slot template
 type UpdateTimeSlotTemplateRequest struct {
 	Name *string `json:"name,omitempty" binding:"omitempty,min=1,max=50"`
@@ -45,7 +47,9 @@ func (r *UpdateTimeSlotTemplateRequest) HasUpdate() bool {
 	return r.Name != nil || r.Note != nil
 }
 
+// -------------------------------------------------------------------------------------
+
 // DeleteTimeSlotTemplateResponse represents the response after deleting a time slot template
 type DeleteTimeSlotTemplateResponse struct {
-	Deleted []string `json:"deleted"`
+	Deleted string `json:"deleted"`
 }

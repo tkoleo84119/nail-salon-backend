@@ -41,12 +41,12 @@ func (s *DeleteTimeSlotService) DeleteTimeSlot(ctx context.Context, scheduleID s
 
 	// Verify time slot belongs to the specified schedule
 	if timeSlot.ScheduleID != scheduleIDInt {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotNotFound, "time slot does not belong to specified schedule", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotBelongToSchedule)
 	}
 
 	// Check if time slot is booked (cannot delete booked time slots)
 	if !timeSlot.IsAvailable.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotAlreadyBookedDoNotDelete, "cannot delete booked time slot", nil)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotDelete)
 	}
 
 	// Get schedule information
@@ -101,6 +101,6 @@ func (s *DeleteTimeSlotService) DeleteTimeSlot(ctx context.Context, scheduleID s
 	}
 
 	return &schedule.DeleteTimeSlotResponse{
-		Deleted: []string{timeSlotID},
+		Deleted: timeSlotID,
 	}, nil
 }

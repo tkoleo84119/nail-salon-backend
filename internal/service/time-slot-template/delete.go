@@ -40,6 +40,6 @@ func (s *DeleteTimeSlotTemplateService) DeleteTimeSlotTemplate(ctx context.Conte
 	}
 
 	return &timeSlotTemplate.DeleteTimeSlotTemplateResponse{
-		Deleted: []string{templateID},
+		Deleted: templateID,
 	}, nil
 }

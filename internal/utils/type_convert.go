@@ -69,8 +69,13 @@ func TimeToPgTimez(t time.Time) pgtype.Timestamptz {
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
 
-// TimeToString converts pgtype.Time to string format HH:MM
-func TimeToString(t pgtype.Time) string {
+// TimeToPgTime converts time.Time to pgtype.Time
+func TimeToPgTime(t time.Time) pgtype.Time {
+	return pgtype.Time{Microseconds: int64(t.Hour()*3600+t.Minute()*60+t.Second()) * 1000000, Valid: true}
+}
+
+// PgTimeToStringTime converts pgtype.Time to string format HH:MM
+func PgTimeToStringTime(t pgtype.Time) string {
 	if !t.Valid {
 		return ""
 	}
@@ -83,8 +88,12 @@ func TimeToString(t pgtype.Time) string {
 	return fmt.Sprintf("%02d:%02d", hours, minutes)
 }
 
-// DateToString converts pgtype.Date to string format YYYY-MM-DD
-func DateToString(d pgtype.Date) string {
+func PgTimeToTime(t pgtype.Time) time.Time {
+	return time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(t.Microseconds) * time.Microsecond)
+}
+
+// PgDateToString converts pgtype.Date to string format YYYY-MM-DD
+func PgDateToString(d pgtype.Date) string {
 	if !d.Valid {
 		return ""
 	}
@@ -92,8 +101,8 @@ func DateToString(d pgtype.Date) string {
 	return d.Time.Format("2006-01-02")
 }
 
-// StringToTime converts date string to time.Time
-func StringToTime(s string) (time.Time, error) {
+// StringDateToTime converts date string (YYYY-MM-DD) to time.Time
+func StringDateToTime(s string) (time.Time, error) {
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
 		return time.Time{}, err
@@ -101,13 +110,31 @@ func StringToTime(s string) (time.Time, error) {
 	return t, nil
 }
 
-// StringToPgDate converts date string to pgtype.Date
-func StringToPgDate(s string) (pgtype.Date, error) {
+// StringDateToPgDate converts date string (YYYY-MM-DD) to pgtype.Date
+func StringDateToPgDate(s string) (pgtype.Date, error) {
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
 		return pgtype.Date{}, err
 	}
 	return pgtype.Date{Time: t, Valid: true}, nil
+}
+
+// StringTimeToTime converts time string (HH:MM) to time.Time
+func StringTimeToTime(s string) (time.Time, error) {
+	t, err := time.Parse("15:04", s)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t, nil
+}
+
+// StringTimeToPgTime converts time string (HH:MM) to pgtype.Time
+func StringTimeToPgTime(s string) (pgtype.Time, error) {
+	t, err := time.Parse("15:04", s)
+	if err != nil {
+		return pgtype.Time{}, err
+	}
+	return pgtype.Time{Microseconds: int64(t.Hour()*3600+t.Minute()*60+t.Second()) * 1000000, Valid: true}, nil
 }
 
 // TimeToPgDate converts time.Time to pgtype.Date

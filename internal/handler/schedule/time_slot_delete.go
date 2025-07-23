@@ -22,7 +22,6 @@ func NewDeleteTimeSlotHandler(service scheduleService.DeleteTimeSlotServiceInter
 }
 
 func (h *DeleteTimeSlotHandler) DeleteTimeSlot(c *gin.Context) {
-
 	// Get path parameters
 	scheduleID := c.Param("scheduleId")
 	if scheduleID == "" {

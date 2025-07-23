@@ -14,6 +14,8 @@ type CreateTimeSlotTemplateItemResponse struct {
 	EndTime    string `json:"endTime"`
 }
 
+// -------------------------------------------------------------------------------------
+
 type UpdateTimeSlotTemplateItemRequest struct {
 	StartTime string `json:"startTime" binding:"required"`
 	EndTime   string `json:"endTime" binding:"required"`
@@ -26,6 +28,8 @@ type UpdateTimeSlotTemplateItemResponse struct {
 	EndTime    string `json:"endTime"`
 }
 
+// -------------------------------------------------------------------------------------
+
 type DeleteTimeSlotTemplateItemResponse struct {
-	Deleted []string `json:"deleted"`
+	Deleted string `json:"deleted"`
 }
