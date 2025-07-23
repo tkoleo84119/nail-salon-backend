@@ -65,13 +65,13 @@ func setupBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen
 }
 
 func setupStaffRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	staff := api.Group("/staff")
+	staff := api.Group("/staffs")
 	{
 		staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffCreate.CreateStaff)
-		staff.PATCH("/:id", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffUpdate.UpdateStaff)
+		staff.PATCH("/:staffId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffUpdate.UpdateStaff)
 		staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.StaffUpdateMe.UpdateMyStaff)
-		staff.POST("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffStoreAccess.CreateStoreAccess)
-		staff.DELETE("/:id/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffDeleteStoreAccess.DeleteStoreAccessBulk)
+		staff.POST("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffStoreAccess.CreateStoreAccess)
+		staff.DELETE("/:staffId/store-access/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffDeleteStoreAccess.DeleteStoreAccessBulk)
 	}
 }
 

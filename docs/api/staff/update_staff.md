@@ -9,7 +9,7 @@
 
 ## Endpoint
 
-**PATCH** `/api/staff/{id}`
+**PATCH** `/api/staffs/{staffId}`
 
 ---
 

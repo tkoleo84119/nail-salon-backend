@@ -2,8 +2,10 @@ package staff
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
+
+	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -33,8 +35,8 @@ func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context
 	// Check if target staff exists
 	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetStaffID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserStaffNotFound)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
 		}
 		return nil, fmt.Errorf("failed to get target staff: %w", err)
 	}

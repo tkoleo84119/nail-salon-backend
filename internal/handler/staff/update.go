@@ -21,15 +21,6 @@ func NewUpdateStaffHandler(service staffService.UpdateStaffServiceInterface) *Up
 }
 
 func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
-	// Get target staff ID from path parameter
-	targetID := c.Param("id")
-	if targetID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
-			"id": "id為必填項目",
-		})
-		return
-	}
-
 	// Parse and validate request
 	var req staff.UpdateStaffRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -38,11 +29,18 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 		return
 	}
 
+	// Get target staff ID from path parameter
+	targetID := c.Param("staffId")
+	if targetID == "" {
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+			"staffId": "staffId為必填項目",
+		})
+		return
+	}
+
 	// Additional validation: ensure at least one field is provided for update
 	if !req.HasUpdates() {
-		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
-			"request": "至少需要提供一個欄位進行更新",
-		})
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 

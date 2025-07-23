@@ -2,8 +2,10 @@ package staff
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
+
+	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -39,8 +41,8 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, target
 	// Check if target staff exists
 	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetStaffID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserStaffNotFound)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
 		}
 		return nil, false, fmt.Errorf("failed to get target staff: %w", err)
 	}
@@ -58,7 +60,7 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, target
 	// Check if store exists and is active
 	store, err := s.queries.GetStoreByID(ctx, storeID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotFound)
 		}
 		return nil, false, fmt.Errorf("failed to get store: %w", err)

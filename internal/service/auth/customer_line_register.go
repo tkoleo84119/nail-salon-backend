@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/netip"
 	"time"
 
@@ -49,7 +50,7 @@ func (s *CustomerLineRegisterService) CustomerLineRegister(ctx context.Context, 
 	if err == nil {
 		// Customer already exists
 		return nil, errorCodes.NewServiceError(errorCodes.CustomerAlreadyExists, "this line account has been registered", nil)
-	} else if err != pgx.ErrNoRows {
+	} else if !errors.Is(err, pgx.ErrNoRows) {
 		// Database error
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check customer existence", err)
 	}

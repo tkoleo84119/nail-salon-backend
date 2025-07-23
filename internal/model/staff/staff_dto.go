@@ -21,6 +21,8 @@ type CreateStaffResponse struct {
 	StoreList []common.Store `json:"storeList"`
 }
 
+// -------------------------------------------------------------------------------------
+
 // UpdateStaffRequest represents the request to update staff information
 type UpdateStaffRequest struct {
 	Role     *string `json:"role,omitempty" binding:"omitempty,oneof=ADMIN MANAGER STYLIST"`
@@ -39,6 +41,8 @@ type UpdateStaffResponse struct {
 func (r UpdateStaffRequest) HasUpdates() bool {
 	return r.Role != nil || r.IsActive != nil
 }
+
+// -------------------------------------------------------------------------------------
 
 // UpdateMyStaffRequest represents the request to update current staff user's information
 type UpdateMyStaffRequest struct {

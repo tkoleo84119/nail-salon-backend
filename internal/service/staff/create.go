@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -67,7 +66,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check stores", err)
 	}
 	if storeCheck.TotalCount != int64(len(storeIDs)) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotExist)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotFound)
 	}
 	if storeCheck.ActiveCount != storeCheck.TotalCount {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotActive)
@@ -87,8 +86,8 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 		storeAccessParams = append(storeAccessParams, dbgen.BatchCreateStaffUserStoreAccessParams{
 			StoreID:     storeID,
 			StaffUserID: staffID,
-			CreatedAt:   pgtype.Timestamptz{Time: now, Valid: true},
-			UpdatedAt:   pgtype.Timestamptz{Time: now, Valid: true},
+			CreatedAt:   utils.TimeToPgTimez(now),
+			UpdatedAt:   utils.TimeToPgTimez(now),
 		})
 	}
 
@@ -97,6 +96,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
 	}
 	defer tx.Rollback(ctx)
+
 	qtx := dbgen.New(tx)
 
 	createdStaff, err := qtx.CreateStaffUser(ctx, dbgen.CreateStaffUserParams{

@@ -13,6 +13,8 @@ type CreateStoreAccessResponse struct {
 	StoreList   []common.Store `json:"storeList"`
 }
 
+// -------------------------------------------------------------------------------------
+
 // DeleteStoreAccessBulkRequest represents the request for deleting store access
 type DeleteStoreAccessBulkRequest struct {
 	StoreIDs []string `json:"storeIds" binding:"required,min=1,max=100"`

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"net/netip"
 	"time"
 
@@ -43,7 +44,7 @@ func (s *CustomerLineLoginService) CustomerLineLogin(ctx context.Context, req au
 	})
 
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			// Customer not registered, return registration info
 			response := &auth.CustomerLineLoginResponse{
 				NeedRegister: true,

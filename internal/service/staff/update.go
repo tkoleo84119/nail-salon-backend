@@ -2,7 +2,9 @@ package staff
 
 import (
 	"context"
-	"database/sql"
+	"errors"
+
+	"github.com/jackc/pgx/v5"
 
 	"github.com/jmoiron/sqlx"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -43,7 +45,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, r
 	// Get target staff user
 	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetIDInt)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get target staff", err)
@@ -64,7 +66,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, r
 	// Perform the update
 	response, err := s.repo.UpdateStaffUser(ctx, targetIDInt, req)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff user", err)
 	}
 
 	return response, nil

@@ -32,10 +32,8 @@ func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
 	}
 
 	// Additional validation: ensure at least one field is provided for update
-	if req.Email == nil {
-		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
-			"request": "至少需要提供一個欄位進行更新",
-		})
+	if !req.HasUpdates() {
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 

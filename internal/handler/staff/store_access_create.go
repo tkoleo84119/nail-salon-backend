@@ -30,10 +30,10 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	}
 
 	// Get target staff ID from path parameter
-	targetID := c.Param("id")
+	targetID := c.Param("staffId")
 	if targetID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
-			"id": "id為必填項目",
+			"staffId": "staffId為必填項目",
 		})
 		return
 	}

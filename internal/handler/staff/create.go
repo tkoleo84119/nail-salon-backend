@@ -14,12 +14,12 @@ import (
 )
 
 type CreateStaffHandler struct {
-	createStaffService staffService.CreateStaffServiceInterface
+	service staffService.CreateStaffServiceInterface
 }
 
-func NewCreateStaffHandler(createStaffService staffService.CreateStaffServiceInterface) *CreateStaffHandler {
+func NewCreateStaffHandler(service staffService.CreateStaffServiceInterface) *CreateStaffHandler {
 	return &CreateStaffHandler{
-		createStaffService: createStaffService,
+		service: service,
 	}
 }
 
@@ -47,7 +47,7 @@ func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
 		creatorStoreIDs[i] = storeID
 	}
 
-	response, err := h.createStaffService.CreateStaff(c.Request.Context(), req, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.CreateStaff(c.Request.Context(), req, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
@@ -55,4 +55,3 @@ func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, common.SuccessResponse(response))
 }
-

@@ -2,7 +2,6 @@ package staff
 
 import (
 	"context"
-	"strings"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
@@ -31,7 +30,7 @@ func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req staff.Upda
 	// Check if staff user exists
 	_, err := s.queries.GetStaffUserByID(ctx, staffUserID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "failed to get staff user", err)
+		return nil, errorCodes.NewServiceError(errorCodes.UserNotFound, "failed to get staff user", err)
 	}
 
 	// Check email uniqueness if email is being updated
@@ -51,10 +50,7 @@ func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req staff.Upda
 	// Update staff user record using repository
 	response, err := s.staffUserRepository.UpdateMyStaff(ctx, staffUserID, req)
 	if err != nil {
-		if strings.Contains(err.Error(), "no rows returned") {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthStaffFailed)
-		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff user", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff own information", err)
 	}
 
 	return response, nil

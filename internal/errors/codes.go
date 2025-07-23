@@ -16,16 +16,14 @@ const (
 
 	// USER - User operation errors
 	UserInvalidRole    = "USER_INVALID_ROLE"
-	UserStoreNotExist  = "USER_STORE_NOT_EXIST"
 	UserStoreNotActive = "USER_STORE_NOT_ACTIVE"
 	UserInactive       = "USER_INACTIVE"
+	UserNotUpdateSelf  = "USER_NOT_UPDATE_SELF"
 	UserNotFound       = "USER_NOT_FOUND"
+	UserStoreNotFound  = "USER_STORE_NOT_FOUND"
 	UserAlreadyExists  = "USER_ALREADY_EXISTS"
 	UserEmailExists    = "USER_EMAIL_EXISTS"
 	UserUsernameExists = "USER_USERNAME_EXISTS"
-	UserNotUpdateSelf  = "USER_NOT_UPDATE_SELF"
-	UserStaffNotFound  = "USER_STAFF_NOT_FOUND"
-	UserStoreNotFound  = "USER_STORE_NOT_FOUND"
 
 	// CUSTOMER - Customer operation errors
 	CustomerNotFound      = "CUSTOMER_NOT_FOUND"

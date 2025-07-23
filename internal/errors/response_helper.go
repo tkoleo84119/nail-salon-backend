@@ -38,3 +38,10 @@ func AbortWithError(c *gin.Context, code string, fieldErrors map[string]string) 
 	RespondWithError(c, code, fieldErrors)
 	c.Abort()
 }
+
+// RespondWithEmptyFieldError sends a JSON error response with empty field error
+func RespondWithEmptyFieldError(c *gin.Context) {
+	AbortWithError(c, ValAllFieldsEmpty, map[string]string{
+		"request": "至少需要提供一個欄位進行更新",
+	})
+}
