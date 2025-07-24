@@ -52,3 +52,9 @@ ORDER BY srv.is_addon ASC, srv.name ASC;
 -- name: DeleteBookingDetailsByBookingID :exec
 DELETE FROM booking_details
 WHERE booking_id = $1;
+
+-- name: CancelBooking :one
+UPDATE bookings
+SET status = $2, cancel_reason = $3, updated_at = NOW()
+WHERE id = $1 AND customer_id = $4
+RETURNING id, status, cancel_reason, updated_at;

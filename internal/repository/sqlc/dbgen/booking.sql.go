@@ -11,6 +11,44 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const cancelBooking = `-- name: CancelBooking :one
+UPDATE bookings
+SET status = $2, cancel_reason = $3, updated_at = NOW()
+WHERE id = $1 AND customer_id = $4
+RETURNING id, status, cancel_reason, updated_at
+`
+
+type CancelBookingParams struct {
+	ID           int64       `db:"id" json:"id"`
+	Status       string      `db:"status" json:"status"`
+	CancelReason pgtype.Text `db:"cancel_reason" json:"cancel_reason"`
+	CustomerID   int64       `db:"customer_id" json:"customer_id"`
+}
+
+type CancelBookingRow struct {
+	ID           int64              `db:"id" json:"id"`
+	Status       string             `db:"status" json:"status"`
+	CancelReason pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) CancelBooking(ctx context.Context, arg CancelBookingParams) (CancelBookingRow, error) {
+	row := q.db.QueryRow(ctx, cancelBooking,
+		arg.ID,
+		arg.Status,
+		arg.CancelReason,
+		arg.CustomerID,
+	)
+	var i CancelBookingRow
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.CancelReason,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createBooking = `-- name: CreateBooking :one
 INSERT INTO bookings (
     id,
@@ -23,7 +61,7 @@ INSERT INTO bookings (
     status
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8
-) RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, actual_duration, note, used_products, status, created_at, updated_at
+) RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, actual_duration, note, used_products, status, created_at, updated_at, cancel_reason
 `
 
 type CreateBookingParams struct {
@@ -62,6 +100,7 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.CancelReason,
 	)
 	return i, err
 }

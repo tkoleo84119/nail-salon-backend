@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**PATCH** `/api/bookings/{bookingId}/my`
+**PATCH** `/api/bookings/{bookingId}/me`
 
 ---
 

@@ -31,6 +31,14 @@ type CreateMyBookingResponse struct {
 	UpdatedAt       string   `json:"updatedAt"`
 }
 
+// BookingServiceInfo represents service information for booking
+type BookingServiceInfo struct {
+	ServiceId     int64
+	ServiceName   string
+	Price         float64
+	IsMainService bool
+}
+
 // -------------------------------------------------------------------------------------
 
 // UpdateMyBookingRequest represents the request for updating my booking
@@ -64,14 +72,6 @@ type UpdateMyBookingResponse struct {
 	UpdatedAt       string   `json:"updatedAt"`
 }
 
-// BookingServiceInfo represents service information for booking
-type BookingServiceInfo struct {
-	ServiceId     int64
-	ServiceName   string
-	Price         float64
-	IsMainService bool
-}
-
 // HasUpdates checks if the request has at least one field to update
 func (r UpdateMyBookingRequest) HasUpdates() bool {
 	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil ||
@@ -89,4 +89,18 @@ func (r UpdateMyBookingRequest) IsTimeSlotUpdateComplete() bool {
 		return true
 	}
 	return r.StoreId != nil && r.StylistId != nil && r.TimeSlotId != nil && r.MainServiceId != nil && r.SubServiceIds != nil
+}
+
+// -------------------------------------------------------------------------------------
+
+// CancelMyBookingRequest represents the request for canceling my booking
+type CancelMyBookingRequest struct {
+	CancelReason *string `json:"cancelReason,omitempty" binding:"omitempty,max=100"`
+}
+
+// CancelMyBookingResponse represents the response for canceling my booking
+type CancelMyBookingResponse struct {
+	ID           string  `json:"id"`
+	Status       string  `json:"status"`
+	CancelReason *string `json:"cancelReason,omitempty"`
 }

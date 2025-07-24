@@ -37,6 +37,9 @@ BOOKING:
   BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE:
     message: 預約狀態不允許更新
     status: 400
+  BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL:
+    message: 預約狀態不允許取消
+    status: 409
   TIME_SLOT_NOT_FOUND:
     message: 指定時段不存在
     status: 404

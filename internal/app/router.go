@@ -54,7 +54,8 @@ func setupBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen
 	bookings := api.Group("/bookings")
 	{
 		bookings.POST("/me", middleware.JWTAuth(*cfg, queries), handlers.BookingCreateMy.CreateMyBooking)
-		bookings.PATCH("/:bookingId/my", middleware.JWTAuth(*cfg, queries), handlers.BookingUpdateMy.UpdateMyBooking)
+		bookings.PATCH("/:bookingId/me", middleware.JWTAuth(*cfg, queries), handlers.BookingUpdateMy.UpdateMyBooking)
+		bookings.PATCH("/:bookingId/cancel", middleware.JWTAuth(*cfg, queries), handlers.BookingCancelMy.CancelMyBooking)
 	}
 }
 

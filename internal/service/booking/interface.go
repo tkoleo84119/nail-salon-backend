@@ -14,3 +14,7 @@ type CreateMyBookingServiceInterface interface {
 type UpdateMyBookingServiceInterface interface {
 	UpdateMyBooking(ctx context.Context, bookingIDStr string, req booking.UpdateMyBookingRequest, customerContext common.CustomerContext) (*booking.UpdateMyBookingResponse, error)
 }
+
+type CancelMyBookingServiceInterface interface {
+	CancelMyBooking(ctx context.Context, bookingIDStr string, req booking.CancelMyBookingRequest, customerContext common.CustomerContext) (*booking.CancelMyBookingResponse, error)
+}

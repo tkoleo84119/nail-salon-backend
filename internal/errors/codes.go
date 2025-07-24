@@ -15,10 +15,11 @@ const (
 	AuthLineTokenExpired   = "AUTH_LINE_TOKEN_EXPIRED"
 
 	// BOOKING - Booking operation errors
-	BookingNotFound            = "BOOKING_NOT_FOUND"
+	BookingNotFound                 = "BOOKING_NOT_FOUND"
 	BookingStatusNotAllowedToUpdate = "BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE"
-	BookingTimeSlotNotFound    = "TIME_SLOT_NOT_FOUND"
-	BookingTimeSlotUnavailable = "TIME_SLOT_UNAVAILABLE"
+	BookingStatusNotAllowedToCancel = "BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL"
+	BookingTimeSlotNotFound         = "TIME_SLOT_NOT_FOUND"
+	BookingTimeSlotUnavailable      = "TIME_SLOT_UNAVAILABLE"
 
 	// CUSTOMER - Customer operation errors
 	CustomerNotFound      = "CUSTOMER_NOT_FOUND"
