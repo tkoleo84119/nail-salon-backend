@@ -7,7 +7,7 @@
 
 ## Endpoint
 
-**PATCH** `/api/schedules/{scheduleId}/time-slots/{timeSlotId}`
+**PATCH** `/api/admin/schedules/{scheduleId}/time-slots/{timeSlotId}`
 
 ---
 

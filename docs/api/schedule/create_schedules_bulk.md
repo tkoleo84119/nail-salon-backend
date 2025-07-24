@@ -7,7 +7,7 @@
 
 ## Endpoint
 
-**POST** `/api/schedules/bulk`
+**POST** `/api/admin/schedules/bulk`
 
 ---
 

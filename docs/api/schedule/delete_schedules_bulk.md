@@ -7,7 +7,7 @@
 
 ## Endpoint
 
-**DELETE** `/api/schedules/bulk`
+**DELETE** `/api/admin/schedules/bulk`
 
 ---
 

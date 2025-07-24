@@ -7,7 +7,7 @@
 
 ## Endpoint
 
-**POST** `/api/schedules/{scheduleId}/time-slots`
+**POST** `/api/admin/schedules/{scheduleId}/time-slots`
 
 ---
 

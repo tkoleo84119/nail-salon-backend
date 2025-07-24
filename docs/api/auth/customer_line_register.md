@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**POST** `/api/auth/customers/line/register`
+**POST** `/api/auth/line/register`
 
 ---
 

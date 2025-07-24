@@ -9,7 +9,7 @@
 
 ## Endpoint
 
-**PATCH** `/api/stores/{storeId}`
+**PATCH** `/api/admin/stores/{storeId}`
 
 ---
 

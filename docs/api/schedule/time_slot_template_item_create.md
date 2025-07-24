@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**POST** `/api/time-slot-templates/{templateId}/items`
+**POST** `/api/admin/time-slot-templates/{templateId}/items`
 
 ---
 

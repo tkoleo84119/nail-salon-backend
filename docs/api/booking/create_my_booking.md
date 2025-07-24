@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**POST** `/api/bookings/me`
+**POST** `/api/bookings`
 
 ---
 

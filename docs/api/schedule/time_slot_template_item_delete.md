@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**DELETE** `/api/time-slot-templates/{templateId}/items/{itemId}`
+**DELETE** `/api/admin/time-slot-templates/{templateId}/items/{itemId}`
 
 ---
 

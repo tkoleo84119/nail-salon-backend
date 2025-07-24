@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**PATCH** `/api/services/{serviceId}`
+**PATCH** `/api/admin/services/{serviceId}`
 
 ---
 

@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**POST** `/api/services`
+**POST** `/api/admin/services`
 
 ---
 
@@ -51,8 +51,8 @@ Authorization: Bearer <access_token>
 | 欄位            | 規則                                         | 說明     |
 | --------------- | -------------------------------------------- | -------- |
 | name            | <li>必填<li>長度大於1<li>長度小於100<li>唯一 | 服務名稱 |
-| price           | <li>必填<li>數字最小是0                 | 價格     |
-| durationMinutes | <li>必填<li>數字最小是0<li>小於1440     | 操作分鐘 |
+| price           | <li>必填<li>數字最小是0                      | 價格     |
+| durationMinutes | <li>必填<li>數字最小是0<li>小於1440          | 操作分鐘 |
 | isAddon         | <li>必填<li>布林值                           | 附加服務 |
 | isVisible       | <li>必填<li>布林值                           | 可見狀態 |
 | note            | <li>選填<li>長度小於255                      | 備註     |

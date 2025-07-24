@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**PATCH** `/api/time-slot-templates/{templateId}/items/{itemId}`
+**PATCH** `/api/admin/time-slot-templates/{templateId}/items/{itemId}`
 
 ---
 

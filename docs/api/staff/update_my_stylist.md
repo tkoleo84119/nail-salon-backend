@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**PATCH** `/api/stylists/me`
+**PATCH** `/api/admin/stylists/me`
 
 ---
 

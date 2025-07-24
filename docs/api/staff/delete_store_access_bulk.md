@@ -6,7 +6,7 @@
 
 ## Endpoint
 
-**DELETE** `/api/staffs/{staffId}/store-access/bulk`
+**DELETE** `/api/admin/staff/{staffId}/store-access/bulk`
 
 ---
 

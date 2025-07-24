@@ -7,7 +7,7 @@
 
 ## Endpoint
 
-**DELETE** `/api/schedules/{scheduleId}/time-slots/{timeSlotId}`
+**DELETE** `/api/admin/schedules/{scheduleId}/time-slots/{timeSlotId}`
 
 ---
 

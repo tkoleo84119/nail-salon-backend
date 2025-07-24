@@ -9,7 +9,7 @@
 
 ## Endpoint
 
-**POST** `/api/stores`
+**POST** `/api/admin/stores`
 
 ---
 
