@@ -39,25 +39,17 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req st
 
 	if req.Address != nil {
 		setParts = append(setParts, "address = :address")
-		if *req.Address == "" {
-			args["address"] = pgtype.Text{Valid: false}
-		} else {
-			args["address"] = pgtype.Text{String: *req.Address, Valid: true}
-		}
+		args["address"] = utils.StringPtrToPgText(req.Address, true)
 	}
 
 	if req.Phone != nil {
 		setParts = append(setParts, "phone = :phone")
-		if *req.Phone == "" {
-			args["phone"] = pgtype.Text{Valid: false}
-		} else {
-			args["phone"] = pgtype.Text{String: *req.Phone, Valid: true}
-		}
+		args["phone"] = utils.StringPtrToPgText(req.Phone, true)
 	}
 
 	if req.IsActive != nil {
 		setParts = append(setParts, "is_active = :is_active")
-		args["is_active"] = pgtype.Bool{Bool: *req.IsActive, Valid: true}
+		args["is_active"] = utils.BoolPtrToPgBool(req.IsActive)
 	}
 
 	query := fmt.Sprintf(`

@@ -123,7 +123,7 @@ func (s *StaffLoginService) storeRefreshToken(ctx context.Context, tokenInfo aut
 	}
 
 	tokenID := utils.GenerateID()
-	userAgent := utils.StringToText(&tokenInfo.Context.UserAgent)
+	userAgent := utils.StringPtrToPgText(&tokenInfo.Context.UserAgent, false)
 
 	_, err := s.queries.CreateStaffUserToken(ctx, dbgen.CreateStaffUserTokenParams{
 		ID:           tokenID,
@@ -131,7 +131,7 @@ func (s *StaffLoginService) storeRefreshToken(ctx context.Context, tokenInfo aut
 		RefreshToken: tokenInfo.RefreshToken,
 		UserAgent:    userAgent,
 		IpAddress:    ipAddr,
-		ExpiredAt:    utils.TimeToPgTimez(tokenInfo.ExpiresAt),
+		ExpiredAt:    utils.TimeToPgTimestamptz(tokenInfo.ExpiresAt),
 	})
 
 	return err

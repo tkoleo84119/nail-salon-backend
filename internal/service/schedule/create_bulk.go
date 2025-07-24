@@ -6,7 +6,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -86,7 +85,7 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 
 	// Check for existing schedules
 	for _, scheduleReq := range req.Schedules {
-		workDate, err := utils.StringDateToPgDate(scheduleReq.WorkDate)
+		workDate, err := utils.DateStringToPgDate(scheduleReq.WorkDate)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid work date format", err)
 		}
@@ -159,7 +158,7 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.Sched
 
 	for _, scheduleReq := range schedules {
 		// Parse work date
-		workDate, err := utils.StringDateToPgDate(scheduleReq.WorkDate)
+		workDate, err := utils.DateStringToPgDate(scheduleReq.WorkDate)
 		if err != nil {
 			return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid work date format", err)
 		}
@@ -169,7 +168,7 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.Sched
 		createdScheduleIDs = append(createdScheduleIDs, scheduleID)
 
 		// Prepare schedule row
-		noteValue := utils.StringToText(scheduleReq.Note)
+		noteValue := utils.StringPtrToPgText(scheduleReq.Note, false)
 
 		scheduleRow := dbgen.BatchCreateSchedulesParams{
 			ID:        scheduleID,
@@ -177,32 +176,34 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []schedule.Sched
 			StylistID: stylistID,
 			WorkDate:  workDate,
 			Note:      noteValue,
-			CreatedAt: utils.TimeToPgTimez(now),
-			UpdatedAt: utils.TimeToPgTimez(now),
+			CreatedAt: utils.TimeToPgTimestamptz(now),
+			UpdatedAt: utils.TimeToPgTimestamptz(now),
 		}
 		scheduleRows = append(scheduleRows, scheduleRow)
 
 		// Prepare time slot rows
 		for _, timeSlotReq := range scheduleReq.TimeSlots {
-			startTime, err := utils.StringDateToTime(timeSlotReq.StartTime)
+			startTime, err := utils.TimeStringToTime(timeSlotReq.StartTime)
 			if err != nil {
 				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 			}
 
-			endTime, err := utils.StringDateToTime(timeSlotReq.EndTime)
+			endTime, err := utils.TimeStringToTime(timeSlotReq.EndTime)
 			if err != nil {
 				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 			}
 
 			timeSlotID := utils.GenerateID()
+			isAvailable := true
+
 			timeSlotRow := dbgen.BatchCreateTimeSlotsParams{
 				ID:          timeSlotID,
 				ScheduleID:  scheduleID,
 				StartTime:   utils.TimeToPgTime(startTime),
 				EndTime:     utils.TimeToPgTime(endTime),
-				IsAvailable: pgtype.Bool{Bool: true, Valid: true},
-				CreatedAt:   utils.TimeToPgTimez(now),
-				UpdatedAt:   utils.TimeToPgTimez(now),
+				IsAvailable: utils.BoolPtrToPgBool(&isAvailable),
+				CreatedAt:   utils.TimeToPgTimestamptz(now),
+				UpdatedAt:   utils.TimeToPgTimestamptz(now),
 			}
 			timeSlotRows = append(timeSlotRows, timeSlotRow)
 		}
@@ -238,9 +239,9 @@ func (s *CreateSchedulesBulkService) buildResponseFromScheduleRows(ctx context.C
 			}
 
 			timeSlotResponses = append(timeSlotResponses, schedule.TimeSlotResponse{
-				ID:        utils.FormatID(row.TimeSlotID.Int64),
-				StartTime: utils.PgTimeToStringTime(row.StartTime),
-				EndTime:   utils.PgTimeToStringTime(row.EndTime),
+				ID:        utils.PgInt8ToIDString(row.TimeSlotID),
+				StartTime: utils.PgTimeToTimeString(row.StartTime),
+				EndTime:   utils.PgTimeToTimeString(row.EndTime),
 			})
 		}
 
@@ -297,12 +298,12 @@ func (s *CreateSchedulesBulkService) validateTimeSlots(timeSlots []schedule.Time
 
 	var parsedSlots []timeSlotParsed
 	for _, slot := range timeSlots {
-		startTime, err := utils.StringTimeToTime(slot.StartTime)
+		startTime, err := utils.TimeStringToTime(slot.StartTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, fmt.Sprintf("invalid start time format: %s", slot.StartTime), err)
 		}
 
-		endTime, err := utils.StringTimeToTime(slot.EndTime)
+		endTime, err := utils.TimeStringToTime(slot.EndTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, fmt.Sprintf("invalid end time format: %s", slot.EndTime), err)
 		}

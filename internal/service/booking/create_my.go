@@ -110,14 +110,14 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 	services = append(services, booking.BookingServiceInfo{
 		ServiceId:     mainService.ID,
 		ServiceName:   mainService.Name,
-		Price:         utils.NumericToFloat64(mainService.Price),
+		Price:         utils.PgNumericToFloat64(mainService.Price),
 		IsMainService: true,
 	})
 	for _, subService := range subServices {
 		services = append(services, booking.BookingServiceInfo{
 			ServiceId:   subService.ID,
 			ServiceName: subService.Name,
-			Price:       utils.NumericToFloat64(subService.Price),
+			Price:       utils.PgNumericToFloat64(subService.Price),
 		})
 	}
 
@@ -140,7 +140,7 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		StylistID:     stylistId,
 		TimeSlotID:    timeSlotId,
 		IsChatEnabled: utils.BoolPtrToPgBool(req.IsChatEnabled),
-		Note:          utils.StringToText(req.Note),
+		Note:          utils.StringPtrToPgText(req.Note, false),
 		Status:        booking.BookingStatusScheduled,
 	})
 	if err != nil {
@@ -169,11 +169,11 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		StoreId:         utils.FormatID(storeId),
 		StoreName:       store.Name,
 		StylistId:       utils.FormatID(stylistId),
-		StylistName:     utils.TextToString(stylist.Name),
-		Date:            utils.PgDateToString(schedule.WorkDate),
+		StylistName:     utils.PgTextToString(stylist.Name),
+		Date:            utils.PgDateToDateString(schedule.WorkDate),
 		TimeSlotId:      utils.FormatID(timeSlotId),
-		StartTime:       utils.PgTimeToStringTime(timeSlot.StartTime),
-		EndTime:         utils.PgTimeToStringTime(timeSlot.EndTime),
+		StartTime:       utils.PgTimeToTimeString(timeSlot.StartTime),
+		EndTime:         utils.PgTimeToTimeString(timeSlot.EndTime),
 		MainServiceName: services[0].ServiceName,
 		SubServiceNames: subServiceNames,
 		IsChatEnabled:   isChatEnabled,
@@ -187,11 +187,17 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 func (s *CreateMyBookingService) createBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingId int64, services []booking.BookingServiceInfo) error {
 	for _, service := range services {
 		detailId := utils.GenerateID()
-		_, err := qtx.CreateBookingDetail(ctx, dbgen.CreateBookingDetailParams{
+		
+		price, err := utils.Float64ToPgNumeric(service.Price)
+		if err != nil {
+			return errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to convert price", err)
+		}
+		
+		_, err = qtx.CreateBookingDetail(ctx, dbgen.CreateBookingDetailParams{
 			ID:        detailId,
 			BookingID: bookingId,
 			ServiceID: service.ServiceId,
-			Price:     utils.Float64ToNumeric(service.Price),
+			Price:     price,
 		})
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.SysDatabaseError, "create booking detail failed", err)

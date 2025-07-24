@@ -108,11 +108,11 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 	}
 
 	if req.StartTime != nil && req.EndTime != nil {
-		startTimeParsed, err := utils.StringTimeToTime(*req.StartTime)
+		startTimeParsed, err := utils.TimeStringToTime(*req.StartTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 		}
-		endTimeParsed, err := utils.StringTimeToTime(*req.EndTime)
+		endTimeParsed, err := utils.TimeStringToTime(*req.EndTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 		}

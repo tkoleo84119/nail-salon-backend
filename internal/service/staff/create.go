@@ -86,8 +86,8 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req staff.CreateSt
 		storeAccessParams = append(storeAccessParams, dbgen.BatchCreateStaffUserStoreAccessParams{
 			StoreID:     storeID,
 			StaffUserID: staffID,
-			CreatedAt:   utils.TimeToPgTimez(now),
-			UpdatedAt:   utils.TimeToPgTimez(now),
+			CreatedAt:   utils.TimeToPgTimestamptz(now),
+			UpdatedAt:   utils.TimeToPgTimestamptz(now),
 		})
 	}
 

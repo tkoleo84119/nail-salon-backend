@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -47,12 +46,12 @@ func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Conte
 
 	for i, timeSlot := range req.TimeSlots {
 		// Parse time strings
-		startTime, err := utils.StringTimeToTime(timeSlot.StartTime)
+		startTime, err := utils.TimeStringToTime(timeSlot.StartTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 		}
 
-		endTime, err := utils.StringTimeToTime(timeSlot.EndTime)
+		endTime, err := utils.TimeStringToTime(timeSlot.EndTime)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 		}
@@ -65,8 +64,8 @@ func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Conte
 			TemplateID: templateID,
 			StartTime:  utils.TimeToPgTime(startTime),
 			EndTime:    utils.TimeToPgTime(endTime),
-			CreatedAt:  utils.TimeToPgTimez(now),
-			UpdatedAt:  utils.TimeToPgTimez(now),
+			CreatedAt:  utils.TimeToPgTimestamptz(now),
+			UpdatedAt:  utils.TimeToPgTimestamptz(now),
 		}
 
 		responseTimeSlots[i] = timeSlotTemplate.TimeSlotItemResponse{
@@ -89,8 +88,8 @@ func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Conte
 	template, err := qtx.CreateTimeSlotTemplate(ctx, dbgen.CreateTimeSlotTemplateParams{
 		ID:      templateID,
 		Name:    req.Name,
-		Note:    utils.StringToText(&req.Note),
-		Updater: pgtype.Int8{Int64: staffUserID, Valid: true},
+		Note:    utils.StringPtrToPgText(&req.Note, false),
+		Updater: utils.Int64ToPgInt8(staffUserID),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create time slot template", err)
@@ -127,12 +126,12 @@ func (s *CreateTimeSlotTemplateService) validateTimeSlots(timeSlots []timeSlotTe
 	}, len(timeSlots))
 
 	for i, timeSlot := range timeSlots {
-		startTime, err := utils.StringTimeToTime(timeSlot.StartTime)
+		startTime, err := utils.TimeStringToTime(timeSlot.StartTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 		}
 
-		endTime, err := utils.StringTimeToTime(timeSlot.EndTime)
+		endTime, err := utils.TimeStringToTime(timeSlot.EndTime)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 		}

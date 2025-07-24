@@ -35,12 +35,12 @@ func (s *CreateTimeSlotTemplateItemService) CreateTimeSlotTemplateItem(ctx conte
 	}
 
 	// Validate time format and range
-	startTime, err := utils.StringTimeToTime(req.StartTime)
+	startTime, err := utils.TimeStringToTime(req.StartTime)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
 	}
 
-	endTime, err := utils.StringTimeToTime(req.EndTime)
+	endTime, err := utils.TimeStringToTime(req.EndTime)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
 	}

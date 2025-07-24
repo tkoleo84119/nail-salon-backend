@@ -45,7 +45,7 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req service.Cr
 	}
 
 	// Convert note to pgtype.Text
-	noteText := utils.StringToText(&req.Note)
+	noteText := utils.StringPtrToPgText(&req.Note, false)
 
 	// Create service
 	createdService, err := s.queries.CreateService(ctx, dbgen.CreateServiceParams{

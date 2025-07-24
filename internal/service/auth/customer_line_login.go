@@ -107,8 +107,8 @@ func (s *CustomerLineLoginService) generateRefreshToken(ctx context.Context, cus
 	tokenID := utils.GenerateID()
 
 	// Store refresh token in database
-	expiresAt := utils.TimeToPgTimez(time.Now().Add(7 * 24 * time.Hour)) // 7 days
-	userAgent := utils.StringToText(&loginCtx.UserAgent)
+	expiresAt := utils.TimeToPgTimestamptz(time.Now().Add(7 * 24 * time.Hour)) // 7 days
+	userAgent := utils.StringPtrToPgText(&loginCtx.UserAgent, false)
 
 	var ipAddress *netip.Addr
 	if loginCtx.IPAddress != "" {

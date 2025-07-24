@@ -58,13 +58,13 @@ func (s *CustomerLineRegisterService) CustomerLineRegister(ctx context.Context, 
 	// Prepare customer record
 	customerID := utils.GenerateID()
 
-	birthday, err := utils.StringDateToPgDate(req.Birthday)
+	birthday, err := utils.DateStringToPgDate(req.Birthday)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid birthday format", err)
 	}
-	city := utils.StringToText(&req.City)
-	referrer := utils.StringToText(&req.Referrer)
-	customerNote := utils.StringToText(&req.CustomerNote)
+	city := utils.StringPtrToPgText(&req.City, false)
+	referrer := utils.StringPtrToPgText(&req.Referrer, false)
+	customerNote := utils.StringPtrToPgText(&req.CustomerNote, false)
 	isIntrovert := utils.BoolPtrToPgBool(req.IsIntrovert)
 
 	// Convert favorite arrays to PostgreSQL text arrays
@@ -184,8 +184,8 @@ func (s *CustomerLineRegisterService) generateRefreshToken(ctx context.Context, 
 	tokenID := utils.GenerateID()
 
 	// Store refresh token in database
-	expiresAt := utils.TimeToPgTimez(time.Now().Add(7 * 24 * time.Hour)) // 7 days
-	userAgent := utils.StringToText(&loginCtx.UserAgent)
+	expiresAt := utils.TimeToPgTimestamptz(time.Now().Add(7 * 24 * time.Hour)) // 7 days
+	userAgent := utils.StringPtrToPgText(&loginCtx.UserAgent, false)
 
 	var ipAddress *netip.Addr
 	if loginCtx.IPAddress != "" {

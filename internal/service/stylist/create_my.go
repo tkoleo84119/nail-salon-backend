@@ -56,7 +56,7 @@ func (s *CreateMyStylistService) CreateMyStylist(ctx context.Context, req stylis
 	createdStylist, err := s.queries.CreateStylist(ctx, dbgen.CreateStylistParams{
 		ID:           stylistID,
 		StaffUserID:  staffUserID,
-		Name:         utils.StringToText(&req.StylistName),
+		Name:         utils.StringPtrToPgText(&req.StylistName, false),
 		GoodAtShapes: goodAtShapes,
 		GoodAtColors: goodAtColors,
 		GoodAtStyles: goodAtStyles,

@@ -34,7 +34,7 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 	if req.StartTime != nil {
 		setParts = append(setParts, "start_time = :start_time")
 		// Convert time string to pgtype.Time
-		startTime, err := utils.StringTimeToTime(*req.StartTime)
+		startTime, err := utils.TimeStringToTime(*req.StartTime)
 		if err != nil {
 			return nil, fmt.Errorf("invalid start time format: %w", err)
 		}
@@ -44,7 +44,7 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 	if req.EndTime != nil {
 		setParts = append(setParts, "end_time = :end_time")
 		// Convert time string to pgtype.Time
-		endTime, err := utils.StringTimeToTime(*req.EndTime)
+		endTime, err := utils.TimeStringToTime(*req.EndTime)
 		if err != nil {
 			return nil, fmt.Errorf("invalid end time format: %w", err)
 		}
@@ -88,8 +88,8 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 	response := &schedule.UpdateTimeSlotResponse{
 		ID:          utils.FormatID(result.ID),
 		ScheduleID:  utils.FormatID(result.ScheduleID),
-		StartTime:   utils.PgTimeToStringTime(result.StartTime),
-		EndTime:     utils.PgTimeToStringTime(result.EndTime),
+		StartTime:   utils.PgTimeToTimeString(result.StartTime),
+		EndTime:     utils.PgTimeToTimeString(result.EndTime),
 		IsAvailable: result.IsAvailable.Bool,
 	}
 

@@ -62,8 +62,8 @@ func (s *CreateStoreService) CreateStore(ctx context.Context, req store.CreateSt
 	createdStore, err := qtx.CreateStore(ctx, dbgen.CreateStoreParams{
 		ID:      storeID,
 		Name:    req.Name,
-		Address: utils.StringToText(&req.Address),
-		Phone:   utils.StringToText(&req.Phone),
+		Address: utils.StringPtrToPgText(&req.Address, false),
+		Phone:   utils.StringPtrToPgText(&req.Phone, false),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store", err)
