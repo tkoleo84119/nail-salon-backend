@@ -18,7 +18,9 @@ type UpdateMyCustomerHandler struct {
 }
 
 func NewUpdateMyCustomerHandler(service customerService.UpdateMyCustomerServiceInterface) *UpdateMyCustomerHandler {
-	return &UpdateMyCustomerHandler{service: service}
+	return &UpdateMyCustomerHandler{
+		service: service,
+	}
 }
 
 // UpdateMyCustomer handles PATCH /api/customers/me
@@ -31,9 +33,7 @@ func (h *UpdateMyCustomerHandler) UpdateMyCustomer(c *gin.Context) {
 	}
 
 	if !req.HasUpdates() {
-		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
-			"request": "至少需要提供一個欄位進行更新",
-		})
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 
