@@ -27,6 +27,8 @@ type CreateMyBookingResponse struct {
 	IsChatEnabled   bool     `json:"isChatEnabled"`
 	Note            *string  `json:"note,omitempty"`
 	Status          string   `json:"status"`
+	CreatedAt       string   `json:"createdAt"`
+	UpdatedAt       string   `json:"updatedAt"`
 }
 
 // -------------------------------------------------------------------------------------

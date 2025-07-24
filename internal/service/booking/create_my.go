@@ -2,6 +2,7 @@ package booking
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -106,6 +107,15 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		}
 	}
 
+	// if timeSlot time is not enough for service duration, return error
+	endTime := utils.PgTimeToTime(timeSlot.EndTime)
+	startTime := utils.PgTimeToTime(timeSlot.StartTime)
+	timeSlotDuration := endTime.Sub(startTime)
+	serviceDuration := time.Duration(mainService.DurationMinutes)
+	if timeSlotDuration < serviceDuration {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotEnoughTime)
+	}
+
 	services := make([]booking.BookingServiceInfo, 0, len(subServices)+1)
 	services = append(services, booking.BookingServiceInfo{
 		ServiceId:     mainService.ID,
@@ -133,7 +143,7 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 	qtx := dbgen.New(tx)
 
 	// Create booking
-	_, err = qtx.CreateBooking(ctx, dbgen.CreateBookingParams{
+	bookingInfo, err := qtx.CreateBooking(ctx, dbgen.CreateBookingParams{
 		ID:            bookingId,
 		StoreID:       storeId,
 		CustomerID:    customerContext.CustomerID,
@@ -179,6 +189,8 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		IsChatEnabled:   isChatEnabled,
 		Note:            req.Note,
 		Status:          booking.BookingStatusScheduled,
+		CreatedAt:       bookingInfo.CreatedAt.Time.String(),
+		UpdatedAt:       bookingInfo.UpdatedAt.Time.String(),
 	}
 
 	return response, nil

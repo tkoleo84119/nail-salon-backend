@@ -82,7 +82,9 @@ Authorization: Bearer <access_token>
     "subServiceNames": ["副服務項目名稱1", "副服務項目名稱2"],
     "isChatEnabled": true,
     "note": "這次想做奶茶色",
-    "status": "SCHEDULED"
+    "status": "SCHEDULED",
+    "createdAt": "2025-07-24T10:00:00Z",
+    "updatedAt": "2025-07-24T10:00:00Z"
   }
 }
 ```
