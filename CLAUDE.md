@@ -93,6 +93,51 @@ Follow Conventional Commits format: `<type>: <description>`
 - If sql is update optional columns(dynamic), use sqlx not sqlc
 - When adding a new SQL for batch insert operations, use sqlc's :copyfrom
 - Handler & service & model need to use modules struct by business domain (separate by folder)
+- Always use type conversion utilities from `internal/utils/type_convert.go` instead of manual pgtype construction
+- For nullable database fields, use appropriate converter functions (e.g., `StringPtrToPgText`, `Int64ToPgInt8`)
+
+### Type Conversion Utilities
+
+The `internal/utils/type_convert.go` provides comprehensive type conversion utilities for PostgreSQL types:
+
+#### String Conversions
+- `StringPtrToPgText(s *string, emptyAsNull bool)` - Unified function for optional string fields
+  - `emptyAsNull=false`: Empty strings remain as valid empty strings
+  - `emptyAsNull=true`: Empty strings are treated as NULL
+- `PgTextToString(t pgtype.Text)` - Convert pgtype.Text to string (handles NULL as empty string)
+
+#### Numeric Conversions
+- `Float64ToPgNumeric(f float64)` - Convert float64 to pgtype.Numeric (with error handling)
+- `Int64ToPgNumeric(i int64)` - Convert int64 to pgtype.Numeric (with error handling)
+- `PgNumericToFloat64(n pgtype.Numeric)` - Convert pgtype.Numeric to float64 (handles NULL as 0)
+
+#### Boolean Conversions
+- `BoolPtrToPgBool(b *bool)` - Convert bool pointer to pgtype.Bool (nil becomes NULL)
+
+#### Time Conversions
+- `TimeToPgTimestamptz(t time.Time)` - Convert time to pgtype.Timestamptz
+- `TimeToPgTime(t time.Time)` - Convert time to pgtype.Time
+- `TimeToPgDate(t time.Time)` - Convert time to pgtype.Date
+- `DateStringToTime(s string)` - Parse YYYY-MM-DD format to time.Time
+- `TimeStringToTime(s string)` - Parse HH:MM format to time.Time
+- `PgTimeToTimeString(t pgtype.Time)` - Convert pgtype.Time to HH:MM string
+- `PgDateToDateString(d pgtype.Date)` - Convert pgtype.Date to YYYY-MM-DD string
+
+#### ID Conversions (for Foreign Keys)
+- `Int64ToPgInt8(id int64)` - Convert int64 ID to pgtype.Int8 (for required foreign keys)
+- `Int64PtrToPgInt8(id *int64)` - Convert int64 pointer to pgtype.Int8 (for optional foreign keys)
+- `Int32ToPgInt4(value int32)` - Convert int32 to pgtype.Int4
+- `Int32PtrToPgInt4(value *int32)` - Convert int32 pointer to pgtype.Int4
+- `ParseIDToPgInt8(idStr string)` - Parse string ID to pgtype.Int8 with validation
+- `ParseIDPtrToPgInt8(idStr *string)` - Parse string ID pointer to pgtype.Int8 with validation
+- `PgInt8ToIDString(id pgtype.Int8)` - Convert pgtype.Int8 to ID string (handles NULL)
+- `PgInt8ToIDStringPtr(id pgtype.Int8)` - Convert pgtype.Int8 to ID string pointer (NULL returns nil)
+
+#### Usage Guidelines
+- **Never manually construct pgtype structures** - Always use conversion utilities
+- **Check function documentation** - Each function has comprehensive examples and usage patterns
+- **Handle errors properly** - Functions that can fail return errors (numeric conversions, time parsing)
+- **Choose appropriate null handling** - Use `emptyAsNull` parameter for string fields based on business logic
 
 ### Validation Patterns
 
@@ -165,9 +210,9 @@ func (h *Handler) CreateEntity(c *gin.Context) {
 ```go
 func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffContext StaffContext) (*EntityResponse, error) {
     // Input validation & ID parsing
-    entityID, err := utils.ParseID(req.ID)
+    staffUserID, err := utils.ParseID(staffContext.UserID)
     if err != nil {
-        return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid ID", err)
+        return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
     }
 
     // Business logic validation (permissions, role)
@@ -184,6 +229,9 @@ func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffCont
         return nil, errorCodes.NewServiceErrorWithCode(errorCodes.EntityAlreadyExists)
     }
 
+    // Generate entity ID
+    entityID := utils.GenerateID()
+
     // Transaction-based creation
     tx, err := s.db.Begin(ctx)
     if err != nil {
@@ -192,7 +240,16 @@ func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffCont
     defer tx.Rollback(ctx)
 
     qtx := dbgen.New(tx)
-    created, err := qtx.CreateEntity(ctx, params)
+
+    // Create entity using type converters
+    created, err := qtx.CreateEntity(ctx, dbgen.CreateEntityParams{
+        ID:          entityID,
+        Name:        req.Name,
+        Description: utils.StringPtrToPgText(&req.Description, false), // Empty strings allowed
+        Note:        utils.StringPtrToPgText(&req.Note, true),        // Empty as NULL
+        IsActive:    utils.BoolPtrToPgBool(&req.IsActive),
+        CreatedBy:   utils.Int64ToPgInt8(staffUserID),
+    })
     if err != nil {
         return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "create failed", err)
     }
@@ -201,7 +258,13 @@ func (s *Service) CreateEntity(ctx context.Context, req EntityRequest, staffCont
         return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "commit failed", err)
     }
 
-    return buildResponse(created), nil
+    return &EntityResponse{
+        ID:          utils.FormatID(created.ID),
+        Name:        created.Name,
+        Description: created.Description.String,
+        Note:        created.Note.String,
+        IsActive:    created.IsActive.Bool,
+    }, nil
 }
 ```
 
@@ -278,20 +341,29 @@ func (r *Repository) UpdateEntity(ctx context.Context, id int64, req UpdateReque
     setParts := []string{"updated_at = NOW()"}
     args := map[string]interface{}{"id": id}
 
-    // Dynamic field updates
+    // Dynamic field updates using type converters
     if req.Field1 != nil {
         setParts = append(setParts, "field1 = :field1")
-        args["field1"] = *req.Field1
+        args["field1"] = utils.StringPtrToPgText(req.Field1, true) // Empty as NULL
     }
 
     if req.Field2 != nil {
         setParts = append(setParts, "field2 = :field2")
-        args["field2"] = *req.Field2
+        args["field2"] = utils.BoolPtrToPgBool(req.Field2)
+    }
+
+    if req.UpdaterID != nil {
+        setParts = append(setParts, "updater_id = :updater_id")
+        updaterID, err := utils.ParseID(*req.UpdaterID)
+        if err != nil {
+            return nil, fmt.Errorf("invalid updater ID: %w", err)
+        }
+        args["updater_id"] = utils.Int64ToPgInt8(updaterID)
     }
 
     query := fmt.Sprintf(`
         UPDATE entities SET %s WHERE id = :id
-        RETURNING id, field1, field2, updated_at
+        RETURNING id, field1, field2, updater_id, updated_at
     `, strings.Join(setParts, ", "))
 
     var result EntityModel
@@ -503,3 +575,132 @@ repositories := container.GetRepositories()
 ### Memories and Notes
 - When generating APIs, add routes in `@internal/app/router.go` in the appropriate setup function
 - Avoid commenting with numbered steps in code implementation
+
+## Common Implementation Patterns
+
+### Type Conversion in Practice
+
+#### SQLC Create Operations
+```go
+// Example from store creation
+created, err := qtx.CreateStore(ctx, dbgen.CreateStoreParams{
+    ID:      storeID,
+    Name:    req.Name,
+    Address: utils.StringPtrToPgText(&req.Address, false), // Empty strings allowed
+    Phone:   utils.StringPtrToPgText(&req.Phone, false),   // Empty strings allowed
+})
+
+// Example from service creation
+created, err := qtx.CreateService(ctx, dbgen.CreateServiceParams{
+    ID:              serviceID,
+    Name:            req.Name,
+    Price:           utils.Int64ToPgNumeric(req.Price),    // With error handling
+    DurationMinutes: req.DurationMinutes,
+    IsAddon:         utils.BoolPtrToPgBool(&req.IsAddon),
+    IsVisible:       utils.BoolPtrToPgBool(&req.IsVisible),
+    Note:            utils.StringPtrToPgText(&req.Note, false),
+})
+```
+
+#### SQLC with Foreign Keys
+```go
+// Time slot template creation with foreign key
+template, err := qtx.CreateTimeSlotTemplate(ctx, dbgen.CreateTimeSlotTemplateParams{
+    ID:      templateID,
+    Name:    req.Name,
+    Note:    utils.StringPtrToPgText(&req.Note, false),
+    Updater: utils.Int64ToPgInt8(staffUserID), // Foreign key to staff
+})
+
+// Booking creation with multiple foreign keys
+_, err = qtx.CreateBooking(ctx, dbgen.CreateBookingParams{
+    ID:            bookingId,
+    StoreID:       storeId,      // int64 ID
+    CustomerID:    customerContext.CustomerID, // int64 ID
+    StylistID:     stylistId,    // int64 ID
+    TimeSlotID:    timeSlotId,   // int64 ID
+    IsChatEnabled: utils.BoolPtrToPgBool(req.IsChatEnabled),
+    Note:          utils.StringPtrToPgText(req.Note, false),
+    Status:        booking.BookingStatusScheduled, // String constant
+})
+```
+
+#### Response Building Patterns
+```go
+// Converting database results to API response
+response := &store.CreateStoreResponse{
+    ID:       utils.FormatID(createdStore.ID),          // int64 to string
+    Name:     createdStore.Name,                        // Direct string
+    Address:  createdStore.Address.String,             // pgtype.Text to string
+    Phone:    createdStore.Phone.String,               // pgtype.Text to string
+    IsActive: createdStore.IsActive.Bool,              // pgtype.Bool to bool
+}
+
+// Time-based response building
+response := &booking.CreateMyBookingResponse{
+    Date:            utils.PgDateToDateString(schedule.WorkDate),    // Date to YYYY-MM-DD
+    StartTime:       utils.PgTimeToTimeString(timeSlot.StartTime),   // Time to HH:MM
+    EndTime:         utils.PgTimeToTimeString(timeSlot.EndTime),     // Time to HH:MM
+    StylistName:     utils.PgTextToString(stylist.Name),            // Handle NULL text
+}
+```
+
+#### Dynamic Updates with SQLX
+```go
+// Store update with dynamic fields
+args := map[string]interface{}{"id": id}
+setParts := []string{"updated_at = NOW()"}
+
+if req.Name != nil {
+    setParts = append(setParts, "name = :name")
+    args["name"] = *req.Name
+}
+
+if req.Address != nil {
+    setParts = append(setParts, "address = :address")
+    args["address"] = utils.StringPtrToPgText(req.Address, true) // Empty as NULL
+}
+
+if req.Phone != nil {
+    setParts = append(setParts, "phone = :phone")
+    args["phone"] = utils.StringPtrToPgText(req.Phone, true) // Empty as NULL
+}
+```
+
+### Time Parsing Patterns
+```go
+// Parse time strings in service layer (HH:MM format)
+startTime, err := utils.TimeStringToTime(timeSlot.StartTime)
+if err != nil {
+    return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
+}
+
+// Convert to pgtype for database storage
+templateItems[i] = dbgen.BatchCreateTimeSlotTemplateItemsParams{
+    StartTime: utils.TimeToPgTime(startTime),
+    EndTime:   utils.TimeToPgTime(endTime),
+    CreatedAt: utils.TimeToPgTimestamptz(now),
+    UpdatedAt: utils.TimeToPgTimestamptz(now),
+}
+```
+
+### Batch Operations
+```go
+// Prepare batch items for SQLC copyfrom
+templateItems := make([]dbgen.BatchCreateTimeSlotTemplateItemsParams, len(req.TimeSlots))
+
+for i, timeSlot := range req.TimeSlots {
+    itemID := utils.GenerateID()
+    templateItems[i] = dbgen.BatchCreateTimeSlotTemplateItemsParams{
+        ID:         itemID,
+        TemplateID: templateID,
+        StartTime:  utils.TimeToPgTime(startTime),
+        EndTime:    utils.TimeToPgTime(endTime),
+    }
+}
+
+// Execute batch insert
+if _, err := qtx.BatchCreateTimeSlotTemplateItems(ctx, templateItems); err != nil {
+    return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create template items", err)
+}
+```
