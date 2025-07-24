@@ -84,7 +84,7 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 	}
 
 	// Check if main service exists
-	mainService, err := s.queries.GetServiceDetailById(ctx, mainServiceId)
+	mainService, err := s.queries.GetServiceByID(ctx, mainServiceId)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ServiceNotFound, "main service not found", err)
 	}
@@ -187,12 +187,12 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 func (s *CreateMyBookingService) createBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingId int64, services []booking.BookingServiceInfo) error {
 	for _, service := range services {
 		detailId := utils.GenerateID()
-		
+
 		price, err := utils.Float64ToPgNumeric(service.Price)
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to convert price", err)
 		}
-		
+
 		_, err = qtx.CreateBookingDetail(ctx, dbgen.CreateBookingDetailParams{
 			ID:        detailId,
 			BookingID: bookingId,

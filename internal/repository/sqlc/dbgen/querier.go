@@ -55,7 +55,6 @@ type Querier interface {
 	GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error)
 	GetServiceByID(ctx context.Context, id int64) (GetServiceByIDRow, error)
 	GetServiceByIds(ctx context.Context, dollar_1 []int64) ([]GetServiceByIdsRow, error)
-	GetServiceDetailById(ctx context.Context, id int64) (GetServiceDetailByIdRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]GetStaffUserStoreAccessRow, error)

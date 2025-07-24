@@ -18,7 +18,9 @@ type CreateMyBookingHandler struct {
 }
 
 func NewCreateMyBookingHandler(service bookingService.CreateMyBookingServiceInterface) *CreateMyBookingHandler {
-	return &CreateMyBookingHandler{service: service}
+	return &CreateMyBookingHandler{
+		service: service,
+	}
 }
 
 // CreateMyBooking handles POST /api/bookings/me

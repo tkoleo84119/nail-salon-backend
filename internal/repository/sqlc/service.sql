@@ -32,19 +32,6 @@ SELECT
 FROM services
 WHERE id = $1;
 
--- name: GetServiceDetailById :one
-SELECT
-    id,
-    name,
-    price,
-    duration_minutes,
-    is_addon,
-    is_visible,
-    is_active,
-    note
-FROM services
-WHERE id = $1;
-
 -- name: GetServiceByIds :many
 SELECT
     id,
