@@ -13,7 +13,7 @@ This document lists all API routes in the nail salon backend system, organized b
 ### Customer Profile
 | Method | Endpoint            | Description       | Status        |
 | ------ | ------------------- | ----------------- | ------------- |
-| GET    | `/api/customers/me` | Get my profile    | 🔄 TODO        |
+| GET    | `/api/customers/me` | Get my profile    | ✅ Implemented |
 | PATCH  | `/api/customers/me` | Update my profile | ✅ Implemented |
 
 ### Booking Management

@@ -69,9 +69,9 @@ func setupPublicBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries 
 	bookings := api.Group("/bookings")
 	{
 		// Customer booking operations
-		bookings.POST("", middleware.JWTAuth(*cfg, queries), handlers.BookingCreateMy.CreateMyBooking)
-		bookings.PATCH("/:bookingId", middleware.JWTAuth(*cfg, queries), handlers.BookingUpdateMy.UpdateMyBooking)
-		bookings.PATCH("/:bookingId/cancel", middleware.JWTAuth(*cfg, queries), handlers.BookingCancelMy.CancelMyBooking)
+		bookings.POST("", middleware.CustomerJWTAuth(*cfg, queries), handlers.BookingCreateMy.CreateMyBooking)
+		bookings.PATCH("/:bookingId", middleware.CustomerJWTAuth(*cfg, queries), handlers.BookingUpdateMy.UpdateMyBooking)
+		bookings.PATCH("/:bookingId/cancel", middleware.CustomerJWTAuth(*cfg, queries), handlers.BookingCancelMy.CancelMyBooking)
 	}
 }
 
@@ -82,7 +82,8 @@ func setupPublicCustomerRoutes(api *gin.RouterGroup, cfg *config.Config, queries
 	customers := api.Group("/customers")
 	{
 		// Customer self-service
-		customers.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.CustomerUpdateMy.UpdateMyCustomer)
+		customers.GET("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.CustomerGetMy.GetMyCustomer)
+		customers.PATCH("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.CustomerUpdateMy.UpdateMyCustomer)
 	}
 }
 

@@ -52,6 +52,7 @@ type Services struct {
 	BookingCreateMy            *bookingService.CreateMyBookingService
 	BookingUpdateMy            *bookingService.UpdateMyBookingService
 	BookingCancelMy            bookingService.CancelMyBookingServiceInterface
+	CustomerGetMy              *customerService.GetMyCustomerService
 	CustomerUpdateMy           *customerService.UpdateMyCustomerService
 	StaffCreate                *staffService.CreateStaffService
 	StaffUpdate                *staffService.UpdateStaffService
@@ -84,6 +85,7 @@ type Handlers struct {
 	BookingCreateMy            *bookingHandler.CreateMyBookingHandler
 	BookingUpdateMy            *bookingHandler.UpdateMyBookingHandler
 	BookingCancelMy            *bookingHandler.CancelMyBookingHandler
+	CustomerGetMy              *customerHandler.GetMyCustomerHandler
 	CustomerUpdateMy           *customerHandler.UpdateMyCustomerHandler
 	StaffCreate                *staffHandler.CreateStaffHandler
 	StaffUpdate                *staffHandler.UpdateStaffHandler
@@ -130,6 +132,7 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 		BookingCreateMy:            bookingService.NewCreateMyBookingService(queries, database.PgxPool),
 		BookingUpdateMy:            bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
 		BookingCancelMy:            bookingService.NewCancelMyBookingService(queries),
+		CustomerGetMy:              customerService.NewGetMyCustomerService(queries),
 		CustomerUpdateMy:           customerService.NewUpdateMyCustomerService(queries, repositories.Customer),
 		StaffCreate:                staffService.NewCreateStaffService(queries, database.PgxPool),
 		StaffUpdate:                staffService.NewUpdateStaffService(queries, database.Sqlx),
@@ -162,6 +165,7 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 		BookingCreateMy:            bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
 		BookingUpdateMy:            bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
 		BookingCancelMy:            bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
+		CustomerGetMy:              customerHandler.NewGetMyCustomerHandler(services.CustomerGetMy),
 		CustomerUpdateMy:           customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
 		StaffCreate:                staffHandler.NewCreateStaffHandler(services.StaffCreate),
 		StaffUpdate:                staffHandler.NewUpdateStaffHandler(services.StaffUpdate),
