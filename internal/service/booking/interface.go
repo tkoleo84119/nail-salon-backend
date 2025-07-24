@@ -10,3 +10,7 @@ import (
 type CreateMyBookingServiceInterface interface {
 	CreateMyBooking(ctx context.Context, req booking.CreateMyBookingRequest, customerContext common.CustomerContext) (*booking.CreateMyBookingResponse, error)
 }
+
+type UpdateMyBookingServiceInterface interface {
+	UpdateMyBooking(ctx context.Context, bookingIDStr string, req booking.UpdateMyBookingRequest, customerContext common.CustomerContext) (*booking.UpdateMyBookingResponse, error)
+}

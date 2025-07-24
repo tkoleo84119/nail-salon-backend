@@ -41,6 +41,7 @@ type Querier interface {
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
 	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)
 	CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (TimeSlotTemplateItem, error)
+	DeleteBookingDetailsByBookingID(ctx context.Context, bookingID int64) error
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
@@ -48,6 +49,8 @@ type Querier interface {
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
 	DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
+	GetBookingByID(ctx context.Context, id int64) (GetBookingByIDRow, error)
+	GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error)
 	GetCustomerAuthByProviderUid(ctx context.Context, arg GetCustomerAuthByProviderUidParams) (GetCustomerAuthByProviderUidRow, error)
 	GetCustomerByID(ctx context.Context, id int64) (Customer, error)
 	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)

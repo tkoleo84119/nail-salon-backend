@@ -42,6 +42,7 @@ type Repositories struct {
 	Customer         *sqlx.CustomerRepository
 	TimeSlot         *sqlx.TimeSlotRepository
 	TimeSlotTemplate *sqlx.TimeSlotTemplateRepository
+	Booking          *sqlx.BookingRepository
 }
 
 type Services struct {
@@ -49,6 +50,7 @@ type Services struct {
 	AuthCustomerLineLogin      *authService.CustomerLineLoginService
 	AuthCustomerLineRegister   *authService.CustomerLineRegisterService
 	BookingCreateMy            *bookingService.CreateMyBookingService
+	BookingUpdateMy            *bookingService.UpdateMyBookingService
 	CustomerUpdateMy           *customerService.UpdateMyCustomerService
 	StaffCreate                *staffService.CreateStaffService
 	StaffUpdate                *staffService.UpdateStaffService
@@ -79,6 +81,7 @@ type Handlers struct {
 	AuthCustomerLineLogin      *authHandler.CustomerLineLoginHandler
 	AuthCustomerLineRegister   *authHandler.CustomerLineRegisterHandler
 	BookingCreateMy            *bookingHandler.CreateMyBookingHandler
+	BookingUpdateMy            *bookingHandler.UpdateMyBookingHandler
 	CustomerUpdateMy           *customerHandler.UpdateMyCustomerHandler
 	StaffCreate                *staffHandler.CreateStaffHandler
 	StaffUpdate                *staffHandler.UpdateStaffHandler
@@ -115,6 +118,7 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 		Customer:         sqlx.NewCustomerRepository(database.Sqlx),
 		TimeSlot:         sqlx.NewTimeSlotRepository(database.Sqlx),
 		TimeSlotTemplate: sqlx.NewTimeSlotTemplateRepository(database.Sqlx),
+		Booking:          sqlx.NewBookingRepository(database.Sqlx),
 	}
 
 	services := Services{
@@ -122,6 +126,7 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 		AuthCustomerLineLogin:      authService.NewCustomerLineLoginService(queries, cfg.Line, cfg.JWT),
 		AuthCustomerLineRegister:   authService.NewCustomerLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT),
 		BookingCreateMy:            bookingService.NewCreateMyBookingService(queries, database.PgxPool),
+		BookingUpdateMy:            bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
 		CustomerUpdateMy:           customerService.NewUpdateMyCustomerService(queries, repositories.Customer),
 		StaffCreate:                staffService.NewCreateStaffService(queries, database.PgxPool),
 		StaffUpdate:                staffService.NewUpdateStaffService(queries, database.Sqlx),
@@ -152,6 +157,7 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 		AuthCustomerLineLogin:      authHandler.NewCustomerLineLoginHandler(services.AuthCustomerLineLogin),
 		AuthCustomerLineRegister:   authHandler.NewCustomerLineRegisterHandler(services.AuthCustomerLineRegister),
 		BookingCreateMy:            bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
+		BookingUpdateMy:            bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
 		CustomerUpdateMy:           customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
 		StaffCreate:                staffHandler.NewCreateStaffHandler(services.StaffCreate),
 		StaffUpdate:                staffHandler.NewUpdateStaffHandler(services.StaffUpdate),

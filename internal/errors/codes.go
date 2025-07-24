@@ -16,6 +16,7 @@ const (
 
 	// BOOKING - Booking operation errors
 	BookingNotFound            = "BOOKING_NOT_FOUND"
+	BookingStatusNotAllowedToUpdate = "BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE"
 	BookingTimeSlotNotFound    = "TIME_SLOT_NOT_FOUND"
 	BookingTimeSlotUnavailable = "TIME_SLOT_UNAVAILABLE"
 
@@ -55,6 +56,7 @@ const (
 	TimeSlotInvalidTimeRange                = "TIME_SLOT_INVALID_TIME_RANGE"
 	TimeSlotConflict                        = "TIME_SLOT_CONFLICT"
 	TimeSlotNotFound                        = "TIME_SLOT_NOT_FOUND"
+	TimeSlotNotEnoughTime                   = "TIME_SLOT_NOT_ENOUGH_TIME"
 	TimeSlotTemplateNotFound                = "TIME_SLOT_TEMPLATE_NOT_FOUND"
 	TimeSlotTemplateItemNotFound            = "TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND"
 

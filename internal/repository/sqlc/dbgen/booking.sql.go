@@ -65,3 +65,129 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 	)
 	return i, err
 }
+
+const deleteBookingDetailsByBookingID = `-- name: DeleteBookingDetailsByBookingID :exec
+DELETE FROM booking_details
+WHERE booking_id = $1
+`
+
+func (q *Queries) DeleteBookingDetailsByBookingID(ctx context.Context, bookingID int64) error {
+	_, err := q.db.Exec(ctx, deleteBookingDetailsByBookingID, bookingID)
+	return err
+}
+
+const getBookingByID = `-- name: GetBookingByID :one
+SELECT
+    b.id,
+    b.store_id,
+    s.name as store_name,
+    b.customer_id,
+    b.stylist_id,
+    st.name as stylist_name,
+    b.time_slot_id,
+    ts.start_time,
+    ts.end_time,
+    sch.work_date,
+    b.is_chat_enabled,
+    b.note,
+    b.status,
+    b.created_at,
+    b.updated_at
+FROM bookings b
+JOIN stores s ON b.store_id = s.id
+JOIN stylists st ON b.stylist_id = st.id
+JOIN time_slots ts ON b.time_slot_id = ts.id
+JOIN schedules sch ON ts.schedule_id = sch.id
+WHERE b.id = $1
+`
+
+type GetBookingByIDRow struct {
+	ID            int64              `db:"id" json:"id"`
+	StoreID       int64              `db:"store_id" json:"store_id"`
+	StoreName     string             `db:"store_name" json:"store_name"`
+	CustomerID    int64              `db:"customer_id" json:"customer_id"`
+	StylistID     int64              `db:"stylist_id" json:"stylist_id"`
+	StylistName   pgtype.Text        `db:"stylist_name" json:"stylist_name"`
+	TimeSlotID    int64              `db:"time_slot_id" json:"time_slot_id"`
+	StartTime     pgtype.Time        `db:"start_time" json:"start_time"`
+	EndTime       pgtype.Time        `db:"end_time" json:"end_time"`
+	WorkDate      pgtype.Date        `db:"work_date" json:"work_date"`
+	IsChatEnabled pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
+	Note          pgtype.Text        `db:"note" json:"note"`
+	Status        string             `db:"status" json:"status"`
+	CreatedAt     pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) GetBookingByID(ctx context.Context, id int64) (GetBookingByIDRow, error) {
+	row := q.db.QueryRow(ctx, getBookingByID, id)
+	var i GetBookingByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.StoreID,
+		&i.StoreName,
+		&i.CustomerID,
+		&i.StylistID,
+		&i.StylistName,
+		&i.TimeSlotID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.WorkDate,
+		&i.IsChatEnabled,
+		&i.Note,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getBookingDetailsByBookingID = `-- name: GetBookingDetailsByBookingID :many
+SELECT
+    bd.id,
+    bd.booking_id,
+    bd.service_id,
+    srv.name as service_name,
+    bd.price,
+    bd.created_at
+FROM booking_details bd
+JOIN services srv ON bd.service_id = srv.id
+WHERE bd.booking_id = $1
+ORDER BY srv.is_addon ASC, srv.name ASC
+`
+
+type GetBookingDetailsByBookingIDRow struct {
+	ID          int64              `db:"id" json:"id"`
+	BookingID   int64              `db:"booking_id" json:"booking_id"`
+	ServiceID   int64              `db:"service_id" json:"service_id"`
+	ServiceName string             `db:"service_name" json:"service_name"`
+	Price       pgtype.Numeric     `db:"price" json:"price"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
+}
+
+func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error) {
+	rows, err := q.db.Query(ctx, getBookingDetailsByBookingID, bookingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetBookingDetailsByBookingIDRow{}
+	for rows.Next() {
+		var i GetBookingDetailsByBookingIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.BookingID,
+			&i.ServiceID,
+			&i.ServiceName,
+			&i.Price,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

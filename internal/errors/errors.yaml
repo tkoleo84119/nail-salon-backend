@@ -34,6 +34,9 @@ BOOKING:
   BOOKING_NOT_FOUND:
     message: 預約不存在或已被取消
     status: 404
+  BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE:
+    message: 預約狀態不允許更新
+    status: 400
   TIME_SLOT_NOT_FOUND:
     message: 指定時段不存在
     status: 404
@@ -126,6 +129,9 @@ TIME_SLOT:
     status: 400
   TIME_SLOT_CONFLICT:
     message: 時段時間區段重疊
+    status: 400
+  TIME_SLOT_NOT_ENOUGH_TIME:
+    message: 時段時間不足
     status: 400
   TIME_SLOT_NOT_FOUND:
     message: 時段不存在或已被刪除
