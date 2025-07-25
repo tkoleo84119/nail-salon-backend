@@ -32,34 +32,53 @@ This is a Go web API for a nail salon management system using:
 ```
 internal/
 ├── app/             # Application layer (dependency injection, routing)
+│   ├── container.go         # Main dependency injection container
+│   ├── container_admin.go   # Admin-specific services/handlers
+│   ├── container_public.go  # Public/customer services/handlers
+│   └── router.go           # Modular route setup by domain
 ├── config/          # Environment configuration
 ├── errors/          # Centralized error management with YAML definitions
-├── handler/         # HTTP handlers (auth, staff, store-access)
+├── handler/         # HTTP handlers organized by domain
+│   ├── admin/      # Admin-specific handlers (staff, stores, etc.)
+│   ├── auth/       # Authentication handlers
+│   ├── booking/    # Booking management handlers
+│   └── customer/   # Customer-facing handlers
 ├── infra/db/        # Database connection setup
 ├── middleware/      # JWT auth and role authorization
-├── model/           # Request/response models
+├── model/           # Request/response models organized by domain
+│   ├── admin/      # Admin-specific models
+│   ├── auth/       # Authentication models
+│   ├── booking/    # Booking models
+│   ├── customer/   # Customer models
+│   └── common/     # Shared models and utilities
 ├── repository/      # Data access layer
-│   ├── sqlc/        # SQLC generated queries
-│   └── sqlx/        # SQLX manual queries
-├── service/         # Business logic layer
+│   ├── sqlc/       # SQLC generated queries
+│   └── sqlx/       # SQLX manual queries for dynamic operations
+├── service/         # Business logic layer organized by domain
+│   ├── admin/      # Admin-specific services
+│   ├── auth/       # Authentication services
+│   ├── booking/    # Booking management services
+│   └── customer/   # Customer services
 ├── testutils/       # Test utilities and mocks
-└── utils/           # Utility functions (JWT, passwords, validation)
+└── utils/           # Utility functions (JWT, passwords, validation, type conversion)
 ```
 
 ### Key Patterns
-- **Layered Architecture**: Handler → Service → Repository
-- **Dependency Injection**: Centralized container manages all dependencies (`internal/app/container.go`)
-- **Route Organization**: Modular route setup by business domain (`internal/app/router.go`)
-- **Error Handling**: Centralized error codes in `internal/errors/errors.yaml`
-- **Authentication**: JWT middleware with role-based permissions
-- **Database**: Uses both SQLC (for type safety) and SQLX (for flexibility)
-- **Testing**: Comprehensive unit tests with mocks for external dependencies
+- **Layered Architecture**: Handler → Service → Repository with clear domain separation
+- **Domain-Separated Architecture**: Admin and public APIs with separate containers
+- **Dependency Injection**: Multi-container system with domain-specific organization
+- **Route Organization**: Modular route setup by business domain with role-based middleware
+- **Error Handling**: Centralized error codes with standardized response helpers
+- **Authentication**: Dual JWT system (staff and customer) with context extraction
+- **Database**: Strategic SQLC/SQLX usage based on operation complexity
+- **Type Safety**: Comprehensive type conversion utilities for PostgreSQL integration
+- **Testing**: Domain-separated testing with comprehensive mocks
 
 ### Database Architecture
 - **PostgreSQL**: Primary database with connection pooling via `pgxpool.Pool`
 - **pgx/v5**: Primary driver for transactions and connection management
 - **SQLC**: Type-safe SQL query generation for standard CRUD operations
-- **SQLX**: Dynamic SQL queries for complex updates with optional fields
+- **SQLX**: Dynamic SQL queries for complex updates with optional fields, or complex queries for search
 - **Migrations**: Located in `migration/` directory
 - **Schema**: Documented in `docs/db/database.dbml`
 
@@ -76,11 +95,14 @@ Required environment variables:
 - Optional: `PORT`, `SNOWFLAKE_NODE_ID`, JWT/DB timing configs
 
 ### Business Domain
-Nail salon management system with:
-- Staff management with role-based access (admin/staff)
-- Store access permissions for multi-location support
-- Authentication and authorization
-- Future: customer management, appointments, inventory, billing
+Comprehensive nail salon management system with:
+- **Staff Management**: Multi-role system (SUPER_ADMIN, ADMIN, MANAGER, STYLIST)
+- **Store Management**: Multi-location support with store-specific permissions
+- **Customer Management**: Customer accounts and authentication
+- **Booking System**: Appointment scheduling with time slot management
+- **Service Management**: Service catalog and scheduling
+- **Authentication**: Dual authentication system for staff and customers
+- **Role-Based Authorization**: Granular permissions based on staff roles
 
 ### Commit Convention
 Follow Conventional Commits format: `<type>: <description>`
@@ -144,9 +166,9 @@ The `internal/utils/type_convert.go` provides comprehensive type conversion util
 #### Handler Layer Validation (Fixed Order)
 1. **Input JSON Validation** - Always first, using `c.ShouldBindJSON(&req)`
 2. **Path Parameter Validation** - Validate required URL parameters
-3. **Business Logic Validation** - Check if update requests have fields using `req.HasUpdates()` or `req.HasUpdate()`
-4. **Authentication Context Validation** - Use `middleware.GetStaffFromContext(c)` (not legacy `c.Get("staffContext")`)
-5. **ID Parsing Validation** - Convert string IDs using `utils.ParseID()`
+3. **Business Logic Validation** - Check if update requests have fields using `req.HasUpdates()` or specialized methods
+4. **Authentication Context Validation** - Use `middleware.GetStaffFromContext(c)` or `middleware.GetCustomerFromContext(c)`
+5. **ID Parsing Validation** - Convert string IDs using `utils.ParseID()` and `utils.ParseIDSlice()`
 6. **Service Layer Call** - Pass validated data to service
 
 #### Service Layer Validation (Fixed Order)
@@ -159,18 +181,21 @@ The `internal/utils/type_convert.go` provides comprehensive type conversion util
 #### Validation Guidelines
 - **Handler Validation**: Focus on input format, authentication context, and basic parameter validation
 - **Service Validation**: Handle business logic, permissions, and data integrity
-- **Error Handling**: Use `errorCodes.AbortWithError()` in handlers, `errorCodes.NewServiceError()` in services
-- **Context Extraction**: Always use `middleware.GetStaffFromContext(c)` for staff context
-- **ID Parsing**: Use `utils.ParseID()` for string to int64 conversion with validation
+- **Error Handling**: Use `errorCodes.AbortWithError()` in handlers, `errorCodes.RespondWithServiceError()` for service errors
+- **Standardized Helpers**: Use `errorCodes.RespondWithEmptyFieldError(c)` for update validation failures
+- **Context Extraction**: Use `middleware.GetStaffFromContext(c)` for staff, `middleware.GetCustomerFromContext(c)` for customers
+- **ID Parsing**: Use `utils.ParseID()` and `utils.ParseIDSlice()` for string to int64 conversion with validation
 - **Time Validation**: Use `common.ParseTimeSlot()` for time format validation
-- **Update Validation**: Implement `HasUpdates()` or `HasUpdate()` methods on request models
+- **Update Validation**: Implement `HasUpdates()` and specialized validation methods on request models
 
 ### Error Handling Patterns
 - **Centralized Error Management**: Error codes defined in `internal/errors/errors.yaml`
 - **Service Errors**: `errorCodes.NewServiceError()` and `errorCodes.NewServiceErrorWithCode()`
 - **Handler Errors**: `errorCodes.AbortWithError()` and `errorCodes.RespondWithServiceError()`
-- **Error Categories**: AUTH, USER, VAL (validation), SYS (system), plus business domain errors
-- For permission issues, use `AUTH.AUTH_PERMISSION_DENIED` instead of creating new error
+- **Standardized Helpers**: `errorCodes.RespondWithEmptyFieldError(c)` for consistent empty field responses
+- **Error Categories**: AUTH, BOOKING, CUSTOMER, SCHEDULE, SERVICE, STORE, USER, VAL, SYS
+- **Permission Errors**: Use `AUTH.AUTH_PERMISSION_DENIED` for all permission-related issues
+- **Localized Messages**: Error messages in Chinese for user-facing responses
 
 ## CRUD Operation Patterns
 
@@ -309,15 +334,13 @@ func (h *Handler) UpdateEntity(c *gin.Context) {
         return
     }
 
-    // Business logic validation - HasUpdates check
+    // Business logic validation - HasUpdates check (use standardized helper)
     if !req.HasUpdates() {
-        errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, map[string]string{
-            "request": "至少需要提供一個欄位進行更新",
-        })
+        errorCodes.RespondWithEmptyFieldError(c)
         return
     }
 
-    // Authentication context validation
+    // Authentication context validation (support both staff and customer)
     staffContext, exists := middleware.GetStaffFromContext(c)
     if !exists {
         errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
@@ -325,7 +348,7 @@ func (h *Handler) UpdateEntity(c *gin.Context) {
     }
 
     // Service call
-    response, err := h.service.UpdateEntity(c.Request.Context(), targetID, req, staffContext)
+    response, err := h.service.UpdateEntity(c.Request.Context(), targetID, req, *staffContext)
     if err != nil {
         errorCodes.RespondWithServiceError(c, err)
         return
@@ -438,16 +461,37 @@ func (s *Service) DeleteEntity(ctx context.Context, entityID string, staffContex
 
 ### Request Model Structure
 ```go
+// Create requests use direct types for required fields
+type CreateEntityRequest struct {
+    Name     string   `json:"name" binding:"required,min=1,max=100"`
+    Email    string   `json:"email" binding:"required,email"`
+    Role     string   `json:"role" binding:"required,oneof=ADMIN MANAGER STYLIST"`
+    StoreIDs []string `json:"storeIds" binding:"required,min=1,max=100"`
+}
+
 // Update requests use pointer types for optional fields
 type UpdateEntityRequest struct {
-    Field1   *string `json:"field1,omitempty" binding:"omitempty,max=100"`
-    Field2   *bool   `json:"field2,omitempty"`
-    Field3   *int    `json:"field3,omitempty" binding:"omitempty,min=1"`
+    Name     *string  `json:"name,omitempty" binding:"omitempty,min=1,max=100"`
+    Email    *string  `json:"email,omitempty" binding:"omitempty,email"`
+    IsActive *bool    `json:"isActive,omitempty"`
+    StoreIDs []string `json:"storeIds,omitempty" binding:"omitempty,min=1,max=100"`
 }
 
 // HasUpdates method required for all update requests
 func (r UpdateEntityRequest) HasUpdates() bool {
-    return r.Field1 != nil || r.Field2 != nil || r.Field3 != nil
+    return r.Name != nil || r.Email != nil || r.IsActive != nil || len(r.StoreIDs) > 0
+}
+
+// Advanced validation methods for complex business logic
+func (r UpdateBookingRequest) HasTimeSlotUpdate() bool {
+    return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil
+}
+
+func (r UpdateBookingRequest) IsTimeSlotUpdateComplete() bool {
+    if !r.HasTimeSlotUpdate() {
+        return true // No time slot update, so it's complete
+    }
+    return r.StoreId != nil && r.StylistId != nil && r.TimeSlotId != nil
 }
 ```
 
@@ -462,14 +506,14 @@ func (r UpdateEntityRequest) HasUpdates() bool {
 
 ### JWT Middleware Usage
 ```go
-// Staff authentication (most endpoints)
+// Staff authentication (admin endpoints)
 staffContext, exists := middleware.GetStaffFromContext(c)
 if !exists {
     errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
     return
 }
 
-// Customer authentication (customer endpoints)
+// Customer authentication (public endpoints)
 customerContext, exists := middleware.GetCustomerFromContext(c)
 if !exists {
     errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
@@ -478,10 +522,17 @@ if !exists {
 ```
 
 ### Role-Based Authorization
-- **SUPER_ADMIN**: Full system access, can manage all entities
-- **ADMIN**: Store-level administration, can manage assigned stores
-- **MANAGER**: Store operations, limited administrative functions
-- **STYLIST**: Self-service only, can only manage own records
+- **SUPER_ADMIN**: Full system access, can manage all entities across all stores
+- **ADMIN**: Store-level administration, can manage assigned stores and their staff
+- **MANAGER**: Store operations, limited administrative functions within assigned stores
+- **STYLIST**: Self-service only, can only manage own records and view own schedule
+
+### Role-Based Middleware
+- `RequireAdminRoles()` - SUPER_ADMIN, ADMIN only
+- `RequireManagerOrAbove()` - SUPER_ADMIN, ADMIN, MANAGER
+- `RequireAnyStaffRole()` - All staff roles
+- `RequireSuperAdmin()` - SUPER_ADMIN only
+- `RequireRoles(role1, role2)` - Custom role combinations
 
 ### Permission Validation Patterns
 - **Store Access**: Users can only access stores in their `StoreList`
@@ -538,16 +589,51 @@ errorCodes.RespondWithServiceError(c, serviceError)
 
 ### Application Architecture Patterns
 
-#### Dependency Injection Container (`internal/app/container.go`)
-- **Central Dependency Management**: All repositories, services, and handlers initialized in one place
-- **Structured Organization**: Dependencies grouped by layer (repositories, services, handlers)
-- **Clean Dependencies**: Each layer depends only on its immediate lower layer
-- **Easy Testing**: Container structure makes mocking and testing straightforward
+#### Enhanced Container Architecture
+
+**Main Container** (`internal/app/container.go`):
+- **Central Orchestration**: Coordinates all domain-specific containers
+- **Shared Dependencies**: Database, configuration, and common utilities
+- **Clean Separation**: Clear boundaries between admin and public domains
+
+**Domain-Specific Containers**:
+- **Admin Container** (`container_admin.go`): Staff management, store administration
+- **Public Container** (`container_public.go`): Customer-facing services, booking
+
+**Container Structure**:
+```go
+type Container struct {
+    cfg      *config.Config
+    database *db.Database
+
+    repositories Repositories
+    services     Services
+    handlers     Handlers
+}
+
+type Services struct {
+    Public PublicServices // Customer, booking, etc.
+    Admin  AdminServices  // Staff, store, admin functions
+}
+
+type Handlers struct {
+    Public PublicHandlers
+    Admin  AdminHandlers
+}
+```
 
 #### Route Organization (`internal/app/router.go`)
-- **Modular Route Setup**: Routes organized by business domain (auth, staff, customer, etc.)
-- **Consistent Middleware**: JWT authentication and role-based authorization applied consistently
-- **Separated Concerns**: Route logic separated from main application bootstrap
+- **Domain Separation**: Clear separation between admin and public API routes
+- **Modular Setup Functions**: Each domain has dedicated route setup functions
+- **Consistent Middleware**: JWT authentication and role-based authorization applied systematically
+- **Role-Based Protection**: Different middleware for different access levels
+- **Separated Concerns**: Route logic completely separated from main application bootstrap
+
+**Route Structure**:
+- **Admin Routes**: `/admin/*` with staff JWT and role-based middleware
+- **Public Routes**: `/api/*` with customer JWT for protected endpoints
+- **Auth Routes**: `/auth/*` for authentication (both staff and customer)
+- **Health Routes**: `/health` for monitoring
 
 #### Refactored Main (`cmd/server/main.go`)
 - **Minimal Bootstrap**: Only essential initialization (config, database, error manager, validators)
@@ -572,7 +658,93 @@ services := container.GetServices()
 repositories := container.GetRepositories()
 ```
 
-### Memories and Notes
-- When generating APIs, add routes in `@internal/app/router.go` in the appropriate setup function
-- Avoid commenting with numbered steps in code implementation
-- Use `errors.Is(err, pgx.ErrNoRows)` to check for not having data
+### Latest Development Patterns
+
+#### Container Usage Pattern
+```go
+// Initialize container with domain separation
+container := app.NewContainer(cfg, database)
+handlers := container.GetHandlers()
+services := container.GetServices()
+repositories := container.GetRepositories()
+
+// Access domain-specific handlers
+adminHandlers := handlers.Admin
+publicHandlers := handlers.Public
+```
+
+#### Service Layer Pattern (Enhanced)
+```go
+func (s *Service) Operation(ctx context.Context, req Request, staffContext common.StaffContext) (*Response, error) {
+    // 1. Input validation & ID parsing (with slice support)
+    staffUserID, err := utils.ParseID(staffContext.UserID)
+    if err != nil {
+        return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
+    }
+
+    storeIDs, err := utils.ParseIDSlice(req.StoreIDs) // For slice parsing
+    if err != nil {
+        return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store IDs", err)
+    }
+
+    // 2. Request completeness validation
+    if !req.HasUpdates() {
+        return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field required", nil)
+    }
+
+    // 3. Business logic validation (roles, complex validation)
+    if err := s.validateComplexBusinessLogic(req); err != nil {
+        return nil, err
+    }
+
+    // 4. Permission & authorization validation
+    if err := s.validatePermissions(staffContext, req); err != nil {
+        return nil, err
+    }
+
+    // 5. Data integrity validation
+    // 6. Database operations with appropriate transaction usage
+}
+```
+
+#### Repository Pattern Guidelines
+**SQLC Usage (Preferred for)**:
+- Standard CRUD operations with fixed parameters
+- Existence checks and simple queries
+- Batch operations using `:copyfrom` syntax
+- Performance-critical queries
+
+**SQLX Usage (Required for)**:
+- Dynamic update operations with optional fields
+- Complex WHERE clauses with variable conditions
+- Flexible field selection in queries
+
+### Current Best Practices
+
+#### Error Handling
+- **Handlers**: Use `errorCodes.RespondWithEmptyFieldError(c)` for consistent empty field responses
+- **Services**: Use `errorCodes.NewServiceError()` with proper error categories
+- **Database Errors**: Use `errors.Is(err, pgx.ErrNoRows)` for no-data checks
+
+#### Authentication & Authorization
+- **Dual System**: Separate staff and customer authentication flows
+- **Context Extraction**: Always use middleware functions, never direct context access
+- **Role Validation**: Use appropriate middleware for different access levels
+
+#### Type Conversion
+- **Always use utilities**: Never manually construct pgtype structures
+- **Error Handling**: Properly handle conversion errors, especially for numeric types
+- **Null Handling**: Choose appropriate `emptyAsNull` parameter for string fields
+
+#### Model Design
+- **Complex Validation**: Implement specialized validation methods for business logic
+- **Update Requests**: Use pointer types for all optional fields
+- **Validation Tags**: Use comprehensive binding tags for all field constraints
+
+### Development Notes
+- When generating APIs, add routes in appropriate domain setup functions in `internal/app/router.go`
+- Use domain-separated containers for new services and handlers
+- Always implement proper validation order in both handlers and services
+- For permission issues, use `AUTH.AUTH_PERMISSION_DENIED` error code
+- Implement `HasUpdates()` methods for all update request models
+- Use transactions appropriately based on operation complexity
