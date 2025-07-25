@@ -84,14 +84,14 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 		// Store listing
 		stores.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStores.GetStores)
 
+		// Single store detail
+		stores.GET("/:storeId", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStore.GetStore)
+
 		// Store services browsing
 		stores.GET("/:storeId/services", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetServices.GetStoreServices)
 
 		// Store stylists browsing
 		stores.GET("/:storeId/stylists", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStylists.GetStoreStylists)
-
-		// TODO: Add other public store routes for browsing
-		// stores.GET("/:storeId", handlers.Public.StoreGet.Get)
 	}
 }
 

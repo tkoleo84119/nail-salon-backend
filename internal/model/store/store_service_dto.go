@@ -67,3 +67,13 @@ type GetStoresItemModel struct {
 	Address string `json:"address"`
 	Phone   string `json:"phone"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetStoreResponse represents the response for getting a single store
+type GetStoreResponse struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Phone   string `json:"phone"`
+}

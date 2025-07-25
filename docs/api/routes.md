@@ -34,7 +34,7 @@ This document lists all API routes in the nail salon backend system, organized b
 | Method | Endpoint                        | Description         | Status        |
 | ------ | ------------------------------- | ------------------- | ------------- |
 | GET    | `/api/stores`                   | List stores         | ✅ Implemented |
-| GET    | `/api/stores/:storeId`          | Get store details   | 🔄 TODO        |
+| GET    | `/api/stores/:storeId`          | Get store details   | ✅ Implemented |
 | GET    | `/api/stores/:storeId/stylists` | List store stylists | ✅ Implemented |
 | GET    | `/api/stores/:storeId/services` | List store services | ✅ Implemented |
 
