@@ -30,6 +30,7 @@ type PublicServices struct {
 	BookingCreateMy *bookingService.CreateMyBookingService
 	BookingUpdateMy *bookingService.UpdateMyBookingService
 	BookingCancelMy bookingService.CancelMyBookingServiceInterface
+	BookingGetMy    bookingService.GetMyBookingsServiceInterface
 }
 
 // PublicHandlers contains all public/customer-facing handlers
@@ -46,6 +47,7 @@ type PublicHandlers struct {
 	BookingCreateMy *bookingHandler.CreateMyBookingHandler
 	BookingUpdateMy *bookingHandler.UpdateMyBookingHandler
 	BookingCancelMy *bookingHandler.CancelMyBookingHandler
+	BookingGetMy    *bookingHandler.GetMyBookingsHandler
 }
 
 // NewPublicServices creates and initializes all public services
@@ -63,6 +65,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		BookingCreateMy: bookingService.NewCreateMyBookingService(queries, database.PgxPool),
 		BookingUpdateMy: bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
 		BookingCancelMy: bookingService.NewCancelMyBookingService(queries),
+		BookingGetMy:    bookingService.NewGetMyBookingsService(repositories.Booking),
 	}
 }
 
@@ -81,5 +84,6 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		BookingCreateMy: bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
 		BookingUpdateMy: bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
 		BookingCancelMy: bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
+		BookingGetMy:    bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
 	}
 }

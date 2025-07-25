@@ -101,3 +101,104 @@ func (r *BookingRepository) UpdateMyBooking(ctx context.Context, bookingID int64
 
 	return &result, nil
 }
+
+// GetMyBookingsModel represents the database model for booking list
+type GetMyBookingsModel struct {
+	ID           int64  `db:"id"`
+	StoreID      int64  `db:"store_id"`
+	StoreName    string `db:"store_name"`
+	StylistID    int64  `db:"stylist_id"`
+	StylistName  string `db:"stylist_name"`
+	Date         string `db:"date"`
+	TimeSlotID   int64  `db:"time_slot_id"`
+	StartTime    string `db:"start_time"`
+	EndTime      string `db:"end_time"`
+	Status       string `db:"status"`
+}
+
+// GetMyBookings retrieves customer bookings with optional filtering and pagination
+func (r *BookingRepository) GetMyBookings(ctx context.Context, customerID int64, statuses []string, limit, offset int) ([]GetMyBookingsModel, int, error) {
+	// Build WHERE conditions
+	whereParts := []string{"b.customer_id = :customer_id"}
+	args := map[string]interface{}{
+		"customer_id": customerID,
+		"limit":       limit,
+		"offset":      offset,
+	}
+
+	// Add status filtering if provided
+	if len(statuses) > 0 {
+		placeholders := make([]string, len(statuses))
+		for i, status := range statuses {
+			placeholders[i] = fmt.Sprintf(":status_%d", i)
+			args[fmt.Sprintf("status_%d", i)] = status
+		}
+		whereParts = append(whereParts, fmt.Sprintf("b.status IN (%s)", strings.Join(placeholders, ", ")))
+	}
+
+	whereClause := strings.Join(whereParts, " AND ")
+
+	// Query for bookings with joins
+	query := fmt.Sprintf(`
+		SELECT 
+			b.id,
+			b.store_id,
+			s.name as store_name,
+			b.stylist_id,
+			st.name as stylist_name,
+			TO_CHAR(sc.scheduled_date, 'YYYY-MM-DD') as date,
+			b.time_slot_id,
+			TO_CHAR(ts.start_time, 'HH24:MI') as start_time,
+			TO_CHAR(ts.end_time, 'HH24:MI') as end_time,
+			b.status
+		FROM bookings b
+		INNER JOIN stores s ON b.store_id = s.id
+		INNER JOIN stylists st ON b.stylist_id = st.id
+		INNER JOIN schedules sc ON b.stylist_id = sc.stylist_id AND b.time_slot_id = sc.time_slot_id
+		INNER JOIN time_slots ts ON b.time_slot_id = ts.id
+		WHERE %s
+		ORDER BY sc.scheduled_date DESC, ts.start_time DESC
+		LIMIT :limit OFFSET :offset
+	`, whereClause)
+
+	var bookings []GetMyBookingsModel
+	rows, err := r.db.NamedQueryContext(ctx, query, args)
+	if err != nil {
+		return nil, 0, fmt.Errorf("query bookings failed: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var booking GetMyBookingsModel
+		if err := rows.StructScan(&booking); err != nil {
+			return nil, 0, fmt.Errorf("scan booking failed: %w", err)
+		}
+		bookings = append(bookings, booking)
+	}
+
+	// Count total records
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM bookings b
+		INNER JOIN stores s ON b.store_id = s.id
+		INNER JOIN stylists st ON b.stylist_id = st.id
+		INNER JOIN schedules sc ON b.stylist_id = sc.stylist_id AND b.time_slot_id = sc.time_slot_id
+		INNER JOIN time_slots ts ON b.time_slot_id = ts.id
+		WHERE %s
+	`, whereClause)
+
+	var total int
+	countRow, err := r.db.NamedQueryContext(ctx, countQuery, args)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count bookings failed: %w", err)
+	}
+	defer countRow.Close()
+
+	if countRow.Next() {
+		if err := countRow.Scan(&total); err != nil {
+			return nil, 0, fmt.Errorf("scan count failed: %w", err)
+		}
+	}
+
+	return bookings, total, nil
+}

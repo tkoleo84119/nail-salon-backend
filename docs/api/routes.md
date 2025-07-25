@@ -20,7 +20,7 @@ This document lists all API routes in the nail salon backend system, organized b
 | Method | Endpoint                          | Description         | Status        |
 | ------ | --------------------------------- | ------------------- | ------------- |
 | POST   | `/api/bookings`                   | Create booking      | ✅ Implemented |
-| GET    | `/api/bookings/me`                | List my bookings    | 🔄 TODO        |
+| GET    | `/api/bookings`                   | List my bookings    | ✅ Implemented |
 | GET    | `/api/bookings/:bookingId`        | Get booking details | 🔄 TODO        |
 | PATCH  | `/api/bookings/:bookingId`        | Update my booking   | ✅ Implemented |
 | PATCH  | `/api/bookings/:bookingId/cancel` | Cancel my booking   | ✅ Implemented |
