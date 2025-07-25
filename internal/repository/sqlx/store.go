@@ -9,11 +9,13 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
+	storeModel "github.com/tkoleo84119/nail-salon-backend/internal/model/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type StoreRepositoryInterface interface {
 	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
+	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
 }
 
 type StoreRepository struct {
@@ -93,4 +95,75 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req ad
 		Phone:    result.Phone.String,
 		IsActive: result.IsActive.Bool,
 	}, nil
+}
+
+// GetStoresModel represents the database model for store queries
+type GetStoresModel struct {
+	ID      int64       `db:"id"`
+	Name    string      `db:"name"`
+	Address pgtype.Text `db:"address"`
+	Phone   pgtype.Text `db:"phone"`
+}
+
+// GetStores retrieves stores with pagination, filtering by is_active=true
+func (r *StoreRepository) GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error) {
+	// Count query for total records
+	countQuery := `
+		SELECT COUNT(*) 
+		FROM stores 
+		WHERE is_active = true
+	`
+
+	var total int
+	if err := r.db.Get(&total, countQuery); err != nil {
+		return nil, 0, fmt.Errorf("failed to get total count: %w", err)
+	}
+
+	// Main query with pagination
+	query := `
+		SELECT id, name, 
+		       COALESCE(address, '') as address,
+		       COALESCE(phone, '') as phone
+		FROM stores 
+		WHERE is_active = true
+		ORDER BY name
+		LIMIT :limit OFFSET :offset
+	`
+
+	args := map[string]interface{}{
+		"limit":  limit,
+		"offset": offset,
+	}
+
+	var results []GetStoresModel
+	rows, err := r.db.NamedQuery(query, args)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item GetStoresModel
+		if err := rows.StructScan(&item); err != nil {
+			return nil, 0, fmt.Errorf("failed to scan row: %w", err)
+		}
+		results = append(results, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	// Build response models
+	items := make([]storeModel.GetStoresItemModel, len(results))
+	for i, result := range results {
+		items[i] = storeModel.GetStoresItemModel{
+			ID:      utils.FormatID(result.ID),
+			Name:    result.Name,
+			Address: utils.PgTextToString(result.Address),
+			Phone:   utils.PgTextToString(result.Phone),
+		}
+	}
+
+	return items, total, nil
 }

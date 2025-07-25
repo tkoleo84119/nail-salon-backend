@@ -45,3 +45,25 @@ type GetStoreStylistsItemModel struct {
 	GoodAtStyles  []string `json:"goodAtStyles"`
 	IsIntrovert   bool     `json:"isIntrovert"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetStoresQueryParams represents query parameters for getting stores list
+type GetStoresQueryParams struct {
+	Limit  int `form:"limit,default=20" binding:"omitempty,min=1,max=100"`
+	Offset int `form:"offset,default=0" binding:"omitempty,min=0"`
+}
+
+// GetStoresResponse represents the response for getting stores list
+type GetStoresResponse struct {
+	Total int                  `json:"total"`
+	Items []GetStoresItemModel `json:"items"`
+}
+
+// GetStoresItemModel represents a single store item in the stores list
+type GetStoresItemModel struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Phone   string `json:"phone"`
+}

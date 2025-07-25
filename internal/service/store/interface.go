@@ -13,3 +13,7 @@ type GetStoreServicesServiceInterface interface {
 type GetStoreStylistsServiceInterface interface {
 	GetStoreStylists(ctx context.Context, storeIDStr string, queryParams storeModel.GetStoreStylistsQueryParams) (*storeModel.GetStoreStylistsResponse, error)
 }
+
+type GetStoresServiceInterface interface {
+	GetStores(ctx context.Context, queryParams storeModel.GetStoresQueryParams) (*storeModel.GetStoresResponse, error)
+}

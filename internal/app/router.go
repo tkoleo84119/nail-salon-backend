@@ -81,14 +81,16 @@ func setupPublicBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries 
 func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	stores := api.Group("/stores")
 	{
-		// Store services browsing (no authentication required)
+		// Store listing
+		stores.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStores.GetStores)
+
+		// Store services browsing
 		stores.GET("/:storeId/services", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetServices.GetStoreServices)
 
-		// Store stylists browsing (customer authentication required)
+		// Store stylists browsing
 		stores.GET("/:storeId/stylists", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStylists.GetStoreStylists)
 
 		// TODO: Add other public store routes for browsing
-		// stores.GET("", handlers.Public.StoreList.List)
 		// stores.GET("/:storeId", handlers.Public.StoreGet.Get)
 	}
 }
