@@ -7,7 +7,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	bookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -25,7 +25,7 @@ func NewCreateMyBookingHandler(service bookingService.CreateMyBookingServiceInte
 
 // CreateMyBooking handles POST /api/bookings/me
 func (h *CreateMyBookingHandler) CreateMyBooking(c *gin.Context) {
-	var req booking.CreateMyBookingRequest
+	var req bookingModel.CreateMyBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)

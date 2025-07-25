@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	timeSlotTemplate "github.com/tkoleo84119/nail-salon-backend/internal/model/time-slot-template"
+	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // TimeSlotTemplateRepositoryInterface defines the interface for time slot template repository
 type TimeSlotTemplateRepositoryInterface interface {
-	UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req timeSlotTemplate.UpdateTimeSlotTemplateRequest) (*timeSlotTemplate.UpdateTimeSlotTemplateResponse, error)
+	UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest) (*adminTimeSlotTemplateModel.UpdateTimeSlotTemplateResponse, error)
 }
 
 type TimeSlotTemplateRepository struct {
@@ -24,7 +24,7 @@ func NewTimeSlotTemplateRepository(db *sqlx.DB) *TimeSlotTemplateRepository {
 }
 
 // UpdateTimeSlotTemplate updates time slot template with dynamic fields
-func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req timeSlotTemplate.UpdateTimeSlotTemplateRequest) (*timeSlotTemplate.UpdateTimeSlotTemplateResponse, error) {
+func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest) (*adminTimeSlotTemplateModel.UpdateTimeSlotTemplateResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": templateID,
@@ -70,7 +70,7 @@ func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context,
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	return &timeSlotTemplate.UpdateTimeSlotTemplateResponse{
+	return &adminTimeSlotTemplateModel.UpdateTimeSlotTemplateResponse{
 		ID:   utils.FormatID(result.ID),
 		Name: result.Name,
 		Note: result.Note,

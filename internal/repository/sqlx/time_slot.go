@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
+	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // TimeSlotRepositoryInterface defines the interface for time slot repository
 type TimeSlotRepositoryInterface interface {
-	UpdateTimeSlot(ctx context.Context, timeSlotID int64, req schedule.UpdateTimeSlotRequest) (*schedule.UpdateTimeSlotResponse, error)
+	UpdateTimeSlot(ctx context.Context, timeSlotID int64, req adminScheduleModel.UpdateTimeSlotRequest) (*adminScheduleModel.UpdateTimeSlotResponse, error)
 }
 
 type TimeSlotRepository struct {
@@ -25,7 +25,7 @@ func NewTimeSlotRepository(db *sqlx.DB) *TimeSlotRepository {
 }
 
 // UpdateTimeSlot updates time slot with dynamic fields
-func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int64, req schedule.UpdateTimeSlotRequest) (*schedule.UpdateTimeSlotResponse, error) {
+func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int64, req adminScheduleModel.UpdateTimeSlotRequest) (*adminScheduleModel.UpdateTimeSlotResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": timeSlotID,
@@ -85,7 +85,7 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &schedule.UpdateTimeSlotResponse{
+	response := &adminScheduleModel.UpdateTimeSlotResponse{
 		ID:          utils.FormatID(result.ID),
 		ScheduleID:  utils.FormatID(result.ScheduleID),
 		StartTime:   utils.PgTimeToTimeString(result.StartTime),

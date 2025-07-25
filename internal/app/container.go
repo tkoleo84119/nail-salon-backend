@@ -2,27 +2,29 @@ package app
 
 import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
+	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
+	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
+	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
+	adminStaffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/staff"
+	adminStoreHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store"
+	adminStylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/stylist"
+	adminTimeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time-slot-template"
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	bookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/booking"
 	customerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer"
-	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
-	serviceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/service"
-	staffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/staff"
-	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
-	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
-	timeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
+	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
+	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
+	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
+	adminStoreService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store"
+	adminStylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/stylist"
+	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	bookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/booking"
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
-	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
-	serviceService "github.com/tkoleo84119/nail-salon-backend/internal/service/service"
-	staffService "github.com/tkoleo84119/nail-salon-backend/internal/service/staff"
-	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
-	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
-	timeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/time-slot-template"
 )
 
 type Container struct {
@@ -46,69 +48,69 @@ type Repositories struct {
 }
 
 type Services struct {
-	AuthStaffLogin             *authService.StaffLoginService
-	AuthCustomerLineLogin      *authService.CustomerLineLoginService
-	AuthCustomerLineRegister   *authService.CustomerLineRegisterService
-	BookingCreateMy            *bookingService.CreateMyBookingService
-	BookingUpdateMy            *bookingService.UpdateMyBookingService
-	BookingCancelMy            bookingService.CancelMyBookingServiceInterface
-	CustomerGetMy              *customerService.GetMyCustomerService
-	CustomerUpdateMy           *customerService.UpdateMyCustomerService
-	StaffCreate                *staffService.CreateStaffService
-	StaffUpdate                *staffService.UpdateStaffService
-	StaffUpdateMe              *staffService.UpdateMyStaffService
-	StaffStoreAccess           *staffService.CreateStoreAccessService
-	StaffDeleteStoreAccess     *staffService.DeleteStoreAccessBulkService
-	StoreCreate                *storeService.CreateStoreService
-	StoreUpdate                *storeService.UpdateStoreService
-	StylistCreate              *stylistService.CreateMyStylistService
-	StylistUpdate              *stylistService.UpdateMyStylistService
-	ScheduleCreateBulk         *scheduleService.CreateSchedulesBulkService
-	ScheduleDeleteBulk         *scheduleService.DeleteSchedulesBulkService
-	ScheduleCreateTimeSlot     *scheduleService.CreateTimeSlotService
-	ScheduleUpdateTimeSlot     *scheduleService.UpdateTimeSlotService
-	ScheduleDeleteTimeSlot     *scheduleService.DeleteTimeSlotService
-	TimeSlotTemplateCreate     *timeSlotTemplateService.CreateTimeSlotTemplateService
-	TimeSlotTemplateUpdate     *timeSlotTemplateService.UpdateTimeSlotTemplateService
-	TimeSlotTemplateDelete     *timeSlotTemplateService.DeleteTimeSlotTemplateService
-	TimeSlotTemplateCreateItem *timeSlotTemplateService.CreateTimeSlotTemplateItemService
-	TimeSlotTemplateUpdateItem *timeSlotTemplateService.UpdateTimeSlotTemplateItemService
-	TimeSlotTemplateDeleteItem *timeSlotTemplateService.DeleteTimeSlotTemplateItemService
-	ServiceCreate              *serviceService.CreateServiceService
-	ServiceUpdate              *serviceService.UpdateServiceService
+	AuthStaffLogin                  *adminAuthService.StaffLoginService
+	AuthCustomerLineLogin           *authService.CustomerLineLoginService
+	AuthCustomerLineRegister        *authService.CustomerLineRegisterService
+	BookingCreateMy                 *bookingService.CreateMyBookingService
+	BookingUpdateMy                 *bookingService.UpdateMyBookingService
+	BookingCancelMy                 bookingService.CancelMyBookingServiceInterface
+	CustomerGetMy                   *customerService.GetMyCustomerService
+	CustomerUpdateMy                *customerService.UpdateMyCustomerService
+	AdminStaffCreate                *adminStaffService.CreateStaffService
+	AdminStaffUpdate                *adminStaffService.UpdateStaffService
+	AdminStaffUpdateMe              *adminStaffService.UpdateMyStaffService
+	AdminStaffStoreAccess           *adminStaffService.CreateStoreAccessService
+	AdminStaffDeleteStoreAccess     *adminStaffService.DeleteStoreAccessBulkService
+	AdminStoreCreate                *adminStoreService.CreateStoreService
+	AdminStoreUpdate                *adminStoreService.UpdateStoreService
+	AdminStylistCreate              *adminStylistService.CreateMyStylistService
+	AdminStylistUpdate              *adminStylistService.UpdateMyStylistService
+	AdminScheduleCreateBulk         *adminScheduleService.CreateSchedulesBulkService
+	AdminScheduleDeleteBulk         *adminScheduleService.DeleteSchedulesBulkService
+	AdminScheduleCreateTimeSlot     *adminScheduleService.CreateTimeSlotService
+	AdminScheduleUpdateTimeSlot     *adminScheduleService.UpdateTimeSlotService
+	AdminScheduleDeleteTimeSlot     *adminScheduleService.DeleteTimeSlotService
+	AdminTimeSlotTemplateCreate     *adminTimeSlotTemplateService.CreateTimeSlotTemplateService
+	AdminTimeSlotTemplateUpdate     *adminTimeSlotTemplateService.UpdateTimeSlotTemplateService
+	AdminTimeSlotTemplateDelete     *adminTimeSlotTemplateService.DeleteTimeSlotTemplateService
+	AdminTimeSlotTemplateCreateItem *adminTimeSlotTemplateService.CreateTimeSlotTemplateItemService
+	AdminTimeSlotTemplateUpdateItem *adminTimeSlotTemplateService.UpdateTimeSlotTemplateItemService
+	AdminTimeSlotTemplateDeleteItem *adminTimeSlotTemplateService.DeleteTimeSlotTemplateItemService
+	AdminServiceCreate              *adminServiceService.CreateServiceService
+	AdminServiceUpdate              *adminServiceService.UpdateServiceService
 }
 
 type Handlers struct {
-	AuthStaffLogin             *authHandler.StaffLoginHandler
-	AuthCustomerLineLogin      *authHandler.CustomerLineLoginHandler
-	AuthCustomerLineRegister   *authHandler.CustomerLineRegisterHandler
-	BookingCreateMy            *bookingHandler.CreateMyBookingHandler
-	BookingUpdateMy            *bookingHandler.UpdateMyBookingHandler
-	BookingCancelMy            *bookingHandler.CancelMyBookingHandler
-	CustomerGetMy              *customerHandler.GetMyCustomerHandler
-	CustomerUpdateMy           *customerHandler.UpdateMyCustomerHandler
-	StaffCreate                *staffHandler.CreateStaffHandler
-	StaffUpdate                *staffHandler.UpdateStaffHandler
-	StaffUpdateMe              *staffHandler.UpdateMyStaffHandler
-	StaffStoreAccess           *staffHandler.CreateStoreAccessHandler
-	StaffDeleteStoreAccess     *staffHandler.DeleteStoreAccessBulkHandler
-	StoreCreate                *storeHandler.CreateStoreHandler
-	StoreUpdate                *storeHandler.UpdateStoreHandler
-	StylistCreate              *stylistHandler.CreateMyStylistHandler
-	StylistUpdate              *stylistHandler.UpdateMyStylistHandler
-	ScheduleCreateBulk         *scheduleHandler.CreateSchedulesBulkHandler
-	ScheduleDeleteBulk         *scheduleHandler.DeleteSchedulesBulkHandler
-	ScheduleCreateTimeSlot     *scheduleHandler.CreateTimeSlotHandler
-	ScheduleUpdateTimeSlot     *scheduleHandler.UpdateTimeSlotHandler
-	ScheduleDeleteTimeSlot     *scheduleHandler.DeleteTimeSlotHandler
-	TimeSlotTemplateCreate     *timeSlotTemplateHandler.CreateTimeSlotTemplateHandler
-	TimeSlotTemplateUpdate     *timeSlotTemplateHandler.UpdateTimeSlotTemplateHandler
-	TimeSlotTemplateDelete     *timeSlotTemplateHandler.DeleteTimeSlotTemplateHandler
-	TimeSlotTemplateCreateItem *timeSlotTemplateHandler.CreateTimeSlotTemplateItemHandler
-	TimeSlotTemplateUpdateItem *timeSlotTemplateHandler.UpdateTimeSlotTemplateItemHandler
-	TimeSlotTemplateDeleteItem *timeSlotTemplateHandler.DeleteTimeSlotTemplateItemHandler
-	ServiceCreate              *serviceHandler.CreateServiceHandler
-	ServiceUpdate              *serviceHandler.UpdateServiceHandler
+	AuthStaffLogin                  *adminAuthHandler.StaffLoginHandler
+	AuthCustomerLineLogin           *authHandler.CustomerLineLoginHandler
+	AuthCustomerLineRegister        *authHandler.CustomerLineRegisterHandler
+	BookingCreateMy                 *bookingHandler.CreateMyBookingHandler
+	BookingUpdateMy                 *bookingHandler.UpdateMyBookingHandler
+	BookingCancelMy                 *bookingHandler.CancelMyBookingHandler
+	CustomerGetMy                   *customerHandler.GetMyCustomerHandler
+	CustomerUpdateMy                *customerHandler.UpdateMyCustomerHandler
+	AdminStaffCreate                *adminStaffHandler.CreateStaffHandler
+	AdminStaffUpdate                *adminStaffHandler.UpdateStaffHandler
+	AdminStaffUpdateMe              *adminStaffHandler.UpdateMyStaffHandler
+	AdminStaffStoreAccess           *adminStaffHandler.CreateStoreAccessHandler
+	AdminStaffDeleteStoreAccess     *adminStaffHandler.DeleteStoreAccessBulkHandler
+	AdminStoreCreate                *adminStoreHandler.CreateStoreHandler
+	AdminStoreUpdate                *adminStoreHandler.UpdateStoreHandler
+	AdminStylistCreate              *adminStylistHandler.CreateMyStylistHandler
+	AdminStylistUpdate              *adminStylistHandler.UpdateMyStylistHandler
+	AdminScheduleCreateBulk         *adminScheduleHandler.CreateSchedulesBulkHandler
+	AdminScheduleDeleteBulk         *adminScheduleHandler.DeleteSchedulesBulkHandler
+	AdminScheduleCreateTimeSlot     *adminScheduleHandler.CreateTimeSlotHandler
+	AdminScheduleUpdateTimeSlot     *adminScheduleHandler.UpdateTimeSlotHandler
+	AdminScheduleDeleteTimeSlot     *adminScheduleHandler.DeleteTimeSlotHandler
+	AdminTimeSlotTemplateCreate     *adminTimeSlotTemplateHandler.CreateTimeSlotTemplateHandler
+	AdminTimeSlotTemplateUpdate     *adminTimeSlotTemplateHandler.UpdateTimeSlotTemplateHandler
+	AdminTimeSlotTemplateDelete     *adminTimeSlotTemplateHandler.DeleteTimeSlotTemplateHandler
+	AdminTimeSlotTemplateCreateItem *adminTimeSlotTemplateHandler.CreateTimeSlotTemplateItemHandler
+	AdminTimeSlotTemplateUpdateItem *adminTimeSlotTemplateHandler.UpdateTimeSlotTemplateItemHandler
+	AdminTimeSlotTemplateDeleteItem *adminTimeSlotTemplateHandler.DeleteTimeSlotTemplateItemHandler
+	AdminServiceCreate              *adminServiceHandler.CreateServiceHandler
+	AdminServiceUpdate              *adminServiceHandler.UpdateServiceHandler
 }
 
 func NewContainer(cfg *config.Config, database *db.Database) *Container {
@@ -126,69 +128,69 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 	}
 
 	services := Services{
-		AuthStaffLogin:             authService.NewStaffLoginService(queries, cfg.JWT),
-		AuthCustomerLineLogin:      authService.NewCustomerLineLoginService(queries, cfg.Line, cfg.JWT),
-		AuthCustomerLineRegister:   authService.NewCustomerLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT),
-		BookingCreateMy:            bookingService.NewCreateMyBookingService(queries, database.PgxPool),
-		BookingUpdateMy:            bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
-		BookingCancelMy:            bookingService.NewCancelMyBookingService(queries),
-		CustomerGetMy:              customerService.NewGetMyCustomerService(queries),
-		CustomerUpdateMy:           customerService.NewUpdateMyCustomerService(queries, repositories.Customer),
-		StaffCreate:                staffService.NewCreateStaffService(queries, database.PgxPool),
-		StaffUpdate:                staffService.NewUpdateStaffService(queries, database.Sqlx),
-		StaffUpdateMe:              staffService.NewUpdateMyStaffService(queries, repositories.StaffUser),
-		StaffStoreAccess:           staffService.NewCreateStoreAccessService(queries),
-		StaffDeleteStoreAccess:     staffService.NewDeleteStoreAccessBulkService(queries),
-		StoreCreate:                storeService.NewCreateStoreService(queries, database.PgxPool),
-		StoreUpdate:                storeService.NewUpdateStoreService(queries, repositories.Store),
-		StylistCreate:              stylistService.NewCreateMyStylistService(queries),
-		StylistUpdate:              stylistService.NewUpdateMyStylistService(queries, repositories.Stylist),
-		ScheduleCreateBulk:         scheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
-		ScheduleDeleteBulk:         scheduleService.NewDeleteSchedulesBulkService(queries, database.PgxPool),
-		ScheduleCreateTimeSlot:     scheduleService.NewCreateTimeSlotService(queries),
-		ScheduleUpdateTimeSlot:     scheduleService.NewUpdateTimeSlotService(queries, repositories.TimeSlot),
-		ScheduleDeleteTimeSlot:     scheduleService.NewDeleteTimeSlotService(queries),
-		TimeSlotTemplateCreate:     timeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool),
-		TimeSlotTemplateUpdate:     timeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, repositories.TimeSlotTemplate),
-		TimeSlotTemplateDelete:     timeSlotTemplateService.NewDeleteTimeSlotTemplateService(queries),
-		TimeSlotTemplateCreateItem: timeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries),
-		TimeSlotTemplateUpdateItem: timeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries),
-		TimeSlotTemplateDeleteItem: timeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries),
-		ServiceCreate:              serviceService.NewCreateServiceService(queries),
-		ServiceUpdate:              serviceService.NewUpdateServiceService(queries, repositories.Service),
+		AuthStaffLogin:                  adminAuthService.NewStaffLoginService(queries, cfg.JWT),
+		AuthCustomerLineLogin:           authService.NewCustomerLineLoginService(queries, cfg.Line, cfg.JWT),
+		AuthCustomerLineRegister:        authService.NewCustomerLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT),
+		BookingCreateMy:                 bookingService.NewCreateMyBookingService(queries, database.PgxPool),
+		BookingUpdateMy:                 bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
+		BookingCancelMy:                 bookingService.NewCancelMyBookingService(queries),
+		CustomerGetMy:                   customerService.NewGetMyCustomerService(queries),
+		CustomerUpdateMy:                customerService.NewUpdateMyCustomerService(queries, repositories.Customer),
+		AdminStaffCreate:                adminStaffService.NewCreateStaffService(queries, database.PgxPool),
+		AdminStaffUpdate:                adminStaffService.NewUpdateStaffService(queries, database.Sqlx),
+		AdminStaffUpdateMe:              adminStaffService.NewUpdateMyStaffService(queries, repositories.StaffUser),
+		AdminStaffStoreAccess:           adminStaffService.NewCreateStoreAccessService(queries),
+		AdminStaffDeleteStoreAccess:     adminStaffService.NewDeleteStoreAccessBulkService(queries),
+		AdminStoreCreate:                adminStoreService.NewCreateStoreService(queries, database.PgxPool),
+		AdminStoreUpdate:                adminStoreService.NewUpdateStoreService(queries, repositories.Store),
+		AdminStylistCreate:              adminStylistService.NewCreateMyStylistService(queries),
+		AdminStylistUpdate:              adminStylistService.NewUpdateMyStylistService(queries, repositories.Stylist),
+		AdminScheduleCreateBulk:         adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
+		AdminScheduleDeleteBulk:         adminScheduleService.NewDeleteSchedulesBulkService(queries, database.PgxPool),
+		AdminScheduleCreateTimeSlot:     adminScheduleService.NewCreateTimeSlotService(queries),
+		AdminScheduleUpdateTimeSlot:     adminScheduleService.NewUpdateTimeSlotService(queries, repositories.TimeSlot),
+		AdminScheduleDeleteTimeSlot:     adminScheduleService.NewDeleteTimeSlotService(queries),
+		AdminTimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool),
+		AdminTimeSlotTemplateUpdate:     adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, repositories.TimeSlotTemplate),
+		AdminTimeSlotTemplateDelete:     adminTimeSlotTemplateService.NewDeleteTimeSlotTemplateService(queries),
+		AdminTimeSlotTemplateCreateItem: adminTimeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries),
+		AdminTimeSlotTemplateUpdateItem: adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries),
+		AdminTimeSlotTemplateDeleteItem: adminTimeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries),
+		AdminServiceCreate:              adminServiceService.NewCreateServiceService(queries),
+		AdminServiceUpdate:              adminServiceService.NewUpdateServiceService(queries, repositories.Service),
 	}
 
 	handlers := Handlers{
-		AuthStaffLogin:             authHandler.NewStaffLoginHandler(services.AuthStaffLogin),
-		AuthCustomerLineLogin:      authHandler.NewCustomerLineLoginHandler(services.AuthCustomerLineLogin),
-		AuthCustomerLineRegister:   authHandler.NewCustomerLineRegisterHandler(services.AuthCustomerLineRegister),
-		BookingCreateMy:            bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
-		BookingUpdateMy:            bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
-		BookingCancelMy:            bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
-		CustomerGetMy:              customerHandler.NewGetMyCustomerHandler(services.CustomerGetMy),
-		CustomerUpdateMy:           customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
-		StaffCreate:                staffHandler.NewCreateStaffHandler(services.StaffCreate),
-		StaffUpdate:                staffHandler.NewUpdateStaffHandler(services.StaffUpdate),
-		StaffUpdateMe:              staffHandler.NewUpdateMyStaffHandler(services.StaffUpdateMe),
-		StaffStoreAccess:           staffHandler.NewCreateStoreAccessHandler(services.StaffStoreAccess),
-		StaffDeleteStoreAccess:     staffHandler.NewDeleteStoreAccessBulkHandler(services.StaffDeleteStoreAccess),
-		StoreCreate:                storeHandler.NewCreateStoreHandler(services.StoreCreate),
-		StoreUpdate:                storeHandler.NewUpdateStoreHandler(services.StoreUpdate),
-		StylistCreate:              stylistHandler.NewCreateMyStylistHandler(services.StylistCreate),
-		StylistUpdate:              stylistHandler.NewUpdateMyStylistHandler(services.StylistUpdate),
-		ScheduleCreateBulk:         scheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),
-		ScheduleDeleteBulk:         scheduleHandler.NewDeleteSchedulesBulkHandler(services.ScheduleDeleteBulk),
-		ScheduleCreateTimeSlot:     scheduleHandler.NewCreateTimeSlotHandler(services.ScheduleCreateTimeSlot),
-		ScheduleUpdateTimeSlot:     scheduleHandler.NewUpdateTimeSlotHandler(services.ScheduleUpdateTimeSlot),
-		ScheduleDeleteTimeSlot:     scheduleHandler.NewDeleteTimeSlotHandler(services.ScheduleDeleteTimeSlot),
-		TimeSlotTemplateCreate:     timeSlotTemplateHandler.NewCreateTimeSlotTemplateHandler(services.TimeSlotTemplateCreate),
-		TimeSlotTemplateUpdate:     timeSlotTemplateHandler.NewUpdateTimeSlotTemplateHandler(services.TimeSlotTemplateUpdate),
-		TimeSlotTemplateDelete:     timeSlotTemplateHandler.NewDeleteTimeSlotTemplateHandler(services.TimeSlotTemplateDelete),
-		TimeSlotTemplateCreateItem: timeSlotTemplateHandler.NewCreateTimeSlotTemplateItemHandler(services.TimeSlotTemplateCreateItem),
-		TimeSlotTemplateUpdateItem: timeSlotTemplateHandler.NewUpdateTimeSlotTemplateItemHandler(services.TimeSlotTemplateUpdateItem),
-		TimeSlotTemplateDeleteItem: timeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(services.TimeSlotTemplateDeleteItem),
-		ServiceCreate:              serviceHandler.NewCreateServiceHandler(services.ServiceCreate),
-		ServiceUpdate:              serviceHandler.NewUpdateServiceHandler(services.ServiceUpdate),
+		AuthStaffLogin:                  adminAuthHandler.NewStaffLoginHandler(services.AuthStaffLogin),
+		AuthCustomerLineLogin:           authHandler.NewCustomerLineLoginHandler(services.AuthCustomerLineLogin),
+		AuthCustomerLineRegister:        authHandler.NewCustomerLineRegisterHandler(services.AuthCustomerLineRegister),
+		BookingCreateMy:                 bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
+		BookingUpdateMy:                 bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
+		BookingCancelMy:                 bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
+		CustomerGetMy:                   customerHandler.NewGetMyCustomerHandler(services.CustomerGetMy),
+		CustomerUpdateMy:                customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
+		AdminStaffCreate:                adminStaffHandler.NewCreateStaffHandler(services.AdminStaffCreate),
+		AdminStaffUpdate:                adminStaffHandler.NewUpdateStaffHandler(services.AdminStaffUpdate),
+		AdminStaffUpdateMe:              adminStaffHandler.NewUpdateMyStaffHandler(services.AdminStaffUpdateMe),
+		AdminStaffStoreAccess:           adminStaffHandler.NewCreateStoreAccessHandler(services.AdminStaffStoreAccess),
+		AdminStaffDeleteStoreAccess:     adminStaffHandler.NewDeleteStoreAccessBulkHandler(services.AdminStaffDeleteStoreAccess),
+		AdminStoreCreate:                adminStoreHandler.NewCreateStoreHandler(services.AdminStoreCreate),
+		AdminStoreUpdate:                adminStoreHandler.NewUpdateStoreHandler(services.AdminStoreUpdate),
+		AdminStylistCreate:              adminStylistHandler.NewCreateMyStylistHandler(services.AdminStylistCreate),
+		AdminStylistUpdate:              adminStylistHandler.NewUpdateMyStylistHandler(services.AdminStylistUpdate),
+		AdminScheduleCreateBulk:         adminScheduleHandler.NewCreateSchedulesBulkHandler(services.AdminScheduleCreateBulk),
+		AdminScheduleDeleteBulk:         adminScheduleHandler.NewDeleteSchedulesBulkHandler(services.AdminScheduleDeleteBulk),
+		AdminScheduleCreateTimeSlot:     adminScheduleHandler.NewCreateTimeSlotHandler(services.AdminScheduleCreateTimeSlot),
+		AdminScheduleUpdateTimeSlot:     adminScheduleHandler.NewUpdateTimeSlotHandler(services.AdminScheduleUpdateTimeSlot),
+		AdminScheduleDeleteTimeSlot:     adminScheduleHandler.NewDeleteTimeSlotHandler(services.AdminScheduleDeleteTimeSlot),
+		AdminTimeSlotTemplateCreate:     adminTimeSlotTemplateHandler.NewCreateTimeSlotTemplateHandler(services.AdminTimeSlotTemplateCreate),
+		AdminTimeSlotTemplateUpdate:     adminTimeSlotTemplateHandler.NewUpdateTimeSlotTemplateHandler(services.AdminTimeSlotTemplateUpdate),
+		AdminTimeSlotTemplateDelete:     adminTimeSlotTemplateHandler.NewDeleteTimeSlotTemplateHandler(services.AdminTimeSlotTemplateDelete),
+		AdminTimeSlotTemplateCreateItem: adminTimeSlotTemplateHandler.NewCreateTimeSlotTemplateItemHandler(services.AdminTimeSlotTemplateCreateItem),
+		AdminTimeSlotTemplateUpdateItem: adminTimeSlotTemplateHandler.NewUpdateTimeSlotTemplateItemHandler(services.AdminTimeSlotTemplateUpdateItem),
+		AdminTimeSlotTemplateDeleteItem: adminTimeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(services.AdminTimeSlotTemplateDeleteItem),
+		AdminServiceCreate:              adminServiceHandler.NewCreateServiceHandler(services.AdminServiceCreate),
+		AdminServiceUpdate:              adminServiceHandler.NewUpdateServiceHandler(services.AdminServiceUpdate),
 	}
 
 	return &Container{

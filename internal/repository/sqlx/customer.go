@@ -8,13 +8,13 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // CustomerRepositoryInterface defines the interface for customer repository
 type CustomerRepositoryInterface interface {
-	UpdateMyCustomer(ctx context.Context, customerID int64, req customer.UpdateMyCustomerRequest) (*customer.UpdateMyCustomerResponse, error)
+	UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error)
 }
 
 type CustomerRepository struct {
@@ -26,7 +26,7 @@ func NewCustomerRepository(db *sqlx.DB) *CustomerRepository {
 }
 
 // UpdateMyCustomer updates customer's own profile information
-func (r *CustomerRepository) UpdateMyCustomer(ctx context.Context, customerID int64, req customer.UpdateMyCustomerRequest) (*customer.UpdateMyCustomerResponse, error) {
+func (r *CustomerRepository) UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error) {
 	setParts := []string{}
 	args := []interface{}{}
 	argIndex := 1
@@ -114,7 +114,7 @@ func (r *CustomerRepository) UpdateMyCustomer(ctx context.Context, customerID in
 		return nil, err
 	}
 
-	return &customer.UpdateMyCustomerResponse{
+	return &customerModel.UpdateMyCustomerResponse{
 		ID:             utils.FormatID(result.ID),
 		Name:           result.Name,
 		Phone:          result.Phone,

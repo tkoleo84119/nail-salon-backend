@@ -8,12 +8,12 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/store"
+	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type StoreRepositoryInterface interface {
-	UpdateStore(ctx context.Context, storeID int64, req store.UpdateStoreRequest) (*store.UpdateStoreResponse, error)
+	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
 }
 
 type StoreRepository struct {
@@ -26,7 +26,7 @@ func NewStoreRepository(db *sqlx.DB) *StoreRepository {
 	}
 }
 
-func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req store.UpdateStoreRequest) (*store.UpdateStoreResponse, error) {
+func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": storeID,
@@ -86,7 +86,7 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req st
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	return &store.UpdateStoreResponse{
+	return &adminStoreModel.UpdateStoreResponse{
 		ID:       utils.FormatID(result.ID),
 		Name:     result.Name,
 		Address:  result.Address.String,

@@ -6,15 +6,15 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
+	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // StaffUserRepositoryInterface defines the interface for staff user repository
 type StaffUserRepositoryInterface interface {
-	UpdateStaffUser(ctx context.Context, id int64, req staff.UpdateStaffRequest) (*staff.UpdateStaffResponse, error)
-	UpdateMyStaff(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error)
+	UpdateStaffUser(ctx context.Context, id int64, req adminStaffModel.UpdateStaffRequest) (*adminStaffModel.UpdateStaffResponse, error)
+	UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error)
 }
 
 type StaffUserRepository struct {
@@ -26,7 +26,7 @@ func NewStaffUserRepository(db *sqlx.DB) *StaffUserRepository {
 }
 
 // UpdateStaffUser updates staff user with dynamic fields
-func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req staff.UpdateStaffRequest) (*staff.UpdateStaffResponse, error) {
+func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req adminStaffModel.UpdateStaffRequest) (*adminStaffModel.UpdateStaffResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": id,
@@ -71,7 +71,7 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &staff.UpdateStaffResponse{
+	response := &adminStaffModel.UpdateStaffResponse{
 		ID:       utils.FormatID(result.ID),
 		Username: result.Username,
 		Email:    result.Email,
@@ -83,7 +83,7 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 }
 
 // UpdateMyStaff updates current staff user's information with dynamic fields
-func (r *StaffUserRepository) UpdateMyStaff(ctx context.Context, id int64, req staff.UpdateMyStaffRequest) (*staff.UpdateMyStaffResponse, error) {
+func (r *StaffUserRepository) UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": id,
@@ -121,7 +121,7 @@ func (r *StaffUserRepository) UpdateMyStaff(ctx context.Context, id int64, req s
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &staff.UpdateMyStaffResponse{
+	response := &adminStaffModel.UpdateMyStaffResponse{
 		ID:       utils.FormatID(result.ID),
 		Username: result.Username,
 		Email:    result.Email,

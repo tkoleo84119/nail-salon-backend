@@ -7,7 +7,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -22,7 +22,7 @@ func NewGetMyCustomerService(queries *dbgen.Queries) *GetMyCustomerService {
 	}
 }
 
-func (s *GetMyCustomerService) GetMyCustomer(ctx context.Context, customerContext common.CustomerContext) (*customer.GetMyCustomerResponse, error) {
+func (s *GetMyCustomerService) GetMyCustomer(ctx context.Context, customerContext common.CustomerContext) (*customerModel.GetMyCustomerResponse, error) {
 	// Use customer ID directly from context
 	customerID := customerContext.CustomerID
 
@@ -36,7 +36,7 @@ func (s *GetMyCustomerService) GetMyCustomer(ctx context.Context, customerContex
 	}
 
 	// Build response
-	response := &customer.GetMyCustomerResponse{
+	response := &customerModel.GetMyCustomerResponse{
 		ID:           utils.FormatID(customerData.ID),
 		Name:         customerData.Name,
 		Phone:        customerData.Phone,

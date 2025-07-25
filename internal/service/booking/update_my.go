@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
@@ -30,7 +30,7 @@ func NewUpdateMyBookingService(queries dbgen.Querier, bookingRepo *sqlxRepo.Book
 	}
 }
 
-func (s *UpdateMyBookingService) UpdateMyBooking(ctx context.Context, bookingIDStr string, req booking.UpdateMyBookingRequest, customerContext common.CustomerContext) (*booking.UpdateMyBookingResponse, error) {
+func (s *UpdateMyBookingService) UpdateMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.UpdateMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.UpdateMyBookingResponse, error) {
 	// Parse booking ID
 	bookingID, err := utils.ParseID(bookingIDStr)
 	if err != nil {
@@ -59,7 +59,7 @@ func (s *UpdateMyBookingService) UpdateMyBooking(ctx context.Context, bookingIDS
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 	// only allow update booking in BookingStatusScheduled status
-	if bookingInfo.Status != booking.BookingStatusScheduled {
+	if bookingInfo.Status != bookingModel.BookingStatusScheduled {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingStatusNotAllowedToUpdate)
 	}
 
@@ -202,14 +202,14 @@ func (s *UpdateMyBookingService) validateEntities(ctx context.Context, storeID, 
 	return nil
 }
 
-func (s *UpdateMyBookingService) updateBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingID, mainServiceID int64, subServiceIds []int64, req booking.UpdateMyBookingRequest) error {
+func (s *UpdateMyBookingService) updateBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingID, mainServiceID int64, subServiceIds []int64, req bookingModel.UpdateMyBookingRequest) error {
 	// Delete existing booking details
 	if err := qtx.DeleteBookingDetailsByBookingID(ctx, bookingID); err != nil {
 		return errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to delete booking details", err)
 	}
 
 	// Prepare services for booking details
-	var services []booking.BookingServiceInfo
+	var services []bookingModel.BookingServiceInfo
 
 	// Add main service
 	if req.MainServiceId != nil {
@@ -217,7 +217,7 @@ func (s *UpdateMyBookingService) updateBookingDetails(ctx context.Context, qtx *
 		if err != nil {
 			return errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get main service", err)
 		}
-		services = append(services, booking.BookingServiceInfo{
+		services = append(services, bookingModel.BookingServiceInfo{
 			ServiceId:     mainService.ID,
 			ServiceName:   mainService.Name,
 			Price:         utils.PgNumericToFloat64(mainService.Price),
@@ -232,7 +232,7 @@ func (s *UpdateMyBookingService) updateBookingDetails(ctx context.Context, qtx *
 			return errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get sub services", err)
 		}
 		for _, subService := range subServices {
-			services = append(services, booking.BookingServiceInfo{
+			services = append(services, bookingModel.BookingServiceInfo{
 				ServiceId:   subService.ID,
 				ServiceName: subService.Name,
 				Price:       utils.PgNumericToFloat64(subService.Price),
@@ -244,7 +244,7 @@ func (s *UpdateMyBookingService) updateBookingDetails(ctx context.Context, qtx *
 	return s.createBookingDetails(ctx, qtx, bookingID, services)
 }
 
-func (s *UpdateMyBookingService) createBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingID int64, services []booking.BookingServiceInfo) error {
+func (s *UpdateMyBookingService) createBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingID int64, services []bookingModel.BookingServiceInfo) error {
 	for _, service := range services {
 		detailID := utils.GenerateID()
 
@@ -266,7 +266,7 @@ func (s *UpdateMyBookingService) createBookingDetails(ctx context.Context, qtx *
 	return nil
 }
 
-func (s *UpdateMyBookingService) buildResponse(ctx context.Context, bookingID int64) (*booking.UpdateMyBookingResponse, error) {
+func (s *UpdateMyBookingService) buildResponse(ctx context.Context, bookingID int64) (*bookingModel.UpdateMyBookingResponse, error) {
 	// Get complete booking info
 	bookingInfo, err := s.queries.GetBookingByID(ctx, bookingID)
 	if err != nil {
@@ -292,7 +292,7 @@ func (s *UpdateMyBookingService) buildResponse(ctx context.Context, bookingID in
 		}
 	}
 
-	return &booking.UpdateMyBookingResponse{
+	return &bookingModel.UpdateMyBookingResponse{
 		ID:              utils.FormatID(bookingInfo.ID),
 		StoreId:         utils.FormatID(bookingInfo.StoreID),
 		StoreName:       bookingInfo.StoreName,

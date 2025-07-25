@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -33,7 +33,7 @@ type UpdateMyBookingModel struct {
 }
 
 // UpdateMyBooking updates a booking dynamically based on provided fields
-func (r *BookingRepository) UpdateMyBooking(ctx context.Context, bookingID int64, customerID int64, req booking.UpdateMyBookingRequest) (*UpdateMyBookingModel, error) {
+func (r *BookingRepository) UpdateMyBooking(ctx context.Context, bookingID int64, customerID int64, req bookingModel.UpdateMyBookingRequest) (*UpdateMyBookingModel, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"booking_id":  bookingID,
@@ -79,7 +79,7 @@ func (r *BookingRepository) UpdateMyBooking(ctx context.Context, bookingID int64
 	}
 
 	query := fmt.Sprintf(`
-		UPDATE bookings SET %s 
+		UPDATE bookings SET %s
 		WHERE id = :booking_id AND customer_id = :customer_id
 		RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, note, status
 	`, strings.Join(setParts, ", "))

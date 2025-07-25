@@ -5,7 +5,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	staffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/staff"
+	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 )
 
@@ -97,13 +97,13 @@ func setupAdminScheduleRoutes(admin *gin.RouterGroup, cfg *config.Config, querie
 	schedules := admin.Group("/schedules")
 	{
 		// Bulk operations
-		schedules.POST("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.ScheduleCreateBulk.CreateSchedulesBulk)
-		schedules.DELETE("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.ScheduleDeleteBulk.DeleteSchedulesBulk)
+		schedules.POST("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleCreateBulk.CreateSchedulesBulk)
+		schedules.DELETE("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleDeleteBulk.DeleteSchedulesBulk)
 
 		// Time slot operations
-		schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.ScheduleCreateTimeSlot.CreateTimeSlot)
-		schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.ScheduleUpdateTimeSlot.UpdateTimeSlot)
-		schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.ScheduleDeleteTimeSlot.DeleteTimeSlot)
+		schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleCreateTimeSlot.CreateTimeSlot)
+		schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleUpdateTimeSlot.UpdateTimeSlot)
+		schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleDeleteTimeSlot.DeleteTimeSlot)
 	}
 }
 
@@ -113,8 +113,8 @@ func setupPublicServiceRoutes(api *gin.RouterGroup, cfg *config.Config, queries 
 func setupAdminServiceRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	services := admin.Group("/services")
 	{
-		services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.ServiceCreate.CreateService)
-		services.PATCH("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.ServiceUpdate.UpdateService)
+		services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminServiceCreate.CreateService)
+		services.PATCH("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminServiceUpdate.UpdateService)
 	}
 }
 
@@ -122,13 +122,13 @@ func setupAdminStaffRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 	staff := admin.Group("/staff")
 	{
 		// Staff management
-		staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffCreate.CreateStaff)
-		staff.PATCH("/:staffId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffUpdate.UpdateStaff)
-		staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.StaffUpdateMe.UpdateMyStaff)
+		staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffCreate.CreateStaff)
+		staff.PATCH("/:staffId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffUpdate.UpdateStaff)
+		staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.AdminStaffUpdateMe.UpdateMyStaff)
 
 		// Store access management
-		staff.POST("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffStoreAccess.CreateStoreAccess)
-		staff.DELETE("/:staffId/store-access/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StaffDeleteStoreAccess.DeleteStoreAccessBulk)
+		staff.POST("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffStoreAccess.CreateStoreAccess)
+		staff.DELETE("/:staffId/store-access/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffDeleteStoreAccess.DeleteStoreAccessBulk)
 
 	}
 }
@@ -139,8 +139,8 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	stores := admin.Group("/stores")
 	{
-		stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StoreCreate.CreateStore)
-		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.StoreUpdate.UpdateStore)
+		stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStoreCreate.CreateStore)
+		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStoreUpdate.UpdateStore)
 	}
 }
 
@@ -148,8 +148,8 @@ func setupAdminStylistRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	stylists := admin.Group("/stylists")
 	{
 		// Self-service stylist operations
-		stylists.POST("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), handlers.StylistCreate.CreateMyStylist)
-		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(staffModel.RoleAdmin, staffModel.RoleManager, staffModel.RoleStylist), handlers.StylistUpdate.UpdateMyStylist)
+		stylists.POST("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.AdminStylistCreate.CreateMyStylist)
+		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.AdminStylistUpdate.UpdateMyStylist)
 	}
 }
 
@@ -157,13 +157,13 @@ func setupAdminTimeSlotTemplateRoutes(admin *gin.RouterGroup, cfg *config.Config
 	timeSlotTemplates := admin.Group("/time-slot-templates")
 	{
 		// Template management
-		timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.TimeSlotTemplateCreate.CreateTimeSlotTemplate)
-		timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.TimeSlotTemplateUpdate.UpdateTimeSlotTemplate)
-		timeSlotTemplates.DELETE("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.TimeSlotTemplateDelete.DeleteTimeSlotTemplate)
+		timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateCreate.CreateTimeSlotTemplate)
+		timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateUpdate.UpdateTimeSlotTemplate)
+		timeSlotTemplates.DELETE("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateDelete.DeleteTimeSlotTemplate)
 
 		// Template item management
-		timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.TimeSlotTemplateCreateItem.CreateTimeSlotTemplateItem)
-		timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.TimeSlotTemplateUpdateItem.UpdateTimeSlotTemplateItem)
-		timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.TimeSlotTemplateDeleteItem.DeleteTimeSlotTemplateItem)
+		timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateCreateItem.CreateTimeSlotTemplateItem)
+		timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateUpdateItem.UpdateTimeSlotTemplateItem)
+		timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateDeleteItem.DeleteTimeSlotTemplateItem)
 	}
 }

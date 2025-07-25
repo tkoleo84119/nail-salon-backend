@@ -7,7 +7,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	bookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -25,7 +25,7 @@ func NewUpdateMyBookingHandler(service bookingService.UpdateMyBookingServiceInte
 
 func (h *UpdateMyBookingHandler) UpdateMyBooking(c *gin.Context) {
 	// Input JSON validation
-	var req booking.UpdateMyBookingRequest
+	var req bookingModel.UpdateMyBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)

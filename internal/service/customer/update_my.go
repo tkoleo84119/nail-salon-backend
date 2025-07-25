@@ -4,7 +4,7 @@ import (
 	"context"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -22,7 +22,7 @@ func NewUpdateMyCustomerService(db dbgen.Querier, customerRepo sqlx.CustomerRepo
 	}
 }
 
-func (s *UpdateMyCustomerService) UpdateMyCustomer(ctx context.Context, customerID int64, req customer.UpdateMyCustomerRequest) (*customer.UpdateMyCustomerResponse, error) {
+func (s *UpdateMyCustomerService) UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error) {
 	if !req.HasUpdates() {
 		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "need at least one field to update", nil)
 	}

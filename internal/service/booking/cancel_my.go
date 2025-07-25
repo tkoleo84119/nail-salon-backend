@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -23,7 +23,7 @@ func NewCancelMyBookingService(queries dbgen.Querier) CancelMyBookingServiceInte
 	}
 }
 
-func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDStr string, req booking.CancelMyBookingRequest, customerContext common.CustomerContext) (*booking.CancelMyBookingResponse, error) {
+func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.CancelMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CancelMyBookingResponse, error) {
 	// Parse booking ID
 	bookingID, err := utils.ParseID(bookingIDStr)
 	if err != nil {
@@ -45,14 +45,14 @@ func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDS
 	}
 
 	// Check if booking is in a cancelable state (only SCHEDULED bookings can be canceled)
-	if bookingInfo.Status != booking.BookingStatusScheduled {
+	if bookingInfo.Status != bookingModel.BookingStatusScheduled {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingStatusNotAllowedToCancel)
 	}
 
 	// Cancel booking with optional cancel reason
 	cancelledBooking, err := s.queries.CancelBooking(ctx, dbgen.CancelBookingParams{
 		ID:           bookingID,
-		Status:       booking.BookingStatusCancelled,
+		Status:       bookingModel.BookingStatusCancelled,
 		CancelReason: utils.StringPtrToPgText(req.CancelReason, true), // Empty as NULL
 		CustomerID:   customerContext.CustomerID,
 	})
@@ -66,7 +66,7 @@ func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDS
 		cancelReason = &cancelledBooking.CancelReason.String
 	}
 
-	return &booking.CancelMyBookingResponse{
+	return &bookingModel.CancelMyBookingResponse{
 		ID:           utils.FormatID(cancelledBooking.ID),
 		Status:       cancelledBooking.Status,
 		CancelReason: cancelReason,

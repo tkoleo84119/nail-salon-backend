@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -25,7 +25,7 @@ func NewCreateMyBookingService(queries dbgen.Querier, db *pgxpool.Pool) *CreateM
 	}
 }
 
-func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req booking.CreateMyBookingRequest, customerContext common.CustomerContext) (*booking.CreateMyBookingResponse, error) {
+func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookingModel.CreateMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CreateMyBookingResponse, error) {
 	storeId, err := utils.ParseID(req.StoreId)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid storeId", err)
@@ -116,15 +116,15 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotEnoughTime)
 	}
 
-	services := make([]booking.BookingServiceInfo, 0, len(subServices)+1)
-	services = append(services, booking.BookingServiceInfo{
+	services := make([]bookingModel.BookingServiceInfo, 0, len(subServices)+1)
+	services = append(services, bookingModel.BookingServiceInfo{
 		ServiceId:     mainService.ID,
 		ServiceName:   mainService.Name,
 		Price:         utils.PgNumericToFloat64(mainService.Price),
 		IsMainService: true,
 	})
 	for _, subService := range subServices {
-		services = append(services, booking.BookingServiceInfo{
+		services = append(services, bookingModel.BookingServiceInfo{
 			ServiceId:   subService.ID,
 			ServiceName: subService.Name,
 			Price:       utils.PgNumericToFloat64(subService.Price),
@@ -151,7 +151,7 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		TimeSlotID:    timeSlotId,
 		IsChatEnabled: utils.BoolPtrToPgBool(req.IsChatEnabled),
 		Note:          utils.StringPtrToPgText(req.Note, false),
-		Status:        booking.BookingStatusScheduled,
+		Status:        bookingModel.BookingStatusScheduled,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "create booking failed", err)
@@ -174,7 +174,7 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		}
 	}
 
-	response := &booking.CreateMyBookingResponse{
+	response := &bookingModel.CreateMyBookingResponse{
 		ID:              utils.FormatID(bookingId),
 		StoreId:         utils.FormatID(storeId),
 		StoreName:       store.Name,
@@ -188,7 +188,7 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 		SubServiceNames: subServiceNames,
 		IsChatEnabled:   isChatEnabled,
 		Note:            req.Note,
-		Status:          booking.BookingStatusScheduled,
+		Status:          bookingModel.BookingStatusScheduled,
 		CreatedAt:       bookingInfo.CreatedAt.Time.String(),
 		UpdatedAt:       bookingInfo.UpdatedAt.Time.String(),
 	}
@@ -196,7 +196,7 @@ func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookin
 	return response, nil
 }
 
-func (s *CreateMyBookingService) createBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingId int64, services []booking.BookingServiceInfo) error {
+func (s *CreateMyBookingService) createBookingDetails(ctx context.Context, qtx *dbgen.Queries, bookingId int64, services []bookingModel.BookingServiceInfo) error {
 	for _, service := range services {
 		detailId := utils.GenerateID()
 

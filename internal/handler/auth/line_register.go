@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
+	authModel "github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -23,7 +23,7 @@ func NewCustomerLineRegisterHandler(service authService.CustomerLineRegisterServ
 }
 
 func (h *CustomerLineRegisterHandler) CustomerLineRegister(c *gin.Context) {
-	var req auth.CustomerLineRegisterRequest
+	var req authModel.CustomerLineRegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
@@ -31,7 +31,7 @@ func (h *CustomerLineRegisterHandler) CustomerLineRegister(c *gin.Context) {
 	}
 
 	// Create login context
-	loginCtx := auth.CustomerLoginContext{
+	loginCtx := authModel.CustomerLoginContext{
 		UserAgent: c.GetHeader("User-Agent"),
 		IPAddress: c.ClientIP(),
 		Timestamp: time.Now(),

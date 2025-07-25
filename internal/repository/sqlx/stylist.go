@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/stylist"
+	adminStylistModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/stylist"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // StylistRepositoryInterface defines the interface for stylist repository
 type StylistRepositoryInterface interface {
-	UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateMyStylistRequest) (*stylist.UpdateMyStylistResponse, error)
+	UpdateStylist(ctx context.Context, staffUserID int64, req adminStylistModel.UpdateMyStylistRequest) (*adminStylistModel.UpdateMyStylistResponse, error)
 }
 
 type StylistRepository struct {
@@ -25,7 +25,7 @@ func NewStylistRepository(db *sqlx.DB) *StylistRepository {
 }
 
 // UpdateStylist updates stylist with dynamic fields
-func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req stylist.UpdateMyStylistRequest) (*stylist.UpdateMyStylistResponse, error) {
+func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req adminStylistModel.UpdateMyStylistRequest) (*adminStylistModel.UpdateMyStylistResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"staff_user_id": staffUserID,
@@ -87,7 +87,7 @@ func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &stylist.UpdateMyStylistResponse{
+	response := &adminStylistModel.UpdateMyStylistResponse{
 		ID:           utils.FormatID(result.ID),
 		StaffUserID:  utils.FormatID(staffUserID),
 		StylistName:  result.Name.String,

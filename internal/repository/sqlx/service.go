@@ -7,11 +7,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/service"
+	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
 )
 
 type ServiceRepositoryInterface interface {
-	UpdateService(ctx context.Context, serviceID int64, req service.UpdateServiceRequest) (*service.UpdateServiceResponse, error)
+	UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error)
 }
 
 type ServiceRepository struct {
@@ -24,7 +24,7 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 	}
 }
 
-func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, req service.UpdateServiceRequest) (*service.UpdateServiceResponse, error) {
+func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error) {
 	setParts := []string{}
 	args := []interface{}{}
 	argIndex := 1
@@ -79,9 +79,9 @@ func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, 
 	whereClause := fmt.Sprintf("WHERE id = $%d", argIndex)
 
 	query := fmt.Sprintf(`
-		UPDATE services 
-		SET %s 
-		%s 
+		UPDATE services
+		SET %s
+		%s
 		RETURNING id, name, price, duration_minutes, is_addon, is_visible, is_active, note
 	`, strings.Join(setParts, ", "), whereClause)
 
@@ -101,7 +101,7 @@ func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, 
 		return nil, err
 	}
 
-	return &service.UpdateServiceResponse{
+	return &adminServiceModel.UpdateServiceResponse{
 		ID:              fmt.Sprintf("%d", result.ID),
 		Name:            result.Name,
 		Price:           result.Price,

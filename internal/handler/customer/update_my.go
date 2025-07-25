@@ -8,7 +8,7 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -25,7 +25,7 @@ func NewUpdateMyCustomerHandler(service customerService.UpdateMyCustomerServiceI
 
 // UpdateMyCustomer handles PATCH /api/customers/me
 func (h *UpdateMyCustomerHandler) UpdateMyCustomer(c *gin.Context) {
-	var req customer.UpdateMyCustomerRequest
+	var req customerModel.UpdateMyCustomerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
