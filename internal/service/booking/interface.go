@@ -22,3 +22,7 @@ type CancelMyBookingServiceInterface interface {
 type GetMyBookingsServiceInterface interface {
 	GetMyBookings(ctx context.Context, queryParams bookingModel.GetMyBookingsQueryParams, customerContext common.CustomerContext) (*bookingModel.GetMyBookingsResponse, error)
 }
+
+type GetMyBookingServiceInterface interface {
+	GetMyBooking(ctx context.Context, bookingIDStr string, customerContext common.CustomerContext) (*bookingModel.GetMyBookingResponse, error)
+}

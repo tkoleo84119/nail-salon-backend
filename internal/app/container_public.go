@@ -27,10 +27,11 @@ type PublicServices struct {
 	CustomerUpdateMy *customerService.UpdateMyCustomerService
 
 	// Booking services
-	BookingCreateMy *bookingService.CreateMyBookingService
-	BookingUpdateMy *bookingService.UpdateMyBookingService
-	BookingCancelMy bookingService.CancelMyBookingServiceInterface
-	BookingGetMy    bookingService.GetMyBookingsServiceInterface
+	BookingCreateMy     *bookingService.CreateMyBookingService
+	BookingUpdateMy     *bookingService.UpdateMyBookingService
+	BookingCancelMy     bookingService.CancelMyBookingServiceInterface
+	BookingGetMy        bookingService.GetMyBookingsServiceInterface
+	BookingGetMySingle  bookingService.GetMyBookingServiceInterface
 }
 
 // PublicHandlers contains all public/customer-facing handlers
@@ -44,10 +45,11 @@ type PublicHandlers struct {
 	CustomerUpdateMy *customerHandler.UpdateMyCustomerHandler
 
 	// Booking handlers
-	BookingCreateMy *bookingHandler.CreateMyBookingHandler
-	BookingUpdateMy *bookingHandler.UpdateMyBookingHandler
-	BookingCancelMy *bookingHandler.CancelMyBookingHandler
-	BookingGetMy    *bookingHandler.GetMyBookingsHandler
+	BookingCreateMy     *bookingHandler.CreateMyBookingHandler
+	BookingUpdateMy     *bookingHandler.UpdateMyBookingHandler
+	BookingCancelMy     *bookingHandler.CancelMyBookingHandler
+	BookingGetMy        *bookingHandler.GetMyBookingsHandler
+	BookingGetMySingle  *bookingHandler.GetMyBookingHandler
 }
 
 // NewPublicServices creates and initializes all public services
@@ -62,10 +64,11 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		CustomerUpdateMy: customerService.NewUpdateMyCustomerService(queries, repositories.Customer),
 
 		// Booking services
-		BookingCreateMy: bookingService.NewCreateMyBookingService(queries, database.PgxPool),
-		BookingUpdateMy: bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
-		BookingCancelMy: bookingService.NewCancelMyBookingService(queries),
-		BookingGetMy:    bookingService.NewGetMyBookingsService(repositories.Booking),
+		BookingCreateMy:     bookingService.NewCreateMyBookingService(queries, database.PgxPool),
+		BookingUpdateMy:     bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
+		BookingCancelMy:     bookingService.NewCancelMyBookingService(queries),
+		BookingGetMy:        bookingService.NewGetMyBookingsService(repositories.Booking),
+		BookingGetMySingle:  bookingService.NewGetMyBookingService(queries),
 	}
 }
 
@@ -81,9 +84,10 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		CustomerUpdateMy: customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
 
 		// Booking handlers
-		BookingCreateMy: bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
-		BookingUpdateMy: bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
-		BookingCancelMy: bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
-		BookingGetMy:    bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
+		BookingCreateMy:     bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
+		BookingUpdateMy:     bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
+		BookingCancelMy:     bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
+		BookingGetMy:        bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
+		BookingGetMySingle:  bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
 	}
 }
