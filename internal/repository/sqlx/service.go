@@ -25,7 +25,7 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 }
 
 func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error) {
-	setParts := []string{}
+	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
 	argIndex := 1
 
@@ -70,9 +70,6 @@ func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, 
 		args = append(args, *req.Note)
 		argIndex++
 	}
-
-	// Always update updated_at
-	setParts = append(setParts, fmt.Sprintf("updated_at = NOW()"))
 
 	// Add WHERE clause
 	args = append(args, serviceID)

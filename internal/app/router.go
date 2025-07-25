@@ -39,29 +39,30 @@ func SetupRoutes(container *Container) *gin.Engine {
 			setupAdminServiceRoutes(admin, cfg, queries, handlers)
 			setupAdminScheduleRoutes(admin, cfg, queries, handlers)
 			setupAdminTimeSlotTemplateRoutes(admin, cfg, queries, handlers)
-			setupAdminBookingRoutes(admin, cfg, queries, handlers)
-			setupAdminCustomerRoutes(admin, cfg, queries, handlers)
 		}
 	}
 
 	return router
 }
 
+// Public route setup functions
 func setupPublicAuthRoutes(api *gin.RouterGroup, handlers Handlers) {
 	auth := api.Group("/auth")
 	{
 		line := auth.Group("/line")
 		{
-			line.POST("/login", handlers.AuthCustomerLineLogin.CustomerLineLogin)
-			line.POST("/register", handlers.AuthCustomerLineRegister.CustomerLineRegister)
+			line.POST("/login", handlers.Public.AuthCustomerLineLogin.CustomerLineLogin)
+			line.POST("/register", handlers.Public.AuthCustomerLineRegister.CustomerLineRegister)
 		}
 	}
 }
 
-func setupAdminAuthRoutes(admin *gin.RouterGroup, handlers Handlers) {
-	auth := admin.Group("/auth")
+func setupPublicCustomerRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	customers := api.Group("/customers")
 	{
-		auth.POST("/login", handlers.AuthStaffLogin.StaffLogin)
+		// Customer self-service
+		customers.GET("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerGetMy.GetMyCustomer)
+		customers.PATCH("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerUpdateMy.UpdateMyCustomer)
 	}
 }
 
@@ -69,52 +70,43 @@ func setupPublicBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries 
 	bookings := api.Group("/bookings")
 	{
 		// Customer booking operations
-		bookings.POST("", middleware.CustomerJWTAuth(*cfg, queries), handlers.BookingCreateMy.CreateMyBooking)
-		bookings.PATCH("/:bookingId", middleware.CustomerJWTAuth(*cfg, queries), handlers.BookingUpdateMy.UpdateMyBooking)
-		bookings.PATCH("/:bookingId/cancel", middleware.CustomerJWTAuth(*cfg, queries), handlers.BookingCancelMy.CancelMyBooking)
+		bookings.POST("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingCreateMy.CreateMyBooking)
+		bookings.PATCH("/:bookingId", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingUpdateMy.UpdateMyBooking)
+		bookings.PATCH("/:bookingId/cancel", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingCancelMy.CancelMyBooking)
 	}
 }
 
-func setupAdminBookingRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-}
-
-func setupPublicCustomerRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	customers := api.Group("/customers")
-	{
-		// Customer self-service
-		customers.GET("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.CustomerGetMy.GetMyCustomer)
-		customers.PATCH("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.CustomerUpdateMy.UpdateMyCustomer)
-	}
-}
-
-func setupAdminCustomerRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-}
-
-func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-}
-
-func setupAdminScheduleRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	schedules := admin.Group("/schedules")
-	{
-		// Bulk operations
-		schedules.POST("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleCreateBulk.CreateSchedulesBulk)
-		schedules.DELETE("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleDeleteBulk.DeleteSchedulesBulk)
-
-		// Time slot operations
-		schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleCreateTimeSlot.CreateTimeSlot)
-		schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleUpdateTimeSlot.UpdateTimeSlot)
-		schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.AdminScheduleDeleteTimeSlot.DeleteTimeSlot)
-	}
+func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	// TODO: Add public store routes for browsing
+	// stores := api.Group("/stores")
+	// {
+	// 	stores.GET("", handlers.Public.StoreList.List)
+	// 	stores.GET("/:storeId", handlers.Public.StoreGet.Get)
+	// 	stores.GET("/:storeId/stylists", handlers.Public.StoreStylists.List)
+	// 	stores.GET("/:storeId/services", handlers.Public.StoreServices.List)
+	// }
 }
 
 func setupPublicServiceRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	// TODO: Add public service routes for browsing
+	// services := api.Group("/services")
+	// {
+	// 	services.GET("", handlers.Public.ServiceList.List)
+	// 	services.GET("/:serviceId", handlers.Public.ServiceGet.Get)
+	// }
 }
 
-func setupAdminServiceRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	services := admin.Group("/services")
+func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	// TODO: Add public schedule routes for browsing
+	// api.GET("/stores/:storeId/schedules", handlers.Public.SchedulesByStore.List)
+	// api.GET("/schedules/:scheduleId/time-slots", handlers.Public.TimeSlotsBySchedule.List)
+}
+
+// Admin route setup functions
+func setupAdminAuthRoutes(admin *gin.RouterGroup, handlers Handlers) {
+	auth := admin.Group("/auth")
 	{
-		services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminServiceCreate.CreateService)
-		services.PATCH("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminServiceUpdate.UpdateService)
+		auth.POST("/login", handlers.Admin.AuthStaffLogin.StaffLogin)
 	}
 }
 
@@ -122,25 +114,13 @@ func setupAdminStaffRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 	staff := admin.Group("/staff")
 	{
 		// Staff management
-		staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffCreate.CreateStaff)
-		staff.PATCH("/:staffId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffUpdate.UpdateStaff)
-		staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.AdminStaffUpdateMe.UpdateMyStaff)
+		staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffCreate.CreateStaff)
+		staff.PATCH("/:staffId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffUpdate.UpdateStaff)
+		staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.Admin.StaffUpdateMe.UpdateMyStaff)
 
 		// Store access management
-		staff.POST("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffStoreAccess.CreateStoreAccess)
-		staff.DELETE("/:staffId/store-access/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStaffDeleteStoreAccess.DeleteStoreAccessBulk)
-
-	}
-}
-
-func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-}
-
-func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	stores := admin.Group("/stores")
-	{
-		stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStoreCreate.CreateStore)
-		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.AdminStoreUpdate.UpdateStore)
+		staff.POST("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffStoreAccess.CreateStoreAccess)
+		staff.DELETE("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffDeleteStoreAccess.DeleteStoreAccessBulk)
 	}
 }
 
@@ -148,8 +128,38 @@ func setupAdminStylistRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	stylists := admin.Group("/stylists")
 	{
 		// Self-service stylist operations
-		stylists.POST("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.AdminStylistCreate.CreateMyStylist)
-		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.AdminStylistUpdate.UpdateMyStylist)
+		stylists.POST("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.Admin.StylistCreate.CreateMyStylist)
+		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.Admin.StylistUpdate.UpdateMyStylist)
+	}
+}
+
+func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	stores := admin.Group("/stores")
+	{
+		stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreCreate.CreateStore)
+		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreUpdate.UpdateStore)
+	}
+}
+
+func setupAdminServiceRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	services := admin.Group("/services")
+	{
+		services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceCreate.CreateService)
+		services.PATCH("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceUpdate.UpdateService)
+	}
+}
+
+func setupAdminScheduleRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	schedules := admin.Group("/schedules")
+	{
+		// Bulk operations
+		schedules.POST("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateBulk.CreateSchedulesBulk)
+		schedules.DELETE("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleDeleteBulk.DeleteSchedulesBulk)
+
+		// Time slot operations
+		schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateTimeSlot.CreateTimeSlot)
+		schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleUpdateTimeSlot.UpdateTimeSlot)
+		schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleDeleteTimeSlot.DeleteTimeSlot)
 	}
 }
 
@@ -157,13 +167,13 @@ func setupAdminTimeSlotTemplateRoutes(admin *gin.RouterGroup, cfg *config.Config
 	timeSlotTemplates := admin.Group("/time-slot-templates")
 	{
 		// Template management
-		timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateCreate.CreateTimeSlotTemplate)
-		timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateUpdate.UpdateTimeSlotTemplate)
-		timeSlotTemplates.DELETE("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateDelete.DeleteTimeSlotTemplate)
+		timeSlotTemplates.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateCreate.CreateTimeSlotTemplate)
+		timeSlotTemplates.PATCH("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateUpdate.UpdateTimeSlotTemplate)
+		timeSlotTemplates.DELETE("/:templateId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateDelete.DeleteTimeSlotTemplate)
 
 		// Template item management
-		timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateCreateItem.CreateTimeSlotTemplateItem)
-		timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateUpdateItem.UpdateTimeSlotTemplateItem)
-		timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.AdminTimeSlotTemplateDeleteItem.DeleteTimeSlotTemplateItem)
+		timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateCreateItem.CreateTimeSlotTemplateItem)
+		timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateUpdateItem.UpdateTimeSlotTemplateItem)
+		timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateDeleteItem.DeleteTimeSlotTemplateItem)
 	}
 }
