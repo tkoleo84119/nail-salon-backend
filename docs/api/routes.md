@@ -31,12 +31,12 @@ This document lists all API routes in the nail salon backend system, organized b
 | GET    | `/api/services/:serviceId` | Get service details | 🔄 TODO |
 
 ### Browse Stores (Read-only)
-| Method | Endpoint                        | Description         | Status |
-| ------ | ------------------------------- | ------------------- | ------ |
-| GET    | `/api/stores`                   | List stores         | 🔄 TODO |
-| GET    | `/api/stores/:storeId`          | Get store details   | 🔄 TODO |
-| GET    | `/api/stores/:storeId/stylists` | List store stylists | 🔄 TODO |
-| GET    | `/api/stores/:storeId/services` | List store services | 🔄 TODO |
+| Method | Endpoint                        | Description         | Status        |
+| ------ | ------------------------------- | ------------------- | ------------- |
+| GET    | `/api/stores`                   | List stores         | 🔄 TODO        |
+| GET    | `/api/stores/:storeId`          | Get store details   | 🔄 TODO        |
+| GET    | `/api/stores/:storeId/stylists` | List store stylists | 🔄 TODO        |
+| GET    | `/api/stores/:storeId/services` | List store services | ✅ Implemented |
 
 ### Browse Schedules & Time Slots (Read-only)
 | Method | Endpoint                                | Description               | Status |

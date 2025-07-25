@@ -9,11 +9,13 @@ import (
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	bookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/booking"
 	customerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer"
+	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
 
 	// Public services
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	bookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/booking"
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
+	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
 )
 
 // PublicServices contains all public/customer-facing services
@@ -32,6 +34,9 @@ type PublicServices struct {
 	BookingCancelMy     bookingService.CancelMyBookingServiceInterface
 	BookingGetMy        bookingService.GetMyBookingsServiceInterface
 	BookingGetMySingle  bookingService.GetMyBookingServiceInterface
+
+	// Store services
+	StoreGetServices storeService.GetStoreServicesServiceInterface
 }
 
 // PublicHandlers contains all public/customer-facing handlers
@@ -50,6 +55,9 @@ type PublicHandlers struct {
 	BookingCancelMy     *bookingHandler.CancelMyBookingHandler
 	BookingGetMy        *bookingHandler.GetMyBookingsHandler
 	BookingGetMySingle  *bookingHandler.GetMyBookingHandler
+
+	// Store handlers
+	StoreGetServices *storeHandler.GetStoreServicesHandler
 }
 
 // NewPublicServices creates and initializes all public services
@@ -69,6 +77,9 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		BookingCancelMy:     bookingService.NewCancelMyBookingService(queries),
 		BookingGetMy:        bookingService.NewGetMyBookingsService(repositories.Booking),
 		BookingGetMySingle:  bookingService.NewGetMyBookingService(queries),
+
+		// Store services
+		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.Service),
 	}
 }
 
@@ -89,5 +100,8 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		BookingCancelMy:     bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
 		BookingGetMy:        bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
 		BookingGetMySingle:  bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
+
+		// Store handlers
+		StoreGetServices: storeHandler.NewGetStoreServicesHandler(services.StoreGetServices),
 	}
 }
