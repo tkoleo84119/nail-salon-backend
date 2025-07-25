@@ -36,7 +36,8 @@ type PublicServices struct {
 	BookingGetMySingle  bookingService.GetMyBookingServiceInterface
 
 	// Store services
-	StoreGetServices storeService.GetStoreServicesServiceInterface
+	StoreGetServices  storeService.GetStoreServicesServiceInterface
+	StoreGetStylists  storeService.GetStoreStylistsServiceInterface
 }
 
 // PublicHandlers contains all public/customer-facing handlers
@@ -57,7 +58,8 @@ type PublicHandlers struct {
 	BookingGetMySingle  *bookingHandler.GetMyBookingHandler
 
 	// Store handlers
-	StoreGetServices *storeHandler.GetStoreServicesHandler
+	StoreGetServices  *storeHandler.GetStoreServicesHandler
+	StoreGetStylists  *storeHandler.GetStoreStylistsHandler
 }
 
 // NewPublicServices creates and initializes all public services
@@ -80,6 +82,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 
 		// Store services
 		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.Service),
+		StoreGetStylists: storeService.NewGetStoreStylistsService(queries, repositories.Stylist),
 	}
 }
 
@@ -103,5 +106,6 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 
 		// Store handlers
 		StoreGetServices: storeHandler.NewGetStoreServicesHandler(services.StoreGetServices),
+		StoreGetStylists: storeHandler.NewGetStoreStylistsHandler(services.StoreGetStylists),
 	}
 }

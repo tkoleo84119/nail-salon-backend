@@ -13,19 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStoreServicesHandler struct {
-	service storeService.GetStoreServicesServiceInterface
+type GetStoreStylistsHandler struct {
+	service storeService.GetStoreStylistsServiceInterface
 }
 
-func NewGetStoreServicesHandler(service storeService.GetStoreServicesServiceInterface) *GetStoreServicesHandler {
-	return &GetStoreServicesHandler{
+func NewGetStoreStylistsHandler(service storeService.GetStoreStylistsServiceInterface) *GetStoreStylistsHandler {
+	return &GetStoreStylistsHandler{
 		service: service,
 	}
 }
 
-func (h *GetStoreServicesHandler) GetStoreServices(c *gin.Context) {
+func (h *GetStoreStylistsHandler) GetStoreStylists(c *gin.Context) {
 	// Query parameter validation
-	var queryParams storeModel.GetStoreServicesQueryParams
+	var queryParams storeModel.GetStoreStylistsQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
@@ -53,8 +53,8 @@ func (h *GetStoreServicesHandler) GetStoreServices(c *gin.Context) {
 		queryParams.Limit = 20
 	}
 
-	// Service layer call (no authentication required per spec)
-	response, err := h.service.GetStoreServices(c.Request.Context(), storeID, queryParams)
+	// Service layer call
+	response, err := h.service.GetStoreStylists(c.Request.Context(), storeID, queryParams)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

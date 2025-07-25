@@ -82,12 +82,14 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 	stores := api.Group("/stores")
 	{
 		// Store services browsing (no authentication required)
-		stores.GET("/:storeId/services", handlers.Public.StoreGetServices.GetStoreServices)
-		
+		stores.GET("/:storeId/services", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetServices.GetStoreServices)
+
+		// Store stylists browsing (customer authentication required)
+		stores.GET("/:storeId/stylists", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStylists.GetStoreStylists)
+
 		// TODO: Add other public store routes for browsing
 		// stores.GET("", handlers.Public.StoreList.List)
 		// stores.GET("/:storeId", handlers.Public.StoreGet.Get)
-		// stores.GET("/:storeId/stylists", handlers.Public.StoreStylists.List)
 	}
 }
 
