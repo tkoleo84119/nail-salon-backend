@@ -23,8 +23,9 @@ import (
 // PublicServices contains all public/customer-facing services
 type PublicServices struct {
 	// Authentication services
-	AuthCustomerLineLogin    *authService.CustomerLineLoginService
-	AuthCustomerLineRegister *authService.CustomerLineRegisterService
+	AuthCustomerLineLogin    authService.CustomerLineLoginServiceInterface
+	AuthCustomerLineRegister authService.CustomerLineRegisterServiceInterface
+	AuthRefreshToken         authService.RefreshTokenServiceInterface
 
 	// Customer services
 	CustomerGetMy    *customerService.GetMyCustomerService
@@ -53,6 +54,7 @@ type PublicHandlers struct {
 	// Authentication handlers
 	AuthCustomerLineLogin    *authHandler.CustomerLineLoginHandler
 	AuthCustomerLineRegister *authHandler.CustomerLineRegisterHandler
+	AuthRefreshToken         *authHandler.RefreshTokenHandler
 
 	// Customer handlers
 	CustomerGetMy    *customerHandler.GetMyCustomerHandler
@@ -82,6 +84,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		// Authentication services
 		AuthCustomerLineLogin:    authService.NewCustomerLineLoginService(queries, cfg.Line, cfg.JWT),
 		AuthCustomerLineRegister: authService.NewCustomerLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT),
+		AuthRefreshToken:         authService.NewRefreshTokenService(queries, cfg.JWT),
 
 		// Customer services
 		CustomerGetMy:    customerService.NewGetMyCustomerService(queries),
@@ -112,6 +115,7 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		// Authentication handlers
 		AuthCustomerLineLogin:    authHandler.NewCustomerLineLoginHandler(services.AuthCustomerLineLogin),
 		AuthCustomerLineRegister: authHandler.NewCustomerLineRegisterHandler(services.AuthCustomerLineRegister),
+		AuthRefreshToken:         authHandler.NewRefreshTokenHandler(services.AuthRefreshToken),
 
 		// Customer handlers
 		CustomerGetMy:    customerHandler.NewGetMyCustomerHandler(services.CustomerGetMy),

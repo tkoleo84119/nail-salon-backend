@@ -3,16 +3,17 @@ package errors
 // Error codes constants for easy reference
 const (
 	// AUTH - Authentication related errors
-	AuthInvalidCredentials = "AUTH_INVALID_CREDENTIALS"
-	AuthTokenExpired       = "AUTH_TOKEN_EXPIRED"
-	AuthTokenInvalid       = "AUTH_TOKEN_INVALID"
-	AuthTokenMissing       = "AUTH_TOKEN_MISSING"
-	AuthTokenFormatError   = "AUTH_TOKEN_FORMAT_ERROR"
-	AuthStaffFailed        = "AUTH_STAFF_FAILED"
-	AuthContextMissing     = "AUTH_CONTEXT_MISSING"
-	AuthPermissionDenied   = "AUTH_PERMISSION_DENIED"
-	AuthLineTokenInvalid   = "AUTH_LINE_TOKEN_INVALID"
-	AuthLineTokenExpired   = "AUTH_LINE_TOKEN_EXPIRED"
+	AuthInvalidCredentials  = "AUTH_INVALID_CREDENTIALS"
+	AuthTokenExpired        = "AUTH_TOKEN_EXPIRED"
+	AuthTokenInvalid        = "AUTH_TOKEN_INVALID"
+	AuthTokenMissing        = "AUTH_TOKEN_MISSING"
+	AuthTokenFormatError    = "AUTH_TOKEN_FORMAT_ERROR"
+	AuthStaffFailed         = "AUTH_STAFF_FAILED"
+	AuthContextMissing      = "AUTH_CONTEXT_MISSING"
+	AuthPermissionDenied    = "AUTH_PERMISSION_DENIED"
+	AuthLineTokenInvalid    = "AUTH_LINE_TOKEN_INVALID"
+	AuthLineTokenExpired    = "AUTH_LINE_TOKEN_EXPIRED"
+	AuthRefreshTokenInvalid = "AUTH_REFRESH_TOKEN_INVALID"
 
 	// BOOKING - Booking operation errors
 	BookingNotFound                 = "BOOKING_NOT_FOUND"

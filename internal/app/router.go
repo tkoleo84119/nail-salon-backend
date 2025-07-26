@@ -54,6 +54,11 @@ func setupPublicAuthRoutes(api *gin.RouterGroup, handlers Handlers) {
 			line.POST("/login", handlers.Public.AuthCustomerLineLogin.CustomerLineLogin)
 			line.POST("/register", handlers.Public.AuthCustomerLineRegister.CustomerLineRegister)
 		}
+
+		token := auth.Group("/token")
+		{
+			token.POST("/refresh", handlers.Public.AuthRefreshToken.RefreshToken)
+		}
 	}
 }
 

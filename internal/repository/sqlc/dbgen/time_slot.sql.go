@@ -150,10 +150,10 @@ SELECT
     ts.created_at,
     ts.updated_at
 FROM time_slots ts
-LEFT JOIN booking_details bd ON ts.id = bd.time_slot_id AND bd.status != 'CANCELLED'
-WHERE ts.schedule_id = $1 
+LEFT JOIN bookings b ON ts.id = b.time_slot_id AND b.status != 'CANCELLED'
+WHERE ts.schedule_id = $1
   AND ts.is_available = true
-  AND bd.id IS NULL
+  AND b.id IS NULL
 ORDER BY ts.start_time
 `
 

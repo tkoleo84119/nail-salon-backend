@@ -87,3 +87,16 @@ type CustomerRegisteredCustomer struct {
 	Phone    string `json:"phone"`
 	Birthday string `json:"birthday"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// RefreshTokenRequest represents the request for refreshing access token
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required,min=1"`
+}
+
+// RefreshTokenResponse represents the response for refresh token
+type RefreshTokenResponse struct {
+	AccessToken string `json:"accessToken"`
+	ExpiresIn   int    `json:"expiresIn"`
+}

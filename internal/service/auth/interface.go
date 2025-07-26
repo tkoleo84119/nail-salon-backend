@@ -13,3 +13,7 @@ type CustomerLineLoginServiceInterface interface {
 type CustomerLineRegisterServiceInterface interface {
 	CustomerLineRegister(ctx context.Context, req auth.CustomerLineRegisterRequest, loginCtx auth.CustomerLoginContext) (*auth.CustomerLineRegisterResponse, error)
 }
+
+type RefreshTokenServiceInterface interface {
+	RefreshToken(ctx context.Context, req auth.RefreshTokenRequest) (*auth.RefreshTokenResponse, error)
+}

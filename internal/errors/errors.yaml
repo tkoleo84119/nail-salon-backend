@@ -29,6 +29,9 @@ AUTH:
   AUTH_LINE_TOKEN_EXPIRED:
     message: idToken 已過期
     status: 400
+  AUTH_REFRESH_TOKEN_INVALID:
+    message: Refresh token 無效或已過期
+    status: 401
 
 BOOKING:
   BOOKING_NOT_FOUND:

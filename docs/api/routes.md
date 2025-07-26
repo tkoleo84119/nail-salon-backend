@@ -9,6 +9,7 @@ This document lists all API routes in the nail salon backend system, organized b
 | ------ | ------------------------- | -------------------------- | ------------- |
 | POST   | `/api/auth/line/login`    | Customer LINE login        | ✅ Implemented |
 | POST   | `/api/auth/line/register` | Customer LINE registration | ✅ Implemented |
+| POST   | `/api/auth/token/refresh` | Refresh access token       | ✅ Implemented |
 
 ### Customer Profile
 | Method | Endpoint            | Description       | Status        |
