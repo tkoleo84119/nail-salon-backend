@@ -139,6 +139,7 @@ func setupAdminStaffRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		// Staff management
 		staff.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffGetList.GetStaffList)
 		staff.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffCreate.CreateStaff)
+		staff.GET("/:staffId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffGet.GetStaff)
 		staff.PATCH("/:staffId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffUpdate.UpdateStaff)
 		staff.GET("/me", middleware.JWTAuth(*cfg, queries), handlers.Admin.StaffGetMe.GetMyStaff)
 		staff.PATCH("/me", middleware.JWTAuth(*cfg, queries), handlers.Admin.StaffUpdateMe.UpdateMyStaff)

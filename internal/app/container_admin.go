@@ -34,6 +34,7 @@ type AdminServices struct {
 	StaffCreate            *adminStaffService.CreateStaffService
 	StaffUpdate            *adminStaffService.UpdateStaffService
 	StaffUpdateMe          *adminStaffService.UpdateMyStaffService
+	StaffGet               adminStaffService.GetStaffServiceInterface
 	StaffGetMe             adminStaffService.GetMyStaffServiceInterface
 	StaffGetList           adminStaffService.GetStaffListServiceInterface
 	StaffStoreAccess       *adminStaffService.CreateStoreAccessService
@@ -77,6 +78,7 @@ type AdminHandlers struct {
 	StaffCreate            *adminStaffHandler.CreateStaffHandler
 	StaffUpdate            *adminStaffHandler.UpdateStaffHandler
 	StaffUpdateMe          *adminStaffHandler.UpdateMyStaffHandler
+	StaffGet               *adminStaffHandler.GetStaffHandler
 	StaffGetMe             *adminStaffHandler.GetMyStaffHandler
 	StaffGetList           *adminStaffHandler.GetStaffListHandler
 	StaffStoreAccess       *adminStaffHandler.CreateStoreAccessHandler
@@ -121,6 +123,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffCreate:            adminStaffService.NewCreateStaffService(queries, database.PgxPool),
 		StaffUpdate:            adminStaffService.NewUpdateStaffService(queries, database.Sqlx),
 		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(queries, repositories.StaffUser),
+		StaffGet:               adminStaffService.NewGetStaffService(queries),
 		StaffGetMe:             adminStaffService.NewGetMyStaffService(queries),
 		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.StaffUser),
 		StaffStoreAccess:       adminStaffService.NewCreateStoreAccessService(queries),
@@ -166,6 +169,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StaffCreate:            adminStaffHandler.NewCreateStaffHandler(services.StaffCreate),
 		StaffUpdate:            adminStaffHandler.NewUpdateStaffHandler(services.StaffUpdate),
 		StaffUpdateMe:          adminStaffHandler.NewUpdateMyStaffHandler(services.StaffUpdateMe),
+		StaffGet:               adminStaffHandler.NewGetStaffHandler(services.StaffGet),
 		StaffGetMe:             adminStaffHandler.NewGetMyStaffHandler(services.StaffGetMe),
 		StaffGetList:           adminStaffHandler.NewGetStaffListHandler(services.StaffGetList),
 		StaffStoreAccess:       adminStaffHandler.NewCreateStoreAccessHandler(services.StaffStoreAccess),

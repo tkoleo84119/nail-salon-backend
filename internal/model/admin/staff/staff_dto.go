@@ -104,3 +104,26 @@ type GetMyStaffResponse struct {
 	Role     string `json:"role"`
 	IsActive bool   `json:"isActive"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetStaffResponse represents the response for a specific staff member with optional stylist information
+type GetStaffResponse struct {
+	ID        string            `json:"id"`
+	Username  string            `json:"username"`
+	Email     string            `json:"email"`
+	Role      string            `json:"role"`
+	IsActive  bool              `json:"isActive"`
+	CreatedAt time.Time         `json:"createdAt"`
+	Stylist   *StaffStylistInfo `json:"stylist"`
+}
+
+// StaffStylistInfo represents stylist information within staff response
+type StaffStylistInfo struct {
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	GoodAtShapes []string `json:"goodAtShapes"`
+	GoodAtColors []string `json:"goodAtColors"`
+	GoodAtStyles []string `json:"goodAtStyles"`
+	IsIntrovert  bool     `json:"isIntrovert"`
+}
