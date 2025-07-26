@@ -80,7 +80,7 @@ type GetStaffListRequest struct {
 
 // GetStaffListResponse represents the response for staff list
 type GetStaffListResponse struct {
-	Total int                 `json:"total"`
+	Total int                `json:"total"`
 	Items []StaffListItemDTO `json:"items"`
 }
 
@@ -126,4 +126,17 @@ type StaffStylistInfo struct {
 	GoodAtColors []string `json:"goodAtColors"`
 	GoodAtStyles []string `json:"goodAtStyles"`
 	IsIntrovert  bool     `json:"isIntrovert"`
+}
+
+// -------------------------------------------------------------------------------------
+
+// GetStaffStoreAccessResponse represents the response for staff store access list
+type GetStaffStoreAccessResponse struct {
+	StoreList []StaffStoreAccessItem `json:"storeList"`
+}
+
+// StaffStoreAccessItem represents a single store access item
+type StaffStoreAccessItem struct {
+	StoreID string `json:"storeId"`
+	Name    string `json:"name"`
 }

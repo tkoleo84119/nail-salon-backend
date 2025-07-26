@@ -37,6 +37,7 @@ type AdminServices struct {
 	StaffGet               adminStaffService.GetStaffServiceInterface
 	StaffGetMe             adminStaffService.GetMyStaffServiceInterface
 	StaffGetList           adminStaffService.GetStaffListServiceInterface
+	StaffGetStoreAccess    adminStaffService.GetStaffStoreAccessServiceInterface
 	StaffStoreAccess       *adminStaffService.CreateStoreAccessService
 	StaffDeleteStoreAccess *adminStaffService.DeleteStoreAccessBulkService
 
@@ -81,6 +82,7 @@ type AdminHandlers struct {
 	StaffGet               *adminStaffHandler.GetStaffHandler
 	StaffGetMe             *adminStaffHandler.GetMyStaffHandler
 	StaffGetList           *adminStaffHandler.GetStaffListHandler
+	StaffGetStoreAccess    *adminStaffHandler.GetStaffStoreAccessHandler
 	StaffStoreAccess       *adminStaffHandler.CreateStoreAccessHandler
 	StaffDeleteStoreAccess *adminStaffHandler.DeleteStoreAccessBulkHandler
 
@@ -126,6 +128,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffGet:               adminStaffService.NewGetStaffService(queries),
 		StaffGetMe:             adminStaffService.NewGetMyStaffService(queries),
 		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.StaffUser),
+		StaffGetStoreAccess:    adminStaffService.NewGetStaffStoreAccessService(queries),
 		StaffStoreAccess:       adminStaffService.NewCreateStoreAccessService(queries),
 		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(queries),
 
@@ -172,6 +175,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StaffGet:               adminStaffHandler.NewGetStaffHandler(services.StaffGet),
 		StaffGetMe:             adminStaffHandler.NewGetMyStaffHandler(services.StaffGetMe),
 		StaffGetList:           adminStaffHandler.NewGetStaffListHandler(services.StaffGetList),
+		StaffGetStoreAccess:    adminStaffHandler.NewGetStaffStoreAccessHandler(services.StaffGetStoreAccess),
 		StaffStoreAccess:       adminStaffHandler.NewCreateStoreAccessHandler(services.StaffStoreAccess),
 		StaffDeleteStoreAccess: adminStaffHandler.NewDeleteStoreAccessBulkHandler(services.StaffDeleteStoreAccess),
 

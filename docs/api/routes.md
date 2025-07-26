@@ -61,7 +61,7 @@ This document lists all API routes in the nail salon backend system, organized b
 ### Staff Store Access
 | Method | Endpoint                                      | Description                | Status        |
 | ------ | --------------------------------------------- | -------------------------- | ------------- |
-| GET    | `/api/admin/staff/:staffId/store-access`      | List staff store access    | 🔄 TODO        |
+| GET    | `/api/admin/staff/:staffId/store-access`      | List staff store access    | ✅ Implemented |
 | POST   | `/api/admin/staff/:staffId/store-access`      | Grant store access         | ✅ Implemented |
 | DELETE | `/api/admin/staff/:staffId/store-access/bulk` | Revoke store access (bulk) | ✅ Implemented |
 
@@ -83,12 +83,12 @@ This document lists all API routes in the nail salon backend system, organized b
 | DELETE | `/api/admin/services/:serviceId` | Deactivate service  | 🔄 TODO        |
 
 ### Stylist Management
-| Method | Endpoint                         | Description               | Status        |
-| ------ | -------------------------------- | ------------------------- | ------------- |
-| GET    | `/api/admin/stylists`            | List all stylists         | 🔄 TODO        |
-| GET    | `/api/admin/stylists/me`         | Get my stylist profile    | 🔄 TODO        |
-| POST   | `/api/admin/stylists/me`         | Create my stylist profile | ✅ Implemented |
-| PATCH  | `/api/admin/stylists/me`         | Update my stylist profile | ✅ Implemented |
+| Method | Endpoint                 | Description               | Status        |
+| ------ | ------------------------ | ------------------------- | ------------- |
+| GET    | `/api/admin/stylists`    | List all stylists         | 🔄 TODO        |
+| GET    | `/api/admin/stylists/me` | Get my stylist profile    | 🔄 TODO        |
+| POST   | `/api/admin/stylists/me` | Create my stylist profile | ✅ Implemented |
+| PATCH  | `/api/admin/stylists/me` | Update my stylist profile | ✅ Implemented |
 
 ### Schedule Management
 | Method | Endpoint                                                  | Description              | Status        |
