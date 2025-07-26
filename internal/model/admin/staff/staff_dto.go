@@ -1,6 +1,10 @@
 package adminStaff
 
-import "github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+import (
+	"time"
+
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+)
 
 // CreateStaffRequest represents the request to create a new staff member
 type CreateStaffRequest struct {
@@ -61,4 +65,31 @@ type UpdateMyStaffResponse struct {
 	Email    string `json:"email"`
 	Role     string `json:"role"`
 	IsActive bool   `json:"isActive"`
+}
+
+// -------------------------------------------------------------------------------------
+
+// GetStaffListRequest represents the request to get staff list with filtering
+type GetStaffListRequest struct {
+	Keyword  *string `form:"keyword"`
+	Role     *string `form:"role" binding:"omitempty,oneof=SUPER_ADMIN ADMIN MANAGER STYLIST"`
+	IsActive *bool   `form:"isActive"`
+	Limit    *int    `form:"limit" binding:"omitempty,min=1,max=100"`
+	Offset   *int    `form:"offset" binding:"omitempty,min=0"`
+}
+
+// GetStaffListResponse represents the response for staff list
+type GetStaffListResponse struct {
+	Total int                 `json:"total"`
+	Items []StaffListItemDTO `json:"items"`
+}
+
+// StaffListItemDTO represents a single staff item in the list
+type StaffListItemDTO struct {
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
+	IsActive  bool      `json:"isActive"`
+	CreatedAt time.Time `json:"createdAt"`
 }

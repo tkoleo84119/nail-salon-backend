@@ -34,6 +34,7 @@ type AdminServices struct {
 	StaffCreate            *adminStaffService.CreateStaffService
 	StaffUpdate            *adminStaffService.UpdateStaffService
 	StaffUpdateMe          *adminStaffService.UpdateMyStaffService
+	StaffGetList           adminStaffService.GetStaffListServiceInterface
 	StaffStoreAccess       *adminStaffService.CreateStoreAccessService
 	StaffDeleteStoreAccess *adminStaffService.DeleteStoreAccessBulkService
 
@@ -75,6 +76,7 @@ type AdminHandlers struct {
 	StaffCreate            *adminStaffHandler.CreateStaffHandler
 	StaffUpdate            *adminStaffHandler.UpdateStaffHandler
 	StaffUpdateMe          *adminStaffHandler.UpdateMyStaffHandler
+	StaffGetList           *adminStaffHandler.GetStaffListHandler
 	StaffStoreAccess       *adminStaffHandler.CreateStoreAccessHandler
 	StaffDeleteStoreAccess *adminStaffHandler.DeleteStoreAccessBulkHandler
 
@@ -117,6 +119,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffCreate:            adminStaffService.NewCreateStaffService(queries, database.PgxPool),
 		StaffUpdate:            adminStaffService.NewUpdateStaffService(queries, database.Sqlx),
 		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(queries, repositories.StaffUser),
+		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.StaffUser),
 		StaffStoreAccess:       adminStaffService.NewCreateStoreAccessService(queries),
 		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(queries),
 
@@ -160,6 +163,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StaffCreate:            adminStaffHandler.NewCreateStaffHandler(services.StaffCreate),
 		StaffUpdate:            adminStaffHandler.NewUpdateStaffHandler(services.StaffUpdate),
 		StaffUpdateMe:          adminStaffHandler.NewUpdateMyStaffHandler(services.StaffUpdateMe),
+		StaffGetList:           adminStaffHandler.NewGetStaffListHandler(services.StaffGetList),
 		StaffStoreAccess:       adminStaffHandler.NewCreateStoreAccessHandler(services.StaffStoreAccess),
 		StaffDeleteStoreAccess: adminStaffHandler.NewDeleteStoreAccessBulkHandler(services.StaffDeleteStoreAccess),
 

@@ -25,3 +25,7 @@ type CreateStoreAccessServiceInterface interface {
 type DeleteStoreAccessBulkServiceInterface interface {
 	DeleteStoreAccessBulk(ctx context.Context, targetID string, req adminStaffModel.DeleteStoreAccessBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.DeleteStoreAccessBulkResponse, error)
 }
+
+type GetStaffListServiceInterface interface {
+	GetStaffList(ctx context.Context, req adminStaffModel.GetStaffListRequest) (*adminStaffModel.GetStaffListResponse, error)
+}
