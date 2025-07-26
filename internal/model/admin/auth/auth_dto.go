@@ -42,3 +42,16 @@ type StaffTokenInfo struct {
 	Context      StaffLoginContext
 	ExpiresAt    time.Time
 }
+
+// -------------------------------------------------------------------------------------
+
+// StaffRefreshTokenRequest represents the request for refreshing staff access token
+type StaffRefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required,min=1"`
+}
+
+// StaffRefreshTokenResponse represents the response for staff refresh token
+type StaffRefreshTokenResponse struct {
+	AccessToken string `json:"accessToken"`
+	ExpiresIn   int    `json:"expiresIn"`
+}

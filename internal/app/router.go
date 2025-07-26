@@ -125,6 +125,11 @@ func setupAdminAuthRoutes(admin *gin.RouterGroup, handlers Handlers) {
 	auth := admin.Group("/auth")
 	{
 		auth.POST("/login", handlers.Admin.AuthStaffLogin.StaffLogin)
+		
+		token := auth.Group("/token")
+		{
+			token.POST("/refresh", handlers.Admin.AuthStaffRefreshToken.StaffRefreshToken)
+		}
 	}
 }
 

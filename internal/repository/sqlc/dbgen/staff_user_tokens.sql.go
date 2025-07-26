@@ -52,3 +52,27 @@ func (q *Queries) CreateStaffUserToken(ctx context.Context, arg CreateStaffUserT
 	err := row.Scan(&i.ID, &i.CreatedAt)
 	return i, err
 }
+
+const getValidStaffUserToken = `-- name: GetValidStaffUserToken :one
+SELECT id, staff_user_id, refresh_token, user_agent, ip_address, expired_at,
+       is_revoked, created_at, updated_at
+FROM staff_user_tokens
+WHERE refresh_token = $1 AND expired_at > NOW() AND is_revoked = false
+`
+
+func (q *Queries) GetValidStaffUserToken(ctx context.Context, refreshToken string) (StaffUserToken, error) {
+	row := q.db.QueryRow(ctx, getValidStaffUserToken, refreshToken)
+	var i StaffUserToken
+	err := row.Scan(
+		&i.ID,
+		&i.StaffUserID,
+		&i.RefreshToken,
+		&i.UserAgent,
+		&i.IpAddress,
+		&i.ExpiredAt,
+		&i.IsRevoked,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

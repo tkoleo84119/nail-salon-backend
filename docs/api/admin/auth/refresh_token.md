@@ -1,20 +1,20 @@
 ## User Story
 
-作為顧客，我希望能夠透過 refresh token 來取得新的 access token，方便維持登入狀態。
+作為員工，我希望能夠透過 refresh token 來取得新的 access token，方便維持登入狀態。
 
 ---
 
 ## Endpoint
 
-**POST** `/api/auth/token/refresh`
+**POST** `/api/admin/auth/token/refresh`
 
 ---
 
 ## 說明
 
-- 使用者提供 refresh token，若有效則簽發新的 access token。
+- 員工提供 refresh token，若有效則簽發新的 access token。
 - 若 token 無效、已過期或已被撤銷，則回傳錯誤。
-- 此為前台顧客端使用，與後台管理端獨立。
+- 此為後台管理端使用，與前台顧客端獨立。
 
 ---
 
@@ -73,7 +73,7 @@ Content-Type: application/json
 
 ## 資料表
 
-- `customer_tokens`
+- `staff_user_tokens`
 
 ---
 
