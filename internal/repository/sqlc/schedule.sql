@@ -83,3 +83,16 @@ ORDER BY s.work_date;
 -- name: DeleteSchedulesByIDs :exec
 DELETE FROM schedules
 WHERE id = ANY($1::bigint[]);
+
+-- name: GetAvailableSchedules :many
+SELECT s.work_date, COUNT(*) AS available_slots
+FROM schedules s
+JOIN time_slots ts ON s.id = ts.schedule_id
+LEFT JOIN bookings b ON ts.id = b.time_slot_id AND b.status != 'CANCELLED'
+WHERE s.store_id = $1
+  AND s.stylist_id = $2
+  AND s.work_date BETWEEN $3 AND $4
+  AND ts.is_available = true
+  AND b.id IS NULL
+GROUP BY s.work_date
+ORDER BY s.work_date ASC;

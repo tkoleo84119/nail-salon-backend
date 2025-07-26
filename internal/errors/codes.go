@@ -79,6 +79,8 @@ const (
 	ValDateFormatInvalid     = "VAL_DATE_FORMAT_INVALID"
 	ValDuplicateWorkDate     = "VAL_DUPLICATE_WORK_DATE"
 	ValTimeSlotRequired      = "VAL_TIME_SLOT_REQUIRED"
+	ValEndBeforeStart        = "VAL_END_BEFORE_START"
+	ValDateRangeExceed60Days = "VAL_DATE_RANGE_EXCEED_60_DAYS"
 
 	// SYS - System errors
 	SysInternalError      = "SYS_INTERNAL_ERROR"

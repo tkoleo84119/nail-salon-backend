@@ -194,6 +194,12 @@ VAL:
   VAL_TIME_SLOT_REQUIRED:
     message: 至少需要一個時段
     status: 400
+  VAL_END_BEFORE_START:
+    message: 結束日期必須在開始日期之後
+    status: 400
+  VAL_DATE_RANGE_EXCEED_60_DAYS:
+    message: 日期範圍不能超過 60 天
+    status: 400
 
 SYS:
   SYS_INTERNAL_ERROR:

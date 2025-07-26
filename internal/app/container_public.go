@@ -9,12 +9,14 @@ import (
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	bookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/booking"
 	customerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer"
+	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
 
 	// Public services
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	bookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/booking"
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
+	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
 )
 
@@ -29,17 +31,20 @@ type PublicServices struct {
 	CustomerUpdateMy *customerService.UpdateMyCustomerService
 
 	// Booking services
-	BookingCreateMy     *bookingService.CreateMyBookingService
-	BookingUpdateMy     *bookingService.UpdateMyBookingService
-	BookingCancelMy     bookingService.CancelMyBookingServiceInterface
-	BookingGetMy        bookingService.GetMyBookingsServiceInterface
-	BookingGetMySingle  bookingService.GetMyBookingServiceInterface
+	BookingCreateMy    *bookingService.CreateMyBookingService
+	BookingUpdateMy    *bookingService.UpdateMyBookingService
+	BookingCancelMy    bookingService.CancelMyBookingServiceInterface
+	BookingGetMy       bookingService.GetMyBookingsServiceInterface
+	BookingGetMySingle bookingService.GetMyBookingServiceInterface
+
+	// Schedule services
+	ScheduleGetStoreSchedules scheduleService.ScheduleServiceInterface
 
 	// Store services
-	StoreGetServices  storeService.GetStoreServicesServiceInterface
-	StoreGetStylists  storeService.GetStoreStylistsServiceInterface
-	StoreGetStores    storeService.GetStoresServiceInterface
-	StoreGetStore     storeService.GetStoreServiceInterface
+	StoreGetServices storeService.GetStoreServicesServiceInterface
+	StoreGetStylists storeService.GetStoreStylistsServiceInterface
+	StoreGetStores   storeService.GetStoresServiceInterface
+	StoreGetStore    storeService.GetStoreServiceInterface
 }
 
 // PublicHandlers contains all public/customer-facing handlers
@@ -53,17 +58,20 @@ type PublicHandlers struct {
 	CustomerUpdateMy *customerHandler.UpdateMyCustomerHandler
 
 	// Booking handlers
-	BookingCreateMy     *bookingHandler.CreateMyBookingHandler
-	BookingUpdateMy     *bookingHandler.UpdateMyBookingHandler
-	BookingCancelMy     *bookingHandler.CancelMyBookingHandler
-	BookingGetMy        *bookingHandler.GetMyBookingsHandler
-	BookingGetMySingle  *bookingHandler.GetMyBookingHandler
+	BookingCreateMy    *bookingHandler.CreateMyBookingHandler
+	BookingUpdateMy    *bookingHandler.UpdateMyBookingHandler
+	BookingCancelMy    *bookingHandler.CancelMyBookingHandler
+	BookingGetMy       *bookingHandler.GetMyBookingsHandler
+	BookingGetMySingle *bookingHandler.GetMyBookingHandler
+
+	// Schedule handlers
+	ScheduleGetStoreSchedules *scheduleHandler.ScheduleHandler
 
 	// Store handlers
-	StoreGetServices  *storeHandler.GetStoreServicesHandler
-	StoreGetStylists  *storeHandler.GetStoreStylistsHandler
-	StoreGetStores    *storeHandler.GetStoresHandler
-	StoreGetStore     *storeHandler.GetStoreHandler
+	StoreGetServices *storeHandler.GetStoreServicesHandler
+	StoreGetStylists *storeHandler.GetStoreStylistsHandler
+	StoreGetStores   *storeHandler.GetStoresHandler
+	StoreGetStore    *storeHandler.GetStoreHandler
 }
 
 // NewPublicServices creates and initializes all public services
@@ -78,11 +86,14 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		CustomerUpdateMy: customerService.NewUpdateMyCustomerService(queries, repositories.Customer),
 
 		// Booking services
-		BookingCreateMy:     bookingService.NewCreateMyBookingService(queries, database.PgxPool),
-		BookingUpdateMy:     bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
-		BookingCancelMy:     bookingService.NewCancelMyBookingService(queries),
-		BookingGetMy:        bookingService.NewGetMyBookingsService(repositories.Booking),
-		BookingGetMySingle:  bookingService.NewGetMyBookingService(queries),
+		BookingCreateMy:    bookingService.NewCreateMyBookingService(queries, database.PgxPool),
+		BookingUpdateMy:    bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
+		BookingCancelMy:    bookingService.NewCancelMyBookingService(queries),
+		BookingGetMy:       bookingService.NewGetMyBookingsService(repositories.Booking),
+		BookingGetMySingle: bookingService.NewGetMyBookingService(queries),
+
+		// Schedule services
+		ScheduleGetStoreSchedules: scheduleService.NewScheduleService(queries),
 
 		// Store services
 		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.Service),
@@ -104,11 +115,14 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		CustomerUpdateMy: customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
 
 		// Booking handlers
-		BookingCreateMy:     bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
-		BookingUpdateMy:     bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
-		BookingCancelMy:     bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
-		BookingGetMy:        bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
-		BookingGetMySingle:  bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
+		BookingCreateMy:    bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
+		BookingUpdateMy:    bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
+		BookingCancelMy:    bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
+		BookingGetMy:       bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
+		BookingGetMySingle: bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
+
+		// Schedule handlers
+		ScheduleGetStoreSchedules: scheduleHandler.NewScheduleHandler(services.ScheduleGetStoreSchedules),
 
 		// Store handlers
 		StoreGetServices: storeHandler.NewGetStoreServicesHandler(services.StoreGetServices),

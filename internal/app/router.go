@@ -105,9 +105,11 @@ func setupPublicServiceRoutes(api *gin.RouterGroup, cfg *config.Config, queries 
 }
 
 func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	// TODO: Add public schedule routes for browsing
-	// api.GET("/stores/:storeId/schedules", handlers.Public.SchedulesByStore.List)
-	// api.GET("/schedules/:scheduleId/time-slots", handlers.Public.TimeSlotsBySchedule.List)
+	stores := api.Group("/stores")
+	{
+		// Store schedule routes
+		stores.GET("/:storeId/stylists/:stylistId/schedules", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ScheduleGetStoreSchedules.GetStoreSchedules)
+	}
 }
 
 // Admin route setup functions

@@ -25,11 +25,6 @@ This document lists all API routes in the nail salon backend system, organized b
 | PATCH  | `/api/bookings/:bookingId`        | Update my booking   | ✅ Implemented |
 | PATCH  | `/api/bookings/:bookingId/cancel` | Cancel my booking   | ✅ Implemented |
 
-### Browse Services (Read-only)
-| Method | Endpoint                   | Description         | Status |
-| ------ | -------------------------- | ------------------- | ------ |
-| GET    | `/api/services/:serviceId` | Get service details | 🔄 TODO |
-
 ### Browse Stores (Read-only)
 | Method | Endpoint                        | Description         | Status        |
 | ------ | ------------------------------- | ------------------- | ------------- |
@@ -39,10 +34,10 @@ This document lists all API routes in the nail salon backend system, organized b
 | GET    | `/api/stores/:storeId/services` | List store services | ✅ Implemented |
 
 ### Browse Schedules & Time Slots (Read-only)
-| Method | Endpoint                                | Description               | Status |
-| ------ | --------------------------------------- | ------------------------- | ------ |
-| GET    | `/api/stores/:storeId/schedules`        | List store schedules      | 🔄 TODO |
-| GET    | `/api/schedules/:scheduleId/time-slots` | List available time slots | 🔄 TODO |
+| Method | Endpoint                                             | Description                  | Status        |
+| ------ | ---------------------------------------------------- | ---------------------------- | ------------- |
+| GET    | `/api/stores/:storeId/stylists/:stylistId/schedules` | List store stylist schedules | ✅ Implemented |
+| GET    | `/api/schedules/:scheduleId/time-slots`              | List available time slots    | 🔄 TODO        |
 
 ## Admin Routes
 

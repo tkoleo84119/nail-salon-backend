@@ -101,6 +101,57 @@ func (q *Queries) DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) er
 	return err
 }
 
+const getAvailableSchedules = `-- name: GetAvailableSchedules :many
+SELECT s.work_date, COUNT(*) AS available_slots
+FROM schedules s
+JOIN time_slots ts ON s.id = ts.schedule_id
+LEFT JOIN bookings b ON ts.id = b.time_slot_id AND b.status != 'CANCELLED'
+WHERE s.store_id = $1
+  AND s.stylist_id = $2
+  AND s.work_date BETWEEN $3 AND $4
+  AND ts.is_available = true
+  AND b.id IS NULL
+GROUP BY s.work_date
+ORDER BY s.work_date ASC
+`
+
+type GetAvailableSchedulesParams struct {
+	StoreID    int64       `db:"store_id" json:"store_id"`
+	StylistID  int64       `db:"stylist_id" json:"stylist_id"`
+	WorkDate   pgtype.Date `db:"work_date" json:"work_date"`
+	WorkDate_2 pgtype.Date `db:"work_date_2" json:"work_date_2"`
+}
+
+type GetAvailableSchedulesRow struct {
+	WorkDate       pgtype.Date `db:"work_date" json:"work_date"`
+	AvailableSlots int64       `db:"available_slots" json:"available_slots"`
+}
+
+func (q *Queries) GetAvailableSchedules(ctx context.Context, arg GetAvailableSchedulesParams) ([]GetAvailableSchedulesRow, error) {
+	rows, err := q.db.Query(ctx, getAvailableSchedules,
+		arg.StoreID,
+		arg.StylistID,
+		arg.WorkDate,
+		arg.WorkDate_2,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAvailableSchedulesRow{}
+	for rows.Next() {
+		var i GetAvailableSchedulesRow
+		if err := rows.Scan(&i.WorkDate, &i.AvailableSlots); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getScheduleByID = `-- name: GetScheduleByID :one
 SELECT
     id,
