@@ -53,7 +53,7 @@ This document lists all API routes in the nail salon backend system, organized b
 | ------ | --------------------------- | ----------------- | ------------- |
 | GET    | `/api/admin/staff`          | List all staff    | ✅ Implemented |
 | POST   | `/api/admin/staff`          | Create staff      | ✅ Implemented |
-| GET    | `/api/admin/staff/me`       | Get my profile    | 🔄 TODO        |
+| GET    | `/api/admin/staff/me`       | Get my profile    | ✅ Implemented |
 | PATCH  | `/api/admin/staff/me`       | Update my profile | ✅ Implemented |
 | GET    | `/api/admin/staff/:staffId` | Get staff details | 🔄 TODO        |
 | PATCH  | `/api/admin/staff/:staffId` | Update staff      | ✅ Implemented |

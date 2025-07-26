@@ -29,3 +29,7 @@ type DeleteStoreAccessBulkServiceInterface interface {
 type GetStaffListServiceInterface interface {
 	GetStaffList(ctx context.Context, req adminStaffModel.GetStaffListRequest) (*adminStaffModel.GetStaffListResponse, error)
 }
+
+type GetMyStaffServiceInterface interface {
+	GetMyStaff(ctx context.Context, staffUserID int64) (*adminStaffModel.GetMyStaffResponse, error)
+}

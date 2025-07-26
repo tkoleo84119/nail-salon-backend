@@ -93,3 +93,14 @@ type StaffListItemDTO struct {
 	IsActive  bool      `json:"isActive"`
 	CreatedAt time.Time `json:"createdAt"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetMyStaffResponse represents the response for current staff member's information
+type GetMyStaffResponse struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+	IsActive bool   `json:"isActive"`
+}
