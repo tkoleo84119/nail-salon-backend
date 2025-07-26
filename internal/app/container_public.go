@@ -38,7 +38,8 @@ type PublicServices struct {
 	BookingGetMySingle bookingService.GetMyBookingServiceInterface
 
 	// Schedule services
-	ScheduleGetStoreSchedules scheduleService.ScheduleServiceInterface
+	ScheduleGetStoreSchedules scheduleService.GetStoreScheduleServiceInterface
+	ScheduleGetTimeSlots      scheduleService.GetTimeSlotServiceInterface
 
 	// Store services
 	StoreGetServices storeService.GetStoreServicesServiceInterface
@@ -65,7 +66,8 @@ type PublicHandlers struct {
 	BookingGetMySingle *bookingHandler.GetMyBookingHandler
 
 	// Schedule handlers
-	ScheduleGetStoreSchedules *scheduleHandler.ScheduleHandler
+	ScheduleGetStoreSchedules *scheduleHandler.GetStoreScheduleHandler
+	ScheduleGetTimeSlots      *scheduleHandler.GetTimeSlotHandler
 
 	// Store handlers
 	StoreGetServices *storeHandler.GetStoreServicesHandler
@@ -93,7 +95,8 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		BookingGetMySingle: bookingService.NewGetMyBookingService(queries),
 
 		// Schedule services
-		ScheduleGetStoreSchedules: scheduleService.NewScheduleService(queries),
+		ScheduleGetStoreSchedules: scheduleService.NewGetStoreScheduleService(queries),
+		ScheduleGetTimeSlots:      scheduleService.NewGetTimeSlotService(queries),
 
 		// Store services
 		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.Service),
@@ -122,7 +125,8 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		BookingGetMySingle: bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
 
 		// Schedule handlers
-		ScheduleGetStoreSchedules: scheduleHandler.NewScheduleHandler(services.ScheduleGetStoreSchedules),
+		ScheduleGetStoreSchedules: scheduleHandler.NewGetStoreScheduleHandler(services.ScheduleGetStoreSchedules),
+		ScheduleGetTimeSlots:      scheduleHandler.NewGetTimeSlotHandler(services.ScheduleGetTimeSlots),
 
 		// Store handlers
 		StoreGetServices: storeHandler.NewGetStoreServicesHandler(services.StoreGetServices),

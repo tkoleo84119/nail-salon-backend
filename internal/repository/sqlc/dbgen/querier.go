@@ -51,6 +51,7 @@ type Querier interface {
 	DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error
 	GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error)
 	GetAvailableSchedules(ctx context.Context, arg GetAvailableSchedulesParams) ([]GetAvailableSchedulesRow, error)
+	GetAvailableTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
 	GetBookingByID(ctx context.Context, id int64) (GetBookingByIDRow, error)
 	GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error)
 	GetCustomerAuthByProviderUid(ctx context.Context, arg GetCustomerAuthByProviderUidParams) (GetCustomerAuthByProviderUidRow, error)

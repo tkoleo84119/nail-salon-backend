@@ -140,6 +140,51 @@ func (q *Queries) DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []i
 	return err
 }
 
+const getAvailableTimeSlotsByScheduleID = `-- name: GetAvailableTimeSlotsByScheduleID :many
+SELECT
+    ts.id,
+    ts.schedule_id,
+    ts.start_time,
+    ts.end_time,
+    ts.is_available,
+    ts.created_at,
+    ts.updated_at
+FROM time_slots ts
+LEFT JOIN booking_details bd ON ts.id = bd.time_slot_id AND bd.status != 'CANCELLED'
+WHERE ts.schedule_id = $1 
+  AND ts.is_available = true
+  AND bd.id IS NULL
+ORDER BY ts.start_time
+`
+
+func (q *Queries) GetAvailableTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error) {
+	rows, err := q.db.Query(ctx, getAvailableTimeSlotsByScheduleID, scheduleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TimeSlot{}
+	for rows.Next() {
+		var i TimeSlot
+		if err := rows.Scan(
+			&i.ID,
+			&i.ScheduleID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.IsAvailable,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTimeSlotByID = `-- name: GetTimeSlotByID :one
 SELECT
     id,

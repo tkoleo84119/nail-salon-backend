@@ -37,7 +37,7 @@ This document lists all API routes in the nail salon backend system, organized b
 | Method | Endpoint                                             | Description                  | Status        |
 | ------ | ---------------------------------------------------- | ---------------------------- | ------------- |
 | GET    | `/api/stores/:storeId/stylists/:stylistId/schedules` | List store stylist schedules | ✅ Implemented |
-| GET    | `/api/schedules/:scheduleId/time-slots`              | List available time slots    | 🔄 TODO        |
+| GET    | `/api/schedules/:scheduleId/time-slots`              | List available time slots    | ✅ Implemented |
 
 ## Admin Routes
 

@@ -13,17 +13,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type ScheduleService struct {
+type GetStoreScheduleService struct {
 	queries *dbgen.Queries
 }
 
-func NewScheduleService(queries *dbgen.Queries) *ScheduleService {
-	return &ScheduleService{
+func NewGetStoreScheduleService(queries *dbgen.Queries) *GetStoreScheduleService {
+	return &GetStoreScheduleService{
 		queries: queries,
 	}
 }
 
-func (s *ScheduleService) GetStoreSchedules(ctx context.Context, storeID, stylistID string, req scheduleModel.GetStoreSchedulesRequest, customerContext common.CustomerContext) (*scheduleModel.GetStoreSchedulesResponse, error) {
+func (s *GetStoreScheduleService) GetStoreSchedules(ctx context.Context, storeID, stylistID string, req scheduleModel.GetStoreSchedulesRequest, customerContext common.CustomerContext) (*scheduleModel.GetStoreSchedulesResponse, error) {
 	// Input validation & ID parsing
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {

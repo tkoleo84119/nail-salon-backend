@@ -92,6 +92,9 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 
 		// Store stylists browsing
 		stores.GET("/:storeId/stylists", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStylists.GetStoreStylists)
+
+		// Store schedule routes
+		stores.GET("/:storeId/stylists/:stylistId/schedules", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ScheduleGetStoreSchedules.GetStoreSchedules)
 	}
 }
 
@@ -105,10 +108,10 @@ func setupPublicServiceRoutes(api *gin.RouterGroup, cfg *config.Config, queries 
 }
 
 func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	stores := api.Group("/stores")
+	schedules := api.Group("/schedules")
 	{
-		// Store schedule routes
-		stores.GET("/:storeId/stylists/:stylistId/schedules", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ScheduleGetStoreSchedules.GetStoreSchedules)
+		// Schedule time slot routes
+		schedules.GET("/:scheduleId/time-slots", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ScheduleGetTimeSlots.GetTimeSlots)
 	}
 }
 

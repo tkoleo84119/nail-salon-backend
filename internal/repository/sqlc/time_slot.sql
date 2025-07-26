@@ -81,3 +81,19 @@ SELECT EXISTS(
     AND start_time < $4
     AND end_time > $3
 ) AS has_overlap;
+
+-- name: GetAvailableTimeSlotsByScheduleID :many
+SELECT
+    ts.id,
+    ts.schedule_id,
+    ts.start_time,
+    ts.end_time,
+    ts.is_available,
+    ts.created_at,
+    ts.updated_at
+FROM time_slots ts
+LEFT JOIN bookings b ON ts.id = b.time_slot_id AND b.status != 'CANCELLED'
+WHERE ts.schedule_id = $1
+  AND ts.is_available = true
+  AND b.id IS NULL
+ORDER BY ts.start_time;

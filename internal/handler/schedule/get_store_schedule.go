@@ -13,22 +13,22 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type ScheduleHandler struct {
-	service scheduleService.ScheduleServiceInterface
+type GetStoreScheduleHandler struct {
+	service scheduleService.GetStoreScheduleServiceInterface
 }
 
-func NewScheduleHandler(service scheduleService.ScheduleServiceInterface) *ScheduleHandler {
-	return &ScheduleHandler{
+func NewGetStoreScheduleHandler(service scheduleService.GetStoreScheduleServiceInterface) *GetStoreScheduleHandler {
+	return &GetStoreScheduleHandler{
 		service: service,
 	}
 }
 
-func (h *ScheduleHandler) GetStoreSchedules(c *gin.Context) {
+func (h *GetStoreScheduleHandler) GetStoreSchedules(c *gin.Context) {
 	// Path parameter validation
 	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
-			"storeId": "門市ID為必填項目",
+			"storeId": "storeId 為必填項目",
 		})
 		return
 	}
@@ -36,7 +36,7 @@ func (h *ScheduleHandler) GetStoreSchedules(c *gin.Context) {
 	stylistID := c.Param("stylistId")
 	if stylistID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
-			"stylistId": "美甲師ID為必填項目",
+			"stylistId": "stylistId 為必填項目",
 		})
 		return
 	}
