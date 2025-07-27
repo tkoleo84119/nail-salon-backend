@@ -39,3 +39,28 @@ type UpdateStoreResponse struct {
 func (r UpdateStoreRequest) HasUpdates() bool {
 	return r.Name != nil || r.Address != nil || r.Phone != nil || r.IsActive != nil
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetStoreListRequest represents the request to get store list with filtering
+type GetStoreListRequest struct {
+	Keyword  *string `form:"keyword"`
+	IsActive *bool   `form:"isActive"`
+	Limit    *int    `form:"limit" binding:"omitempty,min=1,max=100"`
+	Offset   *int    `form:"offset" binding:"omitempty,min=0"`
+}
+
+// GetStoreListResponse represents the response for store list
+type GetStoreListResponse struct {
+	Total int               `json:"total"`
+	Items []StoreListItemDTO `json:"items"`
+}
+
+// StoreListItemDTO represents a single store item in the list
+type StoreListItemDTO struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	Phone    string `json:"phone"`
+	IsActive bool   `json:"isActive"`
+}

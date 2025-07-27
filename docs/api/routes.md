@@ -68,7 +68,7 @@ This document lists all API routes in the nail salon backend system, organized b
 ### Store Management
 | Method | Endpoint                     | Description       | Status        |
 | ------ | ---------------------------- | ----------------- | ------------- |
-| GET    | `/api/admin/stores`          | List all stores   | 🔄 TODO        |
+| GET    | `/api/admin/stores`          | List all stores   | ✅ Implemented |
 | POST   | `/api/admin/stores`          | Create store      | ✅ Implemented |
 | GET    | `/api/admin/stores/:storeId` | Get store details | 🔄 TODO        |
 | PATCH  | `/api/admin/stores/:storeId` | Update store      | ✅ Implemented |

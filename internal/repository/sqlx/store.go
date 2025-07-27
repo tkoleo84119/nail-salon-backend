@@ -16,6 +16,7 @@ import (
 type StoreRepositoryInterface interface {
 	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
+	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
 }
 
 type StoreRepository struct {
@@ -109,8 +110,8 @@ type GetStoresModel struct {
 func (r *StoreRepository) GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error) {
 	// Count query for total records
 	countQuery := `
-		SELECT COUNT(*) 
-		FROM stores 
+		SELECT COUNT(*)
+		FROM stores
 		WHERE is_active = true
 	`
 
@@ -121,10 +122,10 @@ func (r *StoreRepository) GetStores(ctx context.Context, limit, offset int) ([]s
 
 	// Main query with pagination
 	query := `
-		SELECT id, name, 
+		SELECT id, name,
 		       COALESCE(address, '') as address,
 		       COALESCE(phone, '') as phone
-		FROM stores 
+		FROM stores
 		WHERE is_active = true
 		ORDER BY name
 		LIMIT :limit OFFSET :offset
@@ -166,4 +167,118 @@ func (r *StoreRepository) GetStores(ctx context.Context, limit, offset int) ([]s
 	}
 
 	return items, total, nil
+}
+
+// GetStoreListModel represents the database model for admin store list queries
+type GetStoreListModel struct {
+	ID       int64       `db:"id"`
+	Name     string      `db:"name"`
+	Address  pgtype.Text `db:"address"`
+	Phone    pgtype.Text `db:"phone"`
+	IsActive pgtype.Bool `db:"is_active"`
+}
+
+// GetStoreList retrieves stores with filtering and pagination for admin
+func (r *StoreRepository) GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error) {
+	// Set default pagination values
+	limit := 20
+	offset := 0
+
+	if req.Limit != nil && *req.Limit > 0 {
+		limit = *req.Limit
+	}
+	if req.Offset != nil && *req.Offset >= 0 {
+		offset = *req.Offset
+	}
+
+	// Build WHERE clause parts
+	whereParts := []string{}
+	args := map[string]interface{}{
+		"limit":  limit,
+		"offset": offset,
+	}
+
+	// Add keyword filter for name and address
+	if req.Keyword != nil && *req.Keyword != "" {
+		keyword := "%" + *req.Keyword + "%"
+		whereParts = append(whereParts, "(name ILIKE :keyword OR address ILIKE :keyword)")
+		args["keyword"] = keyword
+	}
+
+	// Add isActive filter
+	if req.IsActive != nil {
+		whereParts = append(whereParts, "is_active = :is_active")
+		args["is_active"] = *req.IsActive
+	}
+
+	// Build WHERE clause
+	whereClause := ""
+	if len(whereParts) > 0 {
+		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
+	}
+
+	// Count query for total records
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM stores
+		%s
+	`, whereClause)
+
+	var total int
+	rows, err := r.db.NamedQuery(countQuery, args)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.Scan(&total); err != nil {
+			return nil, fmt.Errorf("failed to scan count: %w", err)
+		}
+	}
+
+	// Main query with pagination
+	query := fmt.Sprintf(`
+		SELECT id, name, address, phone, is_active
+		FROM stores
+		%s
+		ORDER BY name
+		LIMIT :limit OFFSET :offset
+	`, whereClause)
+
+	var results []GetStoreListModel
+	rows, err = r.db.NamedQuery(query, args)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item GetStoreListModel
+		if err := rows.StructScan(&item); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		results = append(results, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	// Build response models
+	items := make([]adminStoreModel.StoreListItemDTO, len(results))
+	for i, result := range results {
+		items[i] = adminStoreModel.StoreListItemDTO{
+			ID:       utils.FormatID(result.ID),
+			Name:     result.Name,
+			Address:  result.Address.String,
+			Phone:    result.Phone.String,
+			IsActive: result.IsActive.Bool,
+		}
+	}
+
+	return &adminStoreModel.GetStoreListResponse{
+		Total: total,
+		Items: items,
+	}, nil
 }

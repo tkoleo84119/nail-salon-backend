@@ -42,8 +42,9 @@ type AdminServices struct {
 	StaffDeleteStoreAccess *adminStaffService.DeleteStoreAccessBulkService
 
 	// Store management services
-	StoreCreate *adminStoreService.CreateStoreService
-	StoreUpdate *adminStoreService.UpdateStoreService
+	StoreGetList adminStoreService.GetStoreListServiceInterface
+	StoreCreate  adminStoreService.CreateStoreServiceInterface
+	StoreUpdate  adminStoreService.UpdateStoreServiceInterface
 
 	// Service management services
 	ServiceCreate *adminServiceService.CreateServiceService
@@ -87,8 +88,9 @@ type AdminHandlers struct {
 	StaffDeleteStoreAccess *adminStaffHandler.DeleteStoreAccessBulkHandler
 
 	// Store management handlers
-	StoreCreate *adminStoreHandler.CreateStoreHandler
-	StoreUpdate *adminStoreHandler.UpdateStoreHandler
+	StoreGetList *adminStoreHandler.GetStoreListHandler
+	StoreCreate  *adminStoreHandler.CreateStoreHandler
+	StoreUpdate  *adminStoreHandler.UpdateStoreHandler
 
 	// Service management handlers
 	ServiceCreate *adminServiceHandler.CreateServiceHandler
@@ -133,8 +135,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(queries),
 
 		// Store management services
-		StoreCreate: adminStoreService.NewCreateStoreService(queries, database.PgxPool),
-		StoreUpdate: adminStoreService.NewUpdateStoreService(queries, repositories.Store),
+		StoreGetList: adminStoreService.NewGetStoreListService(repositories.Store),
+		StoreCreate:  adminStoreService.NewCreateStoreService(queries, database.PgxPool),
+		StoreUpdate:  adminStoreService.NewUpdateStoreService(queries, repositories.Store),
 
 		// Service management services
 		ServiceCreate: adminServiceService.NewCreateServiceService(queries),
@@ -180,8 +183,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StaffDeleteStoreAccess: adminStaffHandler.NewDeleteStoreAccessBulkHandler(services.StaffDeleteStoreAccess),
 
 		// Store management handlers
-		StoreCreate: adminStoreHandler.NewCreateStoreHandler(services.StoreCreate),
-		StoreUpdate: adminStoreHandler.NewUpdateStoreHandler(services.StoreUpdate),
+		StoreGetList: adminStoreHandler.NewGetStoreListHandler(services.StoreGetList),
+		StoreCreate:  adminStoreHandler.NewCreateStoreHandler(services.StoreCreate),
+		StoreUpdate:  adminStoreHandler.NewUpdateStoreHandler(services.StoreUpdate),
 
 		// Service management handlers
 		ServiceCreate: adminServiceHandler.NewCreateServiceHandler(services.ServiceCreate),
