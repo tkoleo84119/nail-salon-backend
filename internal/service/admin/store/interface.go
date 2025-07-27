@@ -18,3 +18,7 @@ type UpdateStoreServiceInterface interface {
 type GetStoreListServiceInterface interface {
 	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
 }
+
+type GetStoreServiceInterface interface {
+	GetStore(ctx context.Context, storeID string) (*adminStoreModel.GetStoreResponse, error)
+}

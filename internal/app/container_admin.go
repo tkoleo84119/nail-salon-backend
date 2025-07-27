@@ -43,6 +43,7 @@ type AdminServices struct {
 
 	// Store management services
 	StoreGetList adminStoreService.GetStoreListServiceInterface
+	StoreGet     adminStoreService.GetStoreServiceInterface
 	StoreCreate  adminStoreService.CreateStoreServiceInterface
 	StoreUpdate  adminStoreService.UpdateStoreServiceInterface
 
@@ -89,6 +90,7 @@ type AdminHandlers struct {
 
 	// Store management handlers
 	StoreGetList *adminStoreHandler.GetStoreListHandler
+	StoreGet     *adminStoreHandler.GetStoreHandler
 	StoreCreate  *adminStoreHandler.CreateStoreHandler
 	StoreUpdate  *adminStoreHandler.UpdateStoreHandler
 
@@ -136,6 +138,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Store management services
 		StoreGetList: adminStoreService.NewGetStoreListService(repositories.Store),
+		StoreGet:     adminStoreService.NewGetStoreService(queries),
 		StoreCreate:  adminStoreService.NewCreateStoreService(queries, database.PgxPool),
 		StoreUpdate:  adminStoreService.NewUpdateStoreService(queries, repositories.Store),
 
@@ -184,6 +187,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Store management handlers
 		StoreGetList: adminStoreHandler.NewGetStoreListHandler(services.StoreGetList),
+		StoreGet:     adminStoreHandler.NewGetStoreHandler(services.StoreGet),
 		StoreCreate:  adminStoreHandler.NewCreateStoreHandler(services.StoreCreate),
 		StoreUpdate:  adminStoreHandler.NewUpdateStoreHandler(services.StoreUpdate),
 
