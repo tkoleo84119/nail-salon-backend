@@ -54,8 +54,9 @@ type AdminServices struct {
 	ServiceUpdate  *adminServiceService.UpdateServiceService
 
 	// Stylist management services
-	StylistCreate *adminStylistService.CreateMyStylistService
-	StylistUpdate *adminStylistService.UpdateMyStylistService
+	StylistCreate  *adminStylistService.CreateMyStylistService
+	StylistUpdate  *adminStylistService.UpdateMyStylistService
+	StylistGetList adminStylistService.GetStylistListServiceInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     *adminScheduleService.CreateSchedulesBulkService
@@ -103,8 +104,9 @@ type AdminHandlers struct {
 	ServiceUpdate  *adminServiceHandler.UpdateServiceHandler
 
 	// Stylist management handlers
-	StylistCreate *adminStylistHandler.CreateMyStylistHandler
-	StylistUpdate *adminStylistHandler.UpdateMyStylistHandler
+	StylistCreate  *adminStylistHandler.CreateMyStylistHandler
+	StylistUpdate  *adminStylistHandler.UpdateMyStylistHandler
+	StylistGetList *adminStylistHandler.GetStylistListHandler
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateSchedulesBulkHandler
@@ -153,8 +155,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.Service),
 
 		// Stylist management services
-		StylistCreate: adminStylistService.NewCreateMyStylistService(queries),
-		StylistUpdate: adminStylistService.NewUpdateMyStylistService(queries, repositories.Stylist),
+		StylistCreate:  adminStylistService.NewCreateMyStylistService(queries),
+		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.Stylist),
+		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.Stylist),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
@@ -204,8 +207,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ServiceUpdate:  adminServiceHandler.NewUpdateServiceHandler(services.ServiceUpdate),
 
 		// Stylist management handlers
-		StylistCreate: adminStylistHandler.NewCreateMyStylistHandler(services.StylistCreate),
-		StylistUpdate: adminStylistHandler.NewUpdateMyStylistHandler(services.StylistUpdate),
+		StylistCreate:  adminStylistHandler.NewCreateMyStylistHandler(services.StylistCreate),
+		StylistUpdate:  adminStylistHandler.NewUpdateMyStylistHandler(services.StylistUpdate),
+		StylistGetList: adminStylistHandler.NewGetStylistListHandler(services.StylistGetList),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),

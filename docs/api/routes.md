@@ -82,12 +82,12 @@ This document lists all API routes in the nail salon backend system, organized b
 | PATCH  | `/api/admin/stores/:storeId/services/:serviceId` | Update service             | ✅ Implemented |
 
 ### Stylist Management
-| Method | Endpoint                 | Description               | Status        |
-| ------ | ------------------------ | ------------------------- | ------------- |
-| GET    | `/api/admin/stylists`    | List all stylists         | 🔄 TODO        |
-| GET    | `/api/admin/stylists/me` | Get my stylist profile    | 🔄 TODO        |
-| POST   | `/api/admin/stylists/me` | Create my stylist profile | ✅ Implemented |
-| PATCH  | `/api/admin/stylists/me` | Update my stylist profile | ✅ Implemented |
+| Method | Endpoint                              | Description               | Status        |
+| ------ | ------------------------------------- | ------------------------- | ------------- |
+| GET    | `/api/admin/stores/:storeId/stylists` | List all stylists         | ✅ Implemented |
+| GET    | `/api/admin/stylists/me`              | Get my stylist profile    | 🔄 TODO        |
+| POST   | `/api/admin/stylists/me`              | Create my stylist profile | ✅ Implemented |
+| PATCH  | `/api/admin/stylists/me`              | Update my stylist profile | ✅ Implemented |
 
 ### Schedule Management
 | Method | Endpoint                                                  | Description              | Status        |
