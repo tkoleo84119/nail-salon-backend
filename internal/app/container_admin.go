@@ -49,6 +49,7 @@ type AdminServices struct {
 
 	// Service management services
 	ServiceGetList adminServiceService.GetServiceListServiceInterface
+	ServiceGet     adminServiceService.GetServiceServiceInterface
 	ServiceCreate  *adminServiceService.CreateServiceService
 	ServiceUpdate  *adminServiceService.UpdateServiceService
 
@@ -97,6 +98,7 @@ type AdminHandlers struct {
 
 	// Service management handlers
 	ServiceGetList *adminServiceHandler.GetServiceListHandler
+	ServiceGet     *adminServiceHandler.GetServiceHandler
 	ServiceCreate  *adminServiceHandler.CreateServiceHandler
 	ServiceUpdate  *adminServiceHandler.UpdateServiceHandler
 
@@ -146,6 +148,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetServiceListService(queries, repositories.Service),
+		ServiceGet:     adminServiceService.NewGetServiceService(queries),
 		ServiceCreate:  adminServiceService.NewCreateServiceService(queries),
 		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.Service),
 
@@ -196,6 +199,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Service management handlers
 		ServiceGetList: adminServiceHandler.NewGetServiceListHandler(services.ServiceGetList),
+		ServiceGet:     adminServiceHandler.NewGetServiceHandler(services.ServiceGet),
 		ServiceCreate:  adminServiceHandler.NewCreateServiceHandler(services.ServiceCreate),
 		ServiceUpdate:  adminServiceHandler.NewUpdateServiceHandler(services.ServiceUpdate),
 

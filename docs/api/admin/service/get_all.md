@@ -83,11 +83,19 @@ Authorization: Bearer <access_token>
 }
 ```
 
+#### 403 Forbidden - 無權限
+
+```json
+{
+  "message": "權限不足，無法執行此操作"
+}
+```
+
 #### 404 Not Found - 門市不存在
 
 ```json
 {
-  "message": "查無此門市"
+  "message": "門市不存在或已被刪除"
 }
 ```
 

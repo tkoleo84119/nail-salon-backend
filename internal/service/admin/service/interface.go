@@ -18,3 +18,7 @@ type UpdateServiceInterface interface {
 type GetServiceListServiceInterface interface {
 	GetServiceList(ctx context.Context, storeID string, req adminServiceModel.GetServiceListRequest, staffContext common.StaffContext) (*adminServiceModel.GetServiceListResponse, error)
 }
+
+type GetServiceServiceInterface interface {
+	GetService(ctx context.Context, storeID, serviceID string, staffContext common.StaffContext) (*adminServiceModel.GetServiceResponse, error)
+}
