@@ -810,3 +810,32 @@ func PgInt4ToInt32Ptr(value pgtype.Int4) *int32 {
 	}
 	return &value.Int32
 }
+
+// PgBoolToBool converts pgtype.Bool to bool for API responses.
+// Returns false for invalid/NULL values.
+//
+// Parameters:
+//   - b: pgtype.Bool from database query result
+//
+// Returns:
+//   - false if b.Valid is false (NULL in database)
+//   - The bool value if b.Valid is true
+//
+// Example:
+//   var result struct {
+//       IsAvailable pgtype.Bool `db:"is_available"`
+//   }
+//   // After scanning from database...
+//   available := utils.PgBoolToBool(result.IsAvailable)  // false if NULL, actual value otherwise
+//
+// Usage in response building:
+//   response := &TimeSlotResponse{
+//       ID:          utils.FormatID(result.ID),
+//       IsAvailable: utils.PgBoolToBool(result.IsAvailable),
+//   }
+func PgBoolToBool(b pgtype.Bool) bool {
+	if !b.Valid {
+		return false
+	}
+	return b.Bool
+}

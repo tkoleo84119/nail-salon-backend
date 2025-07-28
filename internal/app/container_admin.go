@@ -65,6 +65,7 @@ type AdminServices struct {
 	ScheduleUpdateTimeSlot adminScheduleService.UpdateTimeSlotServiceInterface
 	ScheduleDeleteTimeSlot adminScheduleService.DeleteTimeSlotServiceInterface
 	ScheduleGetList        adminScheduleService.GetScheduleListServiceInterface
+	ScheduleGet            adminScheduleService.GetScheduleServiceInterface
 
 	// Time slot template services
 	TimeSlotTemplateCreate     *adminTimeSlotTemplateService.CreateTimeSlotTemplateService
@@ -116,6 +117,7 @@ type AdminHandlers struct {
 	ScheduleUpdateTimeSlot *adminScheduleHandler.UpdateTimeSlotHandler
 	ScheduleDeleteTimeSlot *adminScheduleHandler.DeleteTimeSlotHandler
 	ScheduleGetList        *adminScheduleHandler.GetScheduleListHandler
+	ScheduleGet            *adminScheduleHandler.GetScheduleHandler
 
 	// Time slot template handlers
 	TimeSlotTemplateCreate     *adminTimeSlotTemplateHandler.CreateTimeSlotTemplateHandler
@@ -168,6 +170,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ScheduleUpdateTimeSlot: adminScheduleService.NewUpdateTimeSlotService(queries, repositories.TimeSlot),
 		ScheduleDeleteTimeSlot: adminScheduleService.NewDeleteTimeSlotService(queries),
 		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(queries, repositories.Schedule),
+		ScheduleGet:            adminScheduleService.NewGetScheduleService(queries),
 
 		// Time slot template services
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool),
@@ -221,6 +224,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ScheduleUpdateTimeSlot: adminScheduleHandler.NewUpdateTimeSlotHandler(services.ScheduleUpdateTimeSlot),
 		ScheduleDeleteTimeSlot: adminScheduleHandler.NewDeleteTimeSlotHandler(services.ScheduleDeleteTimeSlot),
 		ScheduleGetList:        adminScheduleHandler.NewGetScheduleListHandler(services.ScheduleGetList),
+		ScheduleGet:            adminScheduleHandler.NewGetScheduleHandler(services.ScheduleGet),
 
 		// Time slot template handlers
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateHandler.NewCreateTimeSlotTemplateHandler(services.TimeSlotTemplateCreate),

@@ -89,17 +89,15 @@ This document lists all API routes in the nail salon backend system, organized b
 | PATCH  | `/api/admin/stylists/me`              | Update my stylist profile | ✅ Implemented |
 
 ### Schedule Management
-| Method | Endpoint                                                  | Description              | Status        |
-| ------ | --------------------------------------------------------- | ------------------------ | ------------- |
-| GET    | `/api/admin/stores/:storeId/schedules`                    | List all schedules       | ✅ Implemented |
-| POST   | `/api/admin/stores/:storeId/schedules/bulk`               | Create schedules (bulk)  | ✅ Implemented |
-| DELETE | `/api/admin/stores/:storeId/schedules/bulk`               | Delete schedules (bulk)  | ✅ Implemented |
-| GET    | `/api/admin/stores/:storeId/schedules/:scheduleId`        | Get schedule details     | 🔄 TODO        |
-| GET    | `/api/admin/schedules/:scheduleId/time-slots`             | List schedule time slots | 🔄 TODO        |
-| POST   | `/api/admin/schedules/:scheduleId/time-slots`             | Create time slot         | ✅ Implemented |
-| GET    | `/api/admin/schedules/:scheduleId/time-slots/:timeSlotId` | Get time slot details    | 🔄 TODO        |
-| PATCH  | `/api/admin/schedules/:scheduleId/time-slots/:timeSlotId` | Update time slot         | ✅ Implemented |
-| DELETE | `/api/admin/schedules/:scheduleId/time-slots/:timeSlotId` | Delete time slot         | ✅ Implemented |
+| Method | Endpoint                                                  | Description             | Status        |
+| ------ | --------------------------------------------------------- | ----------------------- | ------------- |
+| GET    | `/api/admin/stores/:storeId/schedules`                    | List all schedules      | ✅ Implemented |
+| POST   | `/api/admin/stores/:storeId/schedules/bulk`               | Create schedules (bulk) | ✅ Implemented |
+| DELETE | `/api/admin/stores/:storeId/schedules/bulk`               | Delete schedules (bulk) | ✅ Implemented |
+| GET    | `/api/admin/stores/:storeId/schedules/:scheduleId`        | Get schedule details    | ✅ Implemented |
+| POST   | `/api/admin/schedules/:scheduleId/time-slots`             | Create time slot        | ✅ Implemented |
+| PATCH  | `/api/admin/schedules/:scheduleId/time-slots/:timeSlotId` | Update time slot        | ✅ Implemented |
+| DELETE | `/api/admin/schedules/:scheduleId/time-slots/:timeSlotId` | Delete time slot        | ✅ Implemented |
 
 ### Time Slot Template Management
 | Method | Endpoint                                                   | Description          | Status        |

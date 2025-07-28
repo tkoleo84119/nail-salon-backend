@@ -91,3 +91,28 @@ type GetScheduleListTimeSlotInfo struct {
 	EndTime     string `json:"endTime"`
 	IsAvailable bool   `json:"isAvailable"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetScheduleResponse represents the response for getting a single schedule
+type GetScheduleResponse struct {
+	ID        string                     `json:"id"`
+	WorkDate  string                     `json:"workDate"`
+	Stylist   GetScheduleStylistInfo     `json:"stylist"`
+	Note      string                     `json:"note"`
+	TimeSlots []GetScheduleTimeSlotInfo `json:"timeSlots"`
+}
+
+// GetScheduleStylistInfo represents stylist info in single schedule response
+type GetScheduleStylistInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// GetScheduleTimeSlotInfo represents time slot info in single schedule response
+type GetScheduleTimeSlotInfo struct {
+	ID          string `json:"id"`
+	StartTime   string `json:"startTime"`
+	EndTime     string `json:"endTime"`
+	IsAvailable bool   `json:"isAvailable"`
+}
