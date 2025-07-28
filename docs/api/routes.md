@@ -74,13 +74,12 @@ This document lists all API routes in the nail salon backend system, organized b
 | PATCH  | `/api/admin/stores/:storeId` | Update store      | ✅ Implemented |
 
 ### Service Management
-| Method | Endpoint                         | Description         | Status        |
-| ------ | -------------------------------- | ------------------- | ------------- |
-| GET    | `/api/admin/services`            | List all services   | 🔄 TODO        |
-| POST   | `/api/admin/services`            | Create service      | ✅ Implemented |
-| GET    | `/api/admin/services/:serviceId` | Get service details | 🔄 TODO        |
-| PATCH  | `/api/admin/services/:serviceId` | Update service      | ✅ Implemented |
-| DELETE | `/api/admin/services/:serviceId` | Deactivate service  | 🔄 TODO        |
+| Method | Endpoint                                         | Description                | Status        |
+| ------ | ------------------------------------------------ | -------------------------- | ------------- |
+| GET    | `/api/admin/stores/:storeId/services`            | List all services in store | 🔄 TODO        |
+| POST   | `/api/admin/stores/:storeId/services`            | Create service             | ✅ Implemented |
+| GET    | `/api/admin/stores/:storeId/services/:serviceId` | Get service details        | 🔄 TODO        |
+| PATCH  | `/api/admin/stores/:storeId/services/:serviceId` | Update service             | ✅ Implemented |
 
 ### Stylist Management
 | Method | Endpoint                 | Description               | Status        |

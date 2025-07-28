@@ -125,7 +125,7 @@ func setupAdminAuthRoutes(admin *gin.RouterGroup, handlers Handlers) {
 	auth := admin.Group("/auth")
 	{
 		auth.POST("/login", handlers.Admin.AuthStaffLogin.StaffLogin)
-		
+
 		token := auth.Group("/token")
 		{
 			token.POST("/refresh", handlers.Admin.AuthStaffRefreshToken.StaffRefreshToken)
@@ -167,6 +167,9 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.GET("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreGet.GetStore)
 		stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreCreate.CreateStore)
 		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreUpdate.UpdateStore)
+
+		// Store services routes
+		stores.GET("/:storeId/services", middleware.JWTAuth(*cfg, queries), handlers.Admin.ServiceGetList.GetServiceList)
 	}
 }
 

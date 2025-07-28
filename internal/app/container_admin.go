@@ -48,8 +48,9 @@ type AdminServices struct {
 	StoreUpdate  adminStoreService.UpdateStoreServiceInterface
 
 	// Service management services
-	ServiceCreate *adminServiceService.CreateServiceService
-	ServiceUpdate *adminServiceService.UpdateServiceService
+	ServiceGetList adminServiceService.GetServiceListServiceInterface
+	ServiceCreate  *adminServiceService.CreateServiceService
+	ServiceUpdate  *adminServiceService.UpdateServiceService
 
 	// Stylist management services
 	StylistCreate *adminStylistService.CreateMyStylistService
@@ -95,8 +96,9 @@ type AdminHandlers struct {
 	StoreUpdate  *adminStoreHandler.UpdateStoreHandler
 
 	// Service management handlers
-	ServiceCreate *adminServiceHandler.CreateServiceHandler
-	ServiceUpdate *adminServiceHandler.UpdateServiceHandler
+	ServiceGetList *adminServiceHandler.GetServiceListHandler
+	ServiceCreate  *adminServiceHandler.CreateServiceHandler
+	ServiceUpdate  *adminServiceHandler.UpdateServiceHandler
 
 	// Stylist management handlers
 	StylistCreate *adminStylistHandler.CreateMyStylistHandler
@@ -143,8 +145,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StoreUpdate:  adminStoreService.NewUpdateStoreService(queries, repositories.Store),
 
 		// Service management services
-		ServiceCreate: adminServiceService.NewCreateServiceService(queries),
-		ServiceUpdate: adminServiceService.NewUpdateServiceService(queries, repositories.Service),
+		ServiceGetList: adminServiceService.NewGetServiceListService(queries, repositories.Service),
+		ServiceCreate:  adminServiceService.NewCreateServiceService(queries),
+		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.Service),
 
 		// Stylist management services
 		StylistCreate: adminStylistService.NewCreateMyStylistService(queries),
@@ -192,8 +195,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StoreUpdate:  adminStoreHandler.NewUpdateStoreHandler(services.StoreUpdate),
 
 		// Service management handlers
-		ServiceCreate: adminServiceHandler.NewCreateServiceHandler(services.ServiceCreate),
-		ServiceUpdate: adminServiceHandler.NewUpdateServiceHandler(services.ServiceUpdate),
+		ServiceGetList: adminServiceHandler.NewGetServiceListHandler(services.ServiceGetList),
+		ServiceCreate:  adminServiceHandler.NewCreateServiceHandler(services.ServiceCreate),
+		ServiceUpdate:  adminServiceHandler.NewUpdateServiceHandler(services.ServiceUpdate),
 
 		// Stylist management handlers
 		StylistCreate: adminStylistHandler.NewCreateMyStylistHandler(services.StylistCreate),
