@@ -254,3 +254,25 @@ func (q *Queries) GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64
 	}
 	return items, nil
 }
+
+const updateTimeSlot = `-- name: UpdateTimeSlot :one
+UPDATE time_slots
+SET
+    is_available = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING
+    id
+`
+
+type UpdateTimeSlotParams struct {
+	ID          int64       `db:"id" json:"id"`
+	IsAvailable pgtype.Bool `db:"is_available" json:"is_available"`
+}
+
+func (q *Queries) UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error) {
+	row := q.db.QueryRow(ctx, updateTimeSlot, arg.ID, arg.IsAvailable)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}

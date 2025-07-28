@@ -97,3 +97,12 @@ WHERE ts.schedule_id = $1
   AND ts.is_available = true
   AND b.id IS NULL
 ORDER BY ts.start_time;
+
+-- name: UpdateTimeSlot :one
+UPDATE time_slots
+SET
+    is_available = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING
+    id;

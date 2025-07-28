@@ -77,6 +77,7 @@ type Querier interface {
 	GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (CustomerToken, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (StaffUserToken, error)
+	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (TimeSlotTemplateItem, error)
 }
 

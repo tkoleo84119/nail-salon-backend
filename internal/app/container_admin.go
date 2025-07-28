@@ -7,6 +7,7 @@ import (
 
 	// Admin handlers
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
+	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
 	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
 	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
 	adminStaffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/staff"
@@ -16,6 +17,7 @@ import (
 
 	// Admin services
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
+	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
@@ -57,6 +59,9 @@ type AdminServices struct {
 	StylistCreate  *adminStylistService.CreateMyStylistService
 	StylistUpdate  *adminStylistService.UpdateMyStylistService
 	StylistGetList adminStylistService.GetStylistListServiceInterface
+
+	// Booking management services
+	BookingCreate adminBookingService.CreateBookingServiceInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateSchedulesBulkServiceInterface
@@ -111,6 +116,9 @@ type AdminHandlers struct {
 	StylistCreate  *adminStylistHandler.CreateMyStylistHandler
 	StylistUpdate  *adminStylistHandler.UpdateMyStylistHandler
 	StylistGetList *adminStylistHandler.GetStylistListHandler
+
+	// Booking management handlers
+	BookingCreate *adminBookingHandler.CreateBookingHandler
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateSchedulesBulkHandler
@@ -167,6 +175,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.Stylist),
 		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.Stylist),
 
+		// Booking management services
+		BookingCreate: adminBookingService.NewCreateBookingService(queries, database.PgxPool),
+
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
 		ScheduleDeleteBulk:     adminScheduleService.NewDeleteSchedulesBulkService(queries, database.PgxPool),
@@ -222,6 +233,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StylistCreate:  adminStylistHandler.NewCreateMyStylistHandler(services.StylistCreate),
 		StylistUpdate:  adminStylistHandler.NewUpdateMyStylistHandler(services.StylistUpdate),
 		StylistGetList: adminStylistHandler.NewGetStylistListHandler(services.StylistGetList),
+
+		// Booking management handlers
+		BookingCreate: adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),

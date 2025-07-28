@@ -839,3 +839,24 @@ func PgBoolToBool(b pgtype.Bool) bool {
 	}
 	return b.Bool
 }
+
+// BoolToPgBool converts bool to pgtype.Bool for database operations.
+// This is used when setting boolean values that are known to be valid.
+//
+// Parameters:
+//   - b: bool value to convert
+//
+// Returns:
+//   - pgtype.Bool with Valid=true and the boolean value
+//
+// Example:
+//   isEnabled := true
+//   pgBool := utils.BoolToPgBool(isEnabled)
+//
+// Usage in SQLC queries:
+//   params := CreateBookingParams{
+//       IsChatEnabled: utils.BoolToPgBool(req.IsChatEnabled),
+//   }
+func BoolToPgBool(b bool) pgtype.Bool {
+	return pgtype.Bool{Bool: b, Valid: true}
+}
