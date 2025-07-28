@@ -102,7 +102,7 @@ This document lists all API routes in the nail salon backend system, organized b
 ### Time Slot Template Management
 | Method | Endpoint                                                   | Description          | Status        |
 | ------ | ---------------------------------------------------------- | -------------------- | ------------- |
-| GET    | `/api/admin/time-slot-templates`                           | List all templates   | 🔄 TODO        |
+| GET    | `/api/admin/time-slot-templates`                           | List all templates   | ✅ Implemented |
 | POST   | `/api/admin/time-slot-templates`                           | Create template      | ✅ Implemented |
 | GET    | `/api/admin/time-slot-templates/:templateId`               | Get template details | 🔄 TODO        |
 | PATCH  | `/api/admin/time-slot-templates/:templateId`               | Update template      | ✅ Implemented |

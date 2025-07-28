@@ -1,5 +1,7 @@
 package adminTimeSlotTemplate
 
+import "github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+
 // TimeSlotItem represents a time slot in a template
 type TimeSlotItem struct {
 	StartTime string `json:"startTime" binding:"required"`
@@ -52,4 +54,26 @@ func (r *UpdateTimeSlotTemplateRequest) HasUpdate() bool {
 // DeleteTimeSlotTemplateResponse represents the response after deleting a time slot template
 type DeleteTimeSlotTemplateResponse struct {
 	Deleted string `json:"deleted"`
+}
+
+// -------------------------------------------------------------------------------------
+
+// GetTimeSlotTemplateListRequest represents the request to get time slot template list
+type GetTimeSlotTemplateListRequest struct {
+	Name   *string `form:"name" binding:"omitempty,max=50"`
+	Limit  *int    `form:"limit" binding:"omitempty,min=1,max=100"`
+	Offset *int    `form:"offset" binding:"omitempty,min=0"`
+}
+
+// GetTimeSlotTemplateListResponse represents the response with time slot template list
+type GetTimeSlotTemplateListResponse common.ListResponse[GetTimeSlotTemplateListItem]
+
+// GetTimeSlotTemplateListItem represents a single time slot template in the list
+type GetTimeSlotTemplateListItem struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Note      string `json:"note"`
+	Updater   string `json:"updater"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
