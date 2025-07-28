@@ -25,6 +25,7 @@ type Repositories struct {
 	TimeSlot         *sqlx.TimeSlotRepository
 	TimeSlotTemplate *sqlx.TimeSlotTemplateRepository
 	Booking          *sqlx.BookingRepository
+	Schedule         *sqlx.ScheduleRepository
 }
 
 type Services struct {
@@ -49,6 +50,7 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 		TimeSlot:         sqlx.NewTimeSlotRepository(database.Sqlx),
 		TimeSlotTemplate: sqlx.NewTimeSlotTemplateRepository(database.Sqlx),
 		Booking:          sqlx.NewBookingRepository(database.Sqlx),
+		Schedule:         sqlx.NewScheduleRepository(database.Sqlx),
 	}
 
 	// Initialize services using separated containers

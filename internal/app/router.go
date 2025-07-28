@@ -174,6 +174,9 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 
 		// Store stylists routes
 		stores.GET("/:storeId/stylists", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.StylistGetList.GetStylistList)
+
+		// Store schedules routes
+		stores.GET("/:storeId/schedules", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleGetList.GetScheduleList)
 	}
 }
 

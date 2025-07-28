@@ -85,19 +85,16 @@ This document lists all API routes in the nail salon backend system, organized b
 | Method | Endpoint                              | Description               | Status        |
 | ------ | ------------------------------------- | ------------------------- | ------------- |
 | GET    | `/api/admin/stores/:storeId/stylists` | List all stylists         | ✅ Implemented |
-| GET    | `/api/admin/stylists/me`              | Get my stylist profile    | 🔄 TODO        |
 | POST   | `/api/admin/stylists/me`              | Create my stylist profile | ✅ Implemented |
 | PATCH  | `/api/admin/stylists/me`              | Update my stylist profile | ✅ Implemented |
 
 ### Schedule Management
 | Method | Endpoint                                                  | Description              | Status        |
 | ------ | --------------------------------------------------------- | ------------------------ | ------------- |
-| GET    | `/api/admin/schedules`                                    | List all schedules       | 🔄 TODO        |
-| POST   | `/api/admin/schedules/bulk`                               | Create schedules (bulk)  | ✅ Implemented |
-| DELETE | `/api/admin/schedules/bulk`                               | Delete schedules (bulk)  | ✅ Implemented |
-| GET    | `/api/admin/schedules/:scheduleId`                        | Get schedule details     | 🔄 TODO        |
-| PATCH  | `/api/admin/schedules/:scheduleId`                        | Update schedule          | 🔄 TODO        |
-| DELETE | `/api/admin/schedules/:scheduleId`                        | Delete schedule          | 🔄 TODO        |
+| GET    | `/api/admin/stores/:storeId/schedules`                    | List all schedules       | ✅ Implemented |
+| POST   | `/api/admin/stores/:storeId/schedules/bulk`               | Create schedules (bulk)  | ✅ Implemented |
+| DELETE | `/api/admin/stores/:storeId/schedules/bulk`               | Delete schedules (bulk)  | ✅ Implemented |
+| GET    | `/api/admin/stores/:storeId/schedules/:scheduleId`        | Get schedule details     | 🔄 TODO        |
 | GET    | `/api/admin/schedules/:scheduleId/time-slots`             | List schedule time slots | 🔄 TODO        |
 | POST   | `/api/admin/schedules/:scheduleId/time-slots`             | Create time slot         | ✅ Implemented |
 | GET    | `/api/admin/schedules/:scheduleId/time-slots/:timeSlotId` | Get time slot details    | 🔄 TODO        |

@@ -59,11 +59,12 @@ type AdminServices struct {
 	StylistGetList adminStylistService.GetStylistListServiceInterface
 
 	// Schedule management services
-	ScheduleCreateBulk     *adminScheduleService.CreateSchedulesBulkService
-	ScheduleDeleteBulk     *adminScheduleService.DeleteSchedulesBulkService
-	ScheduleCreateTimeSlot *adminScheduleService.CreateTimeSlotService
-	ScheduleUpdateTimeSlot *adminScheduleService.UpdateTimeSlotService
-	ScheduleDeleteTimeSlot *adminScheduleService.DeleteTimeSlotService
+	ScheduleCreateBulk     adminScheduleService.CreateSchedulesBulkServiceInterface
+	ScheduleDeleteBulk     adminScheduleService.DeleteSchedulesBulkServiceInterface
+	ScheduleCreateTimeSlot adminScheduleService.CreateTimeSlotServiceInterface
+	ScheduleUpdateTimeSlot adminScheduleService.UpdateTimeSlotServiceInterface
+	ScheduleDeleteTimeSlot adminScheduleService.DeleteTimeSlotServiceInterface
+	ScheduleGetList        adminScheduleService.GetScheduleListServiceInterface
 
 	// Time slot template services
 	TimeSlotTemplateCreate     *adminTimeSlotTemplateService.CreateTimeSlotTemplateService
@@ -114,6 +115,7 @@ type AdminHandlers struct {
 	ScheduleCreateTimeSlot *adminScheduleHandler.CreateTimeSlotHandler
 	ScheduleUpdateTimeSlot *adminScheduleHandler.UpdateTimeSlotHandler
 	ScheduleDeleteTimeSlot *adminScheduleHandler.DeleteTimeSlotHandler
+	ScheduleGetList        *adminScheduleHandler.GetScheduleListHandler
 
 	// Time slot template handlers
 	TimeSlotTemplateCreate     *adminTimeSlotTemplateHandler.CreateTimeSlotTemplateHandler
@@ -165,6 +167,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ScheduleCreateTimeSlot: adminScheduleService.NewCreateTimeSlotService(queries),
 		ScheduleUpdateTimeSlot: adminScheduleService.NewUpdateTimeSlotService(queries, repositories.TimeSlot),
 		ScheduleDeleteTimeSlot: adminScheduleService.NewDeleteTimeSlotService(queries),
+		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(queries, repositories.Schedule),
 
 		// Time slot template services
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool),
@@ -217,6 +220,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ScheduleCreateTimeSlot: adminScheduleHandler.NewCreateTimeSlotHandler(services.ScheduleCreateTimeSlot),
 		ScheduleUpdateTimeSlot: adminScheduleHandler.NewUpdateTimeSlotHandler(services.ScheduleUpdateTimeSlot),
 		ScheduleDeleteTimeSlot: adminScheduleHandler.NewDeleteTimeSlotHandler(services.ScheduleDeleteTimeSlot),
+		ScheduleGetList:        adminScheduleHandler.NewGetScheduleListHandler(services.ScheduleGetList),
 
 		// Time slot template handlers
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateHandler.NewCreateTimeSlotTemplateHandler(services.TimeSlotTemplateCreate),

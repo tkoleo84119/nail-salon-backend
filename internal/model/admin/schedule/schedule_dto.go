@@ -53,3 +53,41 @@ type DeleteSchedulesBulkRequest struct {
 type DeleteSchedulesBulkResponse struct {
 	Deleted []string `json:"deleted"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetScheduleListRequest represents the request to get schedules list
+type GetScheduleListRequest struct {
+	StylistID   *string `form:"stylistId"`
+	StartDate   string  `form:"startDate" binding:"required"`
+	EndDate     string  `form:"endDate" binding:"required"`
+	IsAvailable *bool   `form:"isAvailable"`
+}
+
+// GetScheduleListResponse represents the response with schedules list  
+type GetScheduleListResponse struct {
+	Items []GetScheduleListItem `json:"items"`
+}
+
+// GetScheduleListItem represents a single schedule in the list
+type GetScheduleListItem struct {
+	ID        string                        `json:"id"`
+	WorkDate  string                        `json:"workDate"`
+	Stylist   GetScheduleListStylistInfo    `json:"stylist"`
+	Note      string                        `json:"note"`
+	TimeSlots []GetScheduleListTimeSlotInfo `json:"timeSlots"`
+}
+
+// GetScheduleListStylistInfo represents stylist info in schedule list
+type GetScheduleListStylistInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// GetScheduleListTimeSlotInfo represents time slot info in schedule list
+type GetScheduleListTimeSlotInfo struct {
+	ID          string `json:"id"`
+	StartTime   string `json:"startTime"`
+	EndTime     string `json:"endTime"`
+	IsAvailable bool   `json:"isAvailable"`
+}

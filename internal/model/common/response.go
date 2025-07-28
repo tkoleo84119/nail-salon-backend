@@ -34,9 +34,13 @@ type LineJWTClaims struct {
 	CustomerID int64 `json:"customerId"`
 }
 
+type ListResponse[T any] struct {
+	Total int `json:"total"`
+	Items []T `json:"items"`
+}
+
 func SuccessResponse(data interface{}) ApiResponse {
 	return ApiResponse{
 		Data: data,
 	}
 }
-
