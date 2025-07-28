@@ -77,3 +77,23 @@ type GetTimeSlotTemplateListItem struct {
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// GetTimeSlotTemplateResponse represents the response for getting a single time slot template
+type GetTimeSlotTemplateResponse struct {
+	ID        string                        `json:"id"`
+	Name      string                        `json:"name"`
+	Note      string                        `json:"note"`
+	Updater   string                        `json:"updater"`
+	CreatedAt string                        `json:"createdAt"`
+	UpdatedAt string                        `json:"updatedAt"`
+	Items     []GetTimeSlotTemplateItemInfo `json:"items"`
+}
+
+// GetTimeSlotTemplateItemInfo represents a time slot template item in the response
+type GetTimeSlotTemplateItemInfo struct {
+	ID        string `json:"id"`
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"endTime"`
+}

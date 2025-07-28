@@ -104,10 +104,9 @@ This document lists all API routes in the nail salon backend system, organized b
 | ------ | ---------------------------------------------------------- | -------------------- | ------------- |
 | GET    | `/api/admin/time-slot-templates`                           | List all templates   | ✅ Implemented |
 | POST   | `/api/admin/time-slot-templates`                           | Create template      | ✅ Implemented |
-| GET    | `/api/admin/time-slot-templates/:templateId`               | Get template details | 🔄 TODO        |
+| GET    | `/api/admin/time-slot-templates/:templateId`               | Get template details | ✅ Implemented |
 | PATCH  | `/api/admin/time-slot-templates/:templateId`               | Update template      | ✅ Implemented |
 | DELETE | `/api/admin/time-slot-templates/:templateId`               | Delete template      | ✅ Implemented |
-| GET    | `/api/admin/time-slot-templates/:templateId/items`         | List template items  | 🔄 TODO        |
 | POST   | `/api/admin/time-slot-templates/:templateId/items`         | Create template item | ✅ Implemented |
 | PATCH  | `/api/admin/time-slot-templates/:templateId/items/:itemId` | Update template item | ✅ Implemented |
 | DELETE | `/api/admin/time-slot-templates/:templateId/items/:itemId` | Delete template item | ✅ Implemented |
