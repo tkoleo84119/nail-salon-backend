@@ -188,7 +188,8 @@ SELECT
     bd.service_id,
     srv.name as service_name,
     bd.price,
-    bd.created_at
+    bd.created_at,
+    srv.is_addon
 FROM booking_details bd
 JOIN services srv ON bd.service_id = srv.id
 WHERE bd.booking_id = $1
@@ -202,6 +203,7 @@ type GetBookingDetailsByBookingIDRow struct {
 	ServiceName string             `db:"service_name" json:"service_name"`
 	Price       pgtype.Numeric     `db:"price" json:"price"`
 	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	IsAddon     pgtype.Bool        `db:"is_addon" json:"is_addon"`
 }
 
 func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error) {
@@ -220,6 +222,7 @@ func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID in
 			&i.ServiceName,
 			&i.Price,
 			&i.CreatedAt,
+			&i.IsAddon,
 		); err != nil {
 			return nil, err
 		}

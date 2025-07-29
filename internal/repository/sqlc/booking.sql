@@ -43,7 +43,8 @@ SELECT
     bd.service_id,
     srv.name as service_name,
     bd.price,
-    bd.created_at
+    bd.created_at,
+    srv.is_addon
 FROM booking_details bd
 JOIN services srv ON bd.service_id = srv.id
 WHERE bd.booking_id = $1

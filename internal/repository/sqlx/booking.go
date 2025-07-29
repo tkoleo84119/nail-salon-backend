@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5/pgtype"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -201,4 +203,137 @@ func (r *BookingRepository) GetMyBookings(ctx context.Context, customerID int64,
 	}
 
 	return bookings, total, nil
+}
+
+// GetStoreBookingListParams represents the parameters for getting store booking list
+type GetStoreBookingListParams struct {
+	StylistID *int64
+	StartDate *time.Time
+	EndDate   *time.Time
+	Limit     *int
+	Offset    *int
+}
+
+// GetStoreBookingListModel represents the database model for admin booking list queries
+type GetStoreBookingListModel struct {
+	ID           int64       `db:"id"`
+	StoreID      int64       `db:"store_id"`
+	CustomerID   int64       `db:"customer_id"`
+	CustomerName string      `db:"customer_name"`
+	StylistID    int64       `db:"stylist_id"`
+	StylistName  pgtype.Text `db:"stylist_name"`
+	TimeSlotID   int64       `db:"time_slot_id"`
+	StartTime    pgtype.Time `db:"start_time"`
+	EndTime      pgtype.Time `db:"end_time"`
+	WorkDate     pgtype.Date `db:"work_date"`
+	Status       string      `db:"status"`
+}
+
+// GetStoreBookingList retrieves bookings for a specific store with dynamic filtering and pagination
+func (r *BookingRepository) GetStoreBookingList(ctx context.Context, storeID int64, params GetStoreBookingListParams) ([]GetStoreBookingListModel, int, error) {
+	// Set default pagination values
+	limit := 20
+	offset := 0
+	if params.Limit != nil && *params.Limit > 0 {
+		limit = *params.Limit
+	}
+	if params.Offset != nil && *params.Offset >= 0 {
+		offset = *params.Offset
+	}
+
+	// Build WHERE clause parts
+	whereParts := []string{"b.store_id = :store_id"}
+	args := map[string]interface{}{
+		"store_id": storeID,
+		"limit":    limit,
+		"offset":   offset,
+	}
+
+	// Add stylist filter
+	if params.StylistID != nil {
+		whereParts = append(whereParts, "b.stylist_id = :stylist_id")
+		args["stylist_id"] = *params.StylistID
+	}
+
+	// Add start date filter
+	if params.StartDate != nil {
+		whereParts = append(whereParts, "sch.work_date >= :start_date")
+		args["start_date"] = *params.StartDate
+	}
+
+	// Add end date filter
+	if params.EndDate != nil {
+		whereParts = append(whereParts, "sch.work_date <= :end_date")
+		args["end_date"] = *params.EndDate
+	}
+
+	// Build WHERE clause
+	whereClause := strings.Join(whereParts, " AND ")
+
+	// Count query for total records
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM bookings b
+		JOIN time_slots ts ON b.time_slot_id = ts.id
+		JOIN schedules sch ON ts.schedule_id = sch.id
+		WHERE %s
+	`, whereClause)
+
+	var total int
+	rows, err := r.db.NamedQueryContext(ctx, countQuery, args)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to execute count query: %w", err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.Scan(&total); err != nil {
+			return nil, 0, fmt.Errorf("failed to scan count: %w", err)
+		}
+	}
+
+	// Main query with pagination
+	query := fmt.Sprintf(`
+		SELECT 
+			b.id,
+			b.store_id,
+			b.customer_id,
+			c.name as customer_name,
+			b.stylist_id,
+			st.name as stylist_name,
+			b.time_slot_id,
+			ts.start_time,
+			ts.end_time,
+			sch.work_date,
+			b.status
+		FROM bookings b
+		JOIN customers c ON b.customer_id = c.id
+		JOIN stylists st ON b.stylist_id = st.id
+		JOIN time_slots ts ON b.time_slot_id = ts.id
+		JOIN schedules sch ON ts.schedule_id = sch.id
+		WHERE %s
+		ORDER BY sch.work_date ASC, ts.start_time ASC
+		LIMIT :limit OFFSET :offset
+	`, whereClause)
+
+	var results []GetStoreBookingListModel
+	rows, err = r.db.NamedQueryContext(ctx, query, args)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item GetStoreBookingListModel
+		if err := rows.StructScan(&item); err != nil {
+			return nil, 0, fmt.Errorf("failed to scan row: %w", err)
+		}
+		results = append(results, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return results, total, nil
 }

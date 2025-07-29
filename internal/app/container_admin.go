@@ -61,7 +61,8 @@ type AdminServices struct {
 	StylistGetList adminStylistService.GetStylistListServiceInterface
 
 	// Booking management services
-	BookingCreate adminBookingService.CreateBookingServiceInterface
+	BookingCreate  adminBookingService.CreateBookingServiceInterface
+	BookingGetList adminBookingService.GetBookingListServiceInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateSchedulesBulkServiceInterface
@@ -118,7 +119,8 @@ type AdminHandlers struct {
 	StylistGetList *adminStylistHandler.GetStylistListHandler
 
 	// Booking management handlers
-	BookingCreate *adminBookingHandler.CreateBookingHandler
+	BookingCreate  *adminBookingHandler.CreateBookingHandler
+	BookingGetList *adminBookingHandler.GetBookingListHandler
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateSchedulesBulkHandler
@@ -176,7 +178,8 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.Stylist),
 
 		// Booking management services
-		BookingCreate: adminBookingService.NewCreateBookingService(queries, database.PgxPool),
+		BookingCreate:  adminBookingService.NewCreateBookingService(queries, database.PgxPool),
+		BookingGetList: adminBookingService.NewGetBookingListService(queries, repositories.Booking),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
@@ -235,7 +238,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StylistGetList: adminStylistHandler.NewGetStylistListHandler(services.StylistGetList),
 
 		// Booking management handlers
-		BookingCreate: adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
+		BookingCreate:  adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
+		BookingGetList: adminBookingHandler.NewGetBookingListHandler(services.BookingGetList),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),
