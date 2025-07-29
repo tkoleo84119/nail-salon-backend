@@ -112,13 +112,11 @@ This document lists all API routes in the nail salon backend system, organized b
 | DELETE | `/api/admin/time-slot-templates/:templateId/items/:itemId` | Delete template item | ✅ Implemented |
 
 ### Booking Management (Admin view)
-| Method | Endpoint                                         | Description         | Status        |
-| ------ | ------------------------------------------------ | ------------------- | ------------- |
-| POST   | `/api/admin/stores/:storeId/bookings`            | Create booking      | ✅ Implemented |
-| GET    | `/api/admin/stores/:storeId/bookings`            | List all bookings   | ✅ Implemented |
-| GET    | `/api/admin/stores/:storeId/bookings/:bookingId` | Get booking details | 🔄 TODO        |
-| PATCH  | `/api/admin/stores/:storeId/bookings/:bookingId` | Update booking      | 🔄 TODO        |
-| DELETE | `/api/admin/stores/:storeId/bookings/:bookingId` | Cancel booking      | 🔄 TODO        |
+| Method | Endpoint                                         | Description       | Status        |
+| ------ | ------------------------------------------------ | ----------------- | ------------- |
+| POST   | `/api/admin/stores/:storeId/bookings`            | Create booking    | ✅ Implemented |
+| GET    | `/api/admin/stores/:storeId/bookings`            | List all bookings | ✅ Implemented |
+| PATCH  | `/api/admin/stores/:storeId/bookings/:bookingId` | Update booking    | ✅ Implemented |
 
 ### Customer Management (Admin view)
 | Method | Endpoint                           | Description          | Status |

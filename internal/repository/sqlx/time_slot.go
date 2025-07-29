@@ -95,3 +95,24 @@ func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int6
 
 	return response, nil
 }
+
+// UpdateTimeSlotAvailability updates the availability status of a time slot
+func (r *TimeSlotRepository) UpdateTimeSlotAvailability(ctx context.Context, timeSlotID int64, isAvailable bool) error {
+	query := `
+		UPDATE time_slots
+		SET is_available = :is_available, updated_at = NOW()
+		WHERE id = :id
+	`
+	
+	args := map[string]interface{}{
+		"id":           timeSlotID,
+		"is_available": isAvailable,
+	}
+
+	_, err := r.db.NamedExecContext(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("failed to update time slot availability: %w", err)
+	}
+
+	return nil
+}

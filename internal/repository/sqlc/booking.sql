@@ -59,3 +59,13 @@ UPDATE bookings
 SET status = $2, cancel_reason = $3, updated_at = NOW()
 WHERE id = $1 AND customer_id = $4
 RETURNING id, status, cancel_reason, updated_at;
+
+-- name: UpdateBookingByStaff :one
+UPDATE bookings
+SET
+    time_slot_id = COALESCE($2, time_slot_id),
+    is_chat_enabled = COALESCE($3, is_chat_enabled),
+    note = COALESCE($4, note),
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id;

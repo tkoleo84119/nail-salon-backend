@@ -61,8 +61,9 @@ type AdminServices struct {
 	StylistGetList adminStylistService.GetStylistListServiceInterface
 
 	// Booking management services
-	BookingCreate  adminBookingService.CreateBookingServiceInterface
-	BookingGetList adminBookingService.GetBookingListServiceInterface
+	BookingCreate        adminBookingService.CreateBookingServiceInterface
+	BookingGetList       adminBookingService.GetBookingListServiceInterface
+	BookingUpdateByStaff adminBookingService.UpdateBookingByStaffServiceInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateSchedulesBulkServiceInterface
@@ -119,8 +120,9 @@ type AdminHandlers struct {
 	StylistGetList *adminStylistHandler.GetStylistListHandler
 
 	// Booking management handlers
-	BookingCreate  *adminBookingHandler.CreateBookingHandler
-	BookingGetList *adminBookingHandler.GetBookingListHandler
+	BookingCreate        *adminBookingHandler.CreateBookingHandler
+	BookingGetList       *adminBookingHandler.GetBookingListHandler
+	BookingUpdateByStaff *adminBookingHandler.UpdateBookingByStaffHandler
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateSchedulesBulkHandler
@@ -178,8 +180,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.Stylist),
 
 		// Booking management services
-		BookingCreate:  adminBookingService.NewCreateBookingService(queries, database.PgxPool),
-		BookingGetList: adminBookingService.NewGetBookingListService(queries, repositories.Booking),
+		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
+		BookingGetList:       adminBookingService.NewGetBookingListService(queries, repositories.Booking),
+		BookingUpdateByStaff: adminBookingService.NewUpdateBookingByStaffService(queries, database.PgxPool, repositories.Booking),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
@@ -238,8 +241,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StylistGetList: adminStylistHandler.NewGetStylistListHandler(services.StylistGetList),
 
 		// Booking management handlers
-		BookingCreate:  adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
-		BookingGetList: adminBookingHandler.NewGetBookingListHandler(services.BookingGetList),
+		BookingCreate:        adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
+		BookingGetList:       adminBookingHandler.NewGetBookingListHandler(services.BookingGetList),
+		BookingUpdateByStaff: adminBookingHandler.NewUpdateBookingByStaffHandler(services.BookingUpdateByStaff),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),

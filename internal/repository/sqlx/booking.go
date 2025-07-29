@@ -142,7 +142,7 @@ func (r *BookingRepository) GetMyBookings(ctx context.Context, customerID int64,
 
 	// Query for bookings with joins
 	query := fmt.Sprintf(`
-		SELECT 
+		SELECT
 			b.id,
 			b.store_id,
 			s.name as store_name,
@@ -294,7 +294,7 @@ func (r *BookingRepository) GetStoreBookingList(ctx context.Context, storeID int
 
 	// Main query with pagination
 	query := fmt.Sprintf(`
-		SELECT 
+		SELECT
 			b.id,
 			b.store_id,
 			b.customer_id,
@@ -336,4 +336,64 @@ func (r *BookingRepository) GetStoreBookingList(ctx context.Context, storeID int
 	}
 
 	return results, total, nil
+}
+
+// UpdateBookingByStaffModel represents the database model for booking updates by staff
+type UpdateBookingByStaffModel struct {
+	ID            int64       `db:"id"`
+	StoreID       int64       `db:"store_id"`
+	CustomerID    int64       `db:"customer_id"`
+	StylistID     int64       `db:"stylist_id"`
+	TimeSlotID    int64       `db:"time_slot_id"`
+	IsChatEnabled pgtype.Bool `db:"is_chat_enabled"`
+	Note          pgtype.Text `db:"note"`
+	Status        string      `db:"status"`
+}
+
+// UpdateBookingByStaff updates a booking dynamically based on provided fields for staff
+func (r *BookingRepository) UpdateBookingByStaff(ctx context.Context, bookingID int64, storeID int64, timeSlotID *int64, isChatEnabled *bool, note *string) (*UpdateBookingByStaffModel, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := map[string]interface{}{
+		"booking_id": bookingID,
+		"store_id":   storeID,
+	}
+
+	// Dynamic field updates
+	if timeSlotID != nil {
+		setParts = append(setParts, "time_slot_id = :time_slot_id")
+		args["time_slot_id"] = *timeSlotID
+	}
+
+	if isChatEnabled != nil {
+		setParts = append(setParts, "is_chat_enabled = :is_chat_enabled")
+		args["is_chat_enabled"] = *isChatEnabled
+	}
+
+	if note != nil {
+		setParts = append(setParts, "note = :note")
+		args["note"] = utils.StringPtrToPgText(note, false)
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE bookings SET %s
+		WHERE id = :booking_id AND store_id = :store_id AND status = 'SCHEDULED'
+		RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, note, status
+	`, strings.Join(setParts, ", "))
+
+	var result UpdateBookingByStaffModel
+	rows, err := r.db.NamedQueryContext(ctx, query, args)
+	if err != nil {
+		return nil, fmt.Errorf("update failed: %w", err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, fmt.Errorf("no rows returned")
+	}
+
+	if err := rows.StructScan(&result); err != nil {
+		return nil, fmt.Errorf("scan failed: %w", err)
+	}
+
+	return &result, nil
 }

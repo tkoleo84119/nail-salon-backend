@@ -35,9 +35,11 @@ const (
 	ScheduleNotBelongToStylist       = "SCHEDULE_NOT_BELONG_TO_STYLIST"
 
 	// SERVICE - Service operation errors
-	ServiceNotFound      = "SERVICE_NOT_FOUND"
-	ServiceNotActive     = "SERVICE_NOT_ACTIVE"
-	ServiceAlreadyExists = "SERVICE_ALREADY_EXISTS"
+	ServiceNotActive      = "SERVICE_NOT_ACTIVE"
+	ServiceNotMainService = "SERVICE_NOT_MAIN_SERVICE"
+	ServiceNotAddon       = "SERVICE_NOT_ADDON"
+	ServiceNotFound       = "SERVICE_NOT_FOUND"
+	ServiceAlreadyExists  = "SERVICE_ALREADY_EXISTS"
 
 	// STORE - Store operation errors
 	StoreNotFound      = "STORE_NOT_FOUND"
