@@ -14,14 +14,14 @@ import (
 )
 
 type GetStoreServicesService struct {
-	queries     dbgen.Querier
-	serviceRepo *sqlxRepo.ServiceRepository
+	queries dbgen.Querier
+	repo    *sqlxRepo.Repositories
 }
 
-func NewGetStoreServicesService(queries dbgen.Querier, serviceRepo *sqlxRepo.ServiceRepository) GetStoreServicesServiceInterface {
+func NewGetStoreServicesService(queries dbgen.Querier, repo *sqlxRepo.Repositories) GetStoreServicesServiceInterface {
 	return &GetStoreServicesService{
-		queries:     queries,
-		serviceRepo: serviceRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -47,7 +47,7 @@ func (s *GetStoreServicesService) GetStoreServices(ctx context.Context, storeIDS
 	}
 
 	// Get services from repository with flexible filtering
-	services, total, err := s.serviceRepo.GetStoreServices(ctx, storeID, queryParams.IsAddon, queryParams.Limit, queryParams.Offset)
+	services, total, err := s.repo.Service.GetStoreServices(ctx, storeID, queryParams.IsAddon, queryParams.Limit, queryParams.Offset)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store services", err)
 	}

@@ -156,51 +156,51 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Staff management services
 		StaffCreate:            adminStaffService.NewCreateStaffService(queries, database.PgxPool),
 		StaffUpdate:            adminStaffService.NewUpdateStaffService(queries, database.Sqlx),
-		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(queries, repositories.StaffUser),
+		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(queries, repositories.SQLX),
 		StaffGet:               adminStaffService.NewGetStaffService(queries),
 		StaffGetMe:             adminStaffService.NewGetMyStaffService(queries),
-		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.StaffUser),
+		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.SQLX),
 		StaffGetStoreAccess:    adminStaffService.NewGetStaffStoreAccessService(queries),
 		StaffStoreAccess:       adminStaffService.NewCreateStoreAccessService(queries),
 		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(queries),
 
 		// Store management services
-		StoreGetList: adminStoreService.NewGetStoreListService(repositories.Store),
+		StoreGetList: adminStoreService.NewGetStoreListService(repositories.SQLX),
 		StoreGet:     adminStoreService.NewGetStoreService(queries),
 		StoreCreate:  adminStoreService.NewCreateStoreService(queries, database.PgxPool),
-		StoreUpdate:  adminStoreService.NewUpdateStoreService(queries, repositories.Store),
+		StoreUpdate:  adminStoreService.NewUpdateStoreService(queries, repositories.SQLX),
 
 		// Service management services
-		ServiceGetList: adminServiceService.NewGetServiceListService(queries, repositories.Service),
+		ServiceGetList: adminServiceService.NewGetServiceListService(queries, repositories.SQLX),
 		ServiceGet:     adminServiceService.NewGetServiceService(queries),
 		ServiceCreate:  adminServiceService.NewCreateServiceService(queries),
-		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.Service),
+		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.SQLX),
 
 		// Stylist management services
 		StylistCreate:  adminStylistService.NewCreateMyStylistService(queries),
-		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.Stylist),
-		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.Stylist),
+		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.SQLX),
+		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.SQLX),
 
 		// Booking management services
 		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
-		BookingGetList:       adminBookingService.NewGetBookingListService(queries, repositories.Booking),
-		BookingUpdateByStaff: adminBookingService.NewUpdateBookingByStaffService(queries, database.PgxPool, repositories.Booking),
-		BookingCancel:        adminBookingService.NewCancelBookingService(database.Sqlx, repositories.Booking, repositories.TimeSlot),
+		BookingGetList:       adminBookingService.NewGetBookingListService(queries, repositories.SQLX),
+		BookingUpdateByStaff: adminBookingService.NewUpdateBookingByStaffService(queries, database.PgxPool, repositories.SQLX),
+		BookingCancel:        adminBookingService.NewCancelBookingService(database.Sqlx, repositories.SQLX),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
 		ScheduleDeleteBulk:     adminScheduleService.NewDeleteSchedulesBulkService(queries, database.PgxPool),
 		ScheduleCreateTimeSlot: adminScheduleService.NewCreateTimeSlotService(queries),
-		ScheduleUpdateTimeSlot: adminScheduleService.NewUpdateTimeSlotService(queries, repositories.TimeSlot),
+		ScheduleUpdateTimeSlot: adminScheduleService.NewUpdateTimeSlotService(queries, repositories.SQLX),
 		ScheduleDeleteTimeSlot: adminScheduleService.NewDeleteTimeSlotService(queries),
-		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(queries, repositories.Schedule),
+		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(queries, repositories.SQLX),
 		ScheduleGet:            adminScheduleService.NewGetScheduleService(queries),
 
 		// Time slot template services
-		TimeSlotTemplateGetList:    adminTimeSlotTemplateService.NewGetTimeSlotTemplateListService(queries, repositories.TimeSlotTemplate),
+		TimeSlotTemplateGetList:    adminTimeSlotTemplateService.NewGetTimeSlotTemplateListService(queries, repositories.SQLX),
 		TimeSlotTemplateGet:        adminTimeSlotTemplateService.NewGetTimeSlotTemplateService(queries),
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool),
-		TimeSlotTemplateUpdate:     adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, repositories.TimeSlotTemplate),
+		TimeSlotTemplateUpdate:     adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, repositories.SQLX),
 		TimeSlotTemplateDelete:     adminTimeSlotTemplateService.NewDeleteTimeSlotTemplateService(queries),
 		TimeSlotTemplateCreateItem: adminTimeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries),
 		TimeSlotTemplateUpdateItem: adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries),

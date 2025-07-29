@@ -9,17 +9,17 @@ import (
 )
 
 type GetStoreListService struct {
-	repository sqlx.StoreRepositoryInterface
+	repo *sqlx.Repositories
 }
 
-func NewGetStoreListService(repository sqlx.StoreRepositoryInterface) *GetStoreListService {
+func NewGetStoreListService(repo *sqlx.Repositories) *GetStoreListService {
 	return &GetStoreListService{
-		repository: repository,
+		repo: repo,
 	}
 }
 
 func (s *GetStoreListService) GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error) {
-	response, err := s.repository.GetStoreList(ctx, req)
+	response, err := s.repo.Store.GetStoreList(ctx, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get store list", err)
 	}

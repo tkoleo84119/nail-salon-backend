@@ -12,14 +12,14 @@ import (
 )
 
 type UpdateTimeSlotTemplateService struct {
-	queries              dbgen.Querier
-	timeSlotTemplateRepo sqlx.TimeSlotTemplateRepositoryInterface
+	queries dbgen.Querier
+	repo    *sqlx.Repositories
 }
 
-func NewUpdateTimeSlotTemplateService(queries dbgen.Querier, timeSlotTemplateRepo sqlx.TimeSlotTemplateRepositoryInterface) *UpdateTimeSlotTemplateService {
+func NewUpdateTimeSlotTemplateService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateTimeSlotTemplateService {
 	return &UpdateTimeSlotTemplateService{
-		queries:              queries,
-		timeSlotTemplateRepo: timeSlotTemplateRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -42,7 +42,7 @@ func (s *UpdateTimeSlotTemplateService) UpdateTimeSlotTemplate(ctx context.Conte
 	}
 
 	// Update the template using sqlx repository
-	response, err := s.timeSlotTemplateRepo.UpdateTimeSlotTemplate(ctx, templateIDInt, req)
+	response, err := s.repo.Template.UpdateTimeSlotTemplate(ctx, templateIDInt, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update time slot template", err)
 	}

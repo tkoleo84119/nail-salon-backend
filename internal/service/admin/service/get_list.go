@@ -16,14 +16,14 @@ import (
 )
 
 type GetServiceListService struct {
-	queries           *dbgen.Queries
-	serviceRepository sqlx.ServiceRepositoryInterface
+	queries *dbgen.Queries
+	repo    *sqlx.Repositories
 }
 
-func NewGetServiceListService(queries *dbgen.Queries, serviceRepository sqlx.ServiceRepositoryInterface) *GetServiceListService {
+func NewGetServiceListService(queries *dbgen.Queries, repo *sqlx.Repositories) *GetServiceListService {
 	return &GetServiceListService{
-		queries:           queries,
-		serviceRepository: serviceRepository,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -78,7 +78,7 @@ func (s *GetServiceListService) GetServiceList(ctx context.Context, storeID stri
 	}
 
 	// Get service list from repository
-	results, total, err := s.serviceRepository.GetStoreServiceList(ctx, storeIDInt, sqlx.GetStoreServiceListParams{
+	results, total, err := s.repo.Service.GetStoreServiceList(ctx, storeIDInt, sqlx.GetStoreServiceListParams{
 		Name:      req.Name,
 		IsAddon:   req.IsAddon,
 		IsActive:  req.IsActive,

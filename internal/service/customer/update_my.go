@@ -11,14 +11,14 @@ import (
 )
 
 type UpdateMyCustomerService struct {
-	customerRepo sqlx.CustomerRepositoryInterface
-	db           dbgen.Querier
+	repo *sqlx.Repositories
+	db   dbgen.Querier
 }
 
-func NewUpdateMyCustomerService(db dbgen.Querier, customerRepo sqlx.CustomerRepositoryInterface) *UpdateMyCustomerService {
+func NewUpdateMyCustomerService(db dbgen.Querier, repo *sqlx.Repositories) *UpdateMyCustomerService {
 	return &UpdateMyCustomerService{
-		customerRepo: customerRepo,
-		db:           db,
+		repo: repo,
+		db:   db,
 	}
 }
 
@@ -42,7 +42,7 @@ func (s *UpdateMyCustomerService) UpdateMyCustomer(ctx context.Context, customer
 	}
 
 	// Data Integrity: Update customer data
-	result, err := s.customerRepo.UpdateMyCustomer(ctx, customerID, req)
+	result, err := s.repo.Customer.UpdateMyCustomer(ctx, customerID, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update customer", err)
 	}

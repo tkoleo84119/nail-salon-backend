@@ -15,14 +15,14 @@ import (
 )
 
 type UpdateServiceService struct {
-	queries     dbgen.Querier
-	serviceRepo sqlx.ServiceRepositoryInterface
+	queries dbgen.Querier
+	repo    *sqlx.Repositories
 }
 
-func NewUpdateServiceService(queries dbgen.Querier, serviceRepo sqlx.ServiceRepositoryInterface) *UpdateServiceService {
+func NewUpdateServiceService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateServiceService {
 	return &UpdateServiceService{
-		queries:     queries,
-		serviceRepo: serviceRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -67,7 +67,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID stri
 	}
 
 	// Update service using sqlx repository
-	updatedService, err := s.serviceRepo.UpdateService(ctx, parsedServiceID, req)
+	updatedService, err := s.repo.Service.UpdateService(ctx, parsedServiceID, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update service", err)
 	}

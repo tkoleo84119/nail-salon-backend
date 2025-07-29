@@ -88,13 +88,13 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 
 		// Customer services
 		CustomerGetMy:    customerService.NewGetMyCustomerService(queries),
-		CustomerUpdateMy: customerService.NewUpdateMyCustomerService(queries, repositories.Customer),
+		CustomerUpdateMy: customerService.NewUpdateMyCustomerService(queries, repositories.SQLX),
 
 		// Booking services
 		BookingCreateMy:    bookingService.NewCreateMyBookingService(queries, database.PgxPool),
-		BookingUpdateMy:    bookingService.NewUpdateMyBookingService(queries, repositories.Booking, database.PgxPool),
+		BookingUpdateMy:    bookingService.NewUpdateMyBookingService(queries, repositories.SQLX, database.PgxPool),
 		BookingCancelMy:    bookingService.NewCancelMyBookingService(queries),
-		BookingGetMy:       bookingService.NewGetMyBookingsService(repositories.Booking),
+		BookingGetMy:       bookingService.NewGetMyBookingsService(repositories.SQLX),
 		BookingGetMySingle: bookingService.NewGetMyBookingService(queries),
 
 		// Schedule services
@@ -102,9 +102,9 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		ScheduleGetTimeSlots:      scheduleService.NewGetTimeSlotService(queries),
 
 		// Store services
-		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.Service),
-		StoreGetStylists: storeService.NewGetStoreStylistsService(queries, repositories.Stylist),
-		StoreGetStores:   storeService.NewGetStoresService(repositories.Store),
+		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.SQLX),
+		StoreGetStylists: storeService.NewGetStoreStylistsService(queries, repositories.SQLX),
+		StoreGetStores:   storeService.NewGetStoresService(repositories.SQLX),
 		StoreGetStore:    storeService.NewGetStoreService(queries),
 	}
 }

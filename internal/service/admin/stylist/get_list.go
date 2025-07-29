@@ -21,14 +21,14 @@ type GetStylistListServiceInterface interface {
 }
 
 type GetStylistListService struct {
-	queries     *dbgen.Queries
-	stylistRepo sqlxRepo.StylistRepositoryInterface
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewGetStylistListService(queries *dbgen.Queries, stylistRepo sqlxRepo.StylistRepositoryInterface) *GetStylistListService {
+func NewGetStylistListService(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *GetStylistListService {
 	return &GetStylistListService{
-		queries:     queries,
-		stylistRepo: stylistRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -60,7 +60,7 @@ func (s *GetStylistListService) GetStylistList(ctx context.Context, storeID stri
 	}
 
 	// Get stylists from repository with dynamic filtering
-	stylists, total, err := s.stylistRepo.GetStoreStylistList(ctx, storeIDInt, sqlxRepo.GetStoreStylistListParams{
+	stylists, total, err := s.repo.Stylist.GetStoreStylistList(ctx, storeIDInt, sqlxRepo.GetStoreStylistListParams{
 		Name:        req.Name,
 		IsIntrovert: req.IsIntrovert,
 		Limit:       req.Limit,

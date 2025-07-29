@@ -17,15 +17,7 @@ type Container struct {
 }
 
 type Repositories struct {
-	Stylist          *sqlx.StylistRepository
-	StaffUser        *sqlx.StaffUserRepository
-	Store            *sqlx.StoreRepository
-	Service          *sqlx.ServiceRepository
-	Customer         *sqlx.CustomerRepository
-	TimeSlot         *sqlx.TimeSlotRepository
-	TimeSlotTemplate *sqlx.TimeSlotTemplateRepository
-	Booking          *sqlx.BookingRepository
-	Schedule         *sqlx.ScheduleRepository
+	SQLX *sqlx.Repositories
 }
 
 type Services struct {
@@ -42,15 +34,7 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 	queries := dbgen.New(database.PgxPool)
 
 	repositories := Repositories{
-		Stylist:          sqlx.NewStylistRepository(database.Sqlx),
-		StaffUser:        sqlx.NewStaffUserRepository(database.Sqlx),
-		Store:            sqlx.NewStoreRepository(database.Sqlx),
-		Service:          sqlx.NewServiceRepository(database.Sqlx),
-		Customer:         sqlx.NewCustomerRepository(database.Sqlx),
-		TimeSlot:         sqlx.NewTimeSlotRepository(database.Sqlx),
-		TimeSlotTemplate: sqlx.NewTimeSlotTemplateRepository(database.Sqlx),
-		Booking:          sqlx.NewBookingRepository(database.Sqlx),
-		Schedule:         sqlx.NewScheduleRepository(database.Sqlx),
+		SQLX: sqlx.NewRepositories(database.Sqlx),
 	}
 
 	// Initialize services using separated containers

@@ -10,14 +10,14 @@ import (
 )
 
 type UpdateMyStaffService struct {
-	queries             dbgen.Querier
-	staffUserRepository sqlx.StaffUserRepositoryInterface
+	queries dbgen.Querier
+	repo    *sqlx.Repositories
 }
 
-func NewUpdateMyStaffService(queries dbgen.Querier, staffUserRepository sqlx.StaffUserRepositoryInterface) *UpdateMyStaffService {
+func NewUpdateMyStaffService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateMyStaffService {
 	return &UpdateMyStaffService{
-		queries:             queries,
-		staffUserRepository: staffUserRepository,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -48,7 +48,7 @@ func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req adminStaff
 	}
 
 	// Update staff user record using repository
-	response, err := s.staffUserRepository.UpdateMyStaff(ctx, staffUserID, req)
+	response, err := s.repo.Staff.UpdateMyStaff(ctx, staffUserID, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff own information", err)
 	}

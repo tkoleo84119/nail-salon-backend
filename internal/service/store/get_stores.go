@@ -9,18 +9,18 @@ import (
 )
 
 type GetStoresService struct {
-	storeRepo *sqlxRepo.StoreRepository
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetStoresService(storeRepo *sqlxRepo.StoreRepository) GetStoresServiceInterface {
+func NewGetStoresService(repo *sqlxRepo.Repositories) GetStoresServiceInterface {
 	return &GetStoresService{
-		storeRepo: storeRepo,
+		repo: repo,
 	}
 }
 
 func (s *GetStoresService) GetStores(ctx context.Context, queryParams storeModel.GetStoresQueryParams) (*storeModel.GetStoresResponse, error) {
 	// Get stores from repository with pagination
-	stores, total, err := s.storeRepo.GetStores(ctx, queryParams.Limit, queryParams.Offset)
+	stores, total, err := s.repo.Store.GetStores(ctx, queryParams.Limit, queryParams.Offset)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get stores", err)
 	}

@@ -15,16 +15,16 @@ import (
 )
 
 type UpdateBookingByStaffService struct {
-	queries           *dbgen.Queries
-	db                *pgxpool.Pool
-	bookingRepository *sqlx.BookingRepository
+	queries *dbgen.Queries
+	db      *pgxpool.Pool
+	repo    *sqlx.Repositories
 }
 
-func NewUpdateBookingByStaffService(queries *dbgen.Queries, db *pgxpool.Pool, bookingRepository *sqlx.BookingRepository) UpdateBookingByStaffServiceInterface {
+func NewUpdateBookingByStaffService(queries *dbgen.Queries, db *pgxpool.Pool, repo *sqlx.Repositories) UpdateBookingByStaffServiceInterface {
 	return &UpdateBookingByStaffService{
-		queries:           queries,
-		db:                db,
-		bookingRepository: bookingRepository,
+		queries: queries,
+		db:      db,
+		repo:    repo,
 	}
 }
 
@@ -201,7 +201,7 @@ func (s *UpdateBookingByStaffService) UpdateBookingByStaff(ctx context.Context, 
 	}
 
 	// Update booking record
-	_, err = s.bookingRepository.UpdateBookingByStaff(ctx, bookingIDInt, storeIDInt, newTimeSlotIDInt, req.IsChatEnabled, req.Note)
+	_, err = s.repo.Booking.UpdateBookingByStaff(ctx, bookingIDInt, storeIDInt, newTimeSlotIDInt, req.IsChatEnabled, req.Note)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update booking", err)
 	}

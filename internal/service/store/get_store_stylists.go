@@ -14,14 +14,14 @@ import (
 )
 
 type GetStoreStylistsService struct {
-	queries     dbgen.Querier
-	stylistRepo *sqlxRepo.StylistRepository
+	queries dbgen.Querier
+	repo    *sqlxRepo.Repositories
 }
 
-func NewGetStoreStylistsService(queries dbgen.Querier, stylistRepo *sqlxRepo.StylistRepository) GetStoreStylistsServiceInterface {
+func NewGetStoreStylistsService(queries dbgen.Querier, repo *sqlxRepo.Repositories) GetStoreStylistsServiceInterface {
 	return &GetStoreStylistsService{
-		queries:     queries,
-		stylistRepo: stylistRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -47,7 +47,7 @@ func (s *GetStoreStylistsService) GetStoreStylists(ctx context.Context, storeIDS
 	}
 
 	// Get stylists from repository
-	stylists, total, err := s.stylistRepo.GetStoreStylists(ctx, storeID, queryParams.Limit, queryParams.Offset)
+	stylists, total, err := s.repo.Stylist.GetStoreStylists(ctx, storeID, queryParams.Limit, queryParams.Offset)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store stylists", err)
 	}

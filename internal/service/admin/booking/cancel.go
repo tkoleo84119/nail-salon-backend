@@ -14,16 +14,14 @@ import (
 )
 
 type CancelBookingService struct {
-	db                 *sqlx.DB
-	bookingRepository  *sqlxRepo.BookingRepository
-	timeSlotRepository *sqlxRepo.TimeSlotRepository
+	db   *sqlx.DB
+	repo *sqlxRepo.Repositories
 }
 
-func NewCancelBookingService(db *sqlx.DB, bookingRepository *sqlxRepo.BookingRepository, timeSlotRepository *sqlxRepo.TimeSlotRepository) CancelBookingServiceInterface {
+func NewCancelBookingService(db *sqlx.DB, repo *sqlxRepo.Repositories) CancelBookingServiceInterface {
 	return &CancelBookingService{
-		db:                 db,
-		bookingRepository:  bookingRepository,
-		timeSlotRepository: timeSlotRepository,
+		db:   db,
+		repo: repo,
 	}
 }
 
@@ -40,7 +38,7 @@ func (s *CancelBookingService) CancelBooking(ctx context.Context, storeID, booki
 	}
 
 	// Get existing booking to verify it exists and is in SCHEDULED status
-	existingBooking, err := s.bookingRepository.GetByID(ctx, bookingIDInt)
+	existingBooking, err := s.repo.Booking.GetByID(ctx, bookingIDInt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingNotFound)
@@ -64,13 +62,13 @@ func (s *CancelBookingService) CancelBooking(ctx context.Context, storeID, booki
 	defer tx.Rollback()
 
 	// Cancel booking using repository
-	id, err := s.bookingRepository.CancelBooking(ctx, tx, bookingIDInt, req.Status, req.CancelReason)
+	id, err := s.repo.Booking.CancelBooking(ctx, tx, bookingIDInt, req.Status, req.CancelReason)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to cancel booking", err)
 	}
 
 	// Release time slot using repository
-	err = s.timeSlotRepository.UpdateTimeSlotAvailabilityTx(ctx, tx, existingBooking.TimeSlotID, true)
+	err = s.repo.TimeSlot.UpdateTimeSlotAvailabilityTx(ctx, tx, existingBooking.TimeSlotID, true)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to release time slot", err)
 	}

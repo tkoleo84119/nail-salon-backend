@@ -13,14 +13,14 @@ import (
 )
 
 type UpdateTimeSlotService struct {
-	queries      dbgen.Querier
-	timeSlotRepo sqlx.TimeSlotRepositoryInterface
+	queries dbgen.Querier
+	repo    *sqlx.Repositories
 }
 
-func NewUpdateTimeSlotService(queries dbgen.Querier, timeSlotRepo sqlx.TimeSlotRepositoryInterface) *UpdateTimeSlotService {
+func NewUpdateTimeSlotService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateTimeSlotService {
 	return &UpdateTimeSlotService{
-		queries:      queries,
-		timeSlotRepo: timeSlotRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -137,7 +137,7 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 	}
 
 	// Update time slot using sqlx repository
-	response, err := s.timeSlotRepo.UpdateTimeSlot(ctx, timeSlotIDInt, req)
+	response, err := s.repo.TimeSlot.UpdateTimeSlot(ctx, timeSlotIDInt, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update time slot", err)
 	}

@@ -13,14 +13,14 @@ import (
 )
 
 type UpdateStoreService struct {
-	queries         dbgen.Querier
-	storeRepository sqlxRepo.StoreRepositoryInterface
+	queries dbgen.Querier
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateStoreService(queries dbgen.Querier, storeRepository sqlxRepo.StoreRepositoryInterface) *UpdateStoreService {
+func NewUpdateStoreService(queries dbgen.Querier, repo *sqlxRepo.Repositories) *UpdateStoreService {
 	return &UpdateStoreService{
-		queries:         queries,
-		storeRepository: storeRepository,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -86,7 +86,7 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 	}
 
 	// Update store using sqlx repository
-	response, err := s.storeRepository.UpdateStore(ctx, parsedStoreID, req)
+	response, err := s.repo.Store.UpdateStore(ctx, parsedStoreID, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update store", err)
 	}

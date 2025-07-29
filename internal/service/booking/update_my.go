@@ -17,16 +17,16 @@ import (
 )
 
 type UpdateMyBookingService struct {
-	queries     dbgen.Querier
-	bookingRepo *sqlxRepo.BookingRepository
-	db          *pgxpool.Pool
+	queries dbgen.Querier
+	repo    *sqlxRepo.Repositories
+	db      *pgxpool.Pool
 }
 
-func NewUpdateMyBookingService(queries dbgen.Querier, bookingRepo *sqlxRepo.BookingRepository, db *pgxpool.Pool) *UpdateMyBookingService {
+func NewUpdateMyBookingService(queries dbgen.Querier, repo *sqlxRepo.Repositories, db *pgxpool.Pool) *UpdateMyBookingService {
 	return &UpdateMyBookingService{
-		queries:     queries,
-		bookingRepo: bookingRepo,
-		db:          db,
+		queries: queries,
+		repo:    repo,
+		db:      db,
 	}
 }
 
@@ -110,7 +110,7 @@ func (s *UpdateMyBookingService) UpdateMyBooking(ctx context.Context, bookingIDS
 	qtx := dbgen.New(tx)
 
 	// Update booking
-	_, err = s.bookingRepo.UpdateMyBooking(ctx, bookingID, customerContext.CustomerID, req)
+	_, err = s.repo.Booking.UpdateMyBooking(ctx, bookingID, customerContext.CustomerID, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update booking", err)
 	}

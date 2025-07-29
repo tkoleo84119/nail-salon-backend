@@ -17,19 +17,19 @@ type GetTimeSlotTemplateListServiceInterface interface {
 }
 
 type GetTimeSlotTemplateListService struct {
-	queries              *dbgen.Queries
-	timeSlotTemplateRepo sqlxRepo.TimeSlotTemplateRepositoryInterface
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewGetTimeSlotTemplateListService(queries *dbgen.Queries, timeSlotTemplateRepo sqlxRepo.TimeSlotTemplateRepositoryInterface) *GetTimeSlotTemplateListService {
+func NewGetTimeSlotTemplateListService(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *GetTimeSlotTemplateListService {
 	return &GetTimeSlotTemplateListService{
-		queries:              queries,
-		timeSlotTemplateRepo: timeSlotTemplateRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
 func (s *GetTimeSlotTemplateListService) GetTimeSlotTemplateList(ctx context.Context, req adminTimeSlotTemplateModel.GetTimeSlotTemplateListRequest, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateListResponse, error) {
-	timeSlotTemplates, total, err := s.timeSlotTemplateRepo.GetTimeSlotTemplateList(ctx, sqlxRepo.GetTimeSlotTemplateListParams{
+	timeSlotTemplates, total, err := s.repo.Template.GetTimeSlotTemplateList(ctx, sqlxRepo.GetTimeSlotTemplateListParams{
 		Name:   req.Name,
 		Limit:  req.Limit,
 		Offset: req.Offset,

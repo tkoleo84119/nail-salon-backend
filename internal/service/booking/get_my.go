@@ -11,12 +11,12 @@ import (
 )
 
 type GetMyBookingsService struct {
-	bookingRepo *sqlxRepo.BookingRepository
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetMyBookingsService(bookingRepo *sqlxRepo.BookingRepository) GetMyBookingsServiceInterface {
+func NewGetMyBookingsService(repo *sqlxRepo.Repositories) GetMyBookingsServiceInterface {
 	return &GetMyBookingsService{
-		bookingRepo: bookingRepo,
+		repo: repo,
 	}
 }
 
@@ -36,7 +36,7 @@ func (s *GetMyBookingsService) GetMyBookings(ctx context.Context, queryParams bo
 	}
 
 	// Get bookings from repository
-	bookings, total, err := s.bookingRepo.GetMyBookings(ctx, customerContext.CustomerID, statuses, queryParams.Limit, queryParams.Offset)
+	bookings, total, err := s.repo.Booking.GetMyBookings(ctx, customerContext.CustomerID, statuses, queryParams.Limit, queryParams.Offset)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get bookings", err)
 	}

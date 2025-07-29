@@ -22,14 +22,14 @@ type GetScheduleListServiceInterface interface {
 }
 
 type GetScheduleListService struct {
-	queries      *dbgen.Queries
-	scheduleRepo sqlxRepo.ScheduleRepositoryInterface
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewGetScheduleListService(queries *dbgen.Queries, scheduleRepo sqlxRepo.ScheduleRepositoryInterface) *GetScheduleListService {
+func NewGetScheduleListService(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *GetScheduleListService {
 	return &GetScheduleListService{
-		queries:      queries,
-		scheduleRepo: scheduleRepo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -88,7 +88,7 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID st
 	}
 
 	// Get schedules from repository with dynamic filtering
-	response, err := s.scheduleRepo.GetStoreScheduleList(ctx, storeIDInt, sqlxRepo.GetStoreScheduleListParams{
+	response, err := s.repo.Schedule.GetStoreScheduleList(ctx, storeIDInt, sqlxRepo.GetStoreScheduleListParams{
 		StylistID:   &stylistIDInt,
 		StartDate:   startDate,
 		EndDate:     endDate,

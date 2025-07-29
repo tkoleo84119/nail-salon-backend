@@ -10,14 +10,14 @@ import (
 )
 
 type UpdateMyStylistService struct {
-	queries           dbgen.Querier
-	stylistRepository sqlx.StylistRepositoryInterface
+	queries dbgen.Querier
+	repo    *sqlx.Repositories
 }
 
-func NewUpdateMyStylistService(queries dbgen.Querier, stylistRepository sqlx.StylistRepositoryInterface) *UpdateMyStylistService {
+func NewUpdateMyStylistService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateMyStylistService {
 	return &UpdateMyStylistService{
-		queries:           queries,
-		stylistRepository: stylistRepository,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -37,7 +37,7 @@ func (s *UpdateMyStylistService) UpdateMyStylist(ctx context.Context, req adminS
 	}
 
 	// Update stylist record using repository
-	response, err := s.stylistRepository.UpdateStylist(ctx, staffUserID, req)
+	response, err := s.repo.Stylist.UpdateStylist(ctx, staffUserID, req)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update stylist", err)
 	}

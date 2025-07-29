@@ -22,14 +22,14 @@ type GetBookingListServiceInterface interface {
 }
 
 type GetBookingListService struct {
-	queries           *dbgen.Queries
-	bookingRepository *sqlx.BookingRepository
+	queries *dbgen.Queries
+	repo    *sqlx.Repositories
 }
 
-func NewGetBookingListService(queries *dbgen.Queries, bookingRepository *sqlx.BookingRepository) *GetBookingListService {
+func NewGetBookingListService(queries *dbgen.Queries, repo *sqlx.Repositories) *GetBookingListService {
 	return &GetBookingListService{
-		queries:           queries,
-		bookingRepository: bookingRepository,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -98,7 +98,7 @@ func (s *GetBookingListService) GetBookingList(ctx context.Context, storeID stri
 	}
 
 	// Get booking list from repository
-	bookings, total, err := s.bookingRepository.GetStoreBookingList(ctx, storeIDInt, repoParams)
+	bookings, total, err := s.repo.Booking.GetStoreBookingList(ctx, storeIDInt, repoParams)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get bookings", err)
 	}
