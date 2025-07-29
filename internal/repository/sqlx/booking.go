@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jmoiron/sqlx"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -106,16 +106,16 @@ func (r *BookingRepository) UpdateMyBooking(ctx context.Context, bookingID int64
 
 // GetMyBookingsModel represents the database model for booking list
 type GetMyBookingsModel struct {
-	ID           int64  `db:"id"`
-	StoreID      int64  `db:"store_id"`
-	StoreName    string `db:"store_name"`
-	StylistID    int64  `db:"stylist_id"`
-	StylistName  string `db:"stylist_name"`
-	Date         string `db:"date"`
-	TimeSlotID   int64  `db:"time_slot_id"`
-	StartTime    string `db:"start_time"`
-	EndTime      string `db:"end_time"`
-	Status       string `db:"status"`
+	ID          int64  `db:"id"`
+	StoreID     int64  `db:"store_id"`
+	StoreName   string `db:"store_name"`
+	StylistID   int64  `db:"stylist_id"`
+	StylistName string `db:"stylist_name"`
+	Date        string `db:"date"`
+	TimeSlotID  int64  `db:"time_slot_id"`
+	StartTime   string `db:"start_time"`
+	EndTime     string `db:"end_time"`
+	Status      string `db:"status"`
 }
 
 // GetMyBookings retrieves customer bookings with optional filtering and pagination
@@ -396,4 +396,91 @@ func (r *BookingRepository) UpdateBookingByStaff(ctx context.Context, bookingID 
 	}
 
 	return &result, nil
+}
+
+type GetByIDRow struct {
+	ID            int64              `db:"id"`
+	StoreID       int64              `db:"store_id"`
+	StoreName     string             `db:"store_name"`
+	CustomerID    int64              `db:"customer_id"`
+	StylistID     int64              `db:"stylist_id"`
+	StylistName   pgtype.Text        `db:"stylist_name"`
+	TimeSlotID    int64              `db:"time_slot_id"`
+	StartTime     pgtype.Time        `db:"start_time"`
+	EndTime       pgtype.Time        `db:"end_time"`
+	WorkDate      pgtype.Date        `db:"work_date"`
+	IsChatEnabled pgtype.Bool        `db:"is_chat_enabled"`
+	Note          pgtype.Text        `db:"note"`
+	Status        string             `db:"status"`
+	CreatedAt     pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
+}
+
+// GetByID retrieves a booking by ID
+func (r *BookingRepository) GetByID(ctx context.Context, bookingID int64) (*GetByIDRow, error) {
+	query := `
+		SELECT
+			b.id,
+			b.store_id,
+			s.name as store_name,
+			b.customer_id,
+			b.stylist_id,
+			st.name as stylist_name,
+			b.time_slot_id,
+			ts.start_time,
+			ts.end_time,
+			sch.work_date,
+			b.is_chat_enabled,
+			b.note,
+			b.status,
+			b.created_at,
+			b.updated_at
+		FROM bookings b
+		JOIN stores s ON b.store_id = s.id
+		JOIN stylists st ON b.stylist_id = st.id
+		JOIN time_slots ts ON b.time_slot_id = ts.id
+		JOIN schedules sch ON ts.schedule_id = sch.id
+		WHERE b.id = $1
+	`
+
+	var result GetByIDRow
+	err := r.db.GetContext(ctx, &result, query, bookingID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// CancelBooking cancels a booking with transaction support
+func (r *BookingRepository) CancelBooking(ctx context.Context, tx *sqlx.Tx, bookingID int64, status string, cancelReason *string) (int64, error) {
+	cancelParams := map[string]interface{}{
+		"booking_id":    bookingID,
+		"status":        status,
+		"cancel_reason": utils.StringPtrToPgText(cancelReason, false),
+	}
+
+	cancelQuery := `
+		UPDATE bookings
+		SET status = :status, cancel_reason = :cancel_reason, updated_at = NOW()
+		WHERE id = :booking_id
+		RETURNING id
+	`
+
+	var result int64
+	rows, err := tx.NamedQuery(cancelQuery, cancelParams)
+	if err != nil {
+		return 0, fmt.Errorf("failed to cancel booking: %w", err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return 0, fmt.Errorf("no rows returned after cancelling booking")
+	}
+
+	if err := rows.StructScan(&result); err != nil {
+		return 0, fmt.Errorf("failed to scan booking ID: %w", err)
+	}
+
+	return result, nil
 }

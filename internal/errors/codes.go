@@ -19,6 +19,7 @@ const (
 	BookingNotFound                 = "BOOKING_NOT_FOUND"
 	BookingStatusNotAllowedToUpdate = "BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE"
 	BookingStatusNotAllowedToCancel = "BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL"
+	BookingNotBelongToStore         = "BOOKING_NOT_BELONG_TO_STORE"
 	BookingTimeSlotNotFound         = "TIME_SLOT_NOT_FOUND"
 	BookingTimeSlotUnavailable      = "TIME_SLOT_UNAVAILABLE"
 

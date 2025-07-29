@@ -64,6 +64,7 @@ type AdminServices struct {
 	BookingCreate        adminBookingService.CreateBookingServiceInterface
 	BookingGetList       adminBookingService.GetBookingListServiceInterface
 	BookingUpdateByStaff adminBookingService.UpdateBookingByStaffServiceInterface
+	BookingCancel        adminBookingService.CancelBookingServiceInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateSchedulesBulkServiceInterface
@@ -123,6 +124,7 @@ type AdminHandlers struct {
 	BookingCreate        *adminBookingHandler.CreateBookingHandler
 	BookingGetList       *adminBookingHandler.GetBookingListHandler
 	BookingUpdateByStaff *adminBookingHandler.UpdateBookingByStaffHandler
+	BookingCancel        *adminBookingHandler.CancelBookingHandler
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateSchedulesBulkHandler
@@ -183,6 +185,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
 		BookingGetList:       adminBookingService.NewGetBookingListService(queries, repositories.Booking),
 		BookingUpdateByStaff: adminBookingService.NewUpdateBookingByStaffService(queries, database.PgxPool, repositories.Booking),
+		BookingCancel:        adminBookingService.NewCancelBookingService(database.Sqlx, repositories.Booking, repositories.TimeSlot),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
@@ -244,6 +247,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		BookingCreate:        adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
 		BookingGetList:       adminBookingHandler.NewGetBookingListHandler(services.BookingGetList),
 		BookingUpdateByStaff: adminBookingHandler.NewUpdateBookingByStaffHandler(services.BookingUpdateByStaff),
+		BookingCancel:        adminBookingHandler.NewCancelBookingHandler(services.BookingCancel),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),

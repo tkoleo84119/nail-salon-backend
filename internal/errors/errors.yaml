@@ -43,6 +43,9 @@ BOOKING:
   BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL:
     message: 預約狀態不允許取消
     status: 409
+  BOOKING_NOT_BELONG_TO_STORE:
+    message: 預約不屬於指定的門市
+    status: 400
   TIME_SLOT_NOT_FOUND:
     message: 指定時段不存在
     status: 404
