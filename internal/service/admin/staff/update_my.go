@@ -30,7 +30,7 @@ func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req adminStaff
 	// Check if staff user exists
 	_, err := s.queries.GetStaffUserByID(ctx, staffUserID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.UserNotFound, "failed to get staff user", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffNotFound, "failed to get staff user", err)
 	}
 
 	// Check email uniqueness if email is being updated
@@ -43,7 +43,7 @@ func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req adminStaff
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check email uniqueness", err)
 		}
 		if exists {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserEmailExists)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffEmailExists)
 		}
 	}
 

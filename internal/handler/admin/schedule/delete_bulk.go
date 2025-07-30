@@ -7,8 +7,8 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -28,7 +28,7 @@ func (h *DeleteSchedulesBulkHandler) DeleteSchedulesBulk(c *gin.Context) {
 	var req adminScheduleModel.DeleteSchedulesBulkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

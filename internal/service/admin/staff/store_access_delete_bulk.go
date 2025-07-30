@@ -8,8 +8,8 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -29,21 +29,21 @@ func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context
 	// Parse target staff ID
 	targetStaffID, err := utils.ParseID(targetID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid target staff ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid target staff ID", err)
 	}
 
 	// Check if target staff exists
 	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetStaffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
 		return nil, fmt.Errorf("failed to get target staff: %w", err)
 	}
 
 	// Cannot modify self
 	if targetStaffID == creatorID {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotUpdateSelf)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotUpdateSelf)
 	}
 	// Cannot modify SUPER_ADMIN store access
 	if targetStaff.Role == adminStaffModel.RoleSuperAdmin {
@@ -55,7 +55,7 @@ func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context
 	for _, storeIDStr := range req.StoreIDs {
 		storeID, err := utils.ParseID(storeIDStr)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 		}
 		storeIDs = append(storeIDs, storeID)
 	}

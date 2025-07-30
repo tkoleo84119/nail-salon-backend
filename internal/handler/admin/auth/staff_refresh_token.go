@@ -27,7 +27,7 @@ func (h *StaffRefreshTokenHandler) StaffRefreshToken(c *gin.Context) {
 	var req adminAuthModel.StaffRefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

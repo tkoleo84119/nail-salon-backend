@@ -25,7 +25,7 @@ func (h *DeleteTimeSlotHandler) DeleteTimeSlot(c *gin.Context) {
 	// Get path parameters
 	scheduleID := c.Param("scheduleId")
 	if scheduleID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"scheduleId": "scheduleId為必填項目",
 		})
 		return
@@ -33,7 +33,7 @@ func (h *DeleteTimeSlotHandler) DeleteTimeSlot(c *gin.Context) {
 
 	timeSlotID := c.Param("timeSlotId")
 	if timeSlotID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"timeSlotId": "timeSlotId為必填項目",
 		})
 		return

@@ -28,7 +28,7 @@ func (h *CreateMyBookingHandler) CreateMyBooking(c *gin.Context) {
 	var req bookingModel.CreateMyBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

@@ -7,8 +7,8 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -28,7 +28,7 @@ func (h *CreateTimeSlotTemplateItemHandler) CreateTimeSlotTemplateItem(c *gin.Co
 	var req adminTimeSlotTemplateModel.CreateTimeSlotTemplateItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
@@ -38,7 +38,7 @@ func (h *CreateTimeSlotTemplateItemHandler) CreateTimeSlotTemplateItem(c *gin.Co
 		validationErrors := map[string]string{
 			"templateId": "templateId為必填項目",
 		}
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, validationErrors)
 		return
 	}
 

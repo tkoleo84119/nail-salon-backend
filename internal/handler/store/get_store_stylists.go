@@ -28,14 +28,14 @@ func (h *GetStoreStylistsHandler) GetStoreStylists(c *gin.Context) {
 	var queryParams storeModel.GetStoreStylistsQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
 	// Path parameter validation
 	storeID := c.Param("storeId")
 	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"storeId": "storeId為必填項目",
 		})
 		return

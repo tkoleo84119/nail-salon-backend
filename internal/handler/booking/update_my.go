@@ -28,14 +28,14 @@ func (h *UpdateMyBookingHandler) UpdateMyBooking(c *gin.Context) {
 	var req bookingModel.UpdateMyBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
 	// Path parameter validation
 	bookingID := c.Param("bookingId")
 	if bookingID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"bookingId": "bookingId為必填項目",
 		})
 		return

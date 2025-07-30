@@ -25,13 +25,13 @@ func (h *GetScheduleHandler) GetSchedule(c *gin.Context) {
 	// validate storeId and scheduleId
 	storeID := c.Param("storeId")
 	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"storeId": "storeId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
 		return
 	}
 
 	scheduleID := c.Param("scheduleId")
 	if scheduleID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"scheduleId": "scheduleId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"scheduleId": "scheduleId 為必填項目"})
 		return
 	}
 

@@ -33,7 +33,7 @@ func (h *GetMyStaffHandler) GetMyStaff(c *gin.Context) {
 	// Parse staff user ID from context
 	staffUserID, err := utils.ParseID(staffContext.UserID)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"staffUserId": "invalid staff user ID"})
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "invalid staff user ID"})
 		return
 	}
 

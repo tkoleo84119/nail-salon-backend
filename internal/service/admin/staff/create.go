@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -29,12 +29,12 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 	// Convert string store IDs to int64
 	storeIDs, err := utils.ParseIDSlice(req.StoreIDs)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store IDs", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store IDs", err)
 	}
 
 	// validate role is valid
 	if !adminStaffModel.IsValidRole(req.Role) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserInvalidRole)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffInvalidRole)
 	}
 	if req.Role == adminStaffModel.RoleSuperAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
@@ -57,7 +57,7 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check user existence", err)
 	}
 	if exists {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserAlreadyExists)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffAlreadyExists)
 	}
 
 	// check if stores exist and active
@@ -66,10 +66,10 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check stores", err)
 	}
 	if storeCheck.TotalCount != int64(len(storeIDs)) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotFound)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffStoreNotFound)
 	}
 	if storeCheck.ActiveCount != storeCheck.TotalCount {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotActive)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffStoreNotActive)
 	}
 
 	hashedPassword, err := utils.HashPassword(req.Password)

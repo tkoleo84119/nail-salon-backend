@@ -8,8 +8,8 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -29,27 +29,27 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, target
 	// Parse target staff ID
 	targetStaffID, err := utils.ParseID(targetID)
 	if err != nil {
-		return nil, false, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid target staff ID", err)
+		return nil, false, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid target staff ID", err)
 	}
 
 	// Parse store ID
 	storeID, err := utils.ParseID(req.StoreID)
 	if err != nil {
-		return nil, false, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+		return nil, false, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 	}
 
 	// Check if target staff exists
 	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetStaffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
+			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
 		return nil, false, fmt.Errorf("failed to get target staff: %w", err)
 	}
 
 	// Cannot modify self
 	if targetStaffID == creatorID {
-		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotUpdateSelf)
+		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotUpdateSelf)
 	}
 
 	// Cannot modify SUPER_ADMIN
@@ -61,12 +61,12 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, target
 	store, err := s.queries.GetStoreByID(ctx, storeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotFound)
+			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StaffStoreNotFound)
 		}
 		return nil, false, fmt.Errorf("failed to get store: %w", err)
 	}
 	if !store.IsActive.Bool {
-		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.UserStoreNotActive)
+		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StaffStoreNotActive)
 	}
 
 	// Check if creator has access to this store (except SUPER_ADMIN)

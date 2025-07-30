@@ -7,8 +7,8 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -25,7 +25,7 @@ func (h *CreateBookingHandler) CreateBooking(c *gin.Context) {
 	// Get path parameter
 	storeID := c.Param("storeId")
 	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"storeId": "storeId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
 		return
 	}
 
@@ -33,7 +33,7 @@ func (h *CreateBookingHandler) CreateBooking(c *gin.Context) {
 	var req adminBookingModel.CreateBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

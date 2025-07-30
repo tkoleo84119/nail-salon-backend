@@ -26,7 +26,7 @@ func (h *CustomerLineRegisterHandler) CustomerLineRegister(c *gin.Context) {
 	var req authModel.CustomerLineRegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

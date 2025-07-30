@@ -19,38 +19,40 @@ import (
 //   - pgtype.Text with Valid=true and the string value otherwise
 //
 // Examples:
-//   // Basic usage - nil becomes NULL, empty string stays as empty string
-//   var name *string = nil
-//   pgText := utils.StringPtrToPgText(name, false)          // Returns {Valid: false}
 //
-//   emptyName := ""
-//   pgText = utils.StringPtrToPgText(&emptyName, false)     // Returns {String: "", Valid: true}
+//	// Basic usage - nil becomes NULL, empty string stays as empty string
+//	var name *string = nil
+//	pgText := utils.StringPtrToPgText(name, false)          // Returns {Valid: false}
 //
-//   realName := "Alice"
-//   pgText = utils.StringPtrToPgText(&realName, false)      // Returns {String: "Alice", Valid: true}
+//	emptyName := ""
+//	pgText = utils.StringPtrToPgText(&emptyName, false)     // Returns {String: "", Valid: true}
 //
-//   // Empty as NULL behavior - both nil and empty string become NULL
-//   var address *string = nil
-//   pgText = utils.StringPtrToPgText(address, true)         // Returns {Valid: false}
+//	realName := "Alice"
+//	pgText = utils.StringPtrToPgText(&realName, false)      // Returns {String: "Alice", Valid: true}
 //
-//   emptyAddr := ""
-//   pgText = utils.StringPtrToPgText(&emptyAddr, true)      // Returns {Valid: false}
+//	// Empty as NULL behavior - both nil and empty string become NULL
+//	var address *string = nil
+//	pgText = utils.StringPtrToPgText(address, true)         // Returns {Valid: false}
 //
-//   realAddr := "123 Main St"
-//   pgText = utils.StringPtrToPgText(&realAddr, true)       // Returns {String: "123 Main St", Valid: true}
+//	emptyAddr := ""
+//	pgText = utils.StringPtrToPgText(&emptyAddr, true)      // Returns {Valid: false}
+//
+//	realAddr := "123 Main St"
+//	pgText = utils.StringPtrToPgText(&realAddr, true)       // Returns {String: "123 Main St", Valid: true}
 //
 // Usage in SQLC queries:
-//   // For optional fields where empty strings are valid
-//   params := CreateUserParams{
-//       Name:    req.Name,                                    // Required field
-//       Bio:     utils.StringPtrToPgText(req.Bio, false),    // Optional, empty allowed
-//   }
 //
-//   // For optional fields where empty strings should be NULL
-//   params := UpdateStoreParams{
-//       Address: utils.StringPtrToPgText(req.Address, true), // Optional, empty becomes NULL
-//       Phone:   utils.StringPtrToPgText(req.Phone, true),   // Optional, empty becomes NULL
-//   }
+//	// For optional fields where empty strings are valid
+//	params := CreateUserParams{
+//	    Name:    req.Name,                                    // Required field
+//	    Bio:     utils.StringPtrToPgText(req.Bio, false),    // Optional, empty allowed
+//	}
+//
+//	// For optional fields where empty strings should be NULL
+//	params := UpdateStoreParams{
+//	    Address: utils.StringPtrToPgText(req.Address, true), // Optional, empty becomes NULL
+//	    Phone:   utils.StringPtrToPgText(req.Phone, true),   // Optional, empty becomes NULL
+//	}
 func StringPtrToPgText(s *string, emptyAsNull bool) pgtype.Text {
 	if s == nil {
 		return pgtype.Text{Valid: false}
@@ -60,7 +62,6 @@ func StringPtrToPgText(s *string, emptyAsNull bool) pgtype.Text {
 	}
 	return pgtype.Text{String: *s, Valid: true}
 }
-
 
 // PgTextToString converts pgtype.Text to string, returning empty string for invalid/NULL values.
 // This is used when reading nullable string fields from database results.
@@ -73,18 +74,20 @@ func StringPtrToPgText(s *string, emptyAsNull bool) pgtype.Text {
 //   - The actual string value if t.Valid is true
 //
 // Example:
-//   var result struct {
-//       Name    string      `db:"name"`
-//       Address pgtype.Text `db:"address"`
-//   }
-//   // After scanning from database...
-//   addressStr := utils.PgTextToString(result.Address)  // "" if NULL, actual value otherwise
+//
+//	var result struct {
+//	    Name    string      `db:"name"`
+//	    Address pgtype.Text `db:"address"`
+//	}
+//	// After scanning from database...
+//	addressStr := utils.PgTextToString(result.Address)  // "" if NULL, actual value otherwise
 //
 // Usage in response building:
-//   response := &UserResponse{
-//       Name:    result.Name,
-//       Address: utils.PgTextToString(result.Address),
-//   }
+//
+//	response := &UserResponse{
+//	    Name:    result.Name,
+//	    Address: utils.PgTextToString(result.Address),
+//	}
 func PgTextToString(t pgtype.Text) string {
 	if !t.Valid {
 		return ""
@@ -103,17 +106,19 @@ func PgTextToString(t pgtype.Text) string {
 //   - The float64 value if conversion succeeds
 //
 // Example:
-//   var result struct {
-//       Price pgtype.Numeric `db:"price"`
-//   }
-//   // After scanning from database...
-//   priceFloat := utils.PgNumericToFloat64(result.Price)  // 0 if NULL, actual value otherwise
+//
+//	var result struct {
+//	    Price pgtype.Numeric `db:"price"`
+//	}
+//	// After scanning from database...
+//	priceFloat := utils.PgNumericToFloat64(result.Price)  // 0 if NULL, actual value otherwise
 //
 // Usage in response building:
-//   response := &ProductResponse{
-//       ID:    result.ID,
-//       Price: utils.PgNumericToFloat64(result.Price),
-//   }
+//
+//	response := &ProductResponse{
+//	    ID:    result.ID,
+//	    Price: utils.PgNumericToFloat64(result.Price),
+//	}
 func PgNumericToFloat64(n pgtype.Numeric) float64 {
 	if !n.Valid {
 		return 0
@@ -138,21 +143,23 @@ func PgNumericToFloat64(n pgtype.Numeric) float64 {
 //   - error if conversion fails
 //
 // Example:
-//   price := 99.99
-//   pgPrice, err := utils.Float64ToPgNumeric(price)
-//   if err != nil {
-//       return nil, fmt.Errorf("failed to convert price: %w", err)
-//   }
+//
+//	price := 99.99
+//	pgPrice, err := utils.Float64ToPgNumeric(price)
+//	if err != nil {
+//	    return nil, fmt.Errorf("failed to convert price: %w", err)
+//	}
 //
 // Usage in SQLC queries:
-//   priceNumeric, err := utils.Float64ToPgNumeric(req.Price)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to convert price", err)
-//   }
-//   params := CreateProductParams{
-//       Name:  req.Name,
-//       Price: priceNumeric,
-//   }
+//
+//	priceNumeric, err := utils.Float64ToPgNumeric(req.Price)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to convert price", err)
+//	}
+//	params := CreateProductParams{
+//	    Name:  req.Name,
+//	    Price: priceNumeric,
+//	}
 func Float64ToPgNumeric(f float64) (pgtype.Numeric, error) {
 	var n pgtype.Numeric
 	err := n.Scan(f)
@@ -173,21 +180,23 @@ func Float64ToPgNumeric(f float64) (pgtype.Numeric, error) {
 //   - error if conversion fails
 //
 // Example:
-//   price := int64(1000) // Price in cents
-//   pgPrice, err := utils.Int64ToPgNumeric(price)
-//   if err != nil {
-//       return nil, fmt.Errorf("failed to convert price: %w", err)
-//   }
+//
+//	price := int64(1000) // Price in cents
+//	pgPrice, err := utils.Int64ToPgNumeric(price)
+//	if err != nil {
+//	    return nil, fmt.Errorf("failed to convert price: %w", err)
+//	}
 //
 // Usage in SQLC queries:
-//   priceNumeric, err := utils.Int64ToPgNumeric(req.Price)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to convert price", err)
-//   }
-//   params := CreateServiceParams{
-//       Name:  req.Name,
-//       Price: priceNumeric,
-//   }
+//
+//	priceNumeric, err := utils.Int64ToPgNumeric(req.Price)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to convert price", err)
+//	}
+//	params := CreateServiceParams{
+//	    Name:  req.Name,
+//	    Price: priceNumeric,
+//	}
 func Int64ToPgNumeric(i int64) (pgtype.Numeric, error) {
 	var n pgtype.Numeric
 	err := n.Scan(i)
@@ -207,18 +216,20 @@ func Int64ToPgNumeric(i int64) (pgtype.Numeric, error) {
 //   - pgtype.Bool with Valid=false if b is nil, otherwise Valid=true with the boolean value
 //
 // Example:
-//   var isActive *bool = nil
-//   pgBool := utils.BoolPtrToPgBool(isActive)          // Returns {Valid: false}
 //
-//   enabled := true
-//   pgBool = utils.BoolPtrToPgBool(&enabled)           // Returns {Bool: true, Valid: true}
+//	var isActive *bool = nil
+//	pgBool := utils.BoolPtrToPgBool(isActive)          // Returns {Valid: false}
+//
+//	enabled := true
+//	pgBool = utils.BoolPtrToPgBool(&enabled)           // Returns {Bool: true, Valid: true}
 //
 // Usage in SQLC queries:
-//   params := CreateServiceParams{
-//       Name:      req.Name,
-//       IsVisible: utils.BoolPtrToPgBool(&req.IsVisible),  // Required field
-//       IsAddon:   utils.BoolPtrToPgBool(req.IsAddon),     // Optional field
-//   }
+//
+//	params := CreateServiceParams{
+//	    Name:      req.Name,
+//	    IsVisible: utils.BoolPtrToPgBool(&req.IsVisible),  // Required field
+//	    IsAddon:   utils.BoolPtrToPgBool(req.IsAddon),     // Optional field
+//	}
 func BoolPtrToPgBool(b *bool) pgtype.Bool {
 	if b == nil {
 		return pgtype.Bool{Valid: false}
@@ -236,15 +247,17 @@ func BoolPtrToPgBool(b *bool) pgtype.Bool {
 //   - pgtype.Timestamptz with Valid=true and the timestamp value
 //
 // Example:
-//   now := time.Now()
-//   pgTimestamp := utils.TimeToPgTimestamptz(now)
+//
+//	now := time.Now()
+//	pgTimestamp := utils.TimeToPgTimestamptz(now)
 //
 // Usage in SQLC queries:
-//   params := CreateUserParams{
-//       Name:      req.Name,
-//       CreatedAt: utils.TimeToPgTimestamptz(time.Now()),
-//       UpdatedAt: utils.TimeToPgTimestamptz(time.Now()),
-//   }
+//
+//	params := CreateUserParams{
+//	    Name:      req.Name,
+//	    CreatedAt: utils.TimeToPgTimestamptz(time.Now()),
+//	    UpdatedAt: utils.TimeToPgTimestamptz(time.Now()),
+//	}
 func TimeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
@@ -259,15 +272,17 @@ func TimeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
 //   - pgtype.Time with Valid=true and the time value in microseconds
 //
 // Example:
-//   timeValue, _ := time.Parse("15:04", "09:30")
-//   pgTime := utils.TimeToPgTime(timeValue)           // Converts to 09:30:00
+//
+//	timeValue, _ := time.Parse("15:04", "09:30")
+//	pgTime := utils.TimeToPgTime(timeValue)           // Converts to 09:30:00
 //
 // Usage in SQLC queries:
-//   startTime, _ := utils.TimeStringToTime(req.StartTime)
-//   params := CreateTimeSlotParams{
-//       StartTime: utils.TimeToPgTime(startTime),
-//       EndTime:   utils.TimeToPgTime(endTime),
-//   }
+//
+//	startTime, _ := utils.TimeStringToTime(req.StartTime)
+//	params := CreateTimeSlotParams{
+//	    StartTime: utils.TimeToPgTime(startTime),
+//	    EndTime:   utils.TimeToPgTime(endTime),
+//	}
 func TimeToPgTime(t time.Time) pgtype.Time {
 	totalMicros := int64(t.Hour()*3600+t.Minute()*60+t.Second()) * 1000000
 	totalMicros += int64(t.Nanosecond()) / 1000 // Add microsecond precision
@@ -285,18 +300,20 @@ func TimeToPgTime(t time.Time) pgtype.Time {
 //   - Time string in "HH:MM" format (e.g., "09:30", "14:45")
 //
 // Example:
-//   var result struct {
-//       StartTime pgtype.Time `db:"start_time"`
-//   }
-//   // After scanning from database...
-//   timeStr := utils.PgTimeToTimeString(result.StartTime)  // "09:30"
+//
+//	var result struct {
+//	    StartTime pgtype.Time `db:"start_time"`
+//	}
+//	// After scanning from database...
+//	timeStr := utils.PgTimeToTimeString(result.StartTime)  // "09:30"
 //
 // Usage in response building:
-//   response := &TimeSlotResponse{
-//       ID:        utils.FormatID(result.ID),
-//       StartTime: utils.PgTimeToTimeString(result.StartTime),
-//       EndTime:   utils.PgTimeToTimeString(result.EndTime),
-//   }
+//
+//	response := &TimeSlotResponse{
+//	    ID:        utils.FormatID(result.ID),
+//	    StartTime: utils.PgTimeToTimeString(result.StartTime),
+//	    EndTime:   utils.PgTimeToTimeString(result.EndTime),
+//	}
 func PgTimeToTimeString(t pgtype.Time) string {
 	if !t.Valid {
 		return ""
@@ -320,23 +337,25 @@ func PgTimeToTimeString(t pgtype.Time) string {
 //   - time.Time with the time portion set (date will be 0001-01-01)
 //
 // Example:
-//   var result struct {
-//       StartTime pgtype.Time `db:"start_time"`
-//   }
-//   // After scanning from database...
-//   startTime := utils.PgTimeToTime(result.StartTime)
 //
-//   // Use for comparisons
-//   if endTime.After(startTime) {
-//       // Valid time range
-//   }
+//	var result struct {
+//	    StartTime pgtype.Time `db:"start_time"`
+//	}
+//	// After scanning from database...
+//	startTime := utils.PgTimeToTime(result.StartTime)
+//
+//	// Use for comparisons
+//	if endTime.After(startTime) {
+//	    // Valid time range
+//	}
 //
 // Usage in business logic:
-//   startTime := utils.PgTimeToTime(timeSlot.StartTime)
-//   endTime := utils.PgTimeToTime(timeSlot.EndTime)
-//   if !endTime.After(startTime) {
-//       return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
-//   }
+//
+//	startTime := utils.PgTimeToTime(timeSlot.StartTime)
+//	endTime := utils.PgTimeToTime(timeSlot.EndTime)
+//	if !endTime.After(startTime) {
+//	    return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
+//	}
 func PgTimeToTime(t pgtype.Time) time.Time {
 	if !t.Valid {
 		return time.Time{}
@@ -355,17 +374,19 @@ func PgTimeToTime(t pgtype.Time) time.Time {
 //   - Date string in "YYYY-MM-DD" format (e.g., "2023-12-25")
 //
 // Example:
-//   var result struct {
-//       WorkDate pgtype.Date `db:"work_date"`
-//   }
-//   // After scanning from database...
-//   dateStr := utils.PgDateToDateString(result.WorkDate)  // "2023-12-25"
+//
+//	var result struct {
+//	    WorkDate pgtype.Date `db:"work_date"`
+//	}
+//	// After scanning from database...
+//	dateStr := utils.PgDateToDateString(result.WorkDate)  // "2023-12-25"
 //
 // Usage in response building:
-//   response := &ScheduleResponse{
-//       ID:       utils.FormatID(result.ID),
-//       WorkDate: utils.PgDateToDateString(result.WorkDate),
-//   }
+//
+//	response := &ScheduleResponse{
+//	    ID:       utils.FormatID(result.ID),
+//	    WorkDate: utils.PgDateToDateString(result.WorkDate),
+//	}
 func PgDateToDateString(d pgtype.Date) string {
 	if !d.Valid {
 		return ""
@@ -384,17 +405,19 @@ func PgDateToDateString(d pgtype.Date) string {
 //   - error if the string format is invalid
 //
 // Example:
-//   dateStr := "2023-12-25"
-//   date, err := utils.DateStringToTime(dateStr)
-//   if err != nil {
-//       return fmt.Errorf("invalid date: %w", err)
-//   }
+//
+//	dateStr := "2023-12-25"
+//	date, err := utils.DateStringToTime(dateStr)
+//	if err != nil {
+//	    return fmt.Errorf("invalid date: %w", err)
+//	}
 //
 // Usage in request validation:
-//   workDate, err := utils.DateStringToTime(req.WorkDate)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid work date format", err)
-//   }
+//
+//	workDate, err := utils.DateStringToTime(req.WorkDate)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid work date format", err)
+//	}
 func DateStringToTime(s string) (time.Time, error) {
 	return time.Parse("2006-01-02", s)
 }
@@ -410,19 +433,21 @@ func DateStringToTime(s string) (time.Time, error) {
 //   - error if the string format is invalid
 //
 // Example:
-//   workDate, err := utils.DateStringToPgDate("2023-12-25")
-//   if err != nil {
-//       return nil, fmt.Errorf("invalid date format: %w", err)
-//   }
+//
+//	workDate, err := utils.DateStringToPgDate("2023-12-25")
+//	if err != nil {
+//	    return nil, fmt.Errorf("invalid date format: %w", err)
+//	}
 //
 // Usage in SQLC queries:
-//   workDate, err := utils.DateStringToPgDate(req.WorkDate)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid work date format", err)
-//   }
-//   params := CreateScheduleParams{
-//       WorkDate: workDate,
-//   }
+//
+//	workDate, err := utils.DateStringToPgDate(req.WorkDate)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid work date format", err)
+//	}
+//	params := CreateScheduleParams{
+//	    WorkDate: workDate,
+//	}
 func DateStringToPgDate(s string) (pgtype.Date, error) {
 	t, err := DateStringToTime(s)
 	if err != nil {
@@ -442,27 +467,29 @@ func DateStringToPgDate(s string) (pgtype.Date, error) {
 //   - error if the string format is invalid
 //
 // Example:
-//   timeStr := "09:30"
-//   timeValue, err := utils.TimeStringToTime(timeStr)
-//   if err != nil {
-//       return fmt.Errorf("invalid time: %w", err)
-//   }
+//
+//	timeStr := "09:30"
+//	timeValue, err := utils.TimeStringToTime(timeStr)
+//	if err != nil {
+//	    return fmt.Errorf("invalid time: %w", err)
+//	}
 //
 // Usage in request validation:
-//   startTime, err := utils.TimeStringToTime(req.StartTime)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
-//   }
 //
-//   endTime, err := utils.TimeStringToTime(req.EndTime)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
-//   }
+//	startTime, err := utils.TimeStringToTime(req.StartTime)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
+//	}
 //
-//   // Validate time range
-//   if !endTime.After(startTime) {
-//       return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
-//   }
+//	endTime, err := utils.TimeStringToTime(req.EndTime)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
+//	}
+//
+//	// Validate time range
+//	if !endTime.After(startTime) {
+//	    return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
+//	}
 func TimeStringToTime(s string) (time.Time, error) {
 	return time.Parse("15:04", s)
 }
@@ -478,19 +505,21 @@ func TimeStringToTime(s string) (time.Time, error) {
 //   - error if the string format is invalid
 //
 // Example:
-//   pgTime, err := utils.TimeStringToPgTime("09:30")
-//   if err != nil {
-//       return nil, fmt.Errorf("invalid time format: %w", err)
-//   }
+//
+//	pgTime, err := utils.TimeStringToPgTime("09:30")
+//	if err != nil {
+//	    return nil, fmt.Errorf("invalid time format: %w", err)
+//	}
 //
 // Usage in SQLC queries:
-//   startTime, err := utils.TimeStringToPgTime(req.StartTime)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
-//   }
-//   params := CreateTimeSlotParams{
-//       StartTime: startTime,
-//   }
+//
+//	startTime, err := utils.TimeStringToPgTime(req.StartTime)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
+//	}
+//	params := CreateTimeSlotParams{
+//	    StartTime: startTime,
+//	}
 func TimeStringToPgTime(s string) (pgtype.Time, error) {
 	t, err := TimeStringToTime(s)
 	if err != nil {
@@ -511,13 +540,15 @@ func TimeStringToPgTime(s string) (pgtype.Time, error) {
 //   - pgtype.Date with Valid=true and the date value
 //
 // Example:
-//   now := time.Now()
-//   pgDate := utils.TimeToPgDate(now)                  // Converts to date-only
+//
+//	now := time.Now()
+//	pgDate := utils.TimeToPgDate(now)                  // Converts to date-only
 //
 // Usage in SQLC queries:
-//   params := CreateScheduleParams{
-//       WorkDate: utils.TimeToPgDate(time.Now()),
-//   }
+//
+//	params := CreateScheduleParams{
+//	    WorkDate: utils.TimeToPgDate(time.Now()),
+//	}
 func TimeToPgDate(t time.Time) pgtype.Date {
 	return pgtype.Date{Time: t, Valid: true}
 }
@@ -534,14 +565,16 @@ func TimeToPgDate(t time.Time) pgtype.Date {
 //   - pgtype.Int8 with Valid=true and the ID value
 //
 // Example:
-//   staffUserID, _ := utils.ParseID(staffContext.UserID)
-//   updaterID := utils.Int64ToPgInt8(staffUserID)
+//
+//	staffUserID, _ := utils.ParseID(staffContext.UserID)
+//	updaterID := utils.Int64ToPgInt8(staffUserID)
 //
 // Usage in SQLC queries:
-//   params := CreateTimeSlotTemplateParams{
-//       Name:    req.Name,
-//       Updater: utils.Int64ToPgInt8(staffUserID),  // Foreign key reference
-//   }
+//
+//	params := CreateTimeSlotTemplateParams{
+//	    Name:    req.Name,
+//	    Updater: utils.Int64ToPgInt8(staffUserID),  // Foreign key reference
+//	}
 func Int64ToPgInt8(id int64) pgtype.Int8 {
 	return pgtype.Int8{Int64: id, Valid: true}
 }
@@ -556,18 +589,20 @@ func Int64ToPgInt8(id int64) pgtype.Int8 {
 //   - pgtype.Int8 with Valid=false if id is nil, otherwise Valid=true with the ID value
 //
 // Example:
-//   var couponID *int64 = nil
-//   pgCouponID := utils.Int64PtrToPgInt8(couponID)     // Returns {Valid: false}
 //
-//   payerID := int64(123)
-//   pgPayerID := utils.Int64PtrToPgInt8(&payerID)      // Returns {Int64: 123, Valid: true}
+//	var couponID *int64 = nil
+//	pgCouponID := utils.Int64PtrToPgInt8(couponID)     // Returns {Valid: false}
+//
+//	payerID := int64(123)
+//	pgPayerID := utils.Int64PtrToPgInt8(&payerID)      // Returns {Int64: 123, Valid: true}
 //
 // Usage in SQLC queries:
-//   params := CreateCheckoutParams{
-//       BookingID:    bookingID,                       // Required foreign key
-//       CouponID:     utils.Int64PtrToPgInt8(req.CouponID),  // Optional foreign key
-//       CheckoutUser: utils.Int64PtrToPgInt8(req.ProcessedBy), // Optional foreign key
-//   }
+//
+//	params := CreateCheckoutParams{
+//	    BookingID:    bookingID,                       // Required foreign key
+//	    CouponID:     utils.Int64PtrToPgInt8(req.CouponID),  // Optional foreign key
+//	    CheckoutUser: utils.Int64PtrToPgInt8(req.ProcessedBy), // Optional foreign key
+//	}
 func Int64PtrToPgInt8(id *int64) pgtype.Int8 {
 	if id == nil {
 		return pgtype.Int8{Valid: false}
@@ -585,13 +620,15 @@ func Int64PtrToPgInt8(id *int64) pgtype.Int8 {
 //   - pgtype.Int4 with Valid=true and the integer value
 //
 // Example:
-//   actualDuration := int32(45)  // minutes
-//   pgDuration := utils.Int32ToPgInt4(actualDuration)
+//
+//	actualDuration := int32(45)  // minutes
+//	pgDuration := utils.Int32ToPgInt4(actualDuration)
 //
 // Usage in SQLC queries:
-//   params := UpdateBookingParams{
-//       ActualDuration: utils.Int32ToPgInt4(req.ActualDuration),
-//   }
+//
+//	params := UpdateBookingParams{
+//	    ActualDuration: utils.Int32ToPgInt4(req.ActualDuration),
+//	}
 func Int32ToPgInt4(value int32) pgtype.Int4 {
 	return pgtype.Int4{Int32: value, Valid: true}
 }
@@ -606,17 +643,19 @@ func Int32ToPgInt4(value int32) pgtype.Int4 {
 //   - pgtype.Int4 with Valid=false if value is nil, otherwise Valid=true with the integer value
 //
 // Example:
-//   var safetyStock *int32 = nil
-//   pgStock := utils.Int32PtrToPgInt4(safetyStock)     // Returns {Valid: false}
 //
-//   minStock := int32(10)
-//   pgStock = utils.Int32PtrToPgInt4(&minStock)        // Returns {Int32: 10, Valid: true}
+//	var safetyStock *int32 = nil
+//	pgStock := utils.Int32PtrToPgInt4(safetyStock)     // Returns {Valid: false}
+//
+//	minStock := int32(10)
+//	pgStock = utils.Int32PtrToPgInt4(&minStock)        // Returns {Int32: 10, Valid: true}
 //
 // Usage in SQLC queries:
-//   params := CreateProductParams{
-//       Name:        req.Name,                         // Required field
-//       SafetyStock: utils.Int32PtrToPgInt4(req.SafetyStock), // Optional field
-//   }
+//
+//	params := CreateProductParams{
+//	    Name:        req.Name,                         // Required field
+//	    SafetyStock: utils.Int32PtrToPgInt4(req.SafetyStock), // Optional field
+//	}
 func Int32PtrToPgInt4(value *int32) pgtype.Int4 {
 	if value == nil {
 		return pgtype.Int4{Valid: false}
@@ -635,19 +674,21 @@ func Int32PtrToPgInt4(value *int32) pgtype.Int4 {
 //   - error if ID parsing fails
 //
 // Example:
-//   couponID, err := utils.ParseIDToPgInt8(req.CouponID)
-//   if err != nil {
-//       return nil, fmt.Errorf("invalid coupon ID: %w", err)
-//   }
+//
+//	couponID, err := utils.ParseIDToPgInt8(req.CouponID)
+//	if err != nil {
+//	    return nil, fmt.Errorf("invalid coupon ID: %w", err)
+//	}
 //
 // Usage in request processing:
-//   couponID, err := utils.ParseIDToPgInt8(req.CouponID)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid coupon ID", err)
-//   }
-//   params := CreateCheckoutParams{
-//       CouponID: couponID,
-//   }
+//
+//	couponID, err := utils.ParseIDToPgInt8(req.CouponID)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid coupon ID", err)
+//	}
+//	params := CreateCheckoutParams{
+//	    CouponID: couponID,
+//	}
 func ParseIDToPgInt8(idStr string) (pgtype.Int8, error) {
 	if idStr == "" {
 		return pgtype.Int8{Valid: false}, nil
@@ -672,20 +713,22 @@ func ParseIDToPgInt8(idStr string) (pgtype.Int8, error) {
 //   - error if ID parsing fails
 //
 // Example:
-//   var couponID *string = nil
-//   pgCouponID, err := utils.ParseIDPtrToPgInt8(couponID)  // Returns {Valid: false}, nil
 //
-//   payerID := "123"
-//   pgPayerID, err := utils.ParseIDPtrToPgInt8(&payerID)   // Returns {Int64: 123, Valid: true}, nil
+//	var couponID *string = nil
+//	pgCouponID, err := utils.ParseIDPtrToPgInt8(couponID)  // Returns {Valid: false}, nil
+//
+//	payerID := "123"
+//	pgPayerID, err := utils.ParseIDPtrToPgInt8(&payerID)   // Returns {Int64: 123, Valid: true}, nil
 //
 // Usage in request processing:
-//   payerID, err := utils.ParseIDPtrToPgInt8(req.PayerID)
-//   if err != nil {
-//       return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid payer ID", err)
-//   }
-//   params := CreateExpenseParams{
-//       PayerID: payerID,
-//   }
+//
+//	payerID, err := utils.ParseIDPtrToPgInt8(req.PayerID)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid payer ID", err)
+//	}
+//	params := CreateExpenseParams{
+//	    PayerID: payerID,
+//	}
 func ParseIDPtrToPgInt8(idStr *string) (pgtype.Int8, error) {
 	if idStr == nil || *idStr == "" {
 		return pgtype.Int8{Valid: false}, nil
@@ -705,17 +748,19 @@ func ParseIDPtrToPgInt8(idStr *string) (pgtype.Int8, error) {
 //   - Formatted ID string if id.Valid is true
 //
 // Example:
-//   var result struct {
-//       CouponID pgtype.Int8 `db:"coupon_id"`
-//   }
-//   // After scanning from database...
-//   couponIDStr := utils.PgInt8ToIDString(result.CouponID)  // "" if NULL, "123" otherwise
+//
+//	var result struct {
+//	    CouponID pgtype.Int8 `db:"coupon_id"`
+//	}
+//	// After scanning from database...
+//	couponIDStr := utils.PgInt8ToIDString(result.CouponID)  // "" if NULL, "123" otherwise
 //
 // Usage in response building:
-//   response := &CheckoutResponse{
-//       ID:       utils.FormatID(result.ID),
-//       CouponID: utils.PgInt8ToIDString(result.CouponID),  // Optional foreign key
-//   }
+//
+//	response := &CheckoutResponse{
+//	    ID:       utils.FormatID(result.ID),
+//	    CouponID: utils.PgInt8ToIDString(result.CouponID),  // Optional foreign key
+//	}
 func PgInt8ToIDString(id pgtype.Int8) string {
 	if !id.Valid {
 		return ""
@@ -734,17 +779,19 @@ func PgInt8ToIDString(id pgtype.Int8) string {
 //   - Pointer to formatted ID string if id.Valid is true
 //
 // Example:
-//   var result struct {
-//       CouponID pgtype.Int8 `db:"coupon_id"`
-//   }
-//   // After scanning from database...
-//   couponIDPtr := utils.PgInt8ToIDStringPtr(result.CouponID)  // nil if NULL, &"123" otherwise
+//
+//	var result struct {
+//	    CouponID pgtype.Int8 `db:"coupon_id"`
+//	}
+//	// After scanning from database...
+//	couponIDPtr := utils.PgInt8ToIDStringPtr(result.CouponID)  // nil if NULL, &"123" otherwise
 //
 // Usage in response building:
-//   response := &CheckoutResponse{
-//       ID:       utils.FormatID(result.ID),
-//       CouponID: utils.PgInt8ToIDStringPtr(result.CouponID),  // Optional field as pointer
-//   }
+//
+//	response := &CheckoutResponse{
+//	    ID:       utils.FormatID(result.ID),
+//	    CouponID: utils.PgInt8ToIDStringPtr(result.CouponID),  // Optional field as pointer
+//	}
 func PgInt8ToIDStringPtr(id pgtype.Int8) *string {
 	if !id.Valid {
 		return nil
@@ -764,17 +811,19 @@ func PgInt8ToIDStringPtr(id pgtype.Int8) *string {
 //   - The int32 value if value.Valid is true
 //
 // Example:
-//   var result struct {
-//       ActualDuration pgtype.Int4 `db:"actual_duration"`
-//   }
-//   // After scanning from database...
-//   duration := utils.PgInt4ToInt32(result.ActualDuration)  // 0 if NULL, actual value otherwise
+//
+//	var result struct {
+//	    ActualDuration pgtype.Int4 `db:"actual_duration"`
+//	}
+//	// After scanning from database...
+//	duration := utils.PgInt4ToInt32(result.ActualDuration)  // 0 if NULL, actual value otherwise
 //
 // Usage in response building:
-//   response := &BookingResponse{
-//       ID:             utils.FormatID(result.ID),
-//       ActualDuration: utils.PgInt4ToInt32(result.ActualDuration),
-//   }
+//
+//	response := &BookingResponse{
+//	    ID:             utils.FormatID(result.ID),
+//	    ActualDuration: utils.PgInt4ToInt32(result.ActualDuration),
+//	}
 func PgInt4ToInt32(value pgtype.Int4) int32 {
 	if !value.Valid {
 		return 0
@@ -793,17 +842,19 @@ func PgInt4ToInt32(value pgtype.Int4) int32 {
 //   - Pointer to int32 value if value.Valid is true
 //
 // Example:
-//   var result struct {
-//       SafetyStock pgtype.Int4 `db:"safety_stock"`
-//   }
-//   // After scanning from database...
-//   stockPtr := utils.PgInt4ToInt32Ptr(result.SafetyStock)  // nil if NULL, &10 otherwise
+//
+//	var result struct {
+//	    SafetyStock pgtype.Int4 `db:"safety_stock"`
+//	}
+//	// After scanning from database...
+//	stockPtr := utils.PgInt4ToInt32Ptr(result.SafetyStock)  // nil if NULL, &10 otherwise
 //
 // Usage in response building:
-//   response := &ProductResponse{
-//       ID:          utils.FormatID(result.ID),
-//       SafetyStock: utils.PgInt4ToInt32Ptr(result.SafetyStock),  // Optional field as pointer
-//   }
+//
+//	response := &ProductResponse{
+//	    ID:          utils.FormatID(result.ID),
+//	    SafetyStock: utils.PgInt4ToInt32Ptr(result.SafetyStock),  // Optional field as pointer
+//	}
 func PgInt4ToInt32Ptr(value pgtype.Int4) *int32 {
 	if !value.Valid {
 		return nil
@@ -822,17 +873,19 @@ func PgInt4ToInt32Ptr(value pgtype.Int4) *int32 {
 //   - The bool value if b.Valid is true
 //
 // Example:
-//   var result struct {
-//       IsAvailable pgtype.Bool `db:"is_available"`
-//   }
-//   // After scanning from database...
-//   available := utils.PgBoolToBool(result.IsAvailable)  // false if NULL, actual value otherwise
+//
+//	var result struct {
+//	    IsAvailable pgtype.Bool `db:"is_available"`
+//	}
+//	// After scanning from database...
+//	available := utils.PgBoolToBool(result.IsAvailable)  // false if NULL, actual value otherwise
 //
 // Usage in response building:
-//   response := &TimeSlotResponse{
-//       ID:          utils.FormatID(result.ID),
-//       IsAvailable: utils.PgBoolToBool(result.IsAvailable),
-//   }
+//
+//	response := &TimeSlotResponse{
+//	    ID:          utils.FormatID(result.ID),
+//	    IsAvailable: utils.PgBoolToBool(result.IsAvailable),
+//	}
 func PgBoolToBool(b pgtype.Bool) bool {
 	if !b.Valid {
 		return false
@@ -850,13 +903,15 @@ func PgBoolToBool(b pgtype.Bool) bool {
 //   - pgtype.Bool with Valid=true and the boolean value
 //
 // Example:
-//   isEnabled := true
-//   pgBool := utils.BoolToPgBool(isEnabled)
+//
+//	isEnabled := true
+//	pgBool := utils.BoolToPgBool(isEnabled)
 //
 // Usage in SQLC queries:
-//   params := CreateBookingParams{
-//       IsChatEnabled: utils.BoolToPgBool(req.IsChatEnabled),
-//   }
+//
+//	params := CreateBookingParams{
+//	    IsChatEnabled: utils.BoolToPgBool(req.IsChatEnabled),
+//	}
 func BoolToPgBool(b bool) pgtype.Bool {
 	return pgtype.Bool{Bool: b, Valid: true}
 }

@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -11,20 +12,36 @@ import (
 
 // ErrorDefinition represents a single error definition
 type ErrorDefinition struct {
+	Code    string `yaml:"code"`
 	Message string `yaml:"message"`
 	Status  int    `yaml:"status"`
 }
 
+type ErrorItem struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Field   string `json:"field,omitempty"`
+}
+
 // ErrorManager manages error definitions loaded from YAML
 type ErrorManager struct {
-	errors map[string]ErrorDefinition
-	mu     sync.RWMutex
+	errors    map[string]ErrorDefinition
+	codeToKey map[string]string
+	mu        sync.RWMutex
 }
 
 var (
 	manager *ErrorManager
 	once    sync.Once
 )
+
+// GetCode retrieves error code by constant name
+func (em *ErrorManager) GetCode(constantName string) string {
+	if def, exists := em.GetError(constantName); exists {
+		return def.Code
+	}
+	return "E9999" // default unknown error code
+}
 
 // GetManager returns the singleton error manager instance
 func GetManager() *ErrorManager {
@@ -51,10 +68,14 @@ func (em *ErrorManager) LoadFromFile(filepath string) error {
 		return fmt.Errorf("failed to parse YAML: %w", err)
 	}
 
+	// initialize reverse mapping
+	em.codeToKey = make(map[string]string)
+
 	// Flatten the categories into a single map
 	for _, errorDefs := range categories {
-		for code, def := range errorDefs {
-			em.errors[code] = def
+		for key, def := range errorDefs {
+			em.errors[key] = def
+			em.codeToKey[def.Code] = key
 		}
 	}
 
@@ -86,24 +107,52 @@ func (em *ErrorManager) GetStatus(code string) int {
 	return 500
 }
 
-// GetErrorResponse creates a standardized error response with optional development details
-func (em *ErrorManager) GetErrorResponse(code string, fieldErrors map[string]string, details ...string) map[string]interface{} {
-	message := em.GetMessage(code)
+// GetErrorResponse creates a standardized error response
+func (em *ErrorManager) GetErrorResponse(errors []ErrorItem) map[string]interface{} {
+	return map[string]interface{}{
+		"errors": errors,
+	}
+}
 
-	response := map[string]interface{}{
-		"message": message,
+// CreateErrorItem creates an error item from a constant name and optional field and parameters
+func (em *ErrorManager) CreateErrorItem(constantName string, field string, params map[string]string) ErrorItem {
+	def, exists := em.GetError(constantName)
+	if !exists {
+		return ErrorItem{
+			Code:    "E9999",
+			Message: "未知錯誤",
+		}
 	}
 
-	if len(fieldErrors) > 0 {
-		response["errors"] = fieldErrors
+	message := def.Message
+	for key, value := range params {
+		placeholder := "{" + key + "}"
+		message = strings.ReplaceAll(message, placeholder, value)
 	}
 
-	// Add development details if provided and in debug mode
-	if len(details) > 0 && details[0] != "" && em.isDebugMode() {
-		response["dev_details"] = details[0]
+	item := ErrorItem{
+		Code:    def.Code,
+		Message: message,
 	}
 
-	return response
+	if field != "" {
+		item.Field = field
+	}
+
+	return item
+}
+
+// GetStatusByCode retrieves HTTP status code by error code
+func (em *ErrorManager) GetStatusByCode(errorCode string) int {
+	em.mu.RLock()
+	defer em.mu.RUnlock()
+
+	if key, exists := em.codeToKey[errorCode]; exists {
+		if def, exists := em.errors[key]; exists {
+			return def.Status
+		}
+	}
+	return 500
 }
 
 // isReleaseMode checks if the application is running in release mode

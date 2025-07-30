@@ -6,9 +6,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -29,17 +29,17 @@ func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, re
 	// Parse IDs
 	stylistID, err := utils.ParseID(req.StylistID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid stylist ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid stylist ID", err)
 	}
 
 	storeID, err := utils.ParseID(req.StoreID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 	}
 
 	scheduleIDs, err := utils.ParseIDSlice(req.ScheduleIDs)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid schedule IDs", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid schedule IDs", err)
 	}
 
 	// Check if stylist exists
@@ -62,10 +62,10 @@ func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, re
 	// Check if store exists and is active
 	store, err := s.queries.GetStoreByID(ctx, storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotFound, "store not found", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotFound, "store not found", err)
 	}
 	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotActive, "store is not active", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotActive, "store is not active", err)
 	}
 
 	// Check if staff has access to this store

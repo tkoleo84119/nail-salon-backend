@@ -3,67 +3,109 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
+	ownErrors "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 )
 
 // ExtractValidationErrors extracts validation errors from Gin binding errors
-func ExtractValidationErrors(err error) map[string]string {
-	errs := make(map[string]string)
+func ExtractValidationErrors(err error) []ownErrors.ErrorItem {
+	var errorItems []ownErrors.ErrorItem
+	errorManager := ownErrors.GetManager()
 
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
 		for _, fieldError := range ve {
 			fieldName := PascalToCamel(fieldError.Field())
+			var constantName string
+			params := map[string]string{
+				"field": fieldName,
+			}
 
 			switch fieldError.Tag() {
 			case "required":
-				errs[fieldName] = fieldName + "為必填項目"
+				constantName = ownErrors.ValFieldRequired
 			case "min":
 				if fieldError.Kind().String() == "string" {
-					errs[fieldName] = fmt.Sprintf("%s長度至少需要%s個字元", fieldName, fieldError.Param())
+					constantName = ownErrors.ValFieldStringMinLength
+					params["param"] = fieldError.Param()
 				} else if fieldError.Kind().String() == "slice" {
-					errs[fieldName] = fmt.Sprintf("%s至少需要%s個項目", fieldName, fieldError.Param())
+					constantName = ownErrors.ValFieldArrayMinLength
+					params["param"] = fieldError.Param()
 				} else {
-					errs[fieldName] = fmt.Sprintf("%s最小值為%s", fieldName, fieldError.Param())
+					constantName = ownErrors.ValFieldMinNumber
+					params["param"] = fieldError.Param()
 				}
 			case "max":
 				if fieldError.Kind().String() == "string" {
-					errs[fieldName] = fmt.Sprintf("%s長度最多%s個字元", fieldName, fieldError.Param())
+					constantName = ownErrors.ValFieldStringMaxLength
+					params["param"] = fieldError.Param()
 				} else if fieldError.Kind().String() == "slice" {
-					errs[fieldName] = fmt.Sprintf("%s最多只能有%s個項目", fieldName, fieldError.Param())
+					constantName = ownErrors.ValFieldArrayMaxLength
+					params["param"] = fieldError.Param()
 				} else {
-					errs[fieldName] = fmt.Sprintf("%s最大值為%s", fieldName, fieldError.Param())
+					constantName = ownErrors.ValFieldMaxNumber
+					params["param"] = fieldError.Param()
 				}
 			case "email":
-				errs[fieldName] = fieldName + "格式不是有效的Email"
+				constantName = ownErrors.ValFieldInvalidEmail
 			case "numeric":
-				errs[fieldName] = fieldName + "必須為數字"
+				constantName = ownErrors.ValFieldNumeric
 			case "boolean":
-				errs[fieldName] = fieldName + "必須為布林值"
+				constantName = ownErrors.ValFieldBoolean
 			case "oneof":
-				errs[fieldName] = fieldName + "只可以傳入特定值"
+				constantName = ownErrors.ValFieldOneof
+				params["param"] = fieldError.Param()
 			case "taiwanlandline":
-				errs[fieldName] = fieldName + "必須為有效的台灣市話號碼格式 (例: 02-12345678)"
+				constantName = ownErrors.ValFieldTaiwanLandline
 			case "taiwanmobile":
-				errs[fieldName] = fieldName + "必須為有效的台灣手機號碼格式 (例: 09xxxxxxxx)"
+				constantName = ownErrors.ValFieldTaiwanMobile
 			default:
-				errs[fieldName] = fieldName + "格式不正確"
+				constantName = ownErrors.ValInputValidationFailed
 			}
+
+			errorItem := errorManager.CreateErrorItem(constantName, fieldName, params)
+			errorItems = append(errorItems, errorItem)
 		}
+
+		return errorItems
 	}
 
 	var synErr *json.SyntaxError
-	var typeErr *json.UnmarshalTypeError
-	switch {
-	case errors.As(err, &synErr), errors.As(err, &typeErr):
-		errs["body"] = "JSON 格式錯誤"
-	default:
-		errs["params"] = "參數格式錯誤"
+	if errors.As(err, &synErr) {
+		errorItem := errorManager.CreateErrorItem(
+			ownErrors.ValJsonFormat,
+			"body",
+			nil,
+		)
+		errorItems = append(errorItems, errorItem)
+		return errorItems
 	}
-	return errs
+
+	var typeErr *json.UnmarshalTypeError
+	if errors.As(err, &typeErr) || strings.Contains(err.Error(), "parsing time") {
+		fieldName := typeErr.Field
+		errorItem := errorManager.CreateErrorItem(
+			ownErrors.ValTypeConversionFailed,
+			fieldName,
+			nil,
+		)
+		errorItems = append(errorItems, errorItem)
+		return errorItems
+	}
+
+	if len(errorItems) == 0 {
+		errorItem := errorManager.CreateErrorItem(
+			ownErrors.ValInputValidationFailed,
+			"",
+			nil,
+		)
+		errorItems = append(errorItems, errorItem)
+	}
+
+	return errorItems
 }
 
 // ValidateTaiwanLandline validates Taiwan landline phone numbers

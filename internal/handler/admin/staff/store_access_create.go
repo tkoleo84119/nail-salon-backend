@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -25,14 +25,14 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	var req adminStaffModel.CreateStoreAccessRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
 	// Get target staff ID from path parameter
 	targetID := c.Param("staffId")
 	if targetID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"staffId": "staffId為必填項目",
 		})
 		return

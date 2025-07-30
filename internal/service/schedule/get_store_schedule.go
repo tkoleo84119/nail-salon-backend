@@ -27,23 +27,23 @@ func (s *GetStoreScheduleService) GetStoreSchedules(ctx context.Context, storeID
 	// Input validation & ID parsing
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 	}
 
 	stylistIDInt, err := utils.ParseID(stylistID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid stylist ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid stylist ID", err)
 	}
 
 	// Date validation
 	startDate, err := utils.DateStringToTime(req.StartDate)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start date format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start date format", err)
 	}
 
 	endDate, err := utils.DateStringToTime(req.EndDate)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end date format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end date format", err)
 	}
 
 	// date range validation (max 60 days)

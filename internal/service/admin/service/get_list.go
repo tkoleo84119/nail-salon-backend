@@ -31,7 +31,7 @@ func (s *GetServiceListService) GetServiceList(ctx context.Context, storeID stri
 	// Parse store ID
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	// Verify store exists
@@ -49,7 +49,7 @@ func (s *GetServiceListService) GetServiceList(ctx context.Context, storeID stri
 		for _, store := range staffContext.StoreList {
 			storeId, err := utils.ParseID(store.ID)
 			if err != nil {
-				return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 			}
 			storeAccess = append(storeAccess, storeId)
 		}

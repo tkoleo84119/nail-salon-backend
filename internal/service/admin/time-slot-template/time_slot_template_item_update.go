@@ -5,8 +5,8 @@ import (
 	"time"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -25,13 +25,13 @@ func (s *UpdateTimeSlotTemplateItemService) UpdateTimeSlotTemplateItem(ctx conte
 	// Parse template ID
 	templateIDInt, err := utils.ParseID(templateID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid template ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid template ID", err)
 	}
 
 	// Parse item ID
 	itemIDInt, err := utils.ParseID(itemID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid item ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid item ID", err)
 	}
 
 	// Check if template exists
@@ -54,12 +54,12 @@ func (s *UpdateTimeSlotTemplateItemService) UpdateTimeSlotTemplateItem(ctx conte
 	// Validate time format and range
 	startTime, err := utils.TimeStringToTime(req.StartTime)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
 	}
 
 	endTime, err := utils.TimeStringToTime(req.EndTime)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
 	}
 
 	// Validate time range

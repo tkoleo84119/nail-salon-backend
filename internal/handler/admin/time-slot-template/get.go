@@ -25,7 +25,7 @@ func (h *GetTimeSlotTemplateHandler) GetTimeSlotTemplate(c *gin.Context) {
 	// Get path parameter
 	templateID := c.Param("templateId")
 	if templateID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"templateId": "templateId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"templateId": "templateId 為必填項目"})
 		return
 	}
 

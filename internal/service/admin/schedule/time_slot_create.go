@@ -4,9 +4,9 @@ import (
 	"context"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -25,17 +25,17 @@ func (s *CreateTimeSlotService) CreateTimeSlot(ctx context.Context, scheduleID s
 	// Parse schedule ID
 	scheduleIDInt, err := utils.ParseID(scheduleID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid schedule ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid schedule ID", err)
 	}
 
 	// Validate time format
 	startTime, err := utils.TimeStringToTime(req.StartTime)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
 	}
 	endTime, err := utils.TimeStringToTime(req.EndTime)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
 	}
 
 	// Validate time range
@@ -69,10 +69,10 @@ func (s *CreateTimeSlotService) CreateTimeSlot(ctx context.Context, scheduleID s
 	// Check if store exists and is active
 	store, err := s.queries.GetStoreByID(ctx, scheduleInfo.StoreID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotFound, "store not found", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotFound, "store not found", err)
 	}
 	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotActive, "store is not active", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotActive, "store is not active", err)
 	}
 
 	// Check if staff has access to this store

@@ -24,7 +24,7 @@ func (h *GetTimeSlotHandler) GetTimeSlots(c *gin.Context) {
 	// Path parameter validation
 	scheduleID := c.Param("scheduleId")
 	if scheduleID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"scheduleId": "scheduleId 為必填項目",
 		})
 		return

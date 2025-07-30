@@ -27,7 +27,7 @@ func (h *GetStaffListHandler) GetStaffList(c *gin.Context) {
 	var req adminStaffModel.GetStaffListRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

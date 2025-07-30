@@ -27,7 +27,7 @@ func (h *GetStoreScheduleHandler) GetStoreSchedules(c *gin.Context) {
 	// Path parameter validation
 	storeID := c.Param("storeId")
 	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"storeId": "storeId 為必填項目",
 		})
 		return
@@ -35,7 +35,7 @@ func (h *GetStoreScheduleHandler) GetStoreSchedules(c *gin.Context) {
 
 	stylistID := c.Param("stylistId")
 	if stylistID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"stylistId": "stylistId 為必填項目",
 		})
 		return
@@ -45,7 +45,7 @@ func (h *GetStoreScheduleHandler) GetStoreSchedules(c *gin.Context) {
 	var req scheduleModel.GetStoreSchedulesRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

@@ -27,7 +27,7 @@ func (h *GetScheduleListHandler) GetScheduleList(c *gin.Context) {
 	// Get store ID from path parameter
 	storeID := c.Param("storeId")
 	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"storeId": "storeId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
 		return
 	}
 
@@ -35,7 +35,7 @@ func (h *GetScheduleListHandler) GetScheduleList(c *gin.Context) {
 	var req adminScheduleModel.GetScheduleListRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

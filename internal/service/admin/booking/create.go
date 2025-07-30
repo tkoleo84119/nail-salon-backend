@@ -37,22 +37,22 @@ func (s *CreateBookingService) CreateBooking(ctx context.Context, storeID string
 	// Parse and validate IDs
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	customerIDInt, err := utils.ParseID(req.CustomerID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid customer ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid customer ID", err)
 	}
 
 	timeSlotIDInt, err := utils.ParseID(req.TimeSlotID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid time slot ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid time slot ID", err)
 	}
 
 	mainServiceIDInt, err := utils.ParseID(req.MainServiceID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid main service ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid main service ID", err)
 	}
 
 	// Parse sub service IDs
@@ -60,7 +60,7 @@ func (s *CreateBookingService) CreateBooking(ctx context.Context, storeID string
 	for _, subServiceID := range req.SubServiceIDs {
 		subServiceIDInt, err := utils.ParseID(subServiceID)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid sub service ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid sub service ID", err)
 		}
 		subServiceIDInts = append(subServiceIDInts, subServiceIDInt)
 	}

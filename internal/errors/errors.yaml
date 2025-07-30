@@ -1,205 +1,120 @@
 AUTH:
   AUTH_INVALID_CREDENTIALS:
+    code: E1001
     message: 帳號或密碼錯誤
     status: 401
-  AUTH_TOKEN_EXPIRED:
-    message: 登入已過期，請重新登入
-    status: 401
   AUTH_TOKEN_INVALID:
-    message: 無效的 accessToken
+    code: E1002
+    message: 無效的 accessToken，請重新登入
     status: 401
   AUTH_TOKEN_MISSING:
-    message: accessToken 缺失
+    code: E1003
+    message: accessToken 缺失，請重新登入
     status: 401
   AUTH_TOKEN_FORMAT_ERROR:
-    message: accessToken 格式錯誤
+    code: E1004
+    message: accessToken 格式錯誤，請重新登入
     status: 401
   AUTH_STAFF_FAILED:
-    message: 未找到員工資訊
+    code: E1005
+    message: 未找到有效的員工資訊，請重新登入
     status: 401
   AUTH_CONTEXT_MISSING:
-    message: 未找到使用者認證資訊
+    code: E1006
+    message: 未找到使用者認證資訊，請重新登入
+    status: 401
+  AUTH_LINE_TOKEN_INVALID:
+    code: E1007
+    message: Line idToken 驗證失敗，請重新登入
+    status: 401
+  AUTH_LINE_TOKEN_EXPIRED:
+    code: E1008
+    message: Line idToken 已過期，請重新登入
+    status: 401
+  AUTH_REFRESH_TOKEN_INVALID:
+    code: E1009
+    message: Refresh token 無效或已過期，請重新登入
     status: 401
   AUTH_PERMISSION_DENIED:
+    code: E1010
     message: 權限不足，無法執行此操作
     status: 403
-  AUTH_LINE_TOKEN_INVALID:
-    message: idToken 驗證失敗
-    status: 400
-  AUTH_LINE_TOKEN_EXPIRED:
-    message: idToken 已過期
-    status: 400
-  AUTH_REFRESH_TOKEN_INVALID:
-    message: Refresh token 無效或已過期
-    status: 401
-
-BOOKING:
-  BOOKING_NOT_FOUND:
-    message: 預約不存在或已被取消
-    status: 404
-  BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE:
-    message: 預約狀態不允許更新
-    status: 400
-  BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL:
-    message: 預約狀態不允許取消
-    status: 409
-  BOOKING_NOT_BELONG_TO_STORE:
-    message: 預約不屬於指定的門市
-    status: 400
-  TIME_SLOT_NOT_FOUND:
-    message: 指定時段不存在
-    status: 404
-  TIME_SLOT_UNAVAILABLE:
-    message: 該時段已被預約，請重新選擇
-    status: 409
-
-CUSTOMER:
-  CUSTOMER_NOT_FOUND:
-    message: 客戶不存在
-    status: 404
-  CUSTOMER_AUTH_NOT_FOUND:
-    message: 客戶登入資訊不存在
-    status: 404
-  CUSTOMER_ALREADY_EXISTS:
-    message: 客戶已存在
-    status: 409
-
-SCHEDULE:
-  SCHEDULE_ALREADY_EXISTS:
-    message: 美甲師班表已存在
-    status: 409
-  SCHEDULE_NOT_FOUND:
-    message: 班表不存在
-    status: 404
-  SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE:
-    message: 部分班表已被預約，無法刪除
-    status: 400
-  SCHEDULE_TIME_SLOT_INVALID:
-    message: 時段時間區段錯誤
-    status: 400
-  SCHEDULE_NOT_BELONG_TO_STORE:
-    message: 部分班表不屬於指定的門市
-    status: 400
-  SCHEDULE_NOT_BELONG_TO_STYLIST:
-    message: 部分班表不屬於指定的美甲師
-    status: 400
-
-SERVICE:
-  SERVICE_NOT_ACTIVE:
-    message: 服務未啟用
-    status: 400
-  SERVICE_NOT_MAIN_SERVICE:
-    message: 服務不是主服務
-    status: 400
-  SERVICE_NOT_ADDON:
-    message: 服務不是附屬服務
-    status: 400
-  SERVICE_NOT_FOUND:
-    message: 服務不存在或已被刪除
-    status: 404
-  SERVICE_ALREADY_EXISTS:
-    message: 服務已存在
-    status: 409
-
-STORE:
-  STORE_NOT_FOUND:
-    message: 門市不存在或已被刪除
-    status: 404
-  STORE_NOT_ACTIVE:
-    message: 門市未啟用
-    status: 400
-  STORE_ALREADY_EXISTS:
-    message: 門市已存在
-    status: 409
-
-STYLIST:
-  STYLIST_ALREADY_EXISTS:
-    message: 該員工已建立過美甲師資料，請使用修改功能
-    status: 409
-  STYLIST_NOT_FOUND:
-    message: 美甲師資料不存在
-    status: 404
-  STYLIST_NOT_CREATED:
-    message: 尚未建立美甲師資料，請先新增
-    status: 404
-
-TIME_SLOT:
-  TIME_SLOT_CANNOT_UPDATE_SEPARATELY:
-    message: 時段起始時間和結束時間必須同時傳入
-    status: 400
-  TIME_SLOT_NOT_BELONG_TO_SCHEDULE:
-    message: 時段不屬於指定的班表
-    status: 400
-  TIME_SLOT_TEMPLATE_ITEM_NOT_BELONG_TO_TEMPLATE:
-    message: 時段項目不屬於指定的範本
-    status: 400
-  TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE:
-    message: 時段已被預約，無法更新
-    status: 400
-  TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE:
-    message: 該時段已被預約，無法刪除
-    status: 400
-  TIME_SLOT_INVALID_TIME_RANGE:
-    message: 時段時間區段錯誤
-    status: 400
-  TIME_SLOT_CONFLICT:
-    message: 時段時間區段重疊
-    status: 400
-  TIME_SLOT_NOT_ENOUGH_TIME:
-    message: 時段時間不足
-    status: 400
-  TIME_SLOT_NOT_FOUND:
-    message: 時段不存在或已被刪除
-    status: 404
-  TIME_SLOT_TEMPLATE_NOT_FOUND:
-    message: 範本不存在或已被刪除
-    status: 404
-  TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND:
-    message: 範本項目不存在或已被刪除
-    status: 404
-
-USER:
-  USER_INVALID_ROLE:
-    message: 無效的角色
-    status: 400
-  USER_STORE_NOT_ACTIVE:
-    message: 部分門市未啟用
-    status: 400
-  USER_INACTIVE:
-    message: 帳號已停用
-    status: 403
-  USER_NOT_UPDATE_SELF:
-    message: 不可更新自己的帳號
-    status: 403
-  USER_NOT_FOUND:
-    message: 使用者不存在
-    status: 404
-  USER_STORE_NOT_FOUND:
-    message: 指定的門市不存在
-    status: 404
-  USER_ALREADY_EXISTS:
-    message: 帳號或Email已存在
-    status: 409
-  USER_EMAIL_EXISTS:
-    message: 此電子郵件已被註冊
-    status: 409
-  USER_USERNAME_EXISTS:
-    message: 此帳號已被使用
-    status: 409
 
 VAL:
   VAL_JSON_FORMAT:
-    message: JSON格式錯誤
+    code: E2001
+    message: JSON 格式錯誤，請檢查
     status: 400
-  VAL_INPUT_VALIDATION_FAILED:
-    message: 輸入驗證失敗
+  VAL_PATH_PARAM_MISSING:
+    code: E2002
+    message: 路徑參數缺失，請檢查
     status: 400
   VAL_ALL_FIELDS_EMPTY:
+    code: E2003
     message: 至少需要提供一個欄位進行更新
     status: 400
-  VAL_DATE_FORMAT_INVALID:
-    message: 日期格式錯誤，請使用 yyyy-MM-dd 格式
+  VAL_TYPE_CONVERSION_FAILED:
+    code: E2004
+    message: 參數類型轉換失敗
     status: 400
+  VAL_INPUT_VALIDATION_FAILED:
+    code: E2005
+    message: 輸入驗證失敗
+    status: 400
+
+  VAL_FIELD_REQUIRED:
+    code: E2020
+    message: "{field} 為必填項目"
+    status: 400
+  VAL_FIELD_STRING_MIN_LENGTH:
+    code: E2021
+    message: "{field} 長度至少需要 {param} 個字元"
+    status: 400
+  VAL_FIELD_ARRAY_MIN_LENGTH:
+    code: E2022
+    message: "{field} 至少需要 {param} 個項目"
+    status: 400
+  VAL_FIELD_MIN_NUMBER:
+    code: E2023
+    message: "{field} 最小值為 {param}"
+    status: 400
+  VAL_FIELD_STRING_MAX_LENGTH:
+    code: E2024
+    message: "{field} 長度最多只能有 {param} 個字元"
+    status: 400
+  VAL_FIELD_ARRAY_MAX_LENGTH:
+    code: E2025
+    message: "{field} 最多只能有 {param} 個項目"
+    status: 400
+  VAL_FIELD_MAX_NUMBER:
+    code: E2026
+    message: "{field} 最大值為 {param}"
+    status: 400
+  VAL_FIELD_INVALID_EMAIL:
+    code: E2027
+    message: "{field} 格式錯誤，請使用正確的電子郵件格式"
+    status: 400
+  VAL_FIELD_NUMERIC:
+    code: E2028
+    message: "{field} 必須是數字字串"
+    status: 400
+  VAL_FIELD_BOOLEAN:
+    code: E2029
+    message: "{field} 必須是布林值"
+    status: 400
+  VAL_FIELD_ONEOF:
+    code: E2030
+    message: "{field} 必須是 {param} 其中一個值"
+    status: 400
+  VAL_FIELD_TAIWAN_LANDLINE:
+    code: E2031
+    message: "{field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX)"
+    status: 400
+  VAL_FIELD_TAIWAN_MOBILE:
+    code: E2032
+    message: "{field} 格式錯誤，請使用正確的台灣手機號碼格式 (09XXXXXXXX)"
+    status: 400
+
   VAL_DUPLICATE_WORK_DATE:
     message: 重複的工作日期
     status: 400
@@ -213,16 +128,220 @@ VAL:
     message: 日期範圍不能超過 60 天
     status: 400
 
+BOOKING:
+  BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE:
+    code: E3BK002
+    message: 預約狀態不允許更新
+    status: 400
+  BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL:
+    code: E3BK003
+    message: 預約狀態不允許取消
+    status: 400
+  BOOKING_NOT_BELONG_TO_STORE:
+    code: E3BK004
+    message: 預約不屬於指定的門市
+    status: 400
+  BOOKING_NOT_FOUND:
+    code: E3BK001
+    message: 預約不存在或已被取消
+    status: 404
+  BOOKING_TIME_SLOT_NOT_FOUND:
+    code: E3BK005
+    message: 指定時段不存在
+    status: 404
+  BOOKING_TIME_SLOT_UNAVAILABLE:
+    code: E3BK006
+    message: 該時段已被預約，請重新選擇
+    status: 409
+
+CUSTOMER:
+  CUSTOMER_NOT_FOUND:
+    code: E3C001
+    message: 客戶不存在
+    status: 404
+  CUSTOMER_AUTH_NOT_FOUND:
+    code: E3C002
+    message: 客戶登入資訊不存在
+    status: 404
+  CUSTOMER_ALREADY_EXISTS:
+    code: E3C003
+    message: 客戶已存在
+    status: 409
+
+SCHEDULE:
+  SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE:
+    code: E3SCH001
+    message: 部分班表已被預約，無法刪除
+    status: 400
+  SCHEDULE_TIME_SLOT_INVALID:
+    code: E3SCH002
+    message: 時段時間區段錯誤
+    status: 400
+  SCHEDULE_NOT_BELONG_TO_STORE:
+    code: E3SCH003
+    message: 部分班表不屬於指定的門市
+    status: 400
+  SCHEDULE_NOT_BELONG_TO_STYLIST:
+    code: E3SCH004
+    message: 部分班表不屬於指定的美甲師
+    status: 400
+  SCHEDULE_NOT_FOUND:
+    code: E3SCH005
+    message: 班表不存在
+    status: 404
+  SCHEDULE_ALREADY_EXISTS:
+    code: E3SCH006
+    message: 美甲師班表已存在
+    status: 409
+
+SERVICE:
+  SERVICE_NOT_ACTIVE:
+    code: E3SER001
+    message: 服務未啟用
+    status: 400
+  SERVICE_NOT_MAIN_SERVICE:
+    code: E3SER002
+    message: 服務不是主服務
+    status: 400
+  SERVICE_NOT_ADDON:
+    code: E3SER003
+    message: 服務不是附屬服務
+    status: 400
+  SERVICE_NOT_FOUND:
+    code: E3SER004
+    message: 服務不存在或已被刪除
+    status: 404
+  SERVICE_ALREADY_EXISTS:
+    code: E3SER005
+    message: 服務已存在
+    status: 409
+
+STAFF:
+  STAFF_INVALID_ROLE:
+    code: E3STA001
+    message: 無效的角色
+    status: 400
+  STAFF_STORE_NOT_ACTIVE:
+    code: E3STA002
+    message: 部分門市未啟用
+    status: 400
+  STAFF_INACTIVE:
+    code: E3STA003
+    message: 帳號已停用
+    status: 403
+  STAFF_NOT_UPDATE_SELF:
+    code: E3STA004
+    message: 不可更新自己的帳號
+    status: 403
+  STAFF_NOT_FOUND:
+    code: E3STA005
+    message: 使用者不存在
+    status: 404
+  STAFF_STORE_NOT_FOUND:
+    code: E3STA006
+    message: 指定的門市不存在
+    status: 404
+  STAFF_ALREADY_EXISTS:
+    code: E3STA007
+    message: 帳號或Email已存在
+    status: 409
+  STAFF_EMAIL_EXISTS:
+    code: E3STA008
+    message: 此電子郵件已被註冊
+    status: 409
+  STAFF_USERNAME_EXISTS:
+    code: E3STA009
+    message: 此帳號已被使用
+    status: 409
+
+STORE:
+  STORE_NOT_ACTIVE:
+    code: E3STO001
+    message: 門市未啟用
+    status: 400
+  STORE_NOT_FOUND:
+    code: E3STO002
+    message: 門市不存在或已被刪除
+    status: 404
+  STORE_ALREADY_EXISTS:
+    code: E3STO003
+    message: 門市已存在
+    status: 409
+
+STYLIST:
+  STYLIST_NOT_FOUND:
+    code: E3STY001
+    message: 美甲師資料不存在
+    status: 404
+  STYLIST_NOT_CREATED:
+    code: E3STY002
+    message: 尚未建立美甲師資料，請先新增
+    status: 404
+  STYLIST_ALREADY_EXISTS:
+    code: E3STY003
+    message: 該員工已建立過美甲師資料，請使用修改功能
+    status: 409
+
+TIME_SLOT:
+  TIME_SLOT_CANNOT_UPDATE_SEPARATELY:
+    code: E3TMS001
+    message: 時段起始時間和結束時間必須同時傳入
+    status: 400
+  TIME_SLOT_NOT_BELONG_TO_SCHEDULE:
+    code: E3TMS002
+    message: 時段不屬於指定的班表
+    status: 400
+  TIME_SLOT_TEMPLATE_ITEM_NOT_BELONG_TO_TEMPLATE:
+    code: E3TMS003
+    message: 時段項目不屬於指定的範本
+    status: 400
+  TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE:
+    code: E3TMS004
+    message: 時段已被預約，無法更新
+    status: 400
+  TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE:
+    code: E3TMS005
+    message: 該時段已被預約，無法刪除
+    status: 400
+  TIME_SLOT_INVALID_TIME_RANGE:
+    code: E3TMS006
+    message: 時段時間區段錯誤
+    status: 400
+  TIME_SLOT_NOT_ENOUGH_TIME:
+    code: E3TMS007
+    message: 時段時間不足
+    status: 400
+  TIME_SLOT_NOT_FOUND:
+    code: E3TMS008
+    message: 時段不存在或已被刪除
+    status: 404
+  TIME_SLOT_TEMPLATE_NOT_FOUND:
+    code: E3TMS009
+    message: 範本不存在或已被刪除
+    status: 404
+  TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND:
+    code: E3TMS010
+    message: 範本項目不存在或已被刪除
+    status: 404
+  TIME_SLOT_CONFLICT:
+    code: E3TMS011
+    message: 時段時間區段重疊
+    status: 409
+
 SYS:
   SYS_INTERNAL_ERROR:
+    code: E9001
     message: 系統發生錯誤，請稍後再試
     status: 500
   SYS_DATABASE_ERROR:
+    code: E9002
     message: 資料庫連接錯誤
     status: 500
   SYS_SERVICE_UNAVAILABLE:
+    code: E9003
     message: 服務暫時無法使用
     status: 503
   SYS_TIMEOUT:
+    code: E9004
     message: 請求超時，請稍後再試
     status: 504

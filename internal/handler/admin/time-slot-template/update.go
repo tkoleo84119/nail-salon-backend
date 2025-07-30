@@ -28,7 +28,7 @@ func (h *UpdateTimeSlotTemplateHandler) UpdateTimeSlotTemplate(c *gin.Context) {
 	var req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
@@ -38,7 +38,7 @@ func (h *UpdateTimeSlotTemplateHandler) UpdateTimeSlotTemplate(c *gin.Context) {
 		validationErrors := map[string]string{
 			"templateId": "templateId為必填項目",
 		}
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, validationErrors)
 		return
 	}
 

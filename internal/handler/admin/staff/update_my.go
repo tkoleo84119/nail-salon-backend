@@ -7,8 +7,8 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -27,7 +27,7 @@ func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
 	var req adminStaffModel.UpdateMyStaffRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

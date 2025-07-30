@@ -29,7 +29,7 @@ func (s *GetStoreServicesService) GetStoreServices(ctx context.Context, storeIDS
 	// Parse store ID
 	storeID, err := utils.ParseID(storeIDStr)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 	}
 
 	// Validate store exists and is active (as per spec requirement)

@@ -28,13 +28,13 @@ func (s *GetServiceService) GetService(ctx context.Context, storeID, serviceID s
 	// Parse store ID
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	// Parse service ID
 	serviceIDInt, err := utils.ParseID(serviceID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid service ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid service ID", err)
 	}
 
 	// Verify store exists

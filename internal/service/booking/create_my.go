@@ -28,29 +28,29 @@ func NewCreateMyBookingService(queries dbgen.Querier, db *pgxpool.Pool) *CreateM
 func (s *CreateMyBookingService) CreateMyBooking(ctx context.Context, req bookingModel.CreateMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CreateMyBookingResponse, error) {
 	storeId, err := utils.ParseID(req.StoreId)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid storeId", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid storeId", err)
 	}
 
 	stylistId, err := utils.ParseID(req.StylistId)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid stylistId", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid stylistId", err)
 	}
 
 	timeSlotId, err := utils.ParseID(req.TimeSlotId)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid timeSlotId", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid timeSlotId", err)
 	}
 
 	mainServiceId, err := utils.ParseID(req.MainServiceId)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid mainServiceId", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid mainServiceId", err)
 	}
 
 	var subServiceIds []int64
 	if len(req.SubServiceIds) > 0 {
 		subServiceIds, err = utils.ParseIDSlice(req.SubServiceIds)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid subServiceIds", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid subServiceIds", err)
 		}
 	}
 

@@ -33,13 +33,13 @@ func (s *GetScheduleService) GetSchedule(ctx context.Context, storeID string, sc
 	// Parse store ID
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
-	// Parse schedule ID  
+	// Parse schedule ID
 	scheduleIDInt, err := utils.ParseID(scheduleID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid schedule ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid schedule ID", err)
 	}
 
 	// Verify store exists

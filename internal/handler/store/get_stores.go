@@ -28,7 +28,7 @@ func (h *GetStoresHandler) GetStores(c *gin.Context) {
 	var queryParams storeModel.GetStoresQueryParams
 	if err := c.ShouldBindQuery(&queryParams); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

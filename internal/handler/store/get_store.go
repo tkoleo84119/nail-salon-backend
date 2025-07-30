@@ -25,7 +25,7 @@ func (h *GetStoreHandler) GetStore(c *gin.Context) {
 	// Path parameter validation
 	storeID := c.Param("storeId")
 	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"storeId": "storeId為必填項目",
 		})
 		return

@@ -32,12 +32,12 @@ func (s *UpdateBookingByStaffService) UpdateBookingByStaff(ctx context.Context, 
 	// Parse IDs
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	bookingIDInt, err := utils.ParseID(bookingID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid booking ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid booking ID", err)
 	}
 
 	if !req.HasUpdates() {
@@ -72,7 +72,7 @@ func (s *UpdateBookingByStaffService) UpdateBookingByStaff(ctx context.Context, 
 		// Validate time slot
 		timeSlotIDInt, err := utils.ParseID(*req.TimeSlotID)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid time slot ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid time slot ID", err)
 		}
 		newTimeSlotIDInt = &timeSlotIDInt
 
@@ -90,7 +90,7 @@ func (s *UpdateBookingByStaffService) UpdateBookingByStaff(ctx context.Context, 
 		// Validate main service
 		mainServiceIDInt, err := utils.ParseID(*req.MainServiceID)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid main service ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid main service ID", err)
 		}
 		mainService, err := s.queries.GetServiceByID(ctx, mainServiceIDInt)
 		if err != nil {
@@ -106,7 +106,7 @@ func (s *UpdateBookingByStaffService) UpdateBookingByStaff(ctx context.Context, 
 			for _, subServiceID := range req.SubServiceIDs {
 				subServiceIDInt, err := utils.ParseID(subServiceID)
 				if err != nil {
-					return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid sub service ID", err)
+					return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid sub service ID", err)
 				}
 				subServiceIDInts = append(subServiceIDInts, subServiceIDInt)
 			}

@@ -32,7 +32,7 @@ func (s *GetTimeSlotTemplateService) GetTimeSlotTemplate(ctx context.Context, te
 	// Parse template ID
 	templateIDInt, err := utils.ParseID(templateID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid template ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid template ID", err)
 	}
 
 	// Get time slot template by ID

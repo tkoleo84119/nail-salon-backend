@@ -28,14 +28,14 @@ func (h *UpdateTimeSlotHandler) UpdateTimeSlot(c *gin.Context) {
 	var req adminScheduleModel.UpdateTimeSlotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
 	// Get path parameters
 	scheduleID := c.Param("scheduleId")
 	if scheduleID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"scheduleId": "scheduleId為必填項目",
 		})
 		return
@@ -43,7 +43,7 @@ func (h *UpdateTimeSlotHandler) UpdateTimeSlot(c *gin.Context) {
 
 	timeSlotID := c.Param("timeSlotId")
 	if timeSlotID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"timeSlotId": "timeSlotId為必填項目",
 		})
 		return

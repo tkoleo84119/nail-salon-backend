@@ -27,14 +27,14 @@ func (h *UpdateServiceHandler) UpdateService(c *gin.Context) {
 	var req adminServiceModel.UpdateServiceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
 	// Get serviceId from path parameter
 	serviceID := c.Param("serviceId")
 	if serviceID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"serviceId": "serviceId為必填項目",
 		})
 		return
@@ -48,7 +48,7 @@ func (h *UpdateServiceHandler) UpdateService(c *gin.Context) {
 
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
-		errorCodes.RespondWithError(c, errorCodes.AuthContextMissing, nil)
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 

@@ -4,24 +4,50 @@ package errors
 const (
 	// AUTH - Authentication related errors
 	AuthInvalidCredentials  = "AUTH_INVALID_CREDENTIALS"
-	AuthTokenExpired        = "AUTH_TOKEN_EXPIRED"
 	AuthTokenInvalid        = "AUTH_TOKEN_INVALID"
 	AuthTokenMissing        = "AUTH_TOKEN_MISSING"
 	AuthTokenFormatError    = "AUTH_TOKEN_FORMAT_ERROR"
 	AuthStaffFailed         = "AUTH_STAFF_FAILED"
 	AuthContextMissing      = "AUTH_CONTEXT_MISSING"
-	AuthPermissionDenied    = "AUTH_PERMISSION_DENIED"
 	AuthLineTokenInvalid    = "AUTH_LINE_TOKEN_INVALID"
 	AuthLineTokenExpired    = "AUTH_LINE_TOKEN_EXPIRED"
 	AuthRefreshTokenInvalid = "AUTH_REFRESH_TOKEN_INVALID"
+	AuthPermissionDenied    = "AUTH_PERMISSION_DENIED"
+
+	// VAL - Input validation errors
+	ValJsonFormat            = "VAL_JSON_FORMAT"
+	ValPathParamMissing      = "VAL_PATH_PARAM_MISSING"
+	ValAllFieldsEmpty        = "VAL_ALL_FIELDS_EMPTY"
+	ValTypeConversionFailed  = "VAL_TYPE_CONVERSION_FAILED"
+	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"
+
+	ValFieldRequired        = "VAL_FIELD_REQUIRED"
+	ValFieldStringMinLength = "VAL_FIELD_STRING_MIN_LENGTH"
+	ValFieldArrayMinLength  = "VAL_FIELD_ARRAY_MIN_LENGTH"
+	ValFieldMinNumber       = "VAL_FIELD_MIN_NUMBER"
+	ValFieldStringMaxLength = "VAL_FIELD_STRING_MAX_LENGTH"
+	ValFieldArrayMaxLength  = "VAL_FIELD_ARRAY_MAX_LENGTH"
+	ValFieldMaxNumber       = "VAL_FIELD_MAX_NUMBER"
+	ValFieldInvalidEmail    = "VAL_FIELD_INVALID_EMAIL"
+	ValFieldNumeric         = "VAL_FIELD_NUMERIC"
+	ValFieldBoolean         = "VAL_FIELD_BOOLEAN"
+	ValFieldOneof           = "VAL_FIELD_ONEOF"
+	ValFieldTaiwanLandline  = "VAL_FIELD_TAIWAN_LANDLINE"
+	ValFieldTaiwanMobile    = "VAL_FIELD_TAIWAN_MOBILE"
+	ValTimeConversionFailed = "VAL_TIME_CONVERSION_FAILED"
+
+	ValDuplicateWorkDate     = "VAL_DUPLICATE_WORK_DATE"
+	ValTimeSlotRequired      = "VAL_TIME_SLOT_REQUIRED"
+	ValEndBeforeStart        = "VAL_END_BEFORE_START"
+	ValDateRangeExceed60Days = "VAL_DATE_RANGE_EXCEED_60_DAYS"
 
 	// BOOKING - Booking operation errors
-	BookingNotFound                 = "BOOKING_NOT_FOUND"
 	BookingStatusNotAllowedToUpdate = "BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE"
 	BookingStatusNotAllowedToCancel = "BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL"
 	BookingNotBelongToStore         = "BOOKING_NOT_BELONG_TO_STORE"
-	BookingTimeSlotNotFound         = "TIME_SLOT_NOT_FOUND"
-	BookingTimeSlotUnavailable      = "TIME_SLOT_UNAVAILABLE"
+	BookingNotFound                 = "BOOKING_NOT_FOUND"
+	BookingTimeSlotNotFound         = "BOOKING_TIME_SLOT_NOT_FOUND"
+	BookingTimeSlotUnavailable      = "BOOKING_TIME_SLOT_UNAVAILABLE"
 
 	// CUSTOMER - Customer operation errors
 	CustomerNotFound      = "CUSTOMER_NOT_FOUND"
@@ -29,11 +55,12 @@ const (
 	CustomerAlreadyExists = "CUSTOMER_ALREADY_EXISTS"
 
 	// SCHEDULE - Schedule operation errors
-	ScheduleAlreadyExists            = "SCHEDULE_ALREADY_EXISTS"
-	ScheduleNotFound                 = "SCHEDULE_NOT_FOUND"
 	ScheduleAlreadyBookedDoNotDelete = "SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE"
+	ScheduleTimeSlotInvalid          = "SCHEDULE_TIME_SLOT_INVALID"
 	ScheduleNotBelongToStore         = "SCHEDULE_NOT_BELONG_TO_STORE"
 	ScheduleNotBelongToStylist       = "SCHEDULE_NOT_BELONG_TO_STYLIST"
+	ScheduleNotFound                 = "SCHEDULE_NOT_FOUND"
+	ScheduleAlreadyExists            = "SCHEDULE_ALREADY_EXISTS"
 
 	// SERVICE - Service operation errors
 	ServiceNotActive      = "SERVICE_NOT_ACTIVE"
@@ -42,15 +69,26 @@ const (
 	ServiceNotFound       = "SERVICE_NOT_FOUND"
 	ServiceAlreadyExists  = "SERVICE_ALREADY_EXISTS"
 
+	// STAFF - Staff operation errors
+	StaffInvalidRole    = "STAFF_INVALID_ROLE"
+	StaffStoreNotActive = "STAFF_STORE_NOT_ACTIVE"
+	StaffInactive       = "STAFF_INACTIVE"
+	StaffNotUpdateSelf  = "STAFF_NOT_UPDATE_SELF"
+	StaffNotFound       = "STAFF_NOT_FOUND"
+	StaffStoreNotFound  = "STAFF_STORE_NOT_FOUND"
+	StaffAlreadyExists  = "STAFF_ALREADY_EXISTS"
+	StaffEmailExists    = "STAFF_EMAIL_EXISTS"
+	StaffUsernameExists = "STAFF_USERNAME_EXISTS"
+
 	// STORE - Store operation errors
-	StoreNotFound      = "STORE_NOT_FOUND"
 	StoreNotActive     = "STORE_NOT_ACTIVE"
+	StoreNotFound      = "STORE_NOT_FOUND"
 	StoreAlreadyExists = "STORE_ALREADY_EXISTS"
 
 	// STYLIST - Stylist operation errors
-	StylistAlreadyExists = "STYLIST_ALREADY_EXISTS"
 	StylistNotFound      = "STYLIST_NOT_FOUND"
 	StylistNotCreated    = "STYLIST_NOT_CREATED"
+	StylistAlreadyExists = "STYLIST_ALREADY_EXISTS"
 
 	// TIME_SLOT - Time slot operation errors
 	TimeSlotCannotUpdateSeparately          = "TIME_SLOT_CANNOT_UPDATE_SEPARATELY"
@@ -59,32 +97,11 @@ const (
 	TimeSlotAlreadyBookedDoNotUpdate        = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE"
 	TimeSlotAlreadyBookedDoNotDelete        = "TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE"
 	TimeSlotInvalidTimeRange                = "TIME_SLOT_INVALID_TIME_RANGE"
-	TimeSlotConflict                        = "TIME_SLOT_CONFLICT"
 	TimeSlotNotFound                        = "TIME_SLOT_NOT_FOUND"
 	TimeSlotNotEnoughTime                   = "TIME_SLOT_NOT_ENOUGH_TIME"
 	TimeSlotTemplateNotFound                = "TIME_SLOT_TEMPLATE_NOT_FOUND"
 	TimeSlotTemplateItemNotFound            = "TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND"
-
-	// USER - User operation errors
-	UserInvalidRole    = "USER_INVALID_ROLE"
-	UserStoreNotActive = "USER_STORE_NOT_ACTIVE"
-	UserInactive       = "USER_INACTIVE"
-	UserNotUpdateSelf  = "USER_NOT_UPDATE_SELF"
-	UserNotFound       = "USER_NOT_FOUND"
-	UserStoreNotFound  = "USER_STORE_NOT_FOUND"
-	UserAlreadyExists  = "USER_ALREADY_EXISTS"
-	UserEmailExists    = "USER_EMAIL_EXISTS"
-	UserUsernameExists = "USER_USERNAME_EXISTS"
-
-	// VAL - Input validation errors
-	ValJsonFormat            = "VAL_JSON_FORMAT"
-	ValInputValidationFailed = "VAL_INPUT_VALIDATION_FAILED"
-	ValAllFieldsEmpty        = "VAL_ALL_FIELDS_EMPTY"
-	ValDateFormatInvalid     = "VAL_DATE_FORMAT_INVALID"
-	ValDuplicateWorkDate     = "VAL_DUPLICATE_WORK_DATE"
-	ValTimeSlotRequired      = "VAL_TIME_SLOT_REQUIRED"
-	ValEndBeforeStart        = "VAL_END_BEFORE_START"
-	ValDateRangeExceed60Days = "VAL_DATE_RANGE_EXCEED_60_DAYS"
+	TimeSlotConflict                        = "TIME_SLOT_CONFLICT"
 
 	// SYS - System errors
 	SysInternalError      = "SYS_INTERNAL_ERROR"

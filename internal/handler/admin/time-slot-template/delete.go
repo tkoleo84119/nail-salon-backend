@@ -25,7 +25,7 @@ func (h *DeleteTimeSlotTemplateHandler) DeleteTimeSlotTemplate(c *gin.Context) {
 	// Validate path parameter
 	templateID := c.Param("templateId")
 	if templateID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"templateId": "templateId為必填項目",
 		})
 		return

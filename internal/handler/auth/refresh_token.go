@@ -27,7 +27,7 @@ func (h *RefreshTokenHandler) RefreshToken(c *gin.Context) {
 	var req authModel.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

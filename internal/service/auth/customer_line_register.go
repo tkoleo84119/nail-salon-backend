@@ -60,7 +60,7 @@ func (s *CustomerLineRegisterService) CustomerLineRegister(ctx context.Context, 
 
 	birthday, err := utils.DateStringToPgDate(req.Birthday)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid birthday format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid birthday format", err)
 	}
 	city := utils.StringPtrToPgText(&req.City, false)
 	referrer := utils.StringPtrToPgText(&req.Referrer, false)

@@ -7,8 +7,8 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -28,14 +28,14 @@ func (h *CreateTimeSlotHandler) CreateTimeSlot(c *gin.Context) {
 	var req adminScheduleModel.CreateTimeSlotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
 	// Get schedule ID from path parameter
 	scheduleID := c.Param("scheduleId")
 	if scheduleID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"scheduleId": "scheduleId為必填項目",
 		})
 		return

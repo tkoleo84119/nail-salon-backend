@@ -26,7 +26,7 @@ func (s *GetStoreService) GetStore(ctx context.Context, storeID string) (*adminS
 	// Parse store ID
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	// Get store information

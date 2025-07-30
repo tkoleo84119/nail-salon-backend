@@ -27,7 +27,7 @@ func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDS
 	// Parse booking ID
 	bookingID, err := utils.ParseID(bookingIDStr)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid booking ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid booking ID", err)
 	}
 
 	// Verify booking exists and belongs to customer

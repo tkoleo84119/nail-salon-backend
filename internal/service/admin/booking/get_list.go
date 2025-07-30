@@ -37,7 +37,7 @@ func (s *GetBookingListService) GetBookingList(ctx context.Context, storeID stri
 	// Parse and validate store ID
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	// Verify store exists
@@ -65,7 +65,7 @@ func (s *GetBookingListService) GetBookingList(ctx context.Context, storeID stri
 	if req.StylistID != nil && *req.StylistID != "" {
 		parsed, err := utils.ParseID(*req.StylistID)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid stylist ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid stylist ID", err)
 		}
 		stylistIDInt = &parsed
 	}
@@ -75,7 +75,7 @@ func (s *GetBookingListService) GetBookingList(ctx context.Context, storeID stri
 	if req.StartDate != nil && *req.StartDate != "" {
 		parsedTime, err := utils.DateStringToTime(*req.StartDate)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid start date format, expected YYYY-MM-DD", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid start date format, expected YYYY-MM-DD", err)
 		}
 		startDate = &parsedTime
 	}
@@ -83,7 +83,7 @@ func (s *GetBookingListService) GetBookingList(ctx context.Context, storeID stri
 	if req.EndDate != nil && *req.EndDate != "" {
 		parsedTime, err := utils.DateStringToTime(*req.EndDate)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid end date format, expected YYYY-MM-DD", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid end date format, expected YYYY-MM-DD", err)
 		}
 		endDate = &parsedTime
 	}

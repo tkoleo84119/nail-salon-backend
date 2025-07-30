@@ -26,14 +26,14 @@ func (s *GetStaffService) GetStaff(ctx context.Context, staffID string) (*adminS
 	// Parse staff ID
 	staffUserID, err := utils.ParseID(staffID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid staff ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid staff ID", err)
 	}
 
 	// Get staff user information
 	staffUser, err := s.queries.GetStaffUserByID(ctx, staffUserID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get staff user", err)
 	}

@@ -29,7 +29,7 @@ func (h *StaffLoginHandler) StaffLogin(c *gin.Context) {
 	var req adminAuthModel.StaffLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

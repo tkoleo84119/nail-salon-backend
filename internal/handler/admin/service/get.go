@@ -25,14 +25,14 @@ func (h *GetServiceHandler) GetService(c *gin.Context) {
 	// Get store ID from path parameter
 	storeID := c.Param("storeId")
 	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"storeId": "storeId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
 		return
 	}
 
 	// Get service ID from path parameter
 	serviceID := c.Param("serviceId")
 	if serviceID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"serviceId": "serviceId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"serviceId": "serviceId 為必填項目"})
 		return
 	}
 

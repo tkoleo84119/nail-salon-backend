@@ -27,7 +27,7 @@ func (s *GetMyBookingService) GetMyBooking(ctx context.Context, bookingIDStr str
 	// Parse booking ID
 	bookingID, err := utils.ParseID(bookingIDStr)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid booking ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid booking ID", err)
 	}
 
 	// Get booking basic information with ownership validation

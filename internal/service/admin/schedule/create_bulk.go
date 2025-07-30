@@ -32,12 +32,12 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 	// Parse IDs
 	stylistID, err := utils.ParseID(req.StylistID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid stylist ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid stylist ID", err)
 	}
 
 	storeID, err := utils.ParseID(req.StoreID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 	}
 
 	// Check if stylist exists
@@ -60,10 +60,10 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 	// Check if store exists and is active
 	store, err := s.queries.GetStoreByID(ctx, storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotFound, "store not found", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotFound, "store not found", err)
 	}
 	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotActive, "store is not active", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotActive, "store is not active", err)
 	}
 
 	// Check if staff has access to this store
@@ -87,7 +87,7 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 	for _, scheduleReq := range req.Schedules {
 		workDate, err := utils.DateStringToPgDate(scheduleReq.WorkDate)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid work date format", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid work date format", err)
 		}
 
 		exists, err := s.queries.CheckScheduleExists(ctx, dbgen.CheckScheduleExistsParams{
@@ -160,7 +160,7 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []adminScheduleM
 		// Parse work date
 		workDate, err := utils.DateStringToPgDate(scheduleReq.WorkDate)
 		if err != nil {
-			return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid work date format", err)
+			return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid work date format", err)
 		}
 
 		// Generate schedule ID
@@ -185,12 +185,12 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []adminScheduleM
 		for _, timeSlotReq := range scheduleReq.TimeSlots {
 			startTime, err := utils.TimeStringToTime(timeSlotReq.StartTime)
 			if err != nil {
-				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
+				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
 			}
 
 			endTime, err := utils.TimeStringToTime(timeSlotReq.EndTime)
 			if err != nil {
-				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
+				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
 			}
 
 			timeSlotID := utils.GenerateID()
@@ -300,12 +300,12 @@ func (s *CreateSchedulesBulkService) validateTimeSlots(timeSlots []adminSchedule
 	for _, slot := range timeSlots {
 		startTime, err := utils.TimeStringToTime(slot.StartTime)
 		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, fmt.Sprintf("invalid start time format: %s", slot.StartTime), err)
+			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, fmt.Sprintf("invalid start time format: %s", slot.StartTime), err)
 		}
 
 		endTime, err := utils.TimeStringToTime(slot.EndTime)
 		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, fmt.Sprintf("invalid end time format: %s", slot.EndTime), err)
+			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, fmt.Sprintf("invalid end time format: %s", slot.EndTime), err)
 		}
 
 		if !endTime.After(startTime) {

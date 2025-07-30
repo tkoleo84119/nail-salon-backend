@@ -36,7 +36,7 @@ func (s *GetStylistListService) GetStylistList(ctx context.Context, storeID stri
 	// Parse store ID
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	// Verify store exists

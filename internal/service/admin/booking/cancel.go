@@ -29,12 +29,12 @@ func (s *CancelBookingService) CancelBooking(ctx context.Context, storeID, booki
 	// Parse IDs
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	bookingIDInt, err := utils.ParseID(bookingID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid booking ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid booking ID", err)
 	}
 
 	// Get existing booking to verify it exists and is in SCHEDULED status

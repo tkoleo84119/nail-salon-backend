@@ -26,7 +26,7 @@ func (h *DeleteTimeSlotTemplateItemHandler) DeleteTimeSlotTemplateItem(c *gin.Co
 		validationErrors := map[string]string{
 			"templateId": "templateId為必填項目",
 		}
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, validationErrors)
 		return
 	}
 
@@ -35,7 +35,7 @@ func (h *DeleteTimeSlotTemplateItemHandler) DeleteTimeSlotTemplateItem(c *gin.Co
 		validationErrors := map[string]string{
 			"itemId": "itemId為必填項目",
 		}
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, validationErrors)
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, validationErrors)
 		return
 	}
 

@@ -25,7 +25,7 @@ func (h *GetMyBookingHandler) GetMyBooking(c *gin.Context) {
 	// Path parameter validation
 	bookingID := c.Param("bookingId")
 	if bookingID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"bookingId": "bookingId為必填項目",
 		})
 		return

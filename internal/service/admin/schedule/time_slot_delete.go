@@ -4,9 +4,9 @@ import (
 	"context"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -25,12 +25,12 @@ func (s *DeleteTimeSlotService) DeleteTimeSlot(ctx context.Context, scheduleID s
 	// Parse IDs
 	scheduleIDInt, err := utils.ParseID(scheduleID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid schedule ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid schedule ID", err)
 	}
 
 	timeSlotIDInt, err := utils.ParseID(timeSlotID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid time slot ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid time slot ID", err)
 	}
 
 	// Get time slot information
@@ -75,10 +75,10 @@ func (s *DeleteTimeSlotService) DeleteTimeSlot(ctx context.Context, scheduleID s
 	// Check if store exists and is active
 	store, err := s.queries.GetStoreByID(ctx, scheduleInfo.StoreID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotFound, "store not found", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotFound, "store not found", err)
 	}
 	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.UserStoreNotActive, "store is not active", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotActive, "store is not active", err)
 	}
 
 	// Check if staff has access to this store

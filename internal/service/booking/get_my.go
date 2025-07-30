@@ -24,7 +24,7 @@ func (s *GetMyBookingsService) GetMyBookings(ctx context.Context, queryParams bo
 	if len(queryParams.Status) > 0 {
 		for _, status := range queryParams.Status {
 			if !bookingModel.IsValidBookingStatus(status) {
-				return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid status value", nil)
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid status value", nil)
 			}
 		}
 	}

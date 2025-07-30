@@ -9,6 +9,7 @@ import (
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStoreService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetStoreListHandler struct {
@@ -25,7 +26,8 @@ func (h *GetStoreListHandler) GetStoreList(c *gin.Context) {
 	// Parse and validate query parameters
 	var req adminStoreModel.GetStoreListRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"error": err.Error()})
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 

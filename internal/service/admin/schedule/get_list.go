@@ -37,7 +37,7 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID st
 	// Parse store ID
 	storeIDInt, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
 	}
 
 	// Parse stylist ID
@@ -45,22 +45,22 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID st
 	if req.StylistID != nil {
 		stylistIDInt, err = utils.ParseID(*req.StylistID)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid stylist ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid stylist ID", err)
 		}
 	}
 
 	// validate startDate and endDate
 	startDate, err := utils.DateStringToTime(req.StartDate)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid start date", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid start date", err)
 	}
 	endDate, err := utils.DateStringToTime(req.EndDate)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "Invalid end date", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid end date", err)
 	}
 
 	if endDate.Before(startDate) {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "End date must be after start date", nil)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "End date must be after start date", nil)
 	}
 
 	if endDate.Sub(startDate) > 60*24*time.Hour {

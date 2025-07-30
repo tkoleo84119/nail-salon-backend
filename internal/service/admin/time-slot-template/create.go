@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -48,12 +48,12 @@ func (s *CreateTimeSlotTemplateService) CreateTimeSlotTemplate(ctx context.Conte
 		// Parse time strings
 		startTime, err := utils.TimeStringToTime(timeSlot.StartTime)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
 		}
 
 		endTime, err := utils.TimeStringToTime(timeSlot.EndTime)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
 		}
 
 		itemID := utils.GenerateID()
@@ -128,12 +128,12 @@ func (s *CreateTimeSlotTemplateService) validateTimeSlots(timeSlots []adminTimeS
 	for i, timeSlot := range timeSlots {
 		startTime, err := utils.TimeStringToTime(timeSlot.StartTime)
 		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid start time format", err)
+			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
 		}
 
 		endTime, err := utils.TimeStringToTime(timeSlot.EndTime)
 		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid end time format", err)
+			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
 		}
 
 		// Validate time range

@@ -34,7 +34,7 @@ func (s *UpdateMyBookingService) UpdateMyBooking(ctx context.Context, bookingIDS
 	// Parse booking ID
 	bookingID, err := utils.ParseID(bookingIDStr)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid booking ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid booking ID", err)
 	}
 
 	// Validate that at least one field is provided
@@ -70,28 +70,28 @@ func (s *UpdateMyBookingService) UpdateMyBooking(ctx context.Context, bookingIDS
 	if req.HasTimeSlotUpdate() {
 		storeID, err = utils.ParseID(*req.StoreId)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 		}
 
 		stylistID, err = utils.ParseID(*req.StylistId)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid stylist ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid stylist ID", err)
 		}
 
 		timeSlotID, err = utils.ParseID(*req.TimeSlotId)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid time slot ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid time slot ID", err)
 		}
 
 		mainServiceID, err = utils.ParseID(*req.MainServiceId)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid main service ID", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid main service ID", err)
 		}
 
 		if len(req.SubServiceIds) > 0 {
 			subServiceIds, err = utils.ParseIDSlice(req.SubServiceIds)
 			if err != nil {
-				return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid sub service IDs", err)
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid sub service IDs", err)
 			}
 		}
 

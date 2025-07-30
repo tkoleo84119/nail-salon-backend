@@ -26,7 +26,7 @@ func (s *GetMyStaffService) GetMyStaff(ctx context.Context, staffUserID int64) (
 	staffUser, err := s.queries.GetStaffUserByID(ctx, staffUserID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get staff user", err)
 	}

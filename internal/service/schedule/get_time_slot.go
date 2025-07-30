@@ -26,7 +26,7 @@ func (s *GetTimeSlotService) GetTimeSlotsBySchedule(ctx context.Context, schedul
 	// Input validation & ID parsing
 	scheduleIDInt, err := utils.ParseID(scheduleID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid schedule ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid schedule ID", err)
 	}
 
 	// Check if customer is blacklisted

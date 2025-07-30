@@ -35,7 +35,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID stri
 	// Parse service ID
 	parsedServiceID, err := utils.ParseID(serviceID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid service ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid service ID", err)
 	}
 
 	// Validate request has at least one field to update

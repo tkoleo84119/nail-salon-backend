@@ -23,7 +23,7 @@ func (h *GetStaffStoreAccessHandler) GetStaffStoreAccess(c *gin.Context) {
 	// Get staff ID from path parameter
 	staffID := c.Param("staffId")
 	if staffID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{"staffId": "staffId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"staffId": "staffId 為必填項目"})
 		return
 	}
 

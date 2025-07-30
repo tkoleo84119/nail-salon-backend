@@ -34,19 +34,19 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, r
 
 	targetIDInt, err := utils.ParseID(targetID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid target ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid target ID", err)
 	}
 
 	// Validate role if provided
 	if req.Role != nil && !adminStaffModel.IsValidRole(*req.Role) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserInvalidRole)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffInvalidRole)
 	}
 
 	// Get target staff user
 	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetIDInt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.UserNotFound)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get target staff", err)
 	}
@@ -76,7 +76,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, r
 func (s *UpdateStaffService) validateUpdatePermissions(updaterID int64, updaterRole string, targetStaff *dbgen.StaffUser) error {
 	// Cannot update own account
 	if updaterID == targetStaff.ID {
-		return errorCodes.NewServiceErrorWithCode(errorCodes.UserNotUpdateSelf)
+		return errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotUpdateSelf)
 	}
 
 	// Cannot update SUPER_ADMIN accounts

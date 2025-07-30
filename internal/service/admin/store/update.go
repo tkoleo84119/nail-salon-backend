@@ -28,7 +28,7 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 	// Parse store ID
 	parsedStoreID, err := utils.ParseID(storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 	}
 
 	// Validate that at least one field has updates
@@ -53,7 +53,7 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 		for _, store := range staffContext.StoreList {
 			parsedStoreID, err := utils.ParseID(store.ID)
 			if err != nil {
-				return nil, errorCodes.NewServiceError(errorCodes.ValInputValidationFailed, "invalid store ID", err)
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
 			}
 			storeIDs = append(storeIDs, parsedStoreID)
 		}
