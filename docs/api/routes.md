@@ -47,6 +47,7 @@ This document lists all API routes in the nail salon backend system, organized b
 | ------ | ------------------------------- | -------------------- | ------------- |
 | POST   | `/api/admin/auth/login`         | Staff login          | ✅ Implemented |
 | POST   | `/api/admin/auth/token/refresh` | Refresh access token | ✅ Implemented |
+| POST   | `/api/admin/auth/token/revoke`  | Revoke access token  | ✅ Implemented |
 
 ### Staff Management
 | Method | Endpoint                    | Description       | Status        |

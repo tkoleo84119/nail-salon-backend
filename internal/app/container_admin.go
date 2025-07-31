@@ -31,6 +31,7 @@ type AdminServices struct {
 	// Authentication services
 	AuthStaffLogin        adminAuthService.StaffLoginServiceInterface
 	AuthStaffRefreshToken adminAuthService.StaffRefreshTokenServiceInterface
+	AuthStaffLogout       adminAuthService.StaffLogoutServiceInterface
 
 	// Staff management services
 	StaffCreate            *adminStaffService.CreateStaffService
@@ -91,6 +92,7 @@ type AdminHandlers struct {
 	// Authentication handlers
 	AuthStaffLogin        *adminAuthHandler.StaffLoginHandler
 	AuthStaffRefreshToken *adminAuthHandler.StaffRefreshTokenHandler
+	AuthStaffLogout       *adminAuthHandler.StaffLogoutHandler
 
 	// Staff management handlers
 	StaffCreate            *adminStaffHandler.CreateStaffHandler
@@ -152,6 +154,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Authentication services
 		AuthStaffLogin:        adminAuthService.NewStaffLoginService(repositories.SQLX, cfg.JWT),
 		AuthStaffRefreshToken: adminAuthService.NewStaffRefreshTokenService(repositories.SQLX, cfg.JWT),
+		AuthStaffLogout:       adminAuthService.NewStaffLogoutService(repositories.SQLX),
 
 		// Staff management services
 		StaffCreate:            adminStaffService.NewCreateStaffService(queries, database.PgxPool),
@@ -214,6 +217,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Authentication handlers
 		AuthStaffLogin:        adminAuthHandler.NewStaffLoginHandler(services.AuthStaffLogin),
 		AuthStaffRefreshToken: adminAuthHandler.NewStaffRefreshTokenHandler(services.AuthStaffRefreshToken),
+		AuthStaffLogout:       adminAuthHandler.NewStaffLogoutHandler(services.AuthStaffLogout),
 
 		// Staff management handlers
 		StaffCreate:            adminStaffHandler.NewCreateStaffHandler(services.StaffCreate),

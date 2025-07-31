@@ -55,3 +55,15 @@ type StaffRefreshTokenResponse struct {
 	AccessToken string `json:"accessToken"`
 	ExpiresIn   int    `json:"expiresIn"`
 }
+
+// -------------------------------------------------------------------------------------
+
+// StaffLogoutRequest represents the request for staff logout
+type StaffLogoutRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required,max=500"`
+}
+
+// StaffLogoutResponse represents the response for staff logout
+type StaffLogoutResponse struct {
+	Success bool `json:"success"`
+}

@@ -12,6 +12,7 @@ type StaffUserTokensRepositoryInterface interface {
 	Create(ctx context.Context, params CreateParams) (int64, error)
 	CheckValid(ctx context.Context, refreshToken string) (bool, error)
 	GetValid(ctx context.Context, refreshToken string) (*GetValidResponse, error)
+	Revoke(ctx context.Context, refreshToken string) error
 }
 
 type StaffUserTokensRepository struct {
@@ -89,4 +90,20 @@ func (r *StaffUserTokensRepository) GetValid(ctx context.Context, refreshToken s
 		return nil, fmt.Errorf("get valid failed: %w", err)
 	}
 	return &result, nil
+}
+
+// Revoke revokes a refresh token by setting is_revoked = true
+func (r *StaffUserTokensRepository) Revoke(ctx context.Context, refreshToken string) error {
+	query := `
+		UPDATE staff_user_tokens
+		SET is_revoked = true, updated_at = NOW()
+		WHERE refresh_token = $1
+	`
+
+	_, err := r.db.ExecContext(ctx, query, refreshToken)
+	if err != nil {
+		return fmt.Errorf("revoke token failed: %w", err)
+	}
+
+	return nil
 }
