@@ -12,15 +12,16 @@
 
 ## 說明
 
-- 僅限 `admin` 以上角色可查詢。
-- 支援基本查詢條件，如門市名稱、啟用狀態等。
+- 支援基本查詢條件。
 - 支援分頁（limit、offset）。
+- 支援排序（sort）。
 
 ---
 
 ## 權限
 
-- 僅限 `admin` 以上角色（`SUPER_ADMIN`, `ADMIN`）。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -28,16 +29,28 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Query Parameters
 
-| 參數     | 型別   | 必填 | 說明                    |
-| -------- | ------ | ---- | ----------------------- |
-| keyword  | string | 否   | 模糊查詢門市名稱 / 地址 |
-| isActive | bool   | 否   | 是否啟用門市            |
-| limit    | int    | 否   | 單頁筆數（預設 20）     |
-| offset   | int    | 否   | 起始筆數（預設 0）      |
+| 參數     | 型別   | 必填 | 預設值    | 說明                                             |
+| -------- | ------ | ---- | --------- | ------------------------------------------------ |
+| name     | string | 否   |           | 模糊查詢門市名稱                                 |
+| isActive | bool   | 否   |           | 門市是否啟用                                     |
+| limit    | int    | 否   | 20        | 單頁筆數                                         |
+| offset   | int    | 否   | 0         | 起始筆數                                         |
+| sort     | string | 否   | createdAt | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序) |
+
+### 驗證規則
+
+| 欄位     | 必填 | 其他規則                                    |
+| -------- | ---- | ------------------------------------------- |
+| name     | 否   | <li>最大長度100字元                         |
+| isActive | 否   | <li>是否是布林值                            |
+| limit    | 否   | <li>最小值1<li>最大值100                    |
+| offset   | 否   | <li>最小值0<li>最大值1000000                |
+| sort     | 否   | <li>可以為 createdAt, isActive (其餘會忽略) |
 
 ---
 
@@ -55,35 +68,68 @@ Authorization: Bearer <access_token>
         "name": "大安旗艦店",
         "address": "台北市大安區復興南路一段100號",
         "phone": "02-1234-5678",
-        "isActive": true
+        "isActive": true,
+        "createdAt": "2025-01-01T00:00:00+08:00",
+        "updatedAt": "2025-01-01T00:00:00+08:00"
       },
       {
         "id": "8000000003",
         "name": "信義分店",
         "address": "台北市信義區松壽路9號",
         "phone": "02-3333-8888",
-        "isActive": false
+        "isActive": false,
+        "createdAt": "2025-01-01T00:00:00+08:00",
+        "updatedAt": "2025-01-01T00:00:00+08:00"
       }
     ]
   }
 }
 ```
 
-### 失敗
+
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼 | 說明                                  |
+| ------ | ------ | ------------------------------------- |
+| 401    | E1002  | 無效的 accessToken，請重新登入        |
+| 401    | E1003  | accessToken 缺失，請重新登入          |
+| 401    | E1004  | accessToken 格式錯誤，請重新登入      |
+| 401    | E1005  | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006  | 未找到使用者認證資訊，請重新登入      |
+| 400    | E2004  | 參數類型轉換失敗                      |
+| 400    | E2023  | {field} 最小值為 {param}              |
+| 400    | E2024  | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2026  | {field} 最大值為 {param}              |
+| 400    | E2029  | {field} 必須是布林值                  |
+| 500    | E9001  | 系統發生錯誤，請稍後再試              |
+| 500    | E9002  | 資料庫操作失敗                        |
+
+#### 400 Bad Request - 輸入驗證失敗
+
+```json
+{
+  "errors": [
+    {
+      "code": "E2024",
+      "message": "name 長度最多只能有 100 個字元",
+      "field": "name"
+    }
+  ]
+}
+```
 
 #### 401 Unauthorized - 未登入/Token失效
 
 ```json
 {
-  "message": "無效的 accessToken"
-}
-```
-
-#### 403 Forbidden - 權限不足
-
-```json
-{
-  "message": "無權限存取此資源"
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
@@ -91,26 +137,35 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
 ---
 
-## 資料表
+## 實作與流程
+
+### 資料表
 
 - `stores`
+- `staff_user_store_access`
 
 ---
 
-## Service 邏輯
+### Service 邏輯
 
-1. 根據 `keyword`（名稱/地址）與 `is_active` 條件動態查詢。
+1. 根據 `name`（名稱）與 `is_active` 條件動態查詢。
 2. 加入 `limit` 與 `offset` 處理分頁。
-3. 回傳結果與總筆數。
+3. 加入 `sort` 處理排序。
+4. 回傳結果與總筆數。
 
 ---
 
 ## 注意事項
 
-- 未來可能添加排序等。
+- createdAt 與 updatedAt 會是標準 Iso 8601 格式。

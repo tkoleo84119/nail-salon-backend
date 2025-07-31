@@ -2,6 +2,7 @@ package adminStore
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -31,8 +32,31 @@ func (h *GetStoreListHandler) GetStoreList(c *gin.Context) {
 		return
 	}
 
+	// set default value
+	limit := 20
+	offset := 0
+	if req.Limit != nil && *req.Limit > 0 {
+		limit = *req.Limit
+	}
+	if req.Offset != nil && *req.Offset >= 0 {
+		offset = *req.Offset
+	}
+
+	sort := []string{}
+	if req.Sort != nil && *req.Sort != "" {
+		sort = strings.Split(*req.Sort, ",")
+	}
+
+	parsedReq := adminStoreModel.GetStoreListParsedRequest{
+		Name:     req.Name,
+		IsActive: req.IsActive,
+		Limit:    limit,
+		Offset:   offset,
+		Sort:     sort,
+	}
+
 	// Service layer call
-	response, err := h.service.GetStoreList(c.Request.Context(), req)
+	response, err := h.service.GetStoreList(c.Request.Context(), parsedReq)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

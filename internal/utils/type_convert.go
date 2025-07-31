@@ -915,3 +915,35 @@ func PgBoolToBool(b pgtype.Bool) bool {
 func BoolToPgBool(b bool) pgtype.Bool {
 	return pgtype.Bool{Bool: b, Valid: true}
 }
+
+// PgTimestamptzToTimeString converts pgtype.Timestamptz to string in ISO 8601 format.
+// This is used when building API responses that need timestamp in string format.
+//
+// Parameters:
+//   - t: pgtype.Timestamptz from database query result
+//
+// Returns:
+//   - Empty string if t.Valid is false (NULL in database)
+//   - Time string in "YYYY-MM-DDTHH:MM:SS+08:00" format (e.g., "2025-01-01T00:00:00+08:00")
+//
+// Example:
+//
+//	var result struct {
+//	    CreatedAt pgtype.Timestamptz `db:"created_at"`
+//	}
+//	// After scanning from database...
+//	createdAtStr := utils.PgTimestamptzToTimeString(result.CreatedAt)  // "" if NULL, "2025-01-01T00:00:00+08:00" otherwise
+//
+// Usage in response building:
+//
+//		response := &BookingResponse{
+//		    ID:          utils.FormatID(result.ID),
+//		    CreatedAt:   utils.PgTimestamptzToTimeString(result.CreatedAt),
+//		}
+//	}
+func PgTimestamptzToTimeString(t pgtype.Timestamptz) string {
+	if !t.Valid {
+		return ""
+	}
+	return t.Time.Format(time.RFC3339)
+}

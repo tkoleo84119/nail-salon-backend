@@ -44,25 +44,36 @@ func (r UpdateStoreRequest) HasUpdates() bool {
 
 // GetStoreListRequest represents the request to get store list with filtering
 type GetStoreListRequest struct {
-	Keyword  *string `form:"keyword"`
-	IsActive *bool   `form:"isActive"`
+	Name     *string `form:"name" binding:"omitempty,max=100"`
+	IsActive *bool   `form:"isActive" binding:"omitempty,boolean"`
 	Limit    *int    `form:"limit" binding:"omitempty,min=1,max=100"`
-	Offset   *int    `form:"offset" binding:"omitempty,min=0"`
+	Offset   *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
+	Sort     *string `form:"sort" binding:"omitempty"`
+}
+
+type GetStoreListParsedRequest struct {
+	Name     *string
+	IsActive *bool
+	Limit    int
+	Offset   int
+	Sort     []string
 }
 
 // GetStoreListResponse represents the response for store list
 type GetStoreListResponse struct {
-	Total int               `json:"total"`
+	Total int                `json:"total"`
 	Items []StoreListItemDTO `json:"items"`
 }
 
 // StoreListItemDTO represents a single store item in the list
 type StoreListItemDTO struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Address  string `json:"address"`
-	Phone    string `json:"phone"`
-	IsActive bool   `json:"isActive"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	Phone     string `json:"phone"`
+	IsActive  bool   `json:"isActive"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // -------------------------------------------------------------------------------------
