@@ -47,7 +47,7 @@ type StaffTokenInfo struct {
 
 // StaffRefreshTokenRequest represents the request for refreshing staff access token
 type StaffRefreshTokenRequest struct {
-	RefreshToken string `json:"refreshToken" binding:"required,min=1"`
+	RefreshToken string `json:"refreshToken" binding:"required,max=500"`
 }
 
 // StaffRefreshTokenResponse represents the response for staff refresh token

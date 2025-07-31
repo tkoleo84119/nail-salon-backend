@@ -2,45 +2,42 @@ package adminAuth
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type StaffRefreshTokenService struct {
-	queries   *dbgen.Queries
+	repo      *sqlxRepo.Repositories
 	jwtConfig config.JWTConfig
 }
 
-func NewStaffRefreshTokenService(queries *dbgen.Queries, jwtConfig config.JWTConfig) *StaffRefreshTokenService {
+func NewStaffRefreshTokenService(repo *sqlxRepo.Repositories, jwtConfig config.JWTConfig) *StaffRefreshTokenService {
 	return &StaffRefreshTokenService{
-		queries:   queries,
+		repo:      repo,
 		jwtConfig: jwtConfig,
 	}
 }
 
 func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req adminAuthModel.StaffRefreshTokenRequest) (*adminAuthModel.StaffRefreshTokenResponse, error) {
 	// Validate refresh token exists and is not revoked/expired
-	tokenRecord, err := s.queries.GetValidStaffUserToken(ctx, req.RefreshToken)
+	refreshTokenInfo, err := s.repo.StaffUserTokens.GetValid(ctx, req.RefreshToken)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthRefreshTokenInvalid)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to validate refresh token", err)
 	}
 
 	// Get staff user information to rebuild JWT claims
-	staffUser, err := s.queries.GetStaffUserByID(ctx, tokenRecord.StaffUserID)
+	staffUser, err := s.repo.Staff.GetByID(ctx, refreshTokenInfo.StaffUserID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthRefreshTokenInvalid)
-		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get staff user", err)
 	}
 
@@ -53,7 +50,7 @@ func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req ad
 	// Generate new access token
 	accessToken, err := utils.GenerateJWT(s.jwtConfig, staffUser.ID, staffUser.Username, staffUser.Role, storeList)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to generate access token", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate access token", err)
 	}
 
 	// Build response
@@ -64,13 +61,13 @@ func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req ad
 }
 
 // getStoreAccess is a helper method to get store access based on staff role
-func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
+func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetByIDResponse) ([]common.Store, error) {
 	var storeList []common.Store
 
 	switch staffUser.Role {
-	case "SUPER_ADMIN":
+	case common.RoleSuperAdmin:
 		// Super admin has access to all active stores
-		stores, err := s.queries.GetAllActiveStores(ctx)
+		stores, err := s.repo.Store.GetAll(ctx, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -80,16 +77,16 @@ func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser
 				Name: store.Name,
 			})
 		}
-	case "ADMIN", "MANAGER", "STYLIST":
+	case common.RoleAdmin, common.RoleManager, common.RoleStylist:
 		// Other roles have access based on store access table
-		storeAccess, err := s.queries.GetStaffUserStoreAccess(ctx, staffUser.ID)
+		storeAccess, err := s.repo.StaffUserStoreAccess.GetByStaffId(ctx, staffUser.ID, nil)
 		if err != nil {
 			return nil, err
 		}
 		for _, access := range storeAccess {
 			storeList = append(storeList, common.Store{
 				ID:   utils.FormatID(access.StoreID),
-				Name: access.StoreName,
+				Name: access.Name,
 			})
 		}
 	}

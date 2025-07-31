@@ -151,7 +151,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 	return AdminServices{
 		// Authentication services
 		AuthStaffLogin:        adminAuthService.NewStaffLoginService(repositories.SQLX, cfg.JWT),
-		AuthStaffRefreshToken: adminAuthService.NewStaffRefreshTokenService(queries, cfg.JWT),
+		AuthStaffRefreshToken: adminAuthService.NewStaffRefreshTokenService(repositories.SQLX, cfg.JWT),
 
 		// Staff management services
 		StaffCreate:            adminStaffService.NewCreateStaffService(queries, database.PgxPool),
