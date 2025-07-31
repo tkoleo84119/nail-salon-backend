@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,6 +32,15 @@ type LineConfig struct {
 	ChannelID        string
 }
 
+type CORSConfig struct {
+	AllowedOrigins   []string
+	AllowedMethods   []string
+	AllowedHeaders   []string
+	ExposedHeaders   []string
+	AllowCredentials bool
+	MaxAge           int
+}
+
 type ServerConfig struct {
 	Port            string
 	SnowflakeNodeId int64
@@ -41,6 +51,7 @@ type Config struct {
 	JWT    JWTConfig
 	Line   LineConfig
 	Server ServerConfig
+	CORS   CORSConfig
 }
 
 func Load() *Config {
@@ -76,11 +87,21 @@ func Load() *Config {
 		SnowflakeNodeId: int64(getenvIntDefault("SNOWFLAKE_NODE_ID", 1)),
 	}
 
+	corsConfig := CORSConfig{
+		AllowedOrigins:   getenvSlice("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000"}),
+		AllowedMethods:   getenvSlice("CORS_ALLOWED_METHODS", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"}),
+		AllowedHeaders:   getenvSlice("CORS_ALLOWED_HEADERS", []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-Requested-With"}),
+		ExposedHeaders:   getenvSlice("CORS_EXPOSED_HEADERS", []string{}),
+		AllowCredentials: getenvBoolDefault("CORS_ALLOW_CREDENTIALS", true),
+		MaxAge:           getenvIntDefault("CORS_MAX_AGE", 300),
+	}
+
 	return &Config{
 		DB:     dbConfig,
 		JWT:    jwtConfig,
 		Line:   lineConfig,
 		Server: serverConfig,
+		CORS:   corsConfig,
 	}
 }
 
@@ -137,4 +158,41 @@ func getenvDuration(key, defaultStr string) time.Duration {
 	}
 
 	return d
+}
+
+func getenvSlice(key string, defaultVal []string) []string {
+	val := os.Getenv(key)
+	if val == "" {
+		return defaultVal
+	}
+	
+	// Split by comma and trim spaces
+	parts := strings.Split(val, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	
+	if len(result) == 0 {
+		return defaultVal
+	}
+	
+	return result
+}
+
+func getenvBoolDefault(key string, defaultVal bool) bool {
+	val := os.Getenv(key)
+	if val == "" {
+		return defaultVal
+	}
+	
+	parsed, err := strconv.ParseBool(val)
+	if err != nil {
+		return defaultVal
+	}
+	
+	return parsed
 }

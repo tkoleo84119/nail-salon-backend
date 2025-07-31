@@ -17,6 +17,9 @@ func SetupRoutes(container *Container) *gin.Engine {
 	queries := dbgen.New(database.PgxPool)
 	router := gin.Default()
 
+	// Apply CORS middleware globally
+	router.Use(middleware.CORSMiddleware(cfg.CORS))
+
 	router.GET("/health", handler.Health)
 
 	api := router.Group("/api")
