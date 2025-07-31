@@ -8,32 +8,32 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type StaffLoginService struct {
-	queries   dbgen.Querier
+	repo      *sqlxRepo.Repositories
 	jwtConfig config.JWTConfig
 }
 
-func NewStaffLoginService(queries dbgen.Querier, jwtConfig config.JWTConfig) *StaffLoginService {
+func NewStaffLoginService(repo *sqlxRepo.Repositories, jwtConfig config.JWTConfig) *StaffLoginService {
 	return &StaffLoginService{
-		queries:   queries,
+		repo:      repo,
 		jwtConfig: jwtConfig,
 	}
 }
 
 func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.StaffLoginRequest, loginCtx adminAuthModel.StaffLoginContext) (*adminAuthModel.StaffLoginResponse, error) {
-	staffUser, err := s.queries.GetStaffUserByUsername(ctx, req.Username)
+	staffUser, err := s.repo.Staff.GetByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
-
-	// Verify password
 	if !utils.CheckPassword(req.Password, staffUser.PasswordHash) {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
+	}
+	if !staffUser.IsActive.Bool {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
 
@@ -82,12 +82,12 @@ func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.S
 }
 
 // getStoreAccess retrieves store access based on user role
-func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
+func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetByUsernameResponse) ([]common.Store, error) {
 	var storeList []common.Store
 
 	// SUPER_ADMIN can access all stores
-	if staffUser.Role == adminStaffModel.RoleSuperAdmin {
-		stores, err := s.queries.GetAllActiveStores(ctx)
+	if staffUser.Role == common.RoleSuperAdmin {
+		stores, err := s.repo.Store.GetAll(ctx, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -99,14 +99,14 @@ func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser dbgen.
 		}
 	} else {
 		// Get specific store access for other roles
-		storeAccess, err := s.queries.GetStaffUserStoreAccess(ctx, staffUser.ID)
+		storeAccess, err := s.repo.StaffUserStoreAccess.GetByStaffId(ctx, staffUser.ID, nil)
 		if err != nil {
 			return nil, err
 		}
 		for _, access := range storeAccess {
 			storeList = append(storeList, common.Store{
 				ID:   utils.FormatID(access.StoreID),
-				Name: access.StoreName,
+				Name: access.Name,
 			})
 		}
 	}
@@ -116,20 +116,19 @@ func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser dbgen.
 
 // storeRefreshToken stores the refresh token in database
 func (s *StaffLoginService) storeRefreshToken(ctx context.Context, tokenInfo adminAuthModel.StaffTokenInfo) error {
-	// Parse IP address
-	var ipAddr *netip.Addr
-	if addr, err := netip.ParseAddr(tokenInfo.Context.IPAddress); err == nil {
-		ipAddr = &addr
+	// Convert IP address to string pointer for PostgreSQL INET type
+	var ipAddr *string
+	if tokenInfo.Context.IPAddress != "" {
+		if _, err := netip.ParseAddr(tokenInfo.Context.IPAddress); err == nil {
+			ipAddr = &tokenInfo.Context.IPAddress
+		}
 	}
 
-	tokenID := utils.GenerateID()
-	userAgent := utils.StringPtrToPgText(&tokenInfo.Context.UserAgent, false)
-
-	_, err := s.queries.CreateStaffUserToken(ctx, dbgen.CreateStaffUserTokenParams{
-		ID:           tokenID,
+	_, err := s.repo.StaffUserTokens.Create(ctx, sqlxRepo.CreateParams{
+		ID:           utils.GenerateID(),
 		StaffUserID:  tokenInfo.StaffUserID,
 		RefreshToken: tokenInfo.RefreshToken,
-		UserAgent:    userAgent,
+		UserAgent:    utils.StringPtrToPgText(&tokenInfo.Context.UserAgent, true),
 		IpAddress:    ipAddr,
 		ExpiredAt:    utils.TimeToPgTimestamptz(tokenInfo.ExpiresAt),
 	})

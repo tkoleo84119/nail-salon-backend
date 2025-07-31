@@ -29,7 +29,7 @@ import (
 // AdminServices contains all admin-facing services
 type AdminServices struct {
 	// Authentication services
-	AuthStaffLogin        *adminAuthService.StaffLoginService
+	AuthStaffLogin        adminAuthService.StaffLoginServiceInterface
 	AuthStaffRefreshToken adminAuthService.StaffRefreshTokenServiceInterface
 
 	// Staff management services
@@ -150,7 +150,7 @@ type AdminHandlers struct {
 func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config) AdminServices {
 	return AdminServices{
 		// Authentication services
-		AuthStaffLogin:        adminAuthService.NewStaffLoginService(queries, cfg.JWT),
+		AuthStaffLogin:        adminAuthService.NewStaffLoginService(repositories.SQLX, cfg.JWT),
 		AuthStaffRefreshToken: adminAuthService.NewStaffRefreshTokenService(queries, cfg.JWT),
 
 		// Staff management services

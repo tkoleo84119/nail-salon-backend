@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -13,6 +14,7 @@ import (
 
 // StaffUserRepositoryInterface defines the interface for staff user repository
 type StaffUserRepositoryInterface interface {
+	GetByUsername(ctx context.Context, username string) (*GetByUsernameResponse, error)
 	UpdateStaffUser(ctx context.Context, id int64, req adminStaffModel.UpdateStaffRequest) (*adminStaffModel.UpdateStaffResponse, error)
 	UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error)
 	GetStaffList(ctx context.Context, req adminStaffModel.GetStaffListRequest) (*adminStaffModel.GetStaffListResponse, error)
@@ -23,7 +25,35 @@ type StaffUserRepository struct {
 }
 
 func NewStaffUserRepository(db *sqlx.DB) *StaffUserRepository {
-	return &StaffUserRepository{db: db}
+	return &StaffUserRepository{
+		db: db,
+	}
+}
+
+type GetByUsernameResponse struct {
+	ID           int64       `db:"id"`
+	Username     string      `db:"username"`
+	Email        string      `db:"email"`
+	PasswordHash string      `db:"password_hash"`
+	Role         string      `db:"role"`
+	IsActive     pgtype.Bool `db:"is_active"`
+}
+
+// GetByUsername retrieves staff user by username
+func (r *StaffUserRepository) GetByUsername(ctx context.Context, username string) (*GetByUsernameResponse, error) {
+	query := `
+		SELECT id, username, email, password_hash, role, is_active
+		FROM staff_users
+		WHERE username = $1
+	`
+
+	var result GetByUsernameResponse
+	err := r.db.GetContext(ctx, &result, query, username)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 // UpdateStaffUser updates staff user with dynamic fields
@@ -175,8 +205,8 @@ func (r *StaffUserRepository) GetStaffList(ctx context.Context, req adminStaffMo
 
 	// Get total count
 	countQuery := fmt.Sprintf(`
-		SELECT COUNT(*) 
-		FROM staff_users 
+		SELECT COUNT(*)
+		FROM staff_users
 		%s
 	`, whereClause)
 
@@ -195,14 +225,14 @@ func (r *StaffUserRepository) GetStaffList(ctx context.Context, req adminStaffMo
 
 	// Get staff list
 	listQuery := fmt.Sprintf(`
-		SELECT 
+		SELECT
 			id,
 			username,
 			email,
 			role,
 			is_active,
 			created_at
-		FROM staff_users 
+		FROM staff_users
 		%s
 		ORDER BY created_at DESC
 		LIMIT :limit OFFSET :offset

@@ -14,6 +14,7 @@ import (
 )
 
 type StoreRepositoryInterface interface {
+	GetAll(ctx context.Context, isActive *bool) ([]GetAllItem, error)
 	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
 	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
@@ -27,6 +28,44 @@ func NewStoreRepository(db *sqlx.DB) *StoreRepository {
 	return &StoreRepository{
 		db: db,
 	}
+}
+
+type GetAllItem struct {
+	ID       int64       `db:"id"`
+	Name     string      `db:"name"`
+	Address  pgtype.Text `db:"address"`
+	Phone    pgtype.Text `db:"phone"`
+	IsActive pgtype.Bool `db:"is_active"`
+}
+
+// GetAll retrieves all stores, can filter by is_active
+func (r *StoreRepository) GetAll(ctx context.Context, isActive *bool) ([]GetAllItem, error) {
+	whereParts := []string{}
+	args := []interface{}{}
+
+	if isActive != nil {
+		whereParts = append(whereParts, "is_active = $1")
+		args = append(args, isActive)
+	}
+
+	whereClause := ""
+	if len(whereParts) > 0 {
+		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
+	}
+
+	query := fmt.Sprintf(`
+		SELECT id, name, address, phone, is_active
+		FROM stores
+		%s
+	`, whereClause)
+
+	var results []GetAllItem
+	err := r.db.SelectContext(ctx, &results, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	return results, nil
 }
 
 func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error) {

@@ -8,8 +8,8 @@ import (
 
 // StaffLoginRequest represents the staff login request payload
 type StaffLoginRequest struct {
-	Username string `json:"username" binding:"required,min=1,max=100"`
-	Password string `json:"password" binding:"required,min=1,max=100"`
+	Username string `json:"username" binding:"required,max=100"`
+	Password string `json:"password" binding:"required,max=100"`
 }
 
 // StaffLoginResponse represents the successful login response
@@ -22,7 +22,7 @@ type StaffLoginResponse struct {
 
 // User represents the authenticated staff user info
 type User struct {
-	ID        string         `json:"id"` // Snowflake ID as string
+	ID        string         `json:"id"`
 	Username  string         `json:"username"`
 	Role      string         `json:"role"`
 	StoreList []common.Store `json:"storeList"`

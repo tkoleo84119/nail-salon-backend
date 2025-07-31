@@ -335,7 +335,7 @@ SYS:
     status: 500
   SYS_DATABASE_ERROR:
     code: E9002
-    message: 資料庫連接錯誤
+    message: 資料庫操作失敗
     status: 500
   SYS_SERVICE_UNAVAILABLE:
     code: E9003
