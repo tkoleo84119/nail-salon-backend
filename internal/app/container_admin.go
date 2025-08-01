@@ -34,12 +34,12 @@ type AdminServices struct {
 	AuthStaffLogout       adminAuthService.StaffLogoutServiceInterface
 
 	// Staff management services
-	StaffCreate            *adminStaffService.CreateStaffService
+	StaffCreate            adminStaffService.CreateStaffServiceInterface
 	StaffUpdate            *adminStaffService.UpdateStaffService
 	StaffUpdateMe          *adminStaffService.UpdateMyStaffService
 	StaffGet               adminStaffService.GetStaffServiceInterface
 	StaffGetMe             adminStaffService.GetMyStaffServiceInterface
-	StaffGetList           adminStaffService.GetStaffListServiceInterface	
+	StaffGetList           adminStaffService.GetStaffListServiceInterface
 	StaffGetStoreAccess    adminStaffService.GetStaffStoreAccessServiceInterface
 	StaffStoreAccess       *adminStaffService.CreateStoreAccessService
 	StaffDeleteStoreAccess *adminStaffService.DeleteStoreAccessBulkService
@@ -157,7 +157,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		AuthStaffLogout:       adminAuthService.NewStaffLogoutService(repositories.SQLX),
 
 		// Staff management services
-		StaffCreate:            adminStaffService.NewCreateStaffService(queries, database.PgxPool),
+		StaffCreate:            adminStaffService.NewCreateStaffService(database.Sqlx, repositories.SQLX),
 		StaffUpdate:            adminStaffService.NewUpdateStaffService(queries, database.Sqlx),
 		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(queries, repositories.SQLX),
 		StaffGet:               adminStaffService.NewGetStaffService(queries),

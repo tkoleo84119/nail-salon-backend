@@ -31,6 +31,26 @@ func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
 		return
 	}
 
+	storeIDs := make([]int64, len(req.StoreIDs))
+	for i, storeID := range req.StoreIDs {
+		parsedStoreID, err := utils.ParseID(storeID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"field": "storeIds 類型轉換失敗",
+			})
+			return
+		}
+		storeIDs[i] = parsedStoreID
+	}
+
+	parsedReq := adminStaffModel.CreateStaffParsedRequest{
+		Username: req.Username,
+		Email:    req.Email,
+		Password: req.Password,
+		Role:     req.Role,
+		StoreIDs: storeIDs,
+	}
+
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
 		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
@@ -41,13 +61,15 @@ func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
 	for i, store := range staffContext.StoreList {
 		storeID, err := utils.ParseID(store.ID)
 		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"field": "storeIds 類型轉換失敗",
+			})
 			return
 		}
 		creatorStoreIDs[i] = storeID
 	}
 
-	response, err := h.service.CreateStaff(c.Request.Context(), req, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.CreateStaff(c.Request.Context(), parsedReq, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

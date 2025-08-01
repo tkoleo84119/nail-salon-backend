@@ -11,6 +11,7 @@ import (
 
 type StaffUserStoreAccessRepositoryInterface interface {
 	CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) error
+	BatchCreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, params []CreateStaffUserStoreAccessTxParams) error
 	GetStaffUserStoreAccessByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetStaffUserStoreAccessByStaffIdItem, error)
 }
 
@@ -49,6 +50,44 @@ func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccessTx(ctx contex
 	}
 
 	return id, nil
+}
+
+func (r *StaffUserStoreAccessRepository) BatchCreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, params []CreateStaffUserStoreAccessTxParams) error {
+	const batchSize = 1000
+
+	var (
+		sb   strings.Builder
+		args []interface{}
+	)
+
+	for i := 0; i < len(params); i += batchSize {
+		end := i + batchSize
+		if end > len(params) {
+			end = len(params)
+		}
+
+		sb.Reset()
+		args = args[:0]
+
+		sb.WriteString(
+			"INSERT INTO staff_user_store_access (store_id, staff_user_id) VALUES ",
+		)
+
+		param := 1
+		for j, v := range params[i:end] {
+			sb.WriteString(fmt.Sprintf("($%d,$%d)", param, param+1))
+			if j < end-i-1 {
+				sb.WriteByte(',')
+			}
+			args = append(args, v.StoreID, v.StaffUserID)
+			param += 2
+		}
+
+		if _, err := tx.ExecContext(ctx, sb.String(), args...); err != nil {
+			return fmt.Errorf("batch insert failed: %w", err)
+		}
+	}
+	return nil
 }
 
 type GetStaffUserStoreAccessByStaffIdItem struct {

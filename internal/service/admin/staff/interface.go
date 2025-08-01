@@ -7,7 +7,7 @@ import (
 )
 
 type CreateStaffServiceInterface interface {
-	CreateStaff(ctx context.Context, req adminStaffModel.CreateStaffRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStaffResponse, error)
+	CreateStaff(ctx context.Context, req adminStaffModel.CreateStaffParsedRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStaffResponse, error)
 }
 
 type UpdateStaffServiceInterface interface {

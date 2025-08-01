@@ -21,7 +21,7 @@
 ## 權限
 
 - 需要登入才可使用。
-- 所有角色皆可使用。
+- `SUPER_ADMIN` 與 `ADMIN` 可使用。
 
 ---
 
@@ -165,13 +165,15 @@
 
 ---
 
-## 資料表
+## 實作與流程
+
+### 資料表
 
 - `staff_users`
 
 ---
 
-## Service 邏輯
+### Service 邏輯
 
 1. 根據 `username`、`email`、`role`、`isActive` 條件動態查詢。
 2. 加入 `limit` 與 `offset` 處理分頁。

@@ -23,6 +23,7 @@ type StoreRepositoryInterface interface {
 	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
 	CheckStoreNameExistsExcluding(ctx context.Context, name string, id int64) (bool, error)
+	CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (int, error)
 }
 
 type StoreRepository struct {
@@ -416,4 +417,17 @@ func (r *StoreRepository) CheckStoreNameExistsExcluding(ctx context.Context, nam
 	}
 
 	return exists, nil
+}
+
+func (r *StoreRepository) CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (int, error) {
+	query := `
+		SELECT COUNT(*) FROM stores WHERE id = ANY($1) AND is_active = true
+	`
+
+	var total int
+	if err := r.db.GetContext(ctx, &total, query, storeIDs); err != nil {
+		return 0, fmt.Errorf("failed to check stores existence: %w", err)
+	}
+
+	return total, nil
 }

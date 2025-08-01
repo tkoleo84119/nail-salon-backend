@@ -2,57 +2,44 @@ package adminStaff
 
 import (
 	"context"
-	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jmoiron/sqlx"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type CreateStaffService struct {
-	queries dbgen.Querier
-	db      *pgxpool.Pool
+	db   *sqlx.DB
+	repo *sqlxRepo.Repositories
 }
 
-func NewCreateStaffService(queries dbgen.Querier, db *pgxpool.Pool) *CreateStaffService {
+func NewCreateStaffService(db *sqlx.DB, repo *sqlxRepo.Repositories) *CreateStaffService {
 	return &CreateStaffService{
-		queries: queries,
-		db:      db,
+		db:   db,
+		repo: repo,
 	}
 }
 
-func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffModel.CreateStaffRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStaffResponse, error) {
-	// Convert string store IDs to int64
-	storeIDs, err := utils.ParseIDSlice(req.StoreIDs)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store IDs", err)
-	}
-
+func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffModel.CreateStaffParsedRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStaffResponse, error) {
 	// validate role is valid
-	if !adminStaffModel.IsValidRole(req.Role) {
+	if !common.IsValidRole(req.Role) || req.Role == adminStaffModel.RoleSuperAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffInvalidRole)
-	}
-	if req.Role == adminStaffModel.RoleSuperAdmin {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	// validate permissions
 	if err := s.validatePermissions(creatorRole, req.Role); err != nil {
 		return nil, err
 	}
-	if err := s.validateStoreAccess(creatorRole, creatorStoreIDs, storeIDs); err != nil {
+	if err := s.validateStoreAccess(creatorRole, creatorStoreIDs, req.StoreIDs); err != nil {
 		return nil, err
 	}
 
 	// check if username or email already exists
-	exists, err := s.queries.CheckStaffUserExists(ctx, dbgen.CheckStaffUserExistsParams{
-		Username: req.Username,
-		Email:    req.Email,
-	})
+	exists, err := s.repo.Staff.CheckStaffUserExists(ctx, req.Username)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check user existence", err)
 	}
@@ -61,15 +48,12 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 	}
 
 	// check if stores exist and active
-	storeCheck, err := s.queries.CheckStoresExistAndActive(ctx, storeIDs)
+	storeCount, err := s.repo.Store.CheckStoresExistAndActive(ctx, req.StoreIDs)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check stores", err)
 	}
-	if storeCheck.TotalCount != int64(len(storeIDs)) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffStoreNotFound)
-	}
-	if storeCheck.ActiveCount != storeCheck.TotalCount {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffStoreNotActive)
+	if storeCount != len(req.StoreIDs) {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 	}
 
 	hashedPassword, err := utils.HashPassword(req.Password)
@@ -78,28 +62,23 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 	}
 
 	// prepare of insert data
-	now := time.Now()
 	staffID := utils.GenerateID()
 
-	storeAccessParams := make([]dbgen.BatchCreateStaffUserStoreAccessParams, 0, len(storeIDs))
-	for _, storeID := range storeIDs {
-		storeAccessParams = append(storeAccessParams, dbgen.BatchCreateStaffUserStoreAccessParams{
+	storeAccessParams := make([]sqlxRepo.CreateStaffUserStoreAccessTxParams, 0, len(req.StoreIDs))
+	for _, storeID := range req.StoreIDs {
+		storeAccessParams = append(storeAccessParams, sqlxRepo.CreateStaffUserStoreAccessTxParams{
 			StoreID:     storeID,
 			StaffUserID: staffID,
-			CreatedAt:   utils.TimeToPgTimestamptz(now),
-			UpdatedAt:   utils.TimeToPgTimestamptz(now),
 		})
 	}
 
-	tx, err := s.db.Begin(ctx)
+	tx, err := s.db.Beginx()
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback()
 
-	qtx := dbgen.New(tx)
-
-	createdStaff, err := qtx.CreateStaffUser(ctx, dbgen.CreateStaffUserParams{
+	createdStaff, err := s.repo.Staff.CreateStaffUserTx(ctx, tx, sqlxRepo.CreateStaffUserTxParams{
 		ID:           staffID,
 		Username:     req.Username,
 		Email:        req.Email,
@@ -111,27 +90,22 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 	}
 
 	// batch create store access records
-	_, err = qtx.BatchCreateStaffUserStoreAccess(ctx, storeAccessParams)
+	err = s.repo.StaffUserStoreAccess.BatchCreateStaffUserStoreAccessTx(ctx, tx, storeAccessParams)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store access", err)
 	}
 
-	if err := tx.Commit(ctx); err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
-	}
-
-	// get store list information
-	stores, err := s.queries.GetStoresByIDs(ctx, storeIDs)
+	_, err = s.repo.Stylist.CreateStylistTx(ctx, tx, sqlxRepo.CreateStylistTxParams{
+		ID:          staffID,
+		StaffUserID: staffID,
+	})
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store information", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create stylist", err)
 	}
 
-	storeList := make([]common.Store, 0, len(stores))
-	for _, store := range stores {
-		storeList = append(storeList, common.Store{
-			ID:   utils.FormatID(store.ID),
-			Name: store.Name,
-		})
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
 	response := &adminStaffModel.CreateStaffResponse{
@@ -139,8 +113,9 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 		Username:  createdStaff.Username,
 		Email:     createdStaff.Email,
 		Role:      createdStaff.Role,
-		IsActive:  createdStaff.IsActive.Bool,
-		StoreList: storeList,
+		IsActive:  true,
+		CreatedAt: utils.PgTimestamptzToTimeString(createdStaff.CreatedAt),
+		UpdatedAt: utils.PgTimestamptzToTimeString(createdStaff.UpdatedAt),
 	}
 
 	return response, nil

@@ -12,8 +12,36 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
+type CreateStylistTxParams struct {
+	ID          int64 `db:"id"`
+	StaffUserID int64 `db:"staff_user_id"`
+}
+
+func (r *StylistRepository) CreateStylistTx(ctx context.Context, tx *sqlx.Tx, params CreateStylistTxParams) (int64, error) {
+	query := `
+		INSERT INTO stylists
+		VALUES (:id, :staff_user_id)
+		RETURNING id
+	`
+
+	var id int64
+	stmt, err := tx.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create store: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowxContext(ctx, params).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create store: %w", err)
+	}
+
+	return id, nil
+}
+
 // StylistRepositoryInterface defines the interface for stylist repository
 type StylistRepositoryInterface interface {
+	CreateStylistTx(ctx context.Context, tx *sqlx.Tx, params CreateStylistTxParams) (int64, error)
 	UpdateStylist(ctx context.Context, staffUserID int64, req adminStylistModel.UpdateMyStylistRequest) (*adminStylistModel.UpdateMyStylistResponse, error)
 	GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error)
 	GetStoreStylistList(ctx context.Context, storeID int64, params GetStoreStylistListParams) ([]GetStoreStylistListModel, int, error)

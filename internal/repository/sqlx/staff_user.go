@@ -14,11 +14,13 @@ import (
 
 // StaffUserRepositoryInterface defines the interface for staff user repository
 type StaffUserRepositoryInterface interface {
+	CreateStaffUserTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserTxParams) (CreateStaffUserTxResponse, error)
 	GetStaffUserByUsername(ctx context.Context, username string) (*GetStaffUserByUsernameResponse, error)
 	GetStaffUserByID(ctx context.Context, id int64) (*GetStaffUserByIDResponse, error)
 	GetAllStaffByFilter(ctx context.Context, params GetAllStaffByFilterParams) (int, []GetAllStaffByFilterResponse, error)
 	UpdateStaffUser(ctx context.Context, id int64, req adminStaffModel.UpdateStaffRequest) (*adminStaffModel.UpdateStaffResponse, error)
 	UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error)
+	CheckStaffUserExists(ctx context.Context, username string) (bool, error)
 }
 
 type StaffUserRepository struct {
@@ -29,6 +31,48 @@ func NewStaffUserRepository(db *sqlx.DB) *StaffUserRepository {
 	return &StaffUserRepository{
 		db: db,
 	}
+}
+
+type CreateStaffUserTxParams struct {
+	ID           int64       `db:"id"`
+	Username     string      `db:"username"`
+	Email        string      `db:"email"`
+	PasswordHash string      `db:"password_hash"`
+	Role         string      `db:"role"`
+	IsActive     pgtype.Bool `db:"is_active"`
+}
+
+type CreateStaffUserTxResponse struct {
+	ID           int64              `db:"id"`
+	Username     string             `db:"username"`
+	Email        string             `db:"email"`
+	PasswordHash string             `db:"password_hash"`
+	Role         string             `db:"role"`
+	IsActive     pgtype.Bool        `db:"is_active"`
+	CreatedAt    pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (r *StaffUserRepository) CreateStaffUserTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserTxParams) (CreateStaffUserTxResponse, error) {
+	query := `
+		INSERT INTO staff_users (id, username, email, password_hash, role, is_active)
+		VALUES (:id, :username, :email, :password_hash, :role, :is_active)
+		RETURNING id, username, email, password_hash, role, is_active, created_at, updated_at
+	`
+
+	var result CreateStaffUserTxResponse
+	stmt, err := tx.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return CreateStaffUserTxResponse{}, fmt.Errorf("failed to create store: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowxContext(ctx, req).StructScan(&result)
+	if err != nil {
+		return CreateStaffUserTxResponse{}, fmt.Errorf("failed to create store: %w", err)
+	}
+
+	return result, nil
 }
 
 type GetStaffUserByUsernameResponse struct {
@@ -308,4 +352,19 @@ func (r *StaffUserRepository) UpdateMyStaff(ctx context.Context, id int64, req a
 	}
 
 	return response, nil
+}
+
+// CheckStaffUserExists checks if a staff user exists by username
+func (r *StaffUserRepository) CheckStaffUserExists(ctx context.Context, username string) (bool, error) {
+	query := `
+		SELECT EXISTS(SELECT 1 FROM staff_users WHERE username = $1)
+	`
+
+	var result bool
+	err := r.db.GetContext(ctx, &result, query, username)
+	if err != nil {
+		return false, err
+	}
+
+	return result, nil
 }
