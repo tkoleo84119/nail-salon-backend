@@ -6,29 +6,24 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateStoreService struct {
-	queries dbgen.Querier
-	repo    *sqlxRepo.Repositories
+	repo *sqlxRepo.Repositories
 }
 
-func NewUpdateStoreService(queries dbgen.Querier, repo *sqlxRepo.Repositories) *UpdateStoreService {
+func NewUpdateStoreService(repo *sqlxRepo.Repositories) *UpdateStoreService {
 	return &UpdateStoreService{
-		queries: queries,
-		repo:    repo,
+		repo: repo,
 	}
 }
 
-func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, req adminStoreModel.UpdateStoreRequest, staffContext common.StaffContext) (*adminStoreModel.UpdateStoreResponse, error) {
-	// Parse store ID
-	parsedStoreID, err := utils.ParseID(storeID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
+func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest, role string, storeIDs []int64) (*adminStoreModel.UpdateStoreResponse, error) {
+	// Validate role permissions (only SUPER_ADMIN and ADMIN can update stores)
+	if role != adminStaffModel.RoleSuperAdmin && role != adminStaffModel.RoleAdmin {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	// Validate that at least one field has updates
@@ -36,36 +31,18 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
 	}
 
-	// Validate role permissions (only SUPER_ADMIN and ADMIN can update stores)
-	if staffContext.Role != adminStaffModel.RoleSuperAdmin && staffContext.Role != adminStaffModel.RoleAdmin {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-	}
-
 	// Check if store exists
-	_, err = s.queries.GetStoreDetailByID(ctx, parsedStoreID)
+	_, err := s.repo.Store.GetStore(ctx, storeID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store details", err)
 	}
 
 	// For ADMIN role, check store access permission
-	if staffContext.Role == adminStaffModel.RoleAdmin {
-		storeIDs := []int64{}
-		for _, store := range staffContext.StoreList {
-			parsedStoreID, err := utils.ParseID(store.ID)
-			if err != nil {
-				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
-			}
-			storeIDs = append(storeIDs, parsedStoreID)
+	if role == adminStaffModel.RoleAdmin {
+		hasAccess, err := utils.CheckStoreAccess(storeID, storeIDs)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
 		}
-
-		hasAccess := false
-		for _, storeID := range storeIDs {
-			if storeID == parsedStoreID {
-				hasAccess = true
-				break
-			}
-		}
-
 		if !hasAccess {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
@@ -73,10 +50,7 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 
 	// Check if name is unique (excluding current store)
 	if req.Name != nil {
-		nameExists, err := s.queries.CheckStoreNameExistsExcluding(ctx, dbgen.CheckStoreNameExistsExcludingParams{
-			Name: *req.Name,
-			ID:   parsedStoreID,
-		})
+		nameExists, err := s.repo.Store.CheckStoreNameExistsExcluding(ctx, *req.Name, storeID)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name uniqueness", err)
 		}
@@ -86,9 +60,24 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID string, re
 	}
 
 	// Update store using sqlx repository
-	response, err := s.repo.Store.UpdateStore(ctx, parsedStoreID, req)
+	updatedStore, err := s.repo.Store.UpdateStore(ctx, storeID, sqlxRepo.UpdateStoreParams{
+		Name:     req.Name,
+		Address:  req.Address,
+		Phone:    req.Phone,
+		IsActive: req.IsActive,
+	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update store", err)
+	}
+
+	response := &adminStoreModel.UpdateStoreResponse{
+		ID:        utils.FormatID(updatedStore.ID),
+		Name:      updatedStore.Name,
+		Address:   utils.PgTextToString(updatedStore.Address),
+		Phone:     utils.PgTextToString(updatedStore.Phone),
+		IsActive:  utils.PgBoolToBool(updatedStore.IsActive),
+		CreatedAt: utils.PgTimestamptzToTimeString(updatedStore.CreatedAt),
+		UpdatedAt: utils.PgTimestamptzToTimeString(updatedStore.UpdatedAt),
 	}
 
 	return response, nil

@@ -18,10 +18,11 @@ type StoreRepositoryInterface interface {
 	GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error)
 	GetAllStore(ctx context.Context, isActive *bool) ([]GetAllStoreItem, error)
 	GetStore(ctx context.Context, storeID int64) (GetStoreResponse, error)
-	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
+	UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
 	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
+	CheckStoreNameExistsExcluding(ctx context.Context, name string, id int64) (bool, error)
 }
 
 type StoreRepository struct {
@@ -228,25 +229,42 @@ func (r *StoreRepository) GetStore(ctx context.Context, storeID int64) (GetStore
 	return result, nil
 }
 
-func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error) {
+type UpdateStoreParams struct {
+	Name     *string
+	Address  *string
+	Phone    *string
+	IsActive *bool
+}
+
+type UpdateStoreResponse struct {
+	ID        int64              `db:"id"`
+	Name      string             `db:"name"`
+	Address   pgtype.Text        `db:"address"`
+	Phone     pgtype.Text        `db:"phone"`
+	IsActive  pgtype.Bool        `db:"is_active"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": storeID,
 	}
 
-	if req.Name != nil {
+	if req.Name != nil && *req.Name != "" {
 		setParts = append(setParts, "name = :name")
 		args["name"] = *req.Name
 	}
 
 	if req.Address != nil {
 		setParts = append(setParts, "address = :address")
-		args["address"] = utils.StringPtrToPgText(req.Address, true)
+		args["address"] = utils.StringPtrToPgText(req.Address, false)
 	}
 
 	if req.Phone != nil {
 		setParts = append(setParts, "phone = :phone")
-		args["phone"] = utils.StringPtrToPgText(req.Phone, true)
+		args["phone"] = utils.StringPtrToPgText(req.Phone, false)
 	}
 
 	if req.IsActive != nil {
@@ -263,16 +281,10 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req ad
 			name,
 			address,
 			phone,
-			is_active
+			is_active,
+			created_at,
+			updated_at
 	`, strings.Join(setParts, ", "))
-
-	var result struct {
-		ID       int64       `db:"id"`
-		Name     string      `db:"name"`
-		Address  pgtype.Text `db:"address"`
-		Phone    pgtype.Text `db:"phone"`
-		IsActive pgtype.Bool `db:"is_active"`
-	}
 
 	rows, err := r.db.NamedQuery(query, args)
 	if err != nil {
@@ -280,6 +292,7 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req ad
 	}
 	defer rows.Close()
 
+	var result UpdateStoreResponse
 	if !rows.Next() {
 		return nil, fmt.Errorf("no rows returned from update")
 	}
@@ -288,13 +301,7 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req ad
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	return &adminStoreModel.UpdateStoreResponse{
-		ID:       utils.FormatID(result.ID),
-		Name:     result.Name,
-		Address:  result.Address.String,
-		Phone:    result.Phone.String,
-		IsActive: result.IsActive.Bool,
-	}, nil
+	return &result, nil
 }
 
 // GetStoresModel represents the database model for store queries
@@ -388,6 +395,23 @@ func (r *StoreRepository) CheckNameExists(ctx context.Context, name string) (boo
 
 	var exists bool
 	if err := r.db.Get(&exists, query, name); err != nil {
+		return false, fmt.Errorf("failed to check name existence: %w", err)
+	}
+
+	return exists, nil
+}
+
+func (r *StoreRepository) CheckStoreNameExistsExcluding(ctx context.Context, name string, id int64) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM stores
+			WHERE name = $1 AND id != $2
+		)
+	`
+
+	var exists bool
+	if err := r.db.Get(&exists, query, name, id); err != nil {
 		return false, fmt.Errorf("failed to check name existence: %w", err)
 	}
 

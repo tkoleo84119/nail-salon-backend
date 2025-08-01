@@ -1,9 +1,6 @@
 ## User Story
 
-作為一位管理員（`SUPER_ADMIN` / `ADMIN`），我希望能更新門市（store），以維護門市資訊。
-
-- `ADMIN` 僅能操作自己有權限的門市。
-- `SUPER_ADMIN` 可操作所有門市。
+作為一位管理員，我希望能更新門市（store），以維護門市資訊。
 
 ---
 
@@ -15,15 +12,15 @@
 
 ## 說明
 
-- 僅限 `SUPER_ADMIN`、`ADMIN` 可更新門市。
-- 僅允許修改名稱、地址、電話。
-- 門市名稱須唯一。
-- `ADMIN` 僅能操作有權限的門市。
+- 提供後台管理員更新門市功能。
+- 僅允許修改名稱、地址、電話、是否啟用。
+- `ADMIN` 只可修改自己有權限的門市。
 
 ---
 
 ## 權限
 
+- 需要登入才可使用。
 - 僅 `SUPER_ADMIN`、`ADMIN` 可操作。
 
 ---
@@ -32,10 +29,8 @@
 
 ### Header
 
-```http
-Content-Type: application/json
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameter
 
@@ -43,7 +38,7 @@ Authorization: Bearer <access_token>
 | ------- | ------ |
 | storeId | 門市ID |
 
-### Body
+### Body 範例
 
 ```json
 {
@@ -56,12 +51,12 @@ Authorization: Bearer <access_token>
 
 ### 驗證規則
 
-| 欄位     | 規則                                             | 說明     |
-| -------- | ------------------------------------------------ | -------- |
-| name     | <li>選填<li>長度大於1<li>長度小於100<li>唯一     | 門市名稱 |
-| address  | <li>選填<li>長度小於255                          | 門市地址 |
-| phone    | <li>選填<li>長度小於20<li>格式必須為台灣市話號碼 | 電話     |
-| isActive | <li>選填                                         | 是否啟用 |
+| 欄位     | 規則                                                               | 說明     |
+| -------- | ------------------------------------------------------------------ | -------- |
+| name     | <li>選填<li>長度大於1<li>長度小於100                               | 門市名稱 |
+| address  | <li>選填<li>長度小於255                                            | 門市地址 |
+| phone    | <li>選填<li>長度小於20<li>格式必須為台灣市話號碼 (例: 02-12345678) | 電話     |
+| isActive | <li>選填<li>必須為布林值                                           | 是否啟用 |
 
 - 欄位皆為選填，但至少需有一項。
 
@@ -78,21 +73,48 @@ Authorization: Bearer <access_token>
     "name": "松江南京分店",
     "address": "台北市中山區松江路123號",
     "phone": "02-88889999",
-    "isActive": true
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                                                         |
+| ------ | -------- | ------------------------------------------------------------ |
+| 401    | E1002    | 無效的 accessToken，請重新登入                               |
+| 401    | E1003    | accessToken 缺失，請重新登入                                 |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入                             |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入                             |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入                             |
+| 403    | E1010    | 權限不足，無法執行此操作                                     |
+| 400    | E2001    | JSON 格式錯誤，請檢查                                        |
+| 400    | E2003    | 至少需要提供一個欄位進行更新                                 |
+| 400    | E2004    | 參數類型轉換失敗                                             |
+| 400    | E2020    | {field} 為必填項目                                           |
+| 400    | E2021    | {field} 長度至少需要 {param} 個字元                          |
+| 400    | E2024    | {field} 長度最多只能有 {param} 個字元                        |
+| 400    | E2031    | {field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX) |
+| 400    | E2029    | {field} 必須是布林值                                         |
+| 409    | E3STO003 | 門市已存在，請創建其他門市                                   |
+| 500    | E9001    | 系統發生錯誤，請稍後再試                                     |
+| 500    | E9002    | 資料庫操作失敗                                               |
 
 #### 400 Bad Request - 驗證錯誤
 
 ```json
 {
-  "message": "輸入驗證失敗",
-  "errors": {
-    "phone": "必須為有效的台灣市話號碼格式 (例: 02-12345678)"
-  }
+  "error": [
+    {
+      "code": "E2031",
+      "message": "phone 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX)",
+      "field": "phone"
+    }
+  ]
 }
 ```
 
@@ -100,7 +122,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "error": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
@@ -108,7 +135,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "權限不足，僅限有權限的管理員操作"
+  "error": [
+    {
+      "code": "E1010",
+      "message": "權限不足，無法執行此操作"
+    }
+  ]
 }
 ```
 
@@ -116,15 +148,25 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "門市不存在或已被刪除"
+  "error": [
+    {
+      "code": "E3STO003",
+      "message": "門市已存在，請創建其他門市"
+    }
+  ]
 }
 ```
 
-#### 500 Internal Server Error
+#### 500 Internal Server Error - 系統錯誤
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "error": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
@@ -139,16 +181,17 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 驗證至少一個欄位有更新。
-2. 驗證 `storeId` 是否存在。
-3. 驗證 `name` 是否唯一（若有更改，不包含自己）。
-4. 更新 `stores` 資料。
-5. 回傳更新結果。
+1. 再次驗證 `role` 是否為 `SUPER_ADMIN` 或 `ADMIN`。
+2. 驗證至少一個欄位有更新。
+3. 驗證 `store` 是否存在。
+4. 若 `role` 為 `ADMIN`，則驗證 `store` 是否為自己有權限的門市。
+5. 若 `name` 有更新，則驗證 `name` 是否唯一（不包含自己）。
+6. 更新 `stores` 資料。
+7. 回傳更新結果。
 
 ---
 
 ## 注意事項
 
-- `ADMIN` 僅能操作自己有權限的門市。
 - 門市名稱不可重複（不包含自己）。
-- 僅允許 name、address、phone 欄位修改。
+- 僅允許 name、address、phone、isActive 欄位修改。

@@ -22,17 +22,19 @@ type CreateStoreResponse struct {
 type UpdateStoreRequest struct {
 	Name     *string `json:"name" binding:"omitempty,min=1,max=100"`
 	Address  *string `json:"address" binding:"omitempty,max=255"`
-	Phone    *string `json:"phone" binding:"omitempty,taiwanlandline"`
-	IsActive *bool   `json:"isActive" binding:"omitempty"`
+	Phone    *string `json:"phone" binding:"omitempty,max=20,taiwanlandline"`
+	IsActive *bool   `json:"isActive" binding:"omitempty,boolean"`
 }
 
 // UpdateStoreResponse represents the response after updating a store
 type UpdateStoreResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Address  string `json:"address"`
-	Phone    string `json:"phone"`
-	IsActive bool   `json:"isActive"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	Phone     string `json:"phone"`
+	IsActive  bool   `json:"isActive"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // HasUpdates checks if the request has any fields to update
