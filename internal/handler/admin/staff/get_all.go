@@ -2,6 +2,7 @@ package adminStaff
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -31,8 +32,31 @@ func (h *GetStaffListHandler) GetStaffList(c *gin.Context) {
 		return
 	}
 
+	// set default value
+	limit := 20
+	offset := 0
+	if req.Limit != nil && *req.Limit > 0 {
+		limit = *req.Limit
+	}
+	if req.Offset != nil && *req.Offset >= 0 {
+		offset = *req.Offset
+	}
+
+	sort := []string{}
+	if req.Sort != nil && *req.Sort != "" {
+		sort = strings.Split(*req.Sort, ",")
+	}
+
 	// Service layer call
-	response, err := h.service.GetStaffList(c.Request.Context(), req)
+	response, err := h.service.GetStaffList(c.Request.Context(), adminStaffModel.GetStaffListParsedRequest{
+		Username: req.Username,
+		Email:    req.Email,
+		Role:     req.Role,
+		IsActive: req.IsActive,
+		Limit:    limit,
+		Offset:   offset,
+		Sort:     sort,
+	})
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

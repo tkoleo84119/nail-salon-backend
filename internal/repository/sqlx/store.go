@@ -96,7 +96,7 @@ func (r *StoreRepository) GetAllStoreByFilter(ctx context.Context, params GetAll
 	}
 
 	// Set default sort values
-	sort := utils.HandleSort([]string{"created_at", "is_active"}, "created_at", "ASC", params.Sort)
+	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_active"}, "created_at", "ASC", params.Sort)
 
 	whereParts := []string{}
 	args := map[string]interface{}{

@@ -39,7 +39,7 @@ type AdminServices struct {
 	StaffUpdateMe          *adminStaffService.UpdateMyStaffService
 	StaffGet               adminStaffService.GetStaffServiceInterface
 	StaffGetMe             adminStaffService.GetMyStaffServiceInterface
-	StaffGetList           adminStaffService.GetStaffListServiceInterface
+	StaffGetList           adminStaffService.GetStaffListServiceInterface	
 	StaffGetStoreAccess    adminStaffService.GetStaffStoreAccessServiceInterface
 	StaffStoreAccess       *adminStaffService.CreateStoreAccessService
 	StaffDeleteStoreAccess *adminStaffService.DeleteStoreAccessBulkService
