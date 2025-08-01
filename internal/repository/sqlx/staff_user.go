@@ -34,12 +34,11 @@ func NewStaffUserRepository(db *sqlx.DB) *StaffUserRepository {
 }
 
 type CreateStaffUserTxParams struct {
-	ID           int64       `db:"id"`
-	Username     string      `db:"username"`
-	Email        string      `db:"email"`
-	PasswordHash string      `db:"password_hash"`
-	Role         string      `db:"role"`
-	IsActive     pgtype.Bool `db:"is_active"`
+	ID           int64  `db:"id"`
+	Username     string `db:"username"`
+	Email        string `db:"email"`
+	PasswordHash string `db:"password_hash"`
+	Role         string `db:"role"`
 }
 
 type CreateStaffUserTxResponse struct {
@@ -55,9 +54,9 @@ type CreateStaffUserTxResponse struct {
 
 func (r *StaffUserRepository) CreateStaffUserTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserTxParams) (CreateStaffUserTxResponse, error) {
 	query := `
-		INSERT INTO staff_users (id, username, email, password_hash, role, is_active)
-		VALUES (:id, :username, :email, :password_hash, :role, :is_active)
-		RETURNING id, username, email, password_hash, role, is_active, created_at, updated_at
+		INSERT INTO staff_users (id, username, email, password_hash, role)
+		VALUES (:id, :username, :email, :password_hash, :role)
+		RETURNING id, username, email, password_hash, role, created_at, updated_at
 	`
 
 	var result CreateStaffUserTxResponse
@@ -102,18 +101,20 @@ func (r *StaffUserRepository) GetStaffUserByUsername(ctx context.Context, userna
 }
 
 type GetStaffUserByIDResponse struct {
-	ID           int64       `db:"id"`
-	Username     string      `db:"username"`
-	Email        string      `db:"email"`
-	PasswordHash string      `db:"password_hash"`
-	Role         string      `db:"role"`
-	IsActive     pgtype.Bool `db:"is_active"`
+	ID           int64              `db:"id"`
+	Username     string             `db:"username"`
+	Email        string             `db:"email"`
+	PasswordHash string             `db:"password_hash"`
+	Role         string             `db:"role"`
+	IsActive     pgtype.Bool        `db:"is_active"`
+	CreatedAt    pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
 }
 
 // GetByID retrieves staff user by ID
 func (r *StaffUserRepository) GetStaffUserByID(ctx context.Context, id int64) (*GetStaffUserByIDResponse, error) {
 	query := `
-		SELECT id, username, email, password_hash, role, is_active
+		SELECT id, username, email, password_hash, role, is_active, created_at, updated_at
 		FROM staff_users
 		WHERE id = $1
 	`

@@ -35,7 +35,7 @@ type GetMyStaffServiceInterface interface {
 }
 
 type GetStaffServiceInterface interface {
-	GetStaff(ctx context.Context, staffID string) (*adminStaffModel.GetStaffResponse, error)
+	GetStaff(ctx context.Context, staffID int64) (*adminStaffModel.GetStaffResponse, error)
 }
 
 type GetStaffStoreAccessServiceInterface interface {

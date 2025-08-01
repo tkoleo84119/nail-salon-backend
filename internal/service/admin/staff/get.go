@@ -8,34 +8,29 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetStaffService struct {
-	queries *dbgen.Queries
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetStaffService(queries *dbgen.Queries) *GetStaffService {
+func NewGetStaffService(repo *sqlxRepo.Repositories) *GetStaffService {
 	return &GetStaffService{
-		queries: queries,
+		repo: repo,
 	}
 }
 
-func (s *GetStaffService) GetStaff(ctx context.Context, staffID string) (*adminStaffModel.GetStaffResponse, error) {
-	// Parse staff ID
-	staffUserID, err := utils.ParseID(staffID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid staff ID", err)
-	}
-
+func (s *GetStaffService) GetStaff(ctx context.Context, staffID int64) (*adminStaffModel.GetStaffResponse, error) {
 	// Get staff user information
-	staffUser, err := s.queries.GetStaffUserByID(ctx, staffUserID)
+	staffUser, err := s.repo.Staff.GetStaffUserByID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get staff user", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get staff user", err)
 	}
 
 	// Prepare response with staff information
@@ -44,28 +39,35 @@ func (s *GetStaffService) GetStaff(ctx context.Context, staffID string) (*adminS
 		Username:  staffUser.Username,
 		Email:     staffUser.Email,
 		Role:      staffUser.Role,
-		IsActive:  staffUser.IsActive.Bool,
-		CreatedAt: staffUser.CreatedAt.Time,
+		IsActive:  utils.PgBoolToBool(staffUser.IsActive),
+		CreatedAt: utils.PgTimestamptzToTimeString(staffUser.CreatedAt),
+		UpdatedAt: utils.PgTimestamptzToTimeString(staffUser.UpdatedAt),
 		Stylist:   nil, // Default to nil
 	}
 
-	// Try to get stylist information if exists
-	stylist, err := s.queries.GetStylistByStaffUserID(ctx, staffUserID)
+	if staffUser.Role == common.RoleSuperAdmin {
+		return response, nil
+	}
+
+	// Try to get stylist information
+	stylist, err := s.repo.Stylist.GetStylistByStaffUserID(ctx, staffID)
 	if err != nil {
-		// If no stylist found, that's okay - staff member might not be a stylist
-		if !errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get stylist information", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
 		}
-	} else {
-		// Convert stylist information
-		response.Stylist = &adminStaffModel.StaffStylistInfo{
-			ID:           utils.FormatID(stylist.ID),
-			Name:         stylist.Name.String,
-			GoodAtShapes: stylist.GoodAtShapes,
-			GoodAtColors: stylist.GoodAtColors,
-			GoodAtStyles: stylist.GoodAtStyles,
-			IsIntrovert:  stylist.IsIntrovert.Bool,
-		}
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get stylist information", err)
+	}
+
+	// Convert stylist information
+	response.Stylist = &adminStaffModel.StaffStylistInfo{
+		ID:           utils.FormatID(stylist.ID),
+		Name:         utils.PgTextToString(stylist.Name),
+		GoodAtShapes: stylist.GoodAtShapes,
+		GoodAtColors: stylist.GoodAtColors,
+		GoodAtStyles: stylist.GoodAtStyles,
+		IsIntrovert:  utils.PgBoolToBool(stylist.IsIntrovert),
+		CreatedAt:    utils.PgTimestamptzToTimeString(stylist.CreatedAt),
+		UpdatedAt:    utils.PgTimestamptzToTimeString(stylist.UpdatedAt),
 	}
 
 	return response, nil

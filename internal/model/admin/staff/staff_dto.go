@@ -1,9 +1,5 @@
 package adminStaff
 
-import (
-	"time"
-)
-
 // CreateStaffRequest represents the request to create a new staff member
 type CreateStaffRequest struct {
 	Username string   `json:"username" binding:"required,max=50"`
@@ -134,7 +130,8 @@ type GetStaffResponse struct {
 	Email     string            `json:"email"`
 	Role      string            `json:"role"`
 	IsActive  bool              `json:"isActive"`
-	CreatedAt time.Time         `json:"createdAt"`
+	CreatedAt string            `json:"createdAt"`
+	UpdatedAt string            `json:"updatedAt"`
 	Stylist   *StaffStylistInfo `json:"stylist"`
 }
 
@@ -146,6 +143,8 @@ type StaffStylistInfo struct {
 	GoodAtColors []string `json:"goodAtColors"`
 	GoodAtStyles []string `json:"goodAtStyles"`
 	IsIntrovert  bool     `json:"isIntrovert"`
+	CreatedAt    string   `json:"createdAt"`
+	UpdatedAt    string   `json:"updatedAt"`
 }
 
 // -------------------------------------------------------------------------------------

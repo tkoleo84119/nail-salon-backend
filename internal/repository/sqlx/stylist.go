@@ -5,12 +5,30 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 	adminStylistModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/stylist"
 	storeModel "github.com/tkoleo84119/nail-salon-backend/internal/model/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
+
+// StylistRepositoryInterface defines the interface for stylist repository
+type StylistRepositoryInterface interface {
+	CreateStylistTx(ctx context.Context, tx *sqlx.Tx, params CreateStylistTxParams) (int64, error)
+	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (*GetStylistByStaffUserIDResponse, error)
+	UpdateStylist(ctx context.Context, staffUserID int64, req adminStylistModel.UpdateMyStylistRequest) (*adminStylistModel.UpdateMyStylistResponse, error)
+	GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error)
+	GetStoreStylistList(ctx context.Context, storeID int64, params GetStoreStylistListParams) ([]GetStoreStylistListModel, int, error)
+}
+
+type StylistRepository struct {
+	db *sqlx.DB
+}
+
+func NewStylistRepository(db *sqlx.DB) *StylistRepository {
+	return &StylistRepository{db: db}
+}
 
 type CreateStylistTxParams struct {
 	ID          int64 `db:"id"`
@@ -39,20 +57,50 @@ func (r *StylistRepository) CreateStylistTx(ctx context.Context, tx *sqlx.Tx, pa
 	return id, nil
 }
 
-// StylistRepositoryInterface defines the interface for stylist repository
-type StylistRepositoryInterface interface {
-	CreateStylistTx(ctx context.Context, tx *sqlx.Tx, params CreateStylistTxParams) (int64, error)
-	UpdateStylist(ctx context.Context, staffUserID int64, req adminStylistModel.UpdateMyStylistRequest) (*adminStylistModel.UpdateMyStylistResponse, error)
-	GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error)
-	GetStoreStylistList(ctx context.Context, storeID int64, params GetStoreStylistListParams) ([]GetStoreStylistListModel, int, error)
+type GetStylistByStaffUserIDResponse struct {
+	ID           int64              `db:"id"`
+	Name         pgtype.Text        `db:"name"`
+	GoodAtShapes []string           `db:"good_at_shapes"`
+	GoodAtColors []string           `db:"good_at_colors"`
+	GoodAtStyles []string           `db:"good_at_styles"`
+	IsIntrovert  pgtype.Bool        `db:"is_introvert"`
+	CreatedAt    pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
 }
 
-type StylistRepository struct {
-	db *sqlx.DB
-}
+func (r *StylistRepository) GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (*GetStylistByStaffUserIDResponse, error) {
+	query := `
+		SELECT id,
+		name,
+		COALESCE(good_at_shapes, '{}'::text[]) AS good_at_shapes,
+		COALESCE(good_at_colors, '{}'::text[]) AS good_at_colors,
+		COALESCE(good_at_styles, '{}'::text[]) AS good_at_styles,
+		is_introvert,
+		created_at,
+		updated_at
+		FROM stylists
+		WHERE staff_user_id = $1
+	`
 
-func NewStylistRepository(db *sqlx.DB) *StylistRepository {
-	return &StylistRepository{db: db}
+	m := pgtype.NewMap()
+	row := r.db.QueryRowContext(ctx, query, staffUserID)
+
+	var result GetStylistByStaffUserIDResponse
+	err := row.Scan(
+		&result.ID,
+		&result.Name,
+		m.SQLScanner(&result.GoodAtShapes),
+		m.SQLScanner(&result.GoodAtColors),
+		m.SQLScanner(&result.GoodAtStyles),
+		&result.IsIntrovert,
+		&result.CreatedAt,
+		&result.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 // UpdateStylist updates stylist with dynamic fields

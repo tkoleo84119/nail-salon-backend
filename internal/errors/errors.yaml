@@ -235,7 +235,7 @@ STAFF:
     status: 403
   STAFF_NOT_FOUND:
     code: E3STA005
-    message: 使用者不存在
+    message: 員工帳號不存在
     status: 404
   STAFF_STORE_NOT_FOUND:
     code: E3STA006

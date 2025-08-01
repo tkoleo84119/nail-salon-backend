@@ -158,7 +158,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffCreate:            adminStaffService.NewCreateStaffService(database.Sqlx, repositories.SQLX),
 		StaffUpdate:            adminStaffService.NewUpdateStaffService(queries, database.Sqlx),
 		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(queries, repositories.SQLX),
-		StaffGet:               adminStaffService.NewGetStaffService(queries),
+		StaffGet:               adminStaffService.NewGetStaffService(repositories.SQLX),
 		StaffGetMe:             adminStaffService.NewGetMyStaffService(queries),
 		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.SQLX),
 		StaffGetStoreAccess:    adminStaffService.NewGetStaffStoreAccessService(queries),
