@@ -86,7 +86,6 @@ This document lists all API routes in the nail salon backend system, organized b
 | Method | Endpoint                              | Description               | Status        |
 | ------ | ------------------------------------- | ------------------------- | ------------- |
 | GET    | `/api/admin/stores/:storeId/stylists` | List all stylists         | ✅ Implemented |
-| POST   | `/api/admin/stylists/me`              | Create my stylist profile | ✅ Implemented |
 | PATCH  | `/api/admin/stylists/me`              | Update my stylist profile | ✅ Implemented |
 
 ### Schedule Management

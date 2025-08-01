@@ -159,7 +159,6 @@ func setupAdminStylistRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	stylists := admin.Group("/stylists")
 	{
 		// Self-service stylist operations
-		stylists.POST("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.Admin.StylistCreate.CreateMyStylist)
 		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.Admin.StylistUpdate.UpdateMyStylist)
 	}
 }

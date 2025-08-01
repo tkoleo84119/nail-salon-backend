@@ -57,7 +57,6 @@ type AdminServices struct {
 	ServiceUpdate  *adminServiceService.UpdateServiceService
 
 	// Stylist management services
-	StylistCreate  *adminStylistService.CreateMyStylistService
 	StylistUpdate  *adminStylistService.UpdateMyStylistService
 	StylistGetList adminStylistService.GetStylistListServiceInterface
 
@@ -118,7 +117,6 @@ type AdminHandlers struct {
 	ServiceUpdate  *adminServiceHandler.UpdateServiceHandler
 
 	// Stylist management handlers
-	StylistCreate  *adminStylistHandler.CreateMyStylistHandler
 	StylistUpdate  *adminStylistHandler.UpdateMyStylistHandler
 	StylistGetList *adminStylistHandler.GetStylistListHandler
 
@@ -180,7 +178,6 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.SQLX),
 
 		// Stylist management services
-		StylistCreate:  adminStylistService.NewCreateMyStylistService(queries),
 		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.SQLX),
 		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.SQLX),
 
@@ -243,7 +240,6 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ServiceUpdate:  adminServiceHandler.NewUpdateServiceHandler(services.ServiceUpdate),
 
 		// Stylist management handlers
-		StylistCreate:  adminStylistHandler.NewCreateMyStylistHandler(services.StylistCreate),
 		StylistUpdate:  adminStylistHandler.NewUpdateMyStylistHandler(services.StylistUpdate),
 		StylistGetList: adminStylistHandler.NewGetStylistListHandler(services.StylistGetList),
 
