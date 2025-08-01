@@ -14,11 +14,13 @@ import (
 )
 
 type StoreRepositoryInterface interface {
+	CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req CreateStoreTxParams) (int64, error)
 	GetAllByFilter(ctx context.Context, params GetAllByFilterParams) (int, []GetAllByFilterItem, error)
 	GetAll(ctx context.Context, isActive *bool) ([]GetAllItem, error)
 	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
 	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
+	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
 }
 
 type StoreRepository struct {
@@ -29,6 +31,36 @@ func NewStoreRepository(db *sqlx.DB) *StoreRepository {
 	return &StoreRepository{
 		db: db,
 	}
+}
+
+type CreateStoreTxParams struct {
+	ID      int64       `db:"id"`
+	Name    string      `db:"name"`
+	Address pgtype.Text `db:"address"`
+	Phone   pgtype.Text `db:"phone"`
+}
+
+// CreateStoreTx creates a new store in a transaction
+func (r *StoreRepository) CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req CreateStoreTxParams) (int64, error) {
+	query := `
+		INSERT INTO stores (id, name, address, phone)
+		VALUES (:id, :name, :address, :phone)
+		RETURNING id
+	`
+
+	var id int64
+	stmt, err := tx.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create store: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowxContext(ctx, req).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create store: %w", err)
+	}
+
+	return id, nil
 }
 
 type GetAllByFilterParams struct {
@@ -316,4 +348,21 @@ type GetStoreListModel struct {
 	Address  pgtype.Text `db:"address"`
 	Phone    pgtype.Text `db:"phone"`
 	IsActive pgtype.Bool `db:"is_active"`
+}
+
+func (r *StoreRepository) CheckNameExists(ctx context.Context, name string) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM stores
+			WHERE name = $1
+		)
+	`
+
+	var exists bool
+	if err := r.db.Get(&exists, query, name); err != nil {
+		return false, fmt.Errorf("failed to check name existence: %w", err)
+	}
+
+	return exists, nil
 }

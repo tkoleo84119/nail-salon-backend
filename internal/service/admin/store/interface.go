@@ -8,7 +8,7 @@ import (
 )
 
 type CreateStoreServiceInterface interface {
-	CreateStore(ctx context.Context, req adminStoreModel.CreateStoreRequest, staffContext common.StaffContext) (*adminStoreModel.CreateStoreResponse, error)
+	CreateStore(ctx context.Context, req adminStoreModel.CreateStoreRequest, staffId int64, role string) (*adminStoreModel.CreateStoreResponse, error)
 }
 
 type UpdateStoreServiceInterface interface {

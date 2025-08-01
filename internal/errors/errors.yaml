@@ -108,11 +108,11 @@ VAL:
     status: 400
   VAL_FIELD_TAIWAN_LANDLINE:
     code: E2031
-    message: "{field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX)"
+    message: "{field} 格式錯誤，請使用正確的台灣電話號碼格式 (02-12345678)"
     status: 400
   VAL_FIELD_TAIWAN_MOBILE:
     code: E2032
-    message: "{field} 格式錯誤，請使用正確的台灣手機號碼格式 (09XXXXXXXX)"
+    message: "{field} 格式錯誤，請使用正確的台灣手機號碼格式 (0912345678)"
     status: 400
 
   VAL_DUPLICATE_WORK_DATE:
@@ -265,7 +265,7 @@ STORE:
     status: 404
   STORE_ALREADY_EXISTS:
     code: E3STO003
-    message: 門市已存在
+    message: 門市已存在，請創建其他門市
     status: 409
 
 STYLIST:

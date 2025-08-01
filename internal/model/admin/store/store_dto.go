@@ -2,9 +2,9 @@ package adminStore
 
 // CreateStoreRequest represents the request to create a new store
 type CreateStoreRequest struct {
-	Name    string `json:"name" binding:"required,min=1,max=100"`
-	Address string `json:"address" binding:"omitempty,max=255"`
-	Phone   string `json:"phone" binding:"omitempty,taiwanlandline"`
+	Name    string  `json:"name" binding:"required,max=100"`
+	Address *string `json:"address,omitempty" binding:"omitempty,max=255"`
+	Phone   *string `json:"phone,omitempty" binding:"omitempty,max=20,taiwanlandline"`
 }
 
 // CreateStoreResponse represents the response after creating a store

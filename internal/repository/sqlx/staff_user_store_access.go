@@ -10,6 +10,7 @@ import (
 )
 
 type StaffUserStoreAccessRepositoryInterface interface {
+	CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) error
 	GetByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetByStaffIdItem, error)
 }
 
@@ -21,6 +22,33 @@ func NewStaffUserStoreAccessRepository(db *sqlx.DB) *StaffUserStoreAccessReposit
 	return &StaffUserStoreAccessRepository{
 		db: db,
 	}
+}
+
+type CreateStaffUserStoreAccessTxParams struct {
+	StoreID     int64 `db:"store_id"`
+	StaffUserID int64 `db:"staff_user_id"`
+}
+
+func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) (int64, error) {
+	query := `
+		INSERT INTO staff_user_store_access (store_id, staff_user_id)
+		VALUES (:store_id, :staff_user_id)
+		RETURNING id
+	`
+
+	var id int64
+	stmt, err := tx.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create staff user store access: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowxContext(ctx, req).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create staff user store access: %w", err)
+	}
+
+	return id, nil
 }
 
 type GetByStaffIdItem struct {

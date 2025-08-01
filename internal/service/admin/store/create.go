@@ -3,42 +3,35 @@ package adminStore
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jmoiron/sqlx"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type CreateStoreService struct {
-	queries dbgen.Querier
-	db      *pgxpool.Pool
+	db   *sqlx.DB
+	repo *sqlxRepo.Repositories
 }
 
-func NewCreateStoreService(queries dbgen.Querier, db *pgxpool.Pool) *CreateStoreService {
+func NewCreateStoreService(db *sqlx.DB, repo *sqlxRepo.Repositories) *CreateStoreService {
 	return &CreateStoreService{
-		queries: queries,
-		db:      db,
+		db:   db,
+		repo: repo,
 	}
 }
 
-func (s *CreateStoreService) CreateStore(ctx context.Context, req adminStoreModel.CreateStoreRequest, staffContext common.StaffContext) (*adminStoreModel.CreateStoreResponse, error) {
-	// Parse staff user ID
-	staffUserID, err := utils.ParseID(staffContext.UserID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
-	}
-
+func (s *CreateStoreService) CreateStore(ctx context.Context, req adminStoreModel.CreateStoreRequest, staffId int64, role string) (*adminStoreModel.CreateStoreResponse, error) {
 	// Validate role permissions (only SUPER_ADMIN and ADMIN can create stores)
-	if staffContext.Role != adminStaffModel.RoleSuperAdmin && staffContext.Role != adminStaffModel.RoleAdmin {
+	if role != adminStaffModel.RoleSuperAdmin && role != adminStaffModel.RoleAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	// Check if store name already exists
-	nameExists, err := s.queries.CheckStoreNameExists(ctx, req.Name)
+	nameExists, err := s.repo.Store.CheckNameExists(ctx, req.Name)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name existence", err)
 	}
@@ -50,30 +43,28 @@ func (s *CreateStoreService) CreateStore(ctx context.Context, req adminStoreMode
 	storeID := utils.GenerateID()
 
 	// Begin transaction
-	tx, err := s.db.Begin(ctx)
+	tx, err := s.db.Beginx()
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
 	}
-	defer tx.Rollback(ctx)
-
-	qtx := dbgen.New(tx)
+	defer tx.Rollback()
 
 	// Create store
-	createdStore, err := qtx.CreateStore(ctx, dbgen.CreateStoreParams{
+	_, err = s.repo.Store.CreateStoreTx(ctx, tx, sqlxRepo.CreateStoreTxParams{
 		ID:      storeID,
 		Name:    req.Name,
-		Address: utils.StringPtrToPgText(&req.Address, false),
-		Phone:   utils.StringPtrToPgText(&req.Phone, false),
+		Address: utils.StringPtrToPgText(req.Address, true),
+		Phone:   utils.StringPtrToPgText(req.Phone, true),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store", err)
 	}
 
 	// If creator is ADMIN, automatically grant store access
-	if staffContext.Role == adminStaffModel.RoleAdmin {
-		err = qtx.CreateStaffUserStoreAccess(ctx, dbgen.CreateStaffUserStoreAccessParams{
+	if role == adminStaffModel.RoleAdmin {
+		_, err = s.repo.StaffUserStoreAccess.CreateStaffUserStoreAccessTx(ctx, tx, sqlxRepo.CreateStaffUserStoreAccessTxParams{
 			StoreID:     storeID,
-			StaffUserID: staffUserID,
+			StaffUserID: staffId,
 		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store access", err)
@@ -81,15 +72,15 @@ func (s *CreateStoreService) CreateStore(ctx context.Context, req adminStoreMode
 	}
 
 	// Commit transaction
-	if err := tx.Commit(ctx); err != nil {
+	if err := tx.Commit(); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
 	return &adminStoreModel.CreateStoreResponse{
-		ID:       utils.FormatID(createdStore.ID),
-		Name:     createdStore.Name,
-		Address:  createdStore.Address.String,
-		Phone:    createdStore.Phone.String,
-		IsActive: createdStore.IsActive.Bool,
+		ID:       utils.FormatID(storeID),
+		Name:     req.Name,
+		Address:  utils.PgTextToString(utils.StringPtrToPgText(req.Address, true)),
+		Phone:    utils.PgTextToString(utils.StringPtrToPgText(req.Phone, true)),
+		IsActive: true,
 	}, nil
 }
