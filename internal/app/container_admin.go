@@ -169,7 +169,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Store management services
 		StoreGetList: adminStoreService.NewGetStoreListService(repositories.SQLX),
-		StoreGet:     adminStoreService.NewGetStoreService(queries),
+		StoreGet:     adminStoreService.NewGetStoreService(repositories.SQLX),
 		StoreCreate:  adminStoreService.NewCreateStoreService(database.Sqlx, repositories.SQLX),
 		StoreUpdate:  adminStoreService.NewUpdateStoreService(queries, repositories.SQLX),
 

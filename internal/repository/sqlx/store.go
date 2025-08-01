@@ -17,6 +17,7 @@ type StoreRepositoryInterface interface {
 	CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req CreateStoreTxParams) (int64, error)
 	GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error)
 	GetAllStore(ctx context.Context, isActive *bool) ([]GetAllStoreItem, error)
+	GetStore(ctx context.Context, storeID int64) (GetStoreResponse, error)
 	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
 	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
@@ -199,6 +200,32 @@ func (r *StoreRepository) GetAllStore(ctx context.Context, isActive *bool) ([]Ge
 	}
 
 	return results, nil
+}
+
+type GetStoreResponse struct {
+	ID        int64              `db:"id"`
+	Name      string             `db:"name"`
+	Address   pgtype.Text        `db:"address"`
+	Phone     pgtype.Text        `db:"phone"`
+	IsActive  pgtype.Bool        `db:"is_active"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (r *StoreRepository) GetStore(ctx context.Context, storeID int64) (GetStoreResponse, error) {
+	query := `
+		SELECT id, name, address, phone, is_active, created_at, updated_at
+		FROM stores
+		WHERE id = $1
+	`
+
+	var result GetStoreResponse
+	err := r.db.GetContext(ctx, &result, query, storeID)
+	if err != nil {
+		return GetStoreResponse{}, fmt.Errorf("failed to get store: %w", err)
+	}
+
+	return result, nil
 }
 
 func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error) {

@@ -1,6 +1,6 @@
 ## User Story
 
-作為管理員，我希望可以查詢單一門市的詳細資料，以便進行設定與後台管理。
+作為員工，我希望可以查詢單一門市的詳細資料，以便進行設定與後台管理。
 
 ---
 
@@ -12,14 +12,14 @@
 
 ## 說明
 
-- 僅限 `admin` 以上角色使用。
 - 查詢特定門市的完整資訊。
 
 ---
 
 ## 權限
 
-- 僅限 `admin` 以上角色 (`SUPER_ADMIN`, `ADMIN`)。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -27,7 +27,8 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameter
 
@@ -48,26 +49,55 @@ Authorization: Bearer <access_token>
     "name": "大安旗艦店",
     "address": "台北市大安區復興南路一段100號",
     "phone": "02-1234-5678",
-    "isActive": true
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```
 
-### 失敗
+
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                             |
+| ------ | -------- | -------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入   |
+| 401    | E1003    | accessToken 缺失，請重新登入     |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入 |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入 |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入 |
+| 400    | E2004    | 參數類型轉換失敗                 |
+| 400    | E2020    | {field} 為必填項目               |
+| 404    | E3STO002 | 門市不存在或已被刪除             |
+| 500    | E9001    | 系統發生錯誤，請稍後再試         |
+| 500    | E9002    | 資料庫操作失敗                   |
+
+#### 400 Bad Request - 輸入驗證失敗
+
+```json
+{
+  "errors": [
+    {
+      "code": "E2004",
+      "message": "storeId 類型轉換失敗",
+      "field": "storeId"
+    }
+  ]
+}
+```
 
 #### 401 Unauthorized - 未登入/Token失效
 
 ```json
 {
-  "message": "無效的 accessToken"
-}
-```
-
-#### 403 Forbidden - 權限不足
-
-```json
-{
-  "message": "無權限存取此資源"
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
@@ -75,7 +105,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "查無此門市"
+  "errors": [
+    {
+      "code": "E3STO002",
+      "message": "門市不存在或已被刪除"
+    }
+  ]
 }
 ```
 
@@ -83,7 +118,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 

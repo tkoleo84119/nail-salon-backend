@@ -20,5 +20,5 @@ type GetStoreListServiceInterface interface {
 }
 
 type GetStoreServiceInterface interface {
-	GetStore(ctx context.Context, storeID string) (*adminStoreModel.GetStoreResponse, error)
+	GetStore(ctx context.Context, storeID int64) (*adminStoreModel.GetStoreResponse, error)
 }

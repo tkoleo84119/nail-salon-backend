@@ -8,43 +8,39 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetStoreService struct {
-	queries *dbgen.Queries
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetStoreService(queries *dbgen.Queries) *GetStoreService {
+func NewGetStoreService(repo *sqlxRepo.Repositories) *GetStoreService {
 	return &GetStoreService{
-		queries: queries,
+		repo: repo,
 	}
 }
 
-func (s *GetStoreService) GetStore(ctx context.Context, storeID string) (*adminStoreModel.GetStoreResponse, error) {
-	// Parse store ID
-	storeIDInt, err := utils.ParseID(storeID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
-	}
-
+func (s *GetStoreService) GetStore(ctx context.Context, storeID int64) (*adminStoreModel.GetStoreResponse, error) {
 	// Get store information
-	store, err := s.queries.GetStoreDetailByID(ctx, storeIDInt)
+	store, err := s.repo.Store.GetStore(ctx, storeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get store", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get store", err)
 	}
 
 	// Build response
 	response := &adminStoreModel.GetStoreResponse{
-		ID:       utils.FormatID(store.ID),
-		Name:     store.Name,
-		Address:  store.Address.String,
-		Phone:    store.Phone.String,
-		IsActive: store.IsActive.Bool,
+		ID:        utils.FormatID(store.ID),
+		Name:      store.Name,
+		Address:   utils.PgTextToString(store.Address),
+		Phone:     utils.PgTextToString(store.Phone),
+		IsActive:  utils.PgBoolToBool(store.IsActive),
+		CreatedAt: utils.PgTimestamptzToTimeString(store.CreatedAt),
+		UpdatedAt: utils.PgTimestamptzToTimeString(store.UpdatedAt),
 	}
 
 	return response, nil

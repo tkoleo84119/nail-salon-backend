@@ -42,7 +42,7 @@ func (h *CreateStoreHandler) CreateStore(c *gin.Context) {
 	staffId, err := utils.ParseID(staffContext.UserID)
 	if err != nil {
 		// if staffId can't be parsed, it means the staffId is invalid
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffId": "staffId 類型轉換失敗"})
 		return
 	}
 

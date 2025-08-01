@@ -80,9 +80,11 @@ type StoreListItemDTO struct {
 
 // GetStoreResponse represents the response for a specific store
 type GetStoreResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Address  string `json:"address"`
-	Phone    string `json:"phone"`
-	IsActive bool   `json:"isActive"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	Phone     string `json:"phone"`
+	IsActive  bool   `json:"isActive"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
