@@ -14,8 +14,8 @@ import (
 
 // StaffUserRepositoryInterface defines the interface for staff user repository
 type StaffUserRepositoryInterface interface {
-	GetByUsername(ctx context.Context, username string) (*GetByUsernameResponse, error)
-	GetByID(ctx context.Context, id int64) (*GetByIDResponse, error)
+	GetStaffUserByUsername(ctx context.Context, username string) (*GetStaffUserByUsernameResponse, error)
+	GetStaffUserByID(ctx context.Context, id int64) (*GetStaffUserByIDResponse, error)
 	UpdateStaffUser(ctx context.Context, id int64, req adminStaffModel.UpdateStaffRequest) (*adminStaffModel.UpdateStaffResponse, error)
 	UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error)
 	GetStaffList(ctx context.Context, req adminStaffModel.GetStaffListRequest) (*adminStaffModel.GetStaffListResponse, error)
@@ -31,7 +31,7 @@ func NewStaffUserRepository(db *sqlx.DB) *StaffUserRepository {
 	}
 }
 
-type GetByUsernameResponse struct {
+type GetStaffUserByUsernameResponse struct {
 	ID           int64       `db:"id"`
 	Username     string      `db:"username"`
 	Email        string      `db:"email"`
@@ -41,14 +41,14 @@ type GetByUsernameResponse struct {
 }
 
 // GetByUsername retrieves staff user by username
-func (r *StaffUserRepository) GetByUsername(ctx context.Context, username string) (*GetByUsernameResponse, error) {
+func (r *StaffUserRepository) GetStaffUserByUsername(ctx context.Context, username string) (*GetStaffUserByUsernameResponse, error) {
 	query := `
 		SELECT id, username, email, password_hash, role, is_active
 		FROM staff_users
 		WHERE username = $1
 	`
 
-	var result GetByUsernameResponse
+	var result GetStaffUserByUsernameResponse
 	err := r.db.GetContext(ctx, &result, query, username)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (r *StaffUserRepository) GetByUsername(ctx context.Context, username string
 	return &result, nil
 }
 
-type GetByIDResponse struct {
+type GetStaffUserByIDResponse struct {
 	ID           int64       `db:"id"`
 	Username     string      `db:"username"`
 	Email        string      `db:"email"`
@@ -67,14 +67,14 @@ type GetByIDResponse struct {
 }
 
 // GetByID retrieves staff user by ID
-func (r *StaffUserRepository) GetByID(ctx context.Context, id int64) (*GetByIDResponse, error) {
+func (r *StaffUserRepository) GetStaffUserByID(ctx context.Context, id int64) (*GetStaffUserByIDResponse, error) {
 	query := `
 		SELECT id, username, email, password_hash, role, is_active
 		FROM staff_users
 		WHERE id = $1
 	`
 
-	var result GetByIDResponse
+	var result GetStaffUserByIDResponse
 	err := r.db.GetContext(ctx, &result, query, id)
 	if err != nil {
 		return nil, err

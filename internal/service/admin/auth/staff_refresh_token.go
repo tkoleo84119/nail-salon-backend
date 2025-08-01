@@ -27,7 +27,7 @@ func NewStaffRefreshTokenService(repo *sqlxRepo.Repositories, jwtConfig config.J
 
 func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req adminAuthModel.StaffRefreshTokenRequest) (*adminAuthModel.StaffRefreshTokenResponse, error) {
 	// Validate refresh token exists and is not revoked/expired
-	refreshTokenInfo, err := s.repo.StaffUserTokens.GetValid(ctx, req.RefreshToken)
+	refreshTokenInfo, err := s.repo.StaffUserTokens.GetStaffUserTokenValid(ctx, req.RefreshToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthRefreshTokenInvalid)
@@ -36,7 +36,7 @@ func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req ad
 	}
 
 	// Get staff user information to rebuild JWT claims
-	staffUser, err := s.repo.Staff.GetByID(ctx, refreshTokenInfo.StaffUserID)
+	staffUser, err := s.repo.Staff.GetStaffUserByID(ctx, refreshTokenInfo.StaffUserID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get staff user", err)
 	}
@@ -57,17 +57,23 @@ func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req ad
 	return &adminAuthModel.StaffRefreshTokenResponse{
 		AccessToken: accessToken,
 		ExpiresIn:   s.jwtConfig.ExpiryHours * 3600,
+		User: adminAuthModel.User{
+			ID:        utils.FormatID(staffUser.ID),
+			Username:  staffUser.Username,
+			Role:      staffUser.Role,
+			StoreList: storeList,
+		},
 	}, nil
 }
 
 // getStoreAccess is a helper method to get store access based on staff role
-func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetByIDResponse) ([]common.Store, error) {
+func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetStaffUserByIDResponse) ([]common.Store, error) {
 	var storeList []common.Store
 
 	switch staffUser.Role {
 	case common.RoleSuperAdmin:
 		// Super admin has access to all active stores
-		stores, err := s.repo.Store.GetAll(ctx, nil)
+		stores, err := s.repo.Store.GetAllStore(ctx, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +85,7 @@ func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser
 		}
 	case common.RoleAdmin, common.RoleManager, common.RoleStylist:
 		// Other roles have access based on store access table
-		storeAccess, err := s.repo.StaffUserStoreAccess.GetByStaffId(ctx, staffUser.ID, nil)
+		storeAccess, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, staffUser.ID, nil)
 		if err != nil {
 			return nil, err
 		}

@@ -54,6 +54,7 @@ type StaffRefreshTokenRequest struct {
 type StaffRefreshTokenResponse struct {
 	AccessToken string `json:"accessToken"`
 	ExpiresIn   int    `json:"expiresIn"`
+	User        User   `json:"user"`
 }
 
 // -------------------------------------------------------------------------------------

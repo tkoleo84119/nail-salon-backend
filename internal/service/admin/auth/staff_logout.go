@@ -24,7 +24,7 @@ func NewStaffLogoutService(repo *sqlxRepo.Repositories) StaffLogoutServiceInterf
 
 // StaffLogout revokes the refresh token and always returns success
 func (s *StaffLogoutService) StaffLogout(ctx context.Context, req adminAuthModel.StaffLogoutRequest) (*adminAuthModel.StaffLogoutResponse, error) {
-	_ = s.repo.StaffUserTokens.Revoke(ctx, req.RefreshToken)
+	_ = s.repo.StaffUserTokens.RevokeStaffUserToken(ctx, req.RefreshToken)
 
 	return &adminAuthModel.StaffLogoutResponse{
 		Success: true,

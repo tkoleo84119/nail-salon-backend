@@ -12,7 +12,7 @@
 
 ## 說明
 
-- 員工提供 `refreshToken`，若有效則簽發新的 `accessToken`。
+- 員工提供 `refreshToken`，若有效則簽發新的 `accessToken` 與 `user` 資料。
 - 此為後台管理端使用，與前台顧客端獨立。
 
 ---
@@ -52,7 +52,18 @@
 ```json
 {
   "accessToken": "new_access_token",
-  "expiresIn": 3600
+  "expiresIn": 3600,
+  "user": {
+    "id": "139842394",
+    "username": "admin001",
+    "role": "ADMIN",
+    "storeList": [
+      {
+        "id": "1",
+        "name": "門市1"
+      }
+    ]
+  }
 }
 ```
 

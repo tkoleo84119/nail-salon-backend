@@ -20,7 +20,7 @@ func NewGetStoreListService(repo *sqlxRepo.Repositories) *GetStoreListService {
 }
 
 func (s *GetStoreListService) GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListParsedRequest) (*adminStoreModel.GetStoreListResponse, error) {
-	total, items, err := s.repo.Store.GetAllByFilter(ctx, sqlxRepo.GetAllByFilterParams{
+	total, items, err := s.repo.Store.GetAllStoreByFilter(ctx, sqlxRepo.GetAllStoreByFilterParams{
 		Name:     req.Name,
 		IsActive: req.IsActive,
 		Limit:    &req.Limit,

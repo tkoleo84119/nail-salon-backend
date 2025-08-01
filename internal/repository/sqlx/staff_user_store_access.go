@@ -11,7 +11,7 @@ import (
 
 type StaffUserStoreAccessRepositoryInterface interface {
 	CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) error
-	GetByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetByStaffIdItem, error)
+	GetStaffUserStoreAccessByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetStaffUserStoreAccessByStaffIdItem, error)
 }
 
 type StaffUserStoreAccessRepository struct {
@@ -51,7 +51,7 @@ func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccessTx(ctx contex
 	return id, nil
 }
 
-type GetByStaffIdItem struct {
+type GetStaffUserStoreAccessByStaffIdItem struct {
 	StoreID  int64       `db:"store_id"`
 	Name     string      `db:"name"`
 	Address  pgtype.Text `db:"address"`
@@ -59,7 +59,7 @@ type GetByStaffIdItem struct {
 	IsActive pgtype.Bool `db:"is_active"`
 }
 
-func (r *StaffUserStoreAccessRepository) GetByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetByStaffIdItem, error) {
+func (r *StaffUserStoreAccessRepository) GetStaffUserStoreAccessByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetStaffUserStoreAccessByStaffIdItem, error) {
 	whereParts := []string{"sc.staff_user_id = $1"}
 	args := []interface{}{staffId}
 
@@ -75,7 +75,7 @@ func (r *StaffUserStoreAccessRepository) GetByStaffId(ctx context.Context, staff
 		WHERE %s
 	`, strings.Join(whereParts, " AND "))
 
-	var results []GetByStaffIdItem
+	var results []GetStaffUserStoreAccessByStaffIdItem
 	err := r.db.SelectContext(ctx, &results, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)

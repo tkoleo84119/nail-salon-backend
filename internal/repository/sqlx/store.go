@@ -15,8 +15,8 @@ import (
 
 type StoreRepositoryInterface interface {
 	CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req CreateStoreTxParams) (int64, error)
-	GetAllByFilter(ctx context.Context, params GetAllByFilterParams) (int, []GetAllByFilterItem, error)
-	GetAll(ctx context.Context, isActive *bool) ([]GetAllItem, error)
+	GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error)
+	GetAllStore(ctx context.Context, isActive *bool) ([]GetAllStoreItem, error)
 	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest) (*adminStoreModel.UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
 	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
@@ -63,7 +63,7 @@ func (r *StoreRepository) CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req Cr
 	return id, nil
 }
 
-type GetAllByFilterParams struct {
+type GetAllStoreByFilterParams struct {
 	Name     *string
 	IsActive *bool
 	Limit    *int
@@ -71,7 +71,7 @@ type GetAllByFilterParams struct {
 	Sort     *[]string
 }
 
-type GetAllByFilterItem struct {
+type GetAllStoreByFilterItem struct {
 	ID        int64              `db:"id"`
 	Name      string             `db:"name"`
 	Address   pgtype.Text        `db:"address"`
@@ -82,7 +82,7 @@ type GetAllByFilterItem struct {
 }
 
 // GetAllByFilter retrieves all stores, can filter by name and is_active
-func (r *StoreRepository) GetAllByFilter(ctx context.Context, params GetAllByFilterParams) (int, []GetAllByFilterItem, error) {
+func (r *StoreRepository) GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error) {
 	// Set default pagination values
 	limit := 20
 	offset := 0
@@ -145,7 +145,7 @@ func (r *StoreRepository) GetAllByFilter(ctx context.Context, params GetAllByFil
 		LIMIT :limit OFFSET :offset
 	`, whereClause, sort)
 
-	var results []GetAllByFilterItem
+	var results []GetAllStoreByFilterItem
 	rows, err = r.db.NamedQueryContext(ctx, query, args)
 	if err != nil {
 		return 0, nil, fmt.Errorf("failed to execute query: %w", err)
@@ -153,7 +153,7 @@ func (r *StoreRepository) GetAllByFilter(ctx context.Context, params GetAllByFil
 	defer rows.Close()
 
 	for rows.Next() {
-		var item GetAllByFilterItem
+		var item GetAllStoreByFilterItem
 		if err := rows.StructScan(&item); err != nil {
 			return 0, nil, fmt.Errorf("failed to scan row: %w", err)
 		}
@@ -163,7 +163,7 @@ func (r *StoreRepository) GetAllByFilter(ctx context.Context, params GetAllByFil
 	return total, results, nil
 }
 
-type GetAllItem struct {
+type GetAllStoreItem struct {
 	ID       int64       `db:"id"`
 	Name     string      `db:"name"`
 	Address  pgtype.Text `db:"address"`
@@ -172,7 +172,7 @@ type GetAllItem struct {
 }
 
 // GetAll retrieves all stores, can filter by is_active
-func (r *StoreRepository) GetAll(ctx context.Context, isActive *bool) ([]GetAllItem, error) {
+func (r *StoreRepository) GetAllStore(ctx context.Context, isActive *bool) ([]GetAllStoreItem, error) {
 	whereParts := []string{}
 	args := []interface{}{}
 
@@ -192,7 +192,7 @@ func (r *StoreRepository) GetAll(ctx context.Context, isActive *bool) ([]GetAllI
 		%s
 	`, whereClause)
 
-	var results []GetAllItem
+	var results []GetAllStoreItem
 	err := r.db.SelectContext(ctx, &results, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)

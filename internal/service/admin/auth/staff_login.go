@@ -26,7 +26,7 @@ func NewStaffLoginService(repo *sqlxRepo.Repositories, jwtConfig config.JWTConfi
 }
 
 func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.StaffLoginRequest, loginCtx adminAuthModel.StaffLoginContext) (*adminAuthModel.StaffLoginResponse, error) {
-	staffUser, err := s.repo.Staff.GetByUsername(ctx, req.Username)
+	staffUser, err := s.repo.Staff.GetStaffUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
@@ -82,12 +82,12 @@ func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.S
 }
 
 // getStoreAccess retrieves store access based on user role
-func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetByUsernameResponse) ([]common.Store, error) {
+func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetStaffUserByUsernameResponse) ([]common.Store, error) {
 	var storeList []common.Store
 
 	// SUPER_ADMIN can access all stores
 	if staffUser.Role == common.RoleSuperAdmin {
-		stores, err := s.repo.Store.GetAll(ctx, nil)
+		stores, err := s.repo.Store.GetAllStore(ctx, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +99,7 @@ func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser *sqlxR
 		}
 	} else {
 		// Get specific store access for other roles
-		storeAccess, err := s.repo.StaffUserStoreAccess.GetByStaffId(ctx, staffUser.ID, nil)
+		storeAccess, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, staffUser.ID, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +124,7 @@ func (s *StaffLoginService) storeRefreshToken(ctx context.Context, tokenInfo adm
 		}
 	}
 
-	_, err := s.repo.StaffUserTokens.Create(ctx, sqlxRepo.CreateParams{
+	_, err := s.repo.StaffUserTokens.CreateStaffUserToken(ctx, sqlxRepo.CreateStaffUserTokenParams{
 		ID:           utils.GenerateID(),
 		StaffUserID:  tokenInfo.StaffUserID,
 		RefreshToken: tokenInfo.RefreshToken,

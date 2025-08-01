@@ -9,10 +9,10 @@ import (
 )
 
 type StaffUserTokensRepositoryInterface interface {
-	Create(ctx context.Context, params CreateParams) (int64, error)
-	CheckValid(ctx context.Context, refreshToken string) (bool, error)
-	GetValid(ctx context.Context, refreshToken string) (*GetValidResponse, error)
-	Revoke(ctx context.Context, refreshToken string) error
+	CreateStaffUserToken(ctx context.Context, params CreateStaffUserTokenParams) (int64, error)
+	CheckStaffUserTokenValid(ctx context.Context, refreshToken string) (bool, error)
+	GetStaffUserTokenValid(ctx context.Context, refreshToken string) (*GetStaffUserTokenValidResponse, error)
+	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
 }
 
 type StaffUserTokensRepository struct {
@@ -25,7 +25,7 @@ func NewStaffUserTokensRepository(db *sqlx.DB) *StaffUserTokensRepository {
 	}
 }
 
-type CreateParams struct {
+type CreateStaffUserTokenParams struct {
 	ID           int64              `db:"id"`
 	StaffUserID  int64              `db:"staff_user_id"`
 	RefreshToken string             `db:"refresh_token"`
@@ -34,7 +34,7 @@ type CreateParams struct {
 	ExpiredAt    pgtype.Timestamptz `db:"expired_at"`
 }
 
-func (r *StaffUserTokensRepository) Create(ctx context.Context, params CreateParams) (int64, error) {
+func (r *StaffUserTokensRepository) CreateStaffUserToken(ctx context.Context, params CreateStaffUserTokenParams) (int64, error) {
 	query := `
 		INSERT INTO staff_user_tokens (id, staff_user_id, refresh_token, user_agent, ip_address, expired_at)
 		VALUES (:id, :staff_user_id, :refresh_token, :user_agent, :ip_address, :expired_at)
@@ -55,7 +55,7 @@ func (r *StaffUserTokensRepository) Create(ctx context.Context, params CreatePar
 	return id, nil
 }
 
-func (r *StaffUserTokensRepository) CheckValid(ctx context.Context, refreshToken string) (bool, error) {
+func (r *StaffUserTokensRepository) CheckStaffUserTokenValid(ctx context.Context, refreshToken string) (bool, error) {
 	query := `
 		SELECT EXISTS(
 			SELECT 1 FROM staff_user_tokens WHERE refresh_token = $1 AND expired_at > NOW() AND is_revoked = false
@@ -70,21 +70,21 @@ func (r *StaffUserTokensRepository) CheckValid(ctx context.Context, refreshToken
 	return valid, nil
 }
 
-type GetValidResponse struct {
+type GetStaffUserTokenValidResponse struct {
 	ID          int64              `db:"id"`
 	StaffUserID int64              `db:"staff_user_id"`
 	ExpiredAt   pgtype.Timestamptz `db:"expired_at"`
 	IsRevoked   pgtype.Bool        `db:"is_revoked"`
 }
 
-func (r *StaffUserTokensRepository) GetValid(ctx context.Context, refreshToken string) (*GetValidResponse, error) {
+func (r *StaffUserTokensRepository) GetStaffUserTokenValid(ctx context.Context, refreshToken string) (*GetStaffUserTokenValidResponse, error) {
 	query := `
 		SELECT id, staff_user_id, expired_at, is_revoked
 		FROM staff_user_tokens
 		WHERE refresh_token = $1 AND expired_at > NOW() AND is_revoked = false
 	`
 
-	var result GetValidResponse
+	var result GetStaffUserTokenValidResponse
 	err := r.db.GetContext(ctx, &result, query, refreshToken)
 	if err != nil {
 		return nil, fmt.Errorf("get valid failed: %w", err)
@@ -93,7 +93,7 @@ func (r *StaffUserTokensRepository) GetValid(ctx context.Context, refreshToken s
 }
 
 // Revoke revokes a refresh token by setting is_revoked = true
-func (r *StaffUserTokensRepository) Revoke(ctx context.Context, refreshToken string) error {
+func (r *StaffUserTokensRepository) RevokeStaffUserToken(ctx context.Context, refreshToken string) error {
 	query := `
 		UPDATE staff_user_tokens
 		SET is_revoked = true, updated_at = NOW()
