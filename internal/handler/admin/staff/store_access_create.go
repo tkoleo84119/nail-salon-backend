@@ -17,24 +17,31 @@ type CreateStoreAccessHandler struct {
 }
 
 func NewCreateStoreAccessHandler(service adminStaffService.CreateStoreAccessServiceInterface) *CreateStoreAccessHandler {
-	return &CreateStoreAccessHandler{service: service}
+	return &CreateStoreAccessHandler{
+		service: service,
+	}
 }
 
 func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
+	// Get target staff ID from path parameter
+	staffID := c.Param("staffId")
+	if staffID == "" {
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
+			"staffId": "staffId為必填項目",
+		})
+		return
+	}
+	parsedStaffID, err := utils.ParseID(staffID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "staffUserId 類型轉換失敗"})
+		return
+	}
+
 	// Parse and validate request
 	var req adminStaffModel.CreateStoreAccessRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
-		return
-	}
-
-	// Get target staff ID from path parameter
-	targetID := c.Param("staffId")
-	if targetID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
-			"staffId": "staffId為必填項目",
-		})
 		return
 	}
 
@@ -47,7 +54,7 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	// Convert UserID to int64
 	creatorID, err := utils.ParseID(staffContext.UserID)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "staffUserId 類型轉換失敗"})
 		return
 	}
 
@@ -56,14 +63,14 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	for _, store := range staffContext.StoreList {
 		storeID, err := utils.ParseID(store.ID)
 		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
 			return
 		}
 		creatorStoreIDs = append(creatorStoreIDs, storeID)
 	}
 
 	// Call service
-	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), targetID, req, creatorID, staffContext.Role, creatorStoreIDs)
+	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), parsedStaffID, req, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

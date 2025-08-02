@@ -17,6 +17,7 @@ type StoreRepositoryInterface interface {
 	CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req CreateStoreTxParams) (int64, error)
 	GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error)
 	GetAllStore(ctx context.Context, isActive *bool) ([]GetAllStoreItem, error)
+	GetStoreByID(ctx context.Context, storeID int64, isActive *bool) (GetStoreResponse, error)
 	GetStore(ctx context.Context, storeID int64) (GetStoreResponse, error)
 	UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
@@ -228,6 +229,34 @@ func (r *StoreRepository) GetStore(ctx context.Context, storeID int64) (GetStore
 	}
 
 	return result, nil
+}
+
+func (r *StoreRepository) GetStoreByID(ctx context.Context, storeID int64, isActive *bool) (*GetStoreResponse, error) {
+	whereParts := []string{
+		"id = $1",
+	}
+	args := []interface{}{
+		storeID,
+	}
+
+	if isActive != nil {
+		whereParts = append(whereParts, "is_active = $2")
+		args = append(args, isActive)
+	}
+
+	query := fmt.Sprintf(`
+		SELECT id, name, address, phone, is_active, created_at, updated_at
+		FROM stores
+		WHERE %s
+	`, strings.Join(whereParts, " AND "))
+
+	var result GetStoreResponse
+	err := r.db.GetContext(ctx, &result, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get store: %w", err)
+	}
+
+	return &result, nil
 }
 
 type UpdateStoreParams struct {

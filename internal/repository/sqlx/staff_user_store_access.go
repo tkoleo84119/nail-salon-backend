@@ -11,8 +11,10 @@ import (
 
 type StaffUserStoreAccessRepositoryInterface interface {
 	CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) error
+	CreateStaffUserStoreAccess(ctx context.Context, req CreateStaffUserStoreAccessTxParams) (int64, error)
 	BatchCreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, params []CreateStaffUserStoreAccessTxParams) error
 	GetStaffUserStoreAccessByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetStaffUserStoreAccessByStaffIdItem, error)
+	CheckStoreAccessExists(ctx context.Context, staffUserID int64, storeID int64) (bool, error)
 }
 
 type StaffUserStoreAccessRepository struct {
@@ -47,6 +49,28 @@ func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccessTx(ctx contex
 	err = stmt.QueryRowxContext(ctx, req).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create staff user store access: %w", err)
+	}
+
+	return id, nil
+}
+
+func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccess(ctx context.Context, req CreateStaffUserStoreAccessTxParams) (int64, error) {
+	query := `
+		INSERT INTO staff_user_store_access (store_id, staff_user_id)
+		VALUES (:store_id, :staff_user_id)
+		RETURNING id
+	`
+
+	var id int64
+	stmt, err := r.db.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create staff user store access: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowxContext(ctx, req).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create store: %w", err)
 	}
 
 	return id, nil
@@ -121,4 +145,20 @@ func (r *StaffUserStoreAccessRepository) GetStaffUserStoreAccessByStaffId(ctx co
 	}
 
 	return results, nil
+}
+
+func (r *StaffUserStoreAccessRepository) CheckStoreAccessExists(ctx context.Context, staffUserID int64, storeID int64) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1 FROM staff_user_store_access WHERE staff_user_id = $1 AND store_id = $2
+		)
+	`
+
+	var exists bool
+	err := r.db.GetContext(ctx, &exists, query, staffUserID, storeID)
+	if err != nil {
+		return false, fmt.Errorf("failed to check store access existence: %w", err)
+	}
+
+	return exists, nil
 }
