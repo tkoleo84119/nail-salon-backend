@@ -116,11 +116,14 @@ type StaffListItemDTO struct {
 
 // GetMyStaffResponse represents the response for current staff member's information
 type GetMyStaffResponse struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	IsActive bool   `json:"isActive"`
+	ID        string            `json:"id"`
+	Username  string            `json:"username"`
+	Email     string            `json:"email"`
+	Role      string            `json:"role"`
+	IsActive  bool              `json:"isActive"`
+	CreatedAt string            `json:"createdAt"`
+	UpdatedAt string            `json:"updatedAt"`
+	Stylist   *StaffStylistInfo `json:"stylist,omitempty"`
 }
 
 // -------------------------------------------------------------------------------------

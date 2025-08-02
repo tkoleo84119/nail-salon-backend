@@ -13,14 +13,14 @@
 ## 說明
 
 - 提供當前登入員工自己的基本資料。
-- 用於顯示後台帳號資訊（如個人資料設定頁）。
-- 根據 JWT 中的 `staff_user_id` 載入對應資料。
+- 若該員工同時為美甲師（`stylists.staff_user_id`），則一併回傳 stylist 資訊。
+- 根據 JWT 中的 `staff_user_id` 查詢對應資料。
 
 ---
 
 ## 權限
 
-- 任一登入後的員工皆可使用（需 JWT 驗證）。
+- 需要登入才可使用。
 
 ---
 
@@ -28,7 +28,8 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ---
 
@@ -39,22 +40,64 @@ Authorization: Bearer <access_token>
 ```json
 {
   "data": {
-    "id": "6000000001",
-    "username": "admin01",
-    "email": "admin01@example.com",
-    "role": "ADMIN",
-    "isActive": true
+    "id": "6000000002",
+    "username": "stylist88",
+    "email": "s88@salon.com",
+    "role": "STYLIST",
+    "isActive": true,
+    "createdAt": "2025-06-01T08:00:00+08:00",
+    "updatedAt": "2025-06-01T08:00:00+08:00",
+    "stylist": {
+      "id": "7000000001",
+      "name": "Bella",
+      "goodAtShapes": ["方形"],
+      "goodAtColors": ["粉色系"],
+      "goodAtStyles": ["簡約風"],
+      "isIntrovert": false,
+      "createdAt": "2025-06-01T08:00:00+08:00",
+      "updatedAt": "2025-06-01T08:00:00+08:00"
+    }
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                             |
+| ------ | -------- | -------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入   |
+| 401    | E1003    | accessToken 缺失，請重新登入     |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入 |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入 |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入 |
+| 400    | E2004    | 參數類型轉換失敗                 |
+| 404    | E3STA005 | 員工帳號不存在                   |
+| 404    | E3STY001 | 美甲師資料不存在                 |
+| 500    | E9001    | 系統發生錯誤，請稍後再試         |
+| 500    | E9002    | 資料庫操作失敗                   |
+
+#### 400 Bad Request - 參數類型轉換失敗
+
+```json
+{
+  "error": {
+    "code": "E2004",
+    "message": "staffUserId 類型轉換失敗",
+    "field": "staffUserId"
+  }
+}
+```
 
 #### 401 Unauthorized - 未登入
 
 ```json
 {
-  "message": "請先登入後再操作"
+  "error": {
+    "code": "E1006",
+    "message": "未找到使用者認證資訊，請重新登入"
+  }
 }
 ```
 
@@ -62,15 +105,21 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "找不到對應的員工帳號"
+  "error": {
+    "code": "E3STA005",
+    "message": "員工帳號不存在"
+  }
 }
 ```
 
-#### 500 Internal Server Error
+#### 500 Internal Server Error - 系統發生錯誤
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "error": {
+    "code": "E9001",
+    "message": "系統發生錯誤，請稍後再試"
+  }
 }
 ```
 
@@ -79,14 +128,15 @@ Authorization: Bearer <access_token>
 ## 資料表
 
 - `staff_users`
+- `stylists`
 
 ---
 
 ## Service 邏輯
 
-1. 解析 JWT 取得 `staff_user_id`。
-2. 查詢 `staff_users` 表是否存在該使用者。
-3. 回傳基本資訊（帳號、信箱、角色、狀態、建立時間）。
+1. 查詢 `staff_users` 表是否存在該使用者。
+2. 若存在，則回傳基本資訊（帳號、信箱、角色、狀態、建立時間）。
+3. 若該員工同時為美甲師（`stylists.staff_user_id`），則一併回傳 stylist 資訊。
 
 ---
 

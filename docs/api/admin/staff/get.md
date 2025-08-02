@@ -51,8 +51,8 @@
     "email": "s88@salon.com",
     "role": "STYLIST",
     "isActive": true,
-    "createdAt": "2025-06-01T08:00:00Z",
-    "updatedAt": "2025-06-01T08:00:00Z",
+    "createdAt": "2025-06-01T08:00:00+08:00",
+    "updatedAt": "2025-06-01T08:00:00+08:00",
     "stylist": {
       "id": "7000000001",
       "name": "Bella",
@@ -60,8 +60,8 @@
       "goodAtColors": ["粉色系"],
       "goodAtStyles": ["簡約風"],
       "isIntrovert": false,
-      "createdAt": "2025-06-01T08:00:00Z",
-      "updatedAt": "2025-06-01T08:00:00Z"
+      "createdAt": "2025-06-01T08:00:00+08:00",
+      "updatedAt": "2025-06-01T08:00:00+08:00"
     }
   }
 }

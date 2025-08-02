@@ -26,14 +26,14 @@ func (h *GetMyStaffHandler) GetMyStaff(c *gin.Context) {
 	// Get staff context from JWT middleware
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthTokenInvalid, nil)
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
 
 	// Parse staff user ID from context
 	staffUserID, err := utils.ParseID(staffContext.UserID)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "invalid staff user ID"})
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "staffUserId 類型轉換失敗"})
 		return
 	}
 
