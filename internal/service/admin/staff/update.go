@@ -9,41 +9,34 @@ import (
 	"github.com/jmoiron/sqlx"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateStaffService struct {
-	queries dbgen.Querier
-	repo    sqlxRepo.StaffUserRepositoryInterface
+	repo sqlxRepo.StaffUserRepositoryInterface
 }
 
-func NewUpdateStaffService(queries dbgen.Querier, db *sqlx.DB) *UpdateStaffService {
+func NewUpdateStaffService(db *sqlx.DB) *UpdateStaffService {
 	return &UpdateStaffService{
-		queries: queries,
-		repo:    sqlxRepo.NewStaffUserRepository(db),
+		repo: sqlxRepo.NewStaffUserRepository(db),
 	}
 }
 
-func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, req adminStaffModel.UpdateStaffRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateStaffResponse, error) {
+func (s *UpdateStaffService) UpdateStaff(ctx context.Context, staffID int64, req adminStaffModel.UpdateStaffRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateStaffResponse, error) {
 	// validate request has at least one field to update
 	if !req.HasUpdates() {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
 	}
 
-	targetIDInt, err := utils.ParseID(targetID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid target ID", err)
-	}
-
 	// Validate role if provided
-	if req.Role != nil && !adminStaffModel.IsValidRole(*req.Role) {
+	if req.Role != nil && !common.IsValidRole(*req.Role) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffInvalidRole)
 	}
 
 	// Get target staff user
-	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetIDInt)
+	targetStaff, err := s.repo.GetStaffUserByID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
@@ -52,7 +45,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, r
 	}
 
 	// Business logic validations
-	if err := s.validateUpdatePermissions(updaterID, updaterRole, &targetStaff); err != nil {
+	if err := s.validateUpdatePermissions(updaterID, updaterRole, targetStaff); err != nil {
 		return nil, err
 	}
 
@@ -64,28 +57,41 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, targetID string, r
 	}
 
 	// Perform the update
-	response, err := s.repo.UpdateStaffUser(ctx, targetIDInt, req)
+	updatedStaff, err := s.repo.UpdateStaffUser(ctx, staffID, sqlxRepo.UpdateStaffUserParams{
+		Role:     req.Role,
+		IsActive: req.IsActive,
+	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff user", err)
+	}
+
+	response := &adminStaffModel.UpdateStaffResponse{
+		ID:        utils.FormatID(updatedStaff.ID),
+		Username:  updatedStaff.Username,
+		Email:     updatedStaff.Email,
+		Role:      updatedStaff.Role,
+		IsActive:  utils.PgBoolToBool(updatedStaff.IsActive),
+		CreatedAt: utils.PgTimestamptzToTimeString(updatedStaff.CreatedAt),
+		UpdatedAt: utils.PgTimestamptzToTimeString(updatedStaff.UpdatedAt),
 	}
 
 	return response, nil
 }
 
 // validateUpdatePermissions checks if the updater has permission to update the target staff
-func (s *UpdateStaffService) validateUpdatePermissions(updaterID int64, updaterRole string, targetStaff *dbgen.StaffUser) error {
+func (s *UpdateStaffService) validateUpdatePermissions(updaterID int64, updaterRole string, targetStaff *sqlxRepo.GetStaffUserByIDResponse) error {
 	// Cannot update own account
 	if updaterID == targetStaff.ID {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotUpdateSelf)
 	}
 
 	// Cannot update SUPER_ADMIN accounts
-	if targetStaff.Role == adminStaffModel.RoleSuperAdmin {
+	if targetStaff.Role == common.RoleSuperAdmin {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	// Only SUPER_ADMIN and ADMIN can update staff
-	if updaterRole != adminStaffModel.RoleSuperAdmin && updaterRole != adminStaffModel.RoleAdmin {
+	if updaterRole != common.RoleSuperAdmin && updaterRole != common.RoleAdmin {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
@@ -95,17 +101,17 @@ func (s *UpdateStaffService) validateUpdatePermissions(updaterID int64, updaterR
 // validateRoleChange checks if the role change is allowed
 func (s *UpdateStaffService) validateRoleChange(updaterRole, newRole string) error {
 	// Cannot change to SUPER_ADMIN
-	if newRole == adminStaffModel.RoleSuperAdmin {
+	if newRole == common.RoleSuperAdmin {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	switch updaterRole {
-	case adminStaffModel.RoleSuperAdmin:
+	case common.RoleSuperAdmin:
 		// SUPER_ADMIN can change any role (except to SUPER_ADMIN, already checked above)
 		return nil
-	case adminStaffModel.RoleAdmin:
+	case common.RoleAdmin:
 		// ADMIN can only change MANAGER and STYLIST roles
-		if newRole == adminStaffModel.RoleManager || newRole == adminStaffModel.RoleStylist {
+		if newRole == common.RoleManager || newRole == common.RoleStylist {
 			return nil
 		}
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)

@@ -1,9 +1,6 @@
 ## User Story
 
-作為一位超級管理員（`SUPER_ADMIN`）或系統管理員（`ADMIN`），我希望能夠管理後台員工帳號， 包含：
-
-1. 修改其角色（如：由 `STYLIST` 轉為 `MANAGER`），以調整其權限範圍。
-2. 停用或重新啟用帳號，以控管系統存取權限。
+作為一位管理員，我希望能夠管理後台員工帳號
 
 ---
 
@@ -13,9 +10,17 @@
 
 ---
 
+## 說明
+
+- 提供管理員更新員工帳號資料的功能。
+- 僅允許修改角色、是否啟用。
+
+---
+
 ## 權限
 
-- 僅限 `SUPER_ADMIN` 或 `ADMIN` 存取
+- 需要登入才可使用。
+- `SUPER_ADMIN` 與 `ADMIN` 可使用。
 
 ---
 
@@ -23,12 +28,16 @@
 
 ### Header
 
-```http
-Content-Type: application/json
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
-### Body
+### Path Parameter
+
+| 參數    | 說明        |
+| ------- | ----------- |
+| staffId | 員工帳號 ID |
+
+### Body 範例
 
 ```json
 {
@@ -37,14 +46,14 @@ Authorization: Bearer <access_token>
 }
 ```
 
-- 至少需要提供一個欄位進行更新
-
 ### 驗證規則
 
-| 欄位     | 規則                                         | 說明               |
-| -------- | -------------------------------------------- | ------------------ |
-| role     | <li>可選<li>值只能為 ADMIN、MANAGER、STYLIST | 欲變更的角色       |
-| isActive | <li>可選<li>布林值                           | 是否啟用該員工帳號 |
+| 欄位     | 必填 | 其他規則                             | 說明               |
+| -------- | ---- | ------------------------------------ | ------------------ |
+| role     | 否   | <li>值只能為 ADMIN、MANAGER、STYLIST | 欲變更的角色       |
+| isActive | 否   | <li>布林值                           | 是否啟用該員工帳號 |
+
+- 至少需要提供一個欄位進行更新
 
 ---
 
@@ -59,21 +68,49 @@ Authorization: Bearer <access_token>
     "username": "staff_amy",
     "email": "amy@example.com",
     "role": "MANAGER",
-    "isActive": false
+    "isActive": false,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
   }
 }
 ```
 
-### 失敗
+
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                              |
+| ------ | -------- | --------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入    |
+| 401    | E1003    | accessToken 缺失，請重新登入      |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入  |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入  |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入  |
+| 403    | E1010    | 權限不足，無法執行此操作          |
+| 400    | E2001    | JSON 格式錯誤，請檢查             |
+| 400    | E2003    | 至少需要提供一個欄位進行更新      |
+| 400    | E2004    | 參數類型轉換失敗                  |
+| 400    | E2020    | {field} 為必填項目                |
+| 400    | E2029    | {field} 必須是布林值              |
+| 400    | E2030    | {field} 必須是 {param} 其中一個值 |
+| 400    | E3STA001 | 無效的角色                        |
+| 403    | E3STA004 | 不可更新自己的帳號                |
+| 404    | E3STA005 | 員工帳號不存在                    |
+| 500    | E9001    | 系統發生錯誤，請稍後再試          |
+| 500    | E9002    | 資料庫操作失敗                    |
 
 #### 400 Bad Request - 驗證錯誤
 
 ```json
 {
-  "message": "輸入驗證失敗",
-  "errors": {
-    "role": "role只可以傳入特定值"
-  }
+  "error": [
+    {
+      "code": "E2029",
+      "message": "isActive 必須是布林值",
+      "field": "isActive"
+    }
+  ]
 }
 ```
 
@@ -81,7 +118,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "error": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
@@ -89,7 +131,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "權限不足，無法執行此操作"
+  "error": [
+    {
+      "code": "E1010",
+      "message": "權限不足，無法執行此操作"
+    }
+  ]
 }
 ```
 
@@ -97,7 +144,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "指定的員工不存在"
+  "error": [
+    {
+      "code": "E3STA005",
+      "message": "員工帳號不存在"
+    }
+  ]
 }
 ```
 
@@ -105,7 +157,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "error": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 

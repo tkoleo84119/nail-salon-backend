@@ -17,10 +17,28 @@ type UpdateStaffHandler struct {
 }
 
 func NewUpdateStaffHandler(service adminStaffService.UpdateStaffServiceInterface) *UpdateStaffHandler {
-	return &UpdateStaffHandler{service: service}
+	return &UpdateStaffHandler{
+		service: service,
+	}
 }
 
 func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
+	// Get target staff ID from path parameter
+	staffId := c.Param("staffId")
+	if staffId == "" {
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
+			"staffId": "staffId 為必填項目",
+		})
+		return
+	}
+	parsedStaffId, err := utils.ParseID(staffId)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"staffId": "staffId 類型轉換失敗",
+		})
+		return
+	}
+
 	// Parse and validate request
 	var req adminStaffModel.UpdateStaffRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -29,18 +47,9 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 		return
 	}
 
-	// Get target staff ID from path parameter
-	targetID := c.Param("staffId")
-	if targetID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
-			"staffId": "staffId為必填項目",
-		})
-		return
-	}
-
 	// Additional validation: ensure at least one field is provided for update
 	if !req.HasUpdates() {
-		errorCodes.RespondWithEmptyFieldError(c)
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
 	}
 
@@ -53,12 +62,14 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 	// Convert UserID to int64
 	updaterID, err := utils.ParseID(staffContext.UserID)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"staffId": "staffId 類型轉換失敗",
+		})
 		return
 	}
 
 	// Call service
-	response, err := h.service.UpdateStaff(c.Request.Context(), targetID, req, updaterID, staffContext.Role)
+	response, err := h.service.UpdateStaff(c.Request.Context(), parsedStaffId, req, updaterID, staffContext.Role)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

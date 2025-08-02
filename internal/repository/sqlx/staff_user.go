@@ -18,7 +18,7 @@ type StaffUserRepositoryInterface interface {
 	GetStaffUserByUsername(ctx context.Context, username string) (*GetStaffUserByUsernameResponse, error)
 	GetStaffUserByID(ctx context.Context, id int64) (*GetStaffUserByIDResponse, error)
 	GetAllStaffByFilter(ctx context.Context, params GetAllStaffByFilterParams) (int, []GetAllStaffByFilterResponse, error)
-	UpdateStaffUser(ctx context.Context, id int64, req adminStaffModel.UpdateStaffRequest) (*adminStaffModel.UpdateStaffResponse, error)
+	UpdateStaffUser(ctx context.Context, id int64, params UpdateStaffUserParams) (*UpdateStaffUserResponse, error)
 	UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error)
 	CheckStaffUserExists(ctx context.Context, username string) (bool, error)
 }
@@ -248,21 +248,36 @@ func (r *StaffUserRepository) GetAllStaffByFilter(ctx context.Context, params Ge
 	return total, result, nil
 }
 
+type UpdateStaffUserParams struct {
+	Role     *string
+	IsActive *bool
+}
+
+type UpdateStaffUserResponse struct {
+	ID        int64              `db:"id"`
+	Username  string             `db:"username"`
+	Email     string             `db:"email"`
+	Role      string             `db:"role"`
+	IsActive  pgtype.Bool        `db:"is_active"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+}
+
 // UpdateStaffUser updates staff user with dynamic fields
-func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req adminStaffModel.UpdateStaffRequest) (*adminStaffModel.UpdateStaffResponse, error) {
+func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, params UpdateStaffUserParams) (*UpdateStaffUserResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": id,
 	}
 
-	if req.Role != nil {
+	if params.Role != nil {
 		setParts = append(setParts, "role = :role")
-		args["role"] = *req.Role
+		args["role"] = *params.Role
 	}
 
-	if req.IsActive != nil {
+	if params.IsActive != nil {
 		setParts = append(setParts, "is_active = :is_active")
-		args["is_active"] = *req.IsActive
+		args["is_active"] = *params.IsActive
 	}
 
 	query := fmt.Sprintf(`
@@ -279,7 +294,7 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 			updated_at
 	`, strings.Join(setParts, ", "))
 
-	var result dbgen.StaffUser
+	var result UpdateStaffUserResponse
 	rows, err := r.db.NamedQuery(query, args)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute update query: %w", err)
@@ -294,15 +309,7 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, req
 		return nil, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &adminStaffModel.UpdateStaffResponse{
-		ID:       utils.FormatID(result.ID),
-		Username: result.Username,
-		Email:    result.Email,
-		Role:     result.Role,
-		IsActive: result.IsActive.Bool,
-	}
-
-	return response, nil
+	return &result, nil
 }
 
 // UpdateMyStaff updates current staff user's information with dynamic fields

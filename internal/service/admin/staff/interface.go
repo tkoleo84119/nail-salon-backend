@@ -11,7 +11,7 @@ type CreateStaffServiceInterface interface {
 }
 
 type UpdateStaffServiceInterface interface {
-	UpdateStaff(ctx context.Context, targetID string, req adminStaffModel.UpdateStaffRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateStaffResponse, error)
+	UpdateStaff(ctx context.Context, targetID int64, req adminStaffModel.UpdateStaffRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateStaffResponse, error)
 }
 
 type UpdateMyStaffServiceInterface interface {
