@@ -36,7 +36,7 @@ type AdminServices struct {
 	// Staff management services
 	StaffCreate            adminStaffService.CreateStaffServiceInterface
 	StaffUpdate            adminStaffService.UpdateStaffServiceInterface
-	StaffUpdateMe          *adminStaffService.UpdateMyStaffService
+	StaffUpdateMe          adminStaffService.UpdateMyStaffServiceInterface
 	StaffGet               adminStaffService.GetStaffServiceInterface
 	StaffGetMe             adminStaffService.GetMyStaffServiceInterface
 	StaffGetList           adminStaffService.GetStaffListServiceInterface
@@ -157,7 +157,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Staff management services
 		StaffCreate:            adminStaffService.NewCreateStaffService(database.Sqlx, repositories.SQLX),
 		StaffUpdate:            adminStaffService.NewUpdateStaffService(database.Sqlx),
-		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(queries, repositories.SQLX),
+		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(repositories.SQLX),
 		StaffGet:               adminStaffService.NewGetStaffService(repositories.SQLX),
 		StaffGetMe:             adminStaffService.NewGetMyStaffService(repositories.SQLX),
 		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.SQLX),

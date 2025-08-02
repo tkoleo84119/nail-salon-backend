@@ -33,7 +33,7 @@ func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
 
 	// Additional validation: ensure at least one field is provided for update
 	if !req.HasUpdates() {
-		errorCodes.RespondWithEmptyFieldError(c)
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
 	}
 
@@ -46,7 +46,7 @@ func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
 
 	staffUserID, err := utils.ParseID(staffContext.UserID)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "staffUserId 類型轉換失敗"})
 		return
 	}
 

@@ -55,7 +55,7 @@ func (r UpdateStaffRequest) HasUpdates() bool {
 
 // UpdateMyStaffRequest represents the request to update current staff user's information
 type UpdateMyStaffRequest struct {
-	Email *string `json:"email,omitempty" binding:"omitempty,email"`
+	Email *string `json:"email" binding:"omitempty,email"`
 }
 
 // HasUpdates checks if the request has any fields to update
@@ -65,11 +65,13 @@ func (r UpdateMyStaffRequest) HasUpdates() bool {
 
 // UpdateMyStaffResponse represents the response after updating current staff user's information
 type UpdateMyStaffResponse struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	IsActive bool   `json:"isActive"`
+	ID        string `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	IsActive  bool   `json:"isActive"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // -------------------------------------------------------------------------------------

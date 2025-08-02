@@ -7,8 +7,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -19,7 +17,6 @@ type StaffUserRepositoryInterface interface {
 	GetStaffUserByID(ctx context.Context, id int64) (*GetStaffUserByIDResponse, error)
 	GetAllStaffByFilter(ctx context.Context, params GetAllStaffByFilterParams) (int, []GetAllStaffByFilterResponse, error)
 	UpdateStaffUser(ctx context.Context, id int64, params UpdateStaffUserParams) (*UpdateStaffUserResponse, error)
-	UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error)
 	CheckStaffUserExists(ctx context.Context, username string) (bool, error)
 }
 
@@ -249,6 +246,7 @@ func (r *StaffUserRepository) GetAllStaffByFilter(ctx context.Context, params Ge
 }
 
 type UpdateStaffUserParams struct {
+	Email    *string
 	Role     *string
 	IsActive *bool
 }
@@ -268,6 +266,11 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, par
 	setParts := []string{"updated_at = NOW()"}
 	args := map[string]interface{}{
 		"id": id,
+	}
+
+	if params.Email != nil && *params.Email != "" {
+		setParts = append(setParts, "email = :email")
+		args["email"] = *params.Email
 	}
 
 	if params.Role != nil {
@@ -310,56 +313,6 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, par
 	}
 
 	return &result, nil
-}
-
-// UpdateMyStaff updates current staff user's information with dynamic fields
-func (r *StaffUserRepository) UpdateMyStaff(ctx context.Context, id int64, req adminStaffModel.UpdateMyStaffRequest) (*adminStaffModel.UpdateMyStaffResponse, error) {
-	setParts := []string{"updated_at = NOW()"}
-	args := map[string]interface{}{
-		"id": id,
-	}
-
-	if req.Email != nil {
-		setParts = append(setParts, "email = :email")
-		args["email"] = *req.Email
-	}
-
-	query := fmt.Sprintf(`
-		UPDATE staff_users
-		SET %s
-		WHERE id = :id
-		RETURNING
-			id,
-			username,
-			email,
-			role,
-			is_active
-	`, strings.Join(setParts, ", "))
-
-	var result dbgen.StaffUser
-	rows, err := r.db.NamedQuery(query, args)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute update query: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, fmt.Errorf("no rows returned from update")
-	}
-
-	if err := rows.StructScan(&result); err != nil {
-		return nil, fmt.Errorf("failed to scan result: %w", err)
-	}
-
-	response := &adminStaffModel.UpdateMyStaffResponse{
-		ID:       utils.FormatID(result.ID),
-		Username: result.Username,
-		Email:    result.Email,
-		Role:     result.Role,
-		IsActive: result.IsActive.Bool,
-	}
-
-	return response, nil
 }
 
 // CheckStaffUserExists checks if a staff user exists by username
