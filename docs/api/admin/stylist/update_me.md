@@ -1,6 +1,6 @@
 ## User Story
 
-作為一位員工（`ADMIN` / `MANAGER` / `STYLIST`，不含 `SUPER_ADMIN`），我希望可以更新自己的美甲師個人資料（stylists），讓顧客可以看到我最新的專長與風格。
+作為一位員工，我希望可以更新自己的美甲師個人資料（stylists），讓顧客可以看到我最新的專長與風格。
 
 ---
 
@@ -12,13 +12,13 @@
 
 ## 說明
 
-每位員工（`staff_user`）僅能更新自己所屬的 `stylist` 資料。
+- 僅允許員工更新自己的美甲師資料。
 
 ---
 
 ## 權限
 
-- 僅限已登入之非 `SUPER_ADMIN` 員工（`ADMIN` / `MANAGER` / `STYLIST`）可呼叫
+- 需要登入才可使用。
 
 ---
 
@@ -26,34 +26,32 @@
 
 ### Header
 
-```http
-Content-Type: application/json
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
-### Body
+### Body 範例
 
 ```json
 {
   "stylistName": "Jane 美甲師",
   "goodAtShapes": ["方形", "橢圓形"],
-  "goodAtColors": ["粉嫩系"],
+  "goodAtColors": ["白色系"],
   "goodAtStyles": ["簡約", "法式"],
   "isIntrovert": true
 }
 ```
 
-- 可傳任一欄位，僅更新指定內容
-
 ### 驗證規則
 
-| 欄位         | 規則                                | 說明           |
-| ------------ | ----------------------------------- | -------------- |
-| stylistName  | <li>可選<li>長度大於1<li>長度小於50 | 美甲師顯示姓名 |
-| goodAtShapes | <li>可選                            | 擅長指型       |
-| goodAtColors | <li>可選                            | 擅長色系       |
-| goodAtStyles | <li>可選                            | 擅長款式       |
-| isIntrovert  | <li>可選<li>布林值                  | 是否I人        |
+| 欄位         | 必填 | 其他規則                                                                                           | 說明       |
+| ------------ | ---- | -------------------------------------------------------------------------------------------------- | ---------- |
+| stylistName  | 否   | <li>email格式                                                                                      | 員工 Email |
+| goodAtShapes | 否   | <li>最多20項<li>值只能為 方形 方圓形 橢圓形 圓形 圓尖形 尖形 梯形                                  | 擅長指型   |
+| goodAtColors | 否   | <li>最多20項<li>值只能為 白色系 裸色系 粉色系 紅色系 橘色系 大地色系 綠色系 藍色系 紫色系 黑色系   | 擅長色系   |
+| goodAtStyles | 否   | <li>最多20項<li>值只能為 暈染 手繪 貓眼 鏡面 可愛 法式 漸層 氣質溫柔 個性 日系 簡約 優雅 典雅 小眾 | 擅長款式   |
+| isIntrovert  | 否   | <li>布林值                                                                                         | 是否I人    |
+
+- 至少需要提供一個欄位進行更新
 
 ---
 
@@ -66,25 +64,50 @@ Authorization: Bearer <access_token>
   "data": {
     "id": "18000000001",
     "staffUserId": "13984392823",
-    "stylistName": "Jane 美甲師",
+    "name": "Jane 美甲師",
     "goodAtShapes": ["方形", "橢圓形"],
     "goodAtColors": ["粉嫩系"],
     "goodAtStyles": ["簡約", "法式"],
-    "isIntrovert": true
+    "isIntrovert": true,
+    "createdAt": "2025-06-01T08:00:00+08:00",
+    "updatedAt": "2025-06-01T08:00:00+08:00"
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                                  |
+| ------ | -------- | ------------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入        |
+| 401    | E1003    | accessToken 缺失，請重新登入          |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入      |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入      |
+| 400    | E2001    | JSON 格式錯誤，請檢查                 |
+| 400    | E2003    | 至少需要提供一個欄位進行更新          |
+| 400    | E2004    | 參數類型轉換失敗                      |
+| 400    | E2024    | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2025    | {field} 最多只能有 {param} 個項目     |
+| 400    | E2029    | {field} 必須是布林值                  |
+| 400    | E2030    | {field} 必須是 {param} 其中一個值     |
+| 404    | E3STA005 | 員工帳號不存在                        |
+| 404    | E3STY001 | 美甲師資料不存在                      |
+| 500    | E9001    | 系統發生錯誤，請稍後再試              |
+| 500    | E9002    | 資料庫操作失敗                        |
 
 #### 400 Bad Request - 驗證錯誤
 
 ```json
 {
-  "message": "輸入驗證失敗",
-  "errors": {
-    "request": "至少需要提供一個欄位進行更新"
-  }
+  "errors": [
+    {
+      "code": "E2003",
+      "message": "至少需要提供一個欄位進行更新"
+    }
+  ]
 }
 ```
 
@@ -92,31 +115,38 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
-#### 403 Forbidden - 權限不足
+#### 404 Not Found - 美甲師資料不存在
 
 ```json
 {
-  "message": "權限不足，無法執行此操作"
+  "errors": [
+    {
+      "code": "E3STY001",
+      "message": "美甲師資料不存在"
+    }
+  ]
 }
 ```
 
-#### 404 Not Found - 尚未建立美甲師資料
+#### 500 Internal Server Error - 系統發生錯誤
 
 ```json
 {
-  "message": "尚未建立美甲師資料，請先新增"
-}
-```
-
-#### 500 Internal Server Error
-
-```json
-{
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
@@ -131,14 +161,13 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 驗證至少一個欄位有更新
-2. 檢查 `stylists` 表是否有該 `staff_user_id` 對應資料：
-   - 若尚未建立，回傳 404 Not Found。
-3. 更新 `stylists` 表的指定欄位。
+1. 驗證至少一個欄位有更新。
+2. 檢查 `stylists` 資料是否存在。
+3. 更新 `stylists` 的指定欄位。
 4. 回傳更新後的 stylist 資料。
 
 ---
 
 ## 注意事項
 
-- 一個 `staff_user` 只可對應一筆 `stylist` 資料。
+- 會回傳更新後的資料，不需要在呼叫一次 `GET /api/admin/staff/me` 來取得資料。

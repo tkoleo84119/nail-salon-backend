@@ -7,9 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
-	adminStylistModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/stylist"
 	storeModel "github.com/tkoleo84119/nail-salon-backend/internal/model/store"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -17,7 +15,7 @@ import (
 type StylistRepositoryInterface interface {
 	CreateStylistTx(ctx context.Context, tx *sqlx.Tx, params CreateStylistTxParams) (int64, error)
 	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (*GetStylistByStaffUserIDResponse, error)
-	UpdateStylist(ctx context.Context, staffUserID int64, req adminStylistModel.UpdateMyStylistRequest) (*adminStylistModel.UpdateMyStylistResponse, error)
+	UpdateStylist(ctx context.Context, staffUserID int64, params UpdateStylistParams) (UpdateStylistResponse, error)
 	GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error)
 	GetStoreStylistList(ctx context.Context, storeID int64, params GetStoreStylistListParams) ([]GetStoreStylistListModel, int, error)
 }
@@ -103,80 +101,99 @@ func (r *StylistRepository) GetStylistByStaffUserID(ctx context.Context, staffUs
 	return &result, nil
 }
 
+type UpdateStylistParams struct {
+	Name         *string   `db:"name"`
+	GoodAtShapes *[]string `db:"good_at_shapes"`
+	GoodAtColors *[]string `db:"good_at_colors"`
+	GoodAtStyles *[]string `db:"good_at_styles"`
+	IsIntrovert  *bool     `db:"is_introvert"`
+}
+
+type UpdateStylistResponse struct {
+	ID           int64              `db:"id"`
+	StaffUserID  int64              `db:"staff_user_id"`
+	Name         pgtype.Text        `db:"name"`
+	GoodAtShapes []string           `db:"good_at_shapes"`
+	GoodAtColors []string           `db:"good_at_colors"`
+	GoodAtStyles []string           `db:"good_at_styles"`
+	IsIntrovert  pgtype.Bool        `db:"is_introvert"`
+	CreatedAt    pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
+}
+
 // UpdateStylist updates stylist with dynamic fields
-func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, req adminStylistModel.UpdateMyStylistRequest) (*adminStylistModel.UpdateMyStylistResponse, error) {
+func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, params UpdateStylistParams) (UpdateStylistResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
-	args := map[string]interface{}{
-		"staff_user_id": staffUserID,
+	args := []interface{}{staffUserID}
+	argIndex := 2
+
+	if params.Name != nil {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", argIndex))
+		args = append(args, *params.Name)
+		argIndex++
 	}
 
-	if req.StylistName != nil {
-		setParts = append(setParts, "name = :name")
-		args["name"] = *req.StylistName
+	if params.GoodAtShapes != nil {
+		setParts = append(setParts, fmt.Sprintf("good_at_shapes = $%d", argIndex))
+		args = append(args, *params.GoodAtShapes)
+		argIndex++
 	}
 
-	if req.GoodAtShapes != nil {
-		setParts = append(setParts, "good_at_shapes = :good_at_shapes")
-		args["good_at_shapes"] = *req.GoodAtShapes
+	if params.GoodAtColors != nil {
+		setParts = append(setParts, fmt.Sprintf("good_at_colors = $%d", argIndex))
+		args = append(args, *params.GoodAtColors)
+		argIndex++
 	}
 
-	if req.GoodAtColors != nil {
-		setParts = append(setParts, "good_at_colors = :good_at_colors")
-		args["good_at_colors"] = *req.GoodAtColors
+	if params.GoodAtStyles != nil {
+		setParts = append(setParts, fmt.Sprintf("good_at_styles = $%d", argIndex))
+		args = append(args, *params.GoodAtStyles)
+		argIndex++
 	}
 
-	if req.GoodAtStyles != nil {
-		setParts = append(setParts, "good_at_styles = :good_at_styles")
-		args["good_at_styles"] = *req.GoodAtStyles
-	}
-
-	if req.IsIntrovert != nil {
-		setParts = append(setParts, "is_introvert = :is_introvert")
-		args["is_introvert"] = *req.IsIntrovert
+	if params.IsIntrovert != nil {
+		setParts = append(setParts, fmt.Sprintf("is_introvert = $%d", argIndex))
+		args = append(args, *params.IsIntrovert)
+		argIndex++
 	}
 
 	query := fmt.Sprintf(`
 		UPDATE stylists
 		SET %s
-		WHERE staff_user_id = :staff_user_id
+		WHERE staff_user_id = $1
 		RETURNING
 			id,
 			staff_user_id,
 			name,
-			good_at_shapes,
-			good_at_colors,
-			good_at_styles,
+			COALESCE(good_at_shapes, '{}'::text[]) AS good_at_shapes,
+			COALESCE(good_at_colors, '{}'::text[]) AS good_at_colors,
+			COALESCE(good_at_styles, '{}'::text[]) AS good_at_styles,
 			is_introvert,
 			created_at,
 			updated_at
 	`, strings.Join(setParts, ", "))
 
-	var result dbgen.Stylist
-	rows, err := r.db.NamedQuery(query, args)
+	row := r.db.QueryRowxContext(ctx, query, args...)
+	m := pgtype.NewMap()
+
+	var result UpdateStylistResponse
+
+	err := row.Scan(
+		&result.ID,
+		&result.StaffUserID,
+		&result.Name,
+		m.SQLScanner(&result.GoodAtShapes),
+		m.SQLScanner(&result.GoodAtColors),
+		m.SQLScanner(&result.GoodAtStyles),
+		&result.IsIntrovert,
+		&result.CreatedAt,
+		&result.UpdatedAt,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute update query: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, fmt.Errorf("no rows returned from update")
+		return UpdateStylistResponse{}, fmt.Errorf("scan result failed: %w", err)
 	}
 
-	if err := rows.StructScan(&result); err != nil {
-		return nil, fmt.Errorf("failed to scan result: %w", err)
-	}
-
-	response := &adminStylistModel.UpdateMyStylistResponse{
-		ID:           utils.FormatID(result.ID),
-		StaffUserID:  utils.FormatID(staffUserID),
-		StylistName:  result.Name.String,
-		GoodAtShapes: result.GoodAtShapes,
-		GoodAtColors: result.GoodAtColors,
-		GoodAtStyles: result.GoodAtStyles,
-		IsIntrovert:  result.IsIntrovert.Bool,
-	}
-
-	return response, nil
+	return result, nil
 }
 
 // GetStoreStylistsModel represents the database model for store stylists

@@ -273,14 +273,6 @@ STYLIST:
     code: E3STY001
     message: 美甲師資料不存在
     status: 404
-  STYLIST_NOT_CREATED:
-    code: E3STY002
-    message: 尚未建立美甲師資料，請先新增
-    status: 404
-  STYLIST_ALREADY_EXISTS:
-    code: E3STY003
-    message: 該員工已建立過美甲師資料，請使用修改功能
-    status: 409
 
 TIME_SLOT:
   TIME_SLOT_CANNOT_UPDATE_SEPARATELY:

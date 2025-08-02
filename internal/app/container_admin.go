@@ -57,7 +57,7 @@ type AdminServices struct {
 	ServiceUpdate  *adminServiceService.UpdateServiceService
 
 	// Stylist management services
-	StylistUpdate  *adminStylistService.UpdateMyStylistService
+	StylistUpdate  adminStylistService.UpdateMyStylistServiceInterface
 	StylistGetList adminStylistService.GetStylistListServiceInterface
 
 	// Booking management services
@@ -178,7 +178,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.SQLX),
 
 		// Stylist management services
-		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.SQLX),
+		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(repositories.SQLX),
 		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.SQLX),
 
 		// Booking management services

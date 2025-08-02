@@ -86,9 +86,7 @@ const (
 	StoreAlreadyExists = "STORE_ALREADY_EXISTS"
 
 	// STYLIST - Stylist operation errors
-	StylistNotFound      = "STYLIST_NOT_FOUND"
-	StylistNotCreated    = "STYLIST_NOT_CREATED"
-	StylistAlreadyExists = "STYLIST_ALREADY_EXISTS"
+	StylistNotFound = "STYLIST_NOT_FOUND"
 
 	// TIME_SLOT - Time slot operation errors
 	TimeSlotCannotUpdateSeparately          = "TIME_SLOT_CANNOT_UPDATE_SEPARATELY"
