@@ -3,46 +3,39 @@ package adminStaff
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type DeleteStoreAccessBulkService struct {
-	queries dbgen.Querier
+	repo *sqlxRepo.Repositories
 }
 
-func NewDeleteStoreAccessBulkService(queries dbgen.Querier) *DeleteStoreAccessBulkService {
+func NewDeleteStoreAccessBulkService(repo *sqlxRepo.Repositories) *DeleteStoreAccessBulkService {
 	return &DeleteStoreAccessBulkService{
-		queries: queries,
+		repo: repo,
 	}
 }
 
 // DeleteStoreAccessBulk deletes store access for a staff member
-func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context, targetID string, req adminStaffModel.DeleteStoreAccessBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.DeleteStoreAccessBulkResponse, error) {
-	// Parse target staff ID
-	targetStaffID, err := utils.ParseID(targetID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid target staff ID", err)
-	}
-
+func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context, targetID int64, storeIDs []int64, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.DeleteStoreAccessBulkResponse, error) {
 	// Check if target staff exists
-	targetStaff, err := s.queries.GetStaffUserByID(ctx, targetStaffID)
+	targetStaff, err := s.repo.Staff.GetStaffUserByID(ctx, targetID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
-		return nil, fmt.Errorf("failed to get target staff: %w", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get target staff", err)
 	}
 
 	// Cannot modify self
-	if targetStaffID == creatorID {
+	if targetID == creatorID {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotUpdateSelf)
 	}
 	// Cannot modify SUPER_ADMIN store access
@@ -50,25 +43,12 @@ func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
-	// Parse store IDs
-	var storeIDs []int64
-	for _, storeIDStr := range req.StoreIDs {
-		storeID, err := utils.ParseID(storeIDStr)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
-		}
-		storeIDs = append(storeIDs, storeID)
-	}
-
 	// For non-SUPER_ADMIN creators, validate they have access to the stores being removed
 	if creatorRole != adminStaffModel.RoleSuperAdmin {
 		for _, storeID := range storeIDs {
-			hasAccess := false
-			for _, creatorStoreID := range creatorStoreIDs {
-				if storeID == creatorStoreID {
-					hasAccess = true
-					break
-				}
+			hasAccess, err := utils.CheckStoreAccess(storeID, creatorStoreIDs)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
 			}
 			if !hasAccess {
 				return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
@@ -77,18 +57,15 @@ func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context
 	}
 
 	// Delete store access (ignore if access doesn't exist as per spec)
-	err = s.queries.DeleteStaffUserStoreAccess(ctx, dbgen.DeleteStaffUserStoreAccessParams{
-		StaffUserID: targetStaffID,
-		Column2:     storeIDs,
-	})
+	err = s.repo.StaffUserStoreAccess.BatchDeleteStaffUserStoreAccess(ctx, targetID, storeIDs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to delete store access: %w", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to delete store access", err)
 	}
 
 	// Get remaining store access for the target staff
-	remainingStoreAccess, err := s.queries.GetStaffUserStoreAccess(ctx, targetStaffID)
+	remainingStoreAccess, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, targetID, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get remaining store access: %w", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get remaining store access", err)
 	}
 
 	// Convert to response format
@@ -96,13 +73,12 @@ func (s *DeleteStoreAccessBulkService) DeleteStoreAccessBulk(ctx context.Context
 	for _, access := range remainingStoreAccess {
 		storeList = append(storeList, common.Store{
 			ID:   utils.FormatID(access.StoreID),
-			Name: access.StoreName,
+			Name: access.Name,
 		})
 	}
 
 	response := &adminStaffModel.DeleteStoreAccessBulkResponse{
-		StaffUserID: utils.FormatID(targetStaffID),
-		StoreList:   storeList,
+		StoreList: storeList,
 	}
 
 	return response, nil

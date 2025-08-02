@@ -24,7 +24,7 @@ func NewCreateStoreAccessService(repo *sqlxRepo.Repositories) *CreateStoreAccess
 }
 
 // CreateStoreAccess creates store access for a staff member
-func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffID int64, req adminStaffModel.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStoreAccessResponse, bool, error) {
+func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffID int64, storeID int64, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStoreAccessResponse, bool, error) {
 	// Check if target staff exists
 	targetStaff, err := s.repo.Staff.GetStaffUserByID(ctx, staffID)
 	if err != nil {
@@ -46,7 +46,7 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 
 	// Check if store exists and is active
 	active := true
-	_, err = s.repo.Store.GetStoreByID(ctx, req.StoreID, &active)
+	_, err = s.repo.Store.GetStoreByID(ctx, storeID, &active)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
@@ -56,7 +56,7 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 
 	// Check if creator has access to this store (except SUPER_ADMIN)
 	if creatorRole != common.RoleSuperAdmin {
-		hasAccess, err := utils.CheckStoreAccess(req.StoreID, creatorStoreIDs)
+		hasAccess, err := utils.CheckStoreAccess(storeID, creatorStoreIDs)
 		if err != nil {
 			return nil, false, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
 		}
@@ -66,7 +66,7 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 	}
 
 	// Check if access already exists
-	exists, err := s.repo.StaffUserStoreAccess.CheckStoreAccessExists(ctx, staffID, req.StoreID)
+	exists, err := s.repo.StaffUserStoreAccess.CheckStoreAccessExists(ctx, staffID, storeID)
 	if err != nil {
 		return nil, false, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store access", err)
 	}
@@ -74,8 +74,8 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 	isNewlyCreated := false
 	if !exists {
 		// Create new store access
-		_, err = s.repo.StaffUserStoreAccess.CreateStaffUserStoreAccess(ctx, sqlxRepo.CreateStaffUserStoreAccessTxParams{
-			StoreID:     req.StoreID,
+		err = s.repo.StaffUserStoreAccess.CreateStaffUserStoreAccess(ctx, sqlxRepo.CreateStaffUserStoreAccessTxParams{
+			StoreID:     storeID,
 			StaffUserID: staffID,
 		})
 		if err != nil {

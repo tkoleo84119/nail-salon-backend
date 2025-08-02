@@ -11,10 +11,11 @@ import (
 
 type StaffUserStoreAccessRepositoryInterface interface {
 	CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) error
-	CreateStaffUserStoreAccess(ctx context.Context, req CreateStaffUserStoreAccessTxParams) (int64, error)
+	CreateStaffUserStoreAccess(ctx context.Context, req CreateStaffUserStoreAccessTxParams) error
 	BatchCreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, params []CreateStaffUserStoreAccessTxParams) error
 	GetStaffUserStoreAccessByStaffId(ctx context.Context, staffId int64, isActive *bool) ([]GetStaffUserStoreAccessByStaffIdItem, error)
 	CheckStoreAccessExists(ctx context.Context, staffUserID int64, storeID int64) (bool, error)
+	BatchDeleteStaffUserStoreAccess(ctx context.Context, staffUserID int64, storeIDs []int64) error
 }
 
 type StaffUserStoreAccessRepository struct {
@@ -32,48 +33,44 @@ type CreateStaffUserStoreAccessTxParams struct {
 	StaffUserID int64 `db:"staff_user_id"`
 }
 
-func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) (int64, error) {
+func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, req CreateStaffUserStoreAccessTxParams) error {
 	query := `
 		INSERT INTO staff_user_store_access (store_id, staff_user_id)
 		VALUES (:store_id, :staff_user_id)
-		RETURNING id
 	`
 
-	var id int64
 	stmt, err := tx.PrepareNamedContext(ctx, query)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create staff user store access: %w", err)
+		return fmt.Errorf("failed to create staff user store access: %w", err)
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRowxContext(ctx, req).Scan(&id)
+	_, err = stmt.ExecContext(ctx, req)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create staff user store access: %w", err)
+		return fmt.Errorf("failed to create staff user store access: %w", err)
 	}
 
-	return id, nil
+	return nil
 }
 
-func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccess(ctx context.Context, req CreateStaffUserStoreAccessTxParams) (int64, error) {
+func (r *StaffUserStoreAccessRepository) CreateStaffUserStoreAccess(ctx context.Context, req CreateStaffUserStoreAccessTxParams) error {
 	query := `
 		INSERT INTO staff_user_store_access (store_id, staff_user_id)
 		VALUES (:store_id, :staff_user_id)
-		RETURNING id
 	`
 
-	var id int64
 	stmt, err := r.db.PrepareNamedContext(ctx, query)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create staff user store access: %w", err)
+		return fmt.Errorf("failed to create staff user store access: %w", err)
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRowxContext(ctx, req).Scan(&id)
+	_, err = stmt.ExecContext(ctx, req)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create store: %w", err)
+		return fmt.Errorf("failed to create store: %w", err)
 	}
 
-	return id, nil
+	return nil
 }
 
 func (r *StaffUserStoreAccessRepository) BatchCreateStaffUserStoreAccessTx(ctx context.Context, tx *sqlx.Tx, params []CreateStaffUserStoreAccessTxParams) error {
@@ -161,4 +158,17 @@ func (r *StaffUserStoreAccessRepository) CheckStoreAccessExists(ctx context.Cont
 	}
 
 	return exists, nil
+}
+
+func (r *StaffUserStoreAccessRepository) BatchDeleteStaffUserStoreAccess(ctx context.Context, staffUserID int64, storeIDs []int64) error {
+	query := `
+		DELETE FROM staff_user_store_access WHERE staff_user_id = $1 AND store_id = ANY($2)
+	`
+
+	_, err := r.db.ExecContext(ctx, query, staffUserID, storeIDs)
+	if err != nil {
+		return fmt.Errorf("failed to delete store access: %w", err)
+	}
+
+	return nil
 }

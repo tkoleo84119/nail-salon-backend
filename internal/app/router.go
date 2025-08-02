@@ -151,7 +151,7 @@ func setupAdminStaffRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		// Store access management
 		staff.GET("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffGetStoreAccess.GetStaffStoreAccess)
 		staff.POST("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffStoreAccess.CreateStoreAccess)
-		staff.DELETE("/:staffId/store-access", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffDeleteStoreAccess.DeleteStoreAccessBulk)
+		staff.DELETE("/:staffId/store-access/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StaffDeleteStoreAccess.DeleteStoreAccessBulk)
 	}
 }
 

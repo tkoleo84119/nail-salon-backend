@@ -19,11 +19,11 @@ type UpdateMyStaffServiceInterface interface {
 }
 
 type CreateStoreAccessServiceInterface interface {
-	CreateStoreAccess(ctx context.Context, staffID int64, req adminStaffModel.CreateStoreAccessRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStoreAccessResponse, bool, error)
+	CreateStoreAccess(ctx context.Context, staffID int64, storeID int64, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStoreAccessResponse, bool, error)
 }
 
 type DeleteStoreAccessBulkServiceInterface interface {
-	DeleteStoreAccessBulk(ctx context.Context, targetID string, req adminStaffModel.DeleteStoreAccessBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.DeleteStoreAccessBulkResponse, error)
+	DeleteStoreAccessBulk(ctx context.Context, targetID int64, storeIDs []int64, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.DeleteStoreAccessBulkResponse, error)
 }
 
 type GetStaffListServiceInterface interface {

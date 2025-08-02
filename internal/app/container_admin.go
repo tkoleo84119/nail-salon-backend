@@ -42,7 +42,7 @@ type AdminServices struct {
 	StaffGetList           adminStaffService.GetStaffListServiceInterface
 	StaffGetStoreAccess    adminStaffService.GetStaffStoreAccessServiceInterface
 	StaffStoreAccess       adminStaffService.CreateStoreAccessServiceInterface
-	StaffDeleteStoreAccess *adminStaffService.DeleteStoreAccessBulkService
+	StaffDeleteStoreAccess adminStaffService.DeleteStoreAccessBulkServiceInterface
 
 	// Store management services
 	StoreGetList adminStoreService.GetStoreListServiceInterface
@@ -163,7 +163,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.SQLX),
 		StaffGetStoreAccess:    adminStaffService.NewGetStaffStoreAccessService(repositories.SQLX),
 		StaffStoreAccess:       adminStaffService.NewCreateStoreAccessService(repositories.SQLX),
-		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(queries),
+		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(repositories.SQLX),
 
 		// Store management services
 		StoreGetList: adminStoreService.NewGetStoreListService(repositories.SQLX),

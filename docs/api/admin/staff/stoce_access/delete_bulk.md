@@ -1,6 +1,6 @@
 ## User Story
 
-作為一位超級管理員（`SUPER_ADMIN`）或系統管理員（`ADMIN`），我希望可以刪除某位員工可操作的門市（多筆），以便控管其實際管理範圍。
+作為一位管理員，我希望可以刪除某位員工可操作的門市（多筆），以便控管其實際管理範圍。
 
 ---
 
@@ -10,9 +10,16 @@
 
 ---
 
+## 說明
+
+- 提供管理員刪除特定員工的門市存取權限。
+
+---
+
 ## 權限
 
-- 僅限 `SUPER_ADMIN` 或 `ADMIN` 存取
+- 需要登入才可使用。
+- `SUPER_ADMIN` 與 `ADMIN` 可使用。
 
 ---
 
@@ -20,12 +27,16 @@
 
 ### Header
 
-```http
-Content-Type: application/json
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
-### Body
+### Path Parameter
+
+| 參數    | 說明        |
+| ------- | ----------- |
+| staffId | 員工帳號 ID |
+
+### Body 範例
 
 ```json
 {
@@ -35,9 +46,9 @@ Authorization: Bearer <access_token>
 
 ### 驗證規則
 
-| 欄位     | 規則                         | 說明                 |
-| -------- | ---------------------------- | -------------------- |
-| storeIds | <li>必填<li>陣列<li>不可為空 | 欲移除的門市 ID 清單 |
+| 欄位     | 必填 | 其他規則                | 說明                 |
+| -------- | ---- | ----------------------- | -------------------- |
+| storeIds | 是   | <li>最小1筆<li>最大20筆 | 欲移除的門市 ID 清單 |
 
 ---
 
@@ -48,7 +59,6 @@ Authorization: Bearer <access_token>
 ```json
 {
   "data": {
-    "staffUserId": "928374234",
     "storeList": [
       {
         "id": "2",
@@ -59,16 +69,55 @@ Authorization: Bearer <access_token>
 }
 ```
 
-### 失敗
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                              |
+| ------ | -------- | --------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入    |
+| 401    | E1003    | accessToken 缺失，請重新登入      |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入  |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入  |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入  |
+| 403    | E1010    | 權限不足，無法執行此操作          |
+| 400    | E2002    | 路徑參數缺失，請檢查              |
+| 400    | E2004    | 參數類型轉換失敗                  |
+| 400    | E2020    | {field} 為必填項目                |
+| 400    | E2022    | {field} 至少需要 {param} 個項目   |
+| 400    | E2025    | {field} 最多只能有 {param} 個項目 |
+| 400    | E3STA004 | 不可更新自己的帳號                |
+| 404    | E3STA005 | 員工帳號不存在                    |
+| 404    | E3STO002 | 門市不存在或已被刪除              |
+| 500    | E9001    | 系統發生錯誤，請稍後再試          |
+| 500    | E9002    | 資料庫操作失敗                    |
 
 #### 400 Bad Request - 驗證錯誤
 
 ```json
 {
-  "message": "輸入驗證失敗",
-  "errors": {
-    "storeIds": "門市清單最小值為1"
-  }
+  "errors": [
+    {
+      "code": "E2022",
+      "message": "storeIds 至少需要 1 個項目",
+      "field": "storeIds"
+    }
+  ]
+}
+```
+
+#### 401 Unauthorized - 無效的 accessToken
+
+```json
+
+```json
+{
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
@@ -76,7 +125,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "權限不足，無法執行此操作"
+  "errors": [
+    {
+      "code": "E1010",
+      "message": "權限不足，無法執行此操作"
+    }
+  ]
 }
 ```
 
@@ -84,15 +138,25 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "指定的員工不存在"
+  "errors": [
+    {
+      "code": "E3STA005",
+      "message": "指定的員工不存在"
+    }
+  ]
 }
 ```
 
-#### 500 Internal Server Error
+#### 500 Internal Server Error - 系統發生錯誤
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
@@ -109,7 +173,7 @@ Authorization: Bearer <access_token>
 ## Service 邏輯
 
 1. 驗證目標員工是否存在
-2. 不能新增自己的 store access
+2. 不能刪除自己的 store access
 3. 目標員工不能為 `SUPER_ADMIN`
 4. 驗證門市是否存在
 5. 檢查門市是否啟用中，且是否是該管理員有權限的門市
@@ -120,7 +184,4 @@ Authorization: Bearer <access_token>
 
 ## 注意事項
 
-- 僅能操作他人帳號（不可移除自己）
 - `SUPER_ADMIN` 不能被更動其門市權限
-- 不會因門市不存在於原 access 而報錯（可忽略）
-

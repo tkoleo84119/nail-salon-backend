@@ -45,6 +45,14 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 		return
 	}
 
+	parsedStoreID, err := utils.ParseID(req.StoreID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"storeId": "storeId 類型轉換失敗",
+		})
+		return
+	}
+
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
 		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
@@ -70,7 +78,7 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	}
 
 	// Call service
-	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), parsedStaffID, req, creatorID, staffContext.Role, creatorStoreIDs)
+	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), parsedStaffID, parsedStoreID, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

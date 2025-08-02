@@ -8,7 +8,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -101,19 +100,19 @@ func hasRequiredRole(userRole string, allowedRoles []string) bool {
 }
 
 func RequireAdminRoles() gin.HandlerFunc {
-	return RequireRoles(adminStaffModel.RoleSuperAdmin, adminStaffModel.RoleAdmin)
+	return RequireRoles(common.RoleSuperAdmin, common.RoleAdmin)
 }
 
 func RequireManagerOrAbove() gin.HandlerFunc {
-	return RequireRoles(adminStaffModel.RoleSuperAdmin, adminStaffModel.RoleAdmin, adminStaffModel.RoleManager)
+	return RequireRoles(common.RoleSuperAdmin, common.RoleAdmin, common.RoleManager)
 }
 
 func RequireSuperAdmin() gin.HandlerFunc {
-	return RequireRoles(adminStaffModel.RoleSuperAdmin)
+	return RequireRoles(common.RoleSuperAdmin)
 }
 
 func RequireAnyStaffRole() gin.HandlerFunc {
-	return RequireRoles(adminStaffModel.RoleSuperAdmin, adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist)
+	return RequireRoles(common.RoleSuperAdmin, common.RoleAdmin, common.RoleManager, common.RoleStylist)
 }
 
 // CustomerJWTAuth middleware for customer authentication

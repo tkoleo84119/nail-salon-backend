@@ -62,7 +62,7 @@ func (s *CreateStoreService) CreateStore(ctx context.Context, req adminStoreMode
 
 	// If creator is ADMIN, automatically grant store access
 	if role == adminStaffModel.RoleAdmin {
-		_, err = s.repo.StaffUserStoreAccess.CreateStaffUserStoreAccessTx(ctx, tx, sqlxRepo.CreateStaffUserStoreAccessTxParams{
+		err = s.repo.StaffUserStoreAccess.CreateStaffUserStoreAccessTx(ctx, tx, sqlxRepo.CreateStaffUserStoreAccessTxParams{
 			StoreID:     storeID,
 			StaffUserID: staffId,
 		})
