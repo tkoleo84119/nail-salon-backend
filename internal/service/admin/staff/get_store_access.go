@@ -8,6 +8,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -39,11 +40,11 @@ func (s *GetStaffStoreAccessService) GetStaffStoreAccess(ctx context.Context, st
 	}
 
 	// Convert to response format
-	var items []adminStaffModel.StaffStoreAccessItem
+	var items []common.Store
 	for _, access := range storeAccessList {
-		items = append(items, adminStaffModel.StaffStoreAccessItem{
-			StoreID: utils.FormatID(access.StoreID),
-			Name:    access.Name,
+		items = append(items, common.Store{
+			ID:   utils.FormatID(access.StoreID),
+			Name: access.Name,
 		})
 	}
 

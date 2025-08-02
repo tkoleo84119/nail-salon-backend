@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -40,6 +41,6 @@ func (h *GetStaffStoreAccessHandler) GetStaffStoreAccess(c *gin.Context) {
 		return
 	}
 
-	// Success response - directly return the response data structure
-	c.JSON(http.StatusOK, response)
+	// Success response
+	c.JSON(http.StatusOK, common.SuccessResponse(response))
 }
