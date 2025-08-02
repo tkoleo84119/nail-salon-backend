@@ -8,40 +8,34 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetStaffStoreAccessService struct {
-	queries *dbgen.Queries
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetStaffStoreAccessService(queries *dbgen.Queries) *GetStaffStoreAccessService {
+func NewGetStaffStoreAccessService(repo *sqlxRepo.Repositories) *GetStaffStoreAccessService {
 	return &GetStaffStoreAccessService{
-		queries: queries,
+		repo: repo,
 	}
 }
 
-func (s *GetStaffStoreAccessService) GetStaffStoreAccess(ctx context.Context, staffID string) (*adminStaffModel.GetStaffStoreAccessResponse, error) {
-	// Parse staff ID
-	staffUserID, err := utils.ParseID(staffID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid staff ID", err)
-	}
-
+func (s *GetStaffStoreAccessService) GetStaffStoreAccess(ctx context.Context, staffID int64) (*adminStaffModel.GetStaffStoreAccessResponse, error) {
 	// Verify staff user exists
-	_, err = s.queries.GetStaffUserByID(ctx, staffUserID)
+	_, err := s.repo.Staff.GetStaffUserByID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
 		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get staff user", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get staff user", err)
 	}
 
 	// Get staff store access
-	storeAccessList, err := s.queries.GetStaffUserStoreAccess(ctx, staffUserID)
+	storeAccessList, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, staffID, nil)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to get staff store access", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get staff store access", err)
 	}
 
 	// Convert to response format
@@ -49,7 +43,7 @@ func (s *GetStaffStoreAccessService) GetStaffStoreAccess(ctx context.Context, st
 	for _, access := range storeAccessList {
 		items = append(items, adminStaffModel.StaffStoreAccessItem{
 			StoreID: utils.FormatID(access.StoreID),
-			Name:    access.StoreName,
+			Name:    access.Name,
 		})
 	}
 

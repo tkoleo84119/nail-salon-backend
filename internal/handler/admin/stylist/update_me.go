@@ -24,7 +24,7 @@ func NewUpdateMyStylistHandler(service adminStylistService.UpdateMyStylistServic
 }
 
 var validGoodAtShapes = map[string]struct{}{
-	"方形": {}, "方圓形": {}, "橢圓形": {}, "圓型": {}, "圓尖形": {}, "尖形": {}, "梯形": {},
+	"方形": {}, "方圓形": {}, "橢圓形": {}, "圓形": {}, "圓尖形": {}, "尖形": {}, "梯形": {},
 }
 
 var validGoodAtColors = map[string]struct{}{
@@ -52,7 +52,7 @@ func (h *UpdateMyStylistHandler) UpdateMyStylist(c *gin.Context) {
 	if req.GoodAtShapes != nil {
 		for _, shape := range *req.GoodAtShapes {
 			if _, ok := validGoodAtShapes[shape]; !ok {
-				errorCodes.AbortWithError(c, errorCodes.ValFieldOneof, map[string]string{"goodAtShapes": "goodAtShapes 必須是方形 方圓形 橢圓形 圓型 圓尖形 尖形 梯形 其中一個值"})
+				errorCodes.AbortWithError(c, errorCodes.ValFieldOneof, map[string]string{"goodAtShapes": "goodAtShapes 必須是方形 方圓形 橢圓形 圓形 圓尖形 尖形 梯形 其中一個值"})
 				return
 			}
 		}

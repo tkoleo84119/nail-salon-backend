@@ -15,6 +15,19 @@ type CreateStoreAccessResponse struct {
 
 // -------------------------------------------------------------------------------------
 
+// GetStaffStoreAccessResponse represents the response for staff store access list
+type GetStaffStoreAccessResponse struct {
+	StoreList []StaffStoreAccessItem `json:"storeList"`
+}
+
+// StaffStoreAccessItem represents a single store access item
+type StaffStoreAccessItem struct {
+	StoreID string `json:"storeId"`
+	Name    string `json:"name"`
+}
+
+// -------------------------------------------------------------------------------------
+
 // DeleteStoreAccessBulkRequest represents the request for deleting store access
 type DeleteStoreAccessBulkRequest struct {
 	StoreIDs []string `json:"storeIds" binding:"required,min=1,max=100"`
