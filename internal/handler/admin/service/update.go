@@ -39,10 +39,17 @@ func (h *UpdateServiceHandler) UpdateService(c *gin.Context) {
 		})
 		return
 	}
+	parsedServiceID, err := utils.ParseID(serviceID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"serviceId": "serviceId 類型轉換失敗",
+		})
+		return
+	}
 
 	// Check if request has updates
 	if !req.HasUpdates() {
-		errorCodes.RespondWithEmptyFieldError(c)
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
 	}
 
@@ -52,7 +59,7 @@ func (h *UpdateServiceHandler) UpdateService(c *gin.Context) {
 		return
 	}
 
-	response, err := h.service.UpdateService(c.Request.Context(), serviceID, req, staffContext.Role)
+	response, err := h.service.UpdateService(c.Request.Context(), parsedServiceID, req, staffContext.Role)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -29,11 +29,11 @@ type CreateServiceResponse struct {
 // UpdateServiceRequest represents the request to update a service
 type UpdateServiceRequest struct {
 	Name            *string `json:"name" binding:"omitempty,min=1,max=100"`
-	Price           *int64  `json:"price" binding:"omitempty,min=0"`
+	Price           *int64  `json:"price" binding:"omitempty,min=0,max=1000000"`
 	DurationMinutes *int32  `json:"durationMinutes" binding:"omitempty,min=0,max=1440"`
-	IsAddon         *bool   `json:"isAddon" binding:"omitempty"`
-	IsVisible       *bool   `json:"isVisible" binding:"omitempty"`
-	IsActive        *bool   `json:"isActive" binding:"omitempty"`
+	IsAddon         *bool   `json:"isAddon" binding:"omitempty,boolean"`
+	IsVisible       *bool   `json:"isVisible" binding:"omitempty,boolean"`
+	IsActive        *bool   `json:"isActive" binding:"omitempty,boolean"`
 	Note            *string `json:"note" binding:"omitempty,max=255"`
 }
 
@@ -47,6 +47,8 @@ type UpdateServiceResponse struct {
 	IsVisible       bool   `json:"isVisible"`
 	IsActive        bool   `json:"isActive"`
 	Note            string `json:"note"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
 }
 
 // HasUpdates checks if the request has any fields to update

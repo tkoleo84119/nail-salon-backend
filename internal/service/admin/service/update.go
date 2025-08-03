@@ -8,34 +8,25 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateServiceService struct {
-	queries dbgen.Querier
-	repo    *sqlx.Repositories
+	repo *sqlx.Repositories
 }
 
-func NewUpdateServiceService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateServiceService {
+func NewUpdateServiceService(repo *sqlx.Repositories) *UpdateServiceService {
 	return &UpdateServiceService{
-		queries: queries,
-		repo:    repo,
+		repo: repo,
 	}
 }
 
-func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID string, req adminServiceModel.UpdateServiceRequest, updaterRole string) (*adminServiceModel.UpdateServiceResponse, error) {
+func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest, updaterRole string) (*adminServiceModel.UpdateServiceResponse, error) {
 	// Validate permissions
 	if err := s.validatePermissions(updaterRole); err != nil {
 		return nil, err
-	}
-
-	// Parse service ID
-	parsedServiceID, err := utils.ParseID(serviceID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid service ID", err)
 	}
 
 	// Validate request has at least one field to update
@@ -44,7 +35,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID stri
 	}
 
 	// Check if service exists
-	_, err = s.queries.GetServiceByID(ctx, parsedServiceID)
+	_, err := s.repo.Service.GetServiceByID(ctx, serviceID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceNotFound)
@@ -54,10 +45,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID stri
 
 	// Check name uniqueness if name is being updated
 	if req.Name != nil {
-		exists, err := s.queries.CheckServiceNameExistsExcluding(ctx, dbgen.CheckServiceNameExistsExcludingParams{
-			Name: *req.Name,
-			ID:   parsedServiceID,
-		})
+		exists, err := s.repo.Service.CheckServiceNameExistsExcluding(ctx, serviceID, *req.Name)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check service name uniqueness", err)
 		}
@@ -66,19 +54,39 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID stri
 		}
 	}
 
-	// Update service using sqlx repository
-	updatedService, err := s.repo.Service.UpdateService(ctx, parsedServiceID, req)
+	updatedService, err := s.repo.Service.UpdateService(ctx, serviceID, sqlx.UpdateServiceParams{
+		Name:            req.Name,
+		Price:           req.Price,
+		DurationMinutes: req.DurationMinutes,
+		IsAddon:         req.IsAddon,
+		IsVisible:       req.IsVisible,
+		IsActive:        req.IsActive,
+		Note:            req.Note,
+	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update service", err)
 	}
 
-	return updatedService, nil
+	response := adminServiceModel.UpdateServiceResponse{
+		ID:              utils.FormatID(updatedService.ID),
+		Name:            updatedService.Name,
+		Price:           int64(utils.PgNumericToFloat64(updatedService.Price)),
+		DurationMinutes: updatedService.DurationMinutes,
+		IsAddon:         utils.PgBoolToBool(updatedService.IsAddon),
+		IsVisible:       utils.PgBoolToBool(updatedService.IsVisible),
+		IsActive:        utils.PgBoolToBool(updatedService.IsActive),
+		Note:            utils.PgTextToString(updatedService.Note),
+		CreatedAt:       utils.PgTimestamptzToTimeString(updatedService.CreatedAt),
+		UpdatedAt:       utils.PgTimestamptzToTimeString(updatedService.UpdatedAt),
+	}
+
+	return &response, nil
 }
 
 // validatePermissions checks if the updater has permission to update services
 func (s *UpdateServiceService) validatePermissions(updaterRole string) error {
 	switch updaterRole {
-	case adminStaffModel.RoleSuperAdmin, adminStaffModel.RoleAdmin:
+	case common.RoleSuperAdmin, common.RoleAdmin:
 		return nil
 	default:
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)

@@ -11,7 +11,7 @@ type CreateServiceInterface interface {
 }
 
 type UpdateServiceInterface interface {
-	UpdateService(ctx context.Context, serviceID string, req adminServiceModel.UpdateServiceRequest, updaterRole string) (*adminServiceModel.UpdateServiceResponse, error)
+	UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest, updaterRole string) (*adminServiceModel.UpdateServiceResponse, error)
 }
 
 type GetServiceListServiceInterface interface {
