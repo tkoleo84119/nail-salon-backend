@@ -4,7 +4,6 @@ import (
 	"context"
 
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 type CreateServiceInterface interface {
@@ -20,5 +19,5 @@ type GetServiceListServiceInterface interface {
 }
 
 type GetServiceServiceInterface interface {
-	GetService(ctx context.Context, storeID, serviceID string, staffContext common.StaffContext) (*adminServiceModel.GetServiceResponse, error)
+	GetService(ctx context.Context, serviceID int64) (*adminServiceModel.GetServiceResponse, error)
 }

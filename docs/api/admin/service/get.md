@@ -1,26 +1,25 @@
 ## User Story
 
-作為員工，我希望可以查詢某門市底下的特定服務資料，以便管理或顯示詳細內容。
+作為員工，我希望可以查詢特定服務資料，以便管理或顯示詳細內容。
 
 ---
 
 ## Endpoint
 
-**GET** `/api/admin/stores/{storeId}/services/{serviceId}`
+**GET** `/api/admin/services/{serviceId}`
 
 ---
 
 ## 說明
 
-- 所有登入員工皆可查詢。
 - 用於查詢特定服務的詳細資訊。
-- 僅限該門市底下綁定的服務資料。
 
 ---
 
 ## 權限
 
-- 任一已登入員工皆可使用（JWT 驗證）。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -28,13 +27,13 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameters
 
 | 參數      | 說明    |
 | --------- | ------- |
-| storeId   | 門市 ID |
 | serviceId | 服務 ID |
 
 ---
@@ -53,18 +52,53 @@ Authorization: Bearer <access_token>
     "isAddon": false,
     "isActive": true,
     "isVisible": true,
-    "note": "含修型保養"
+    "note": "含修型保養",
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                             |
+| ------ | -------- | -------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入   |
+| 401    | E1003    | accessToken 缺失，請重新登入     |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入 |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入 |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入 |
+| 400    | E2004    | 參數類型轉換失敗                 |
+| 400    | E2020    | {field} 為必填項目               |
+| 404    | E3SER004 | 服務不存在或已被刪除             |
+| 500    | E9001    | 系統發生錯誤，請稍後再試         |
+| 500    | E9002    | 資料庫操作失敗                   |
+
+#### 400 Bad Request - 參數類型轉換失敗
+
+```json
+{
+  "error": {
+    "code": "E2004",
+    "message": "serviceId 類型轉換失敗",
+    "field": "serviceId"
+  }
+}
+```
+
 
 #### 401 Unauthorized - 未登入/Token失效
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
@@ -72,7 +106,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "權限不足，無法執行此操作"
+  "errors": [
+    {
+      "code": "E1010",
+      "message": "權限不足，無法執行此操作"
+    }
+  ]
 }
 ```
 
@@ -80,21 +119,25 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "門市不存在或已被刪除"
+  "errors": [
+    {
+      "code": "E3SER004",
+      "message": "服務不存在或已被刪除"
+    }
+  ]
 }
 ```
 
-```json
-{
-  "message": "查無此門市或服務"
-}
-```
-
-#### 500 Internal Server Error
+#### 500 Internal Server Error - 系統錯誤
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
@@ -102,22 +145,12 @@ Authorization: Bearer <access_token>
 
 ## 資料表
 
-- `stores`
 - `services`
 
 ---
 
 ## Service 邏輯
 
-1. 驗證 `storeId` 是否存在。
-2. 驗證員工是否擁有該門市存取權限。
-3. 查詢 `services` 表中該筆服務是否存在，且 `store_id=storeId`。
-4. 不存在則回傳 `404 Not Found`。
-5. 存在則回傳該筆服務詳細內容。
-
----
-
-## 注意事項
-
-- 僅能查詢特定門市底下的服務（跨門市查詢無效）。
-
+1. 查詢 `services` 表中該筆服務是否存在。
+2. 不存在則回傳 `404 Not Found`。
+3. 存在則回傳該筆服務詳細內容。

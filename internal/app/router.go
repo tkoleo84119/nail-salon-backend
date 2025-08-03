@@ -171,9 +171,6 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreCreate.CreateStore)
 		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreUpdate.UpdateStore)
 
-		// Store services routes
-		stores.GET("/:storeId/services/:serviceId", middleware.JWTAuth(*cfg, queries), handlers.Admin.ServiceGet.GetService)
-
 		// Store stylists routes
 		stores.GET("/:storeId/stylists", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.StylistGetList.GetStylistList)
 
@@ -193,6 +190,7 @@ func setupAdminServiceRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	services := admin.Group("/services")
 	{
 		services.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceGetList.GetServiceList)
+		services.GET("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceGet.GetService)
 		services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceCreate.CreateService)
 		services.PATCH("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceUpdate.UpdateService)
 	}

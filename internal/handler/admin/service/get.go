@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetServiceHandler struct {
@@ -22,29 +22,20 @@ func NewGetServiceHandler(service adminServiceService.GetServiceServiceInterface
 }
 
 func (h *GetServiceHandler) GetService(c *gin.Context) {
-	// Get store ID from path parameter
-	storeID := c.Param("storeId")
-	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
-		return
-	}
-
 	// Get service ID from path parameter
 	serviceID := c.Param("serviceId")
 	if serviceID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"serviceId": "serviceId 為必填項目"})
 		return
 	}
-
-	// Get staff context from JWT middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+	parsedServiceID, err := utils.ParseID(serviceID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"serviceId": "serviceId 類型轉換失敗"})
 		return
 	}
 
 	// Service layer call
-	response, err := h.service.GetService(c.Request.Context(), storeID, serviceID, *staffContext)
+	response, err := h.service.GetService(c.Request.Context(), parsedServiceID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

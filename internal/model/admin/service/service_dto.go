@@ -110,4 +110,6 @@ type GetServiceResponse struct {
 	IsActive        bool   `json:"isActive"`
 	IsVisible       bool   `json:"isVisible"`
 	Note            string `json:"note"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
 }

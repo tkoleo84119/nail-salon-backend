@@ -8,57 +8,23 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetServiceService struct {
-	queries *dbgen.Queries
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetServiceService(queries *dbgen.Queries) *GetServiceService {
+func NewGetServiceService(repo *sqlxRepo.Repositories) *GetServiceService {
 	return &GetServiceService{
-		queries: queries,
+		repo: repo,
 	}
 }
 
-func (s *GetServiceService) GetService(ctx context.Context, storeID, serviceID string, staffContext common.StaffContext) (*adminServiceModel.GetServiceResponse, error) {
-	// Parse store ID
-	storeIDInt, err := utils.ParseID(storeID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid store ID", err)
-	}
-
-	// Parse service ID
-	serviceIDInt, err := utils.ParseID(serviceID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid service ID", err)
-	}
-
-	// Verify store exists
-	_, err = s.queries.GetStoreByID(ctx, storeIDInt)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get store", err)
-	}
-
-	// Check store access for the staff member (except SUPER_ADMIN)
-	if staffContext.Role != adminStaffModel.RoleSuperAdmin {
-		hasAccess, err := utils.CheckOneStoreAccess(storeIDInt, staffContext)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to check store access", err)
-		}
-		if !hasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-		}
-	}
-
+func (s *GetServiceService) GetService(ctx context.Context, serviceID int64) (*adminServiceModel.GetServiceResponse, error) {
 	// Get service information
-	service, err := s.queries.GetServiceByID(ctx, serviceIDInt)
+	service, err := s.repo.Service.GetServiceByID(ctx, serviceID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceNotFound)
@@ -72,10 +38,12 @@ func (s *GetServiceService) GetService(ctx context.Context, storeID, serviceID s
 		Name:            service.Name,
 		DurationMinutes: service.DurationMinutes,
 		Price:           int64(utils.PgNumericToFloat64(service.Price)),
-		IsAddon:         service.IsAddon.Bool,
-		IsActive:        service.IsActive.Bool,
-		IsVisible:       service.IsVisible.Bool,
+		IsAddon:         utils.PgBoolToBool(service.IsAddon),
+		IsActive:        utils.PgBoolToBool(service.IsActive),
+		IsVisible:       utils.PgBoolToBool(service.IsVisible),
 		Note:            service.Note.String,
+		CreatedAt:       utils.PgTimestamptzToTimeString(service.CreatedAt),
+		UpdatedAt:       utils.PgTimestamptzToTimeString(service.UpdatedAt),
 	}
 
 	return response, nil

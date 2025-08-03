@@ -16,6 +16,7 @@ import (
 type ServiceRepositoryInterface interface {
 	CreateService(ctx context.Context, params CreateServiceParams) (CreateServiceResponse, error)
 	GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error)
+	GetServiceByID(ctx context.Context, serviceID int64) (GetServiceByIDResponse, error)
 	UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error)
 	GetStoreServices(ctx context.Context, storeID int64, isAddon *bool, limit, offset int) ([]storeModel.GetStoreServicesItemModel, int, error)
 	CheckServiceNameExists(ctx context.Context, name string) (bool, error)
@@ -201,6 +202,35 @@ func (r *ServiceRepository) GetAllServiceByFilter(ctx context.Context, params Ge
 	}
 
 	return total, results, nil
+}
+
+type GetServiceByIDResponse struct {
+	ID              int64              `db:"id"`
+	Name            string             `db:"name"`
+	Price           pgtype.Numeric     `db:"price"`
+	DurationMinutes int32              `db:"duration_minutes"`
+	IsAddon         pgtype.Bool        `db:"is_addon"`
+	IsVisible       pgtype.Bool        `db:"is_visible"`
+	IsActive        pgtype.Bool        `db:"is_active"`
+	Note            pgtype.Text        `db:"note"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (r *ServiceRepository) GetServiceByID(ctx context.Context, serviceID int64) (GetServiceByIDResponse, error) {
+	query := `
+		SELECT id, name, price, duration_minutes, is_addon, is_visible, is_active, note, created_at, updated_at
+		FROM services
+		WHERE id = $1
+	`
+
+	var result GetServiceByIDResponse
+	err := r.db.GetContext(ctx, &result, query, serviceID)
+	if err != nil {
+		return GetServiceByIDResponse{}, err
+	}
+
+	return result, nil
 }
 
 func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error) {
