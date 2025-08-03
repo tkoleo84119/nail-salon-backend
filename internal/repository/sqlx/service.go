@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
 	storeModel "github.com/tkoleo84119/nail-salon-backend/internal/model/store"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type ServiceRepositoryInterface interface {
+	GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error)
 	UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error)
 	GetStoreServices(ctx context.Context, storeID int64, isAddon *bool, limit, offset int) ([]storeModel.GetStoreServicesItemModel, int, error)
-	GetStoreServiceList(ctx context.Context, storeID int64, params GetStoreServiceListParams) ([]GetStoreServiceListModel, int, error)
 }
 
 type ServiceRepository struct {
@@ -25,6 +27,133 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 	return &ServiceRepository{
 		db: db,
 	}
+}
+
+// GetStoreServiceListModel represents the database model for admin service list queries
+type GetAllServiceByFilterItem struct {
+	ID              int64              `db:"id"`
+	Name            string             `db:"name"`
+	Price           pgtype.Numeric     `db:"price"`
+	DurationMinutes int32              `db:"duration_minutes"`
+	IsAddon         pgtype.Bool        `db:"is_addon"`
+	IsActive        pgtype.Bool        `db:"is_active"`
+	IsVisible       pgtype.Bool        `db:"is_visible"`
+	Note            pgtype.Text        `db:"note"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
+}
+
+type GetAllServiceByFilterParams struct {
+	Name      *string
+	IsAddon   *bool
+	IsActive  *bool
+	IsVisible *bool
+	Limit     *int
+	Offset    *int
+	Sort      *[]string
+}
+
+// GetStoreServiceList retrieves services for a specific store with admin filtering and pagination
+func (r *ServiceRepository) GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error) {
+	// Set default pagination values
+	limit := 20
+	offset := 0
+	if params.Limit != nil && *params.Limit > 0 {
+		limit = *params.Limit
+	}
+	if params.Offset != nil && *params.Offset >= 0 {
+		offset = *params.Offset
+	}
+
+	// Set default sort values
+	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_active", "is_visible", "is_addon"}, "created_at", "ASC", params.Sort)
+
+	// Build WHERE clause parts
+	whereParts := []string{}
+	args := map[string]interface{}{
+		"limit":  limit,
+		"offset": offset,
+	}
+
+	if params.Name != nil && *params.Name != "" {
+		whereParts = append(whereParts, "name ILIKE :name")
+		args["name"] = "%" + *params.Name + "%"
+	}
+
+	if params.IsAddon != nil {
+		whereParts = append(whereParts, "is_addon = :is_addon")
+		args["is_addon"] = *params.IsAddon
+	}
+
+	if params.IsActive != nil {
+		whereParts = append(whereParts, "is_active = :is_active")
+		args["is_active"] = *params.IsActive
+	}
+
+	if params.IsVisible != nil {
+		whereParts = append(whereParts, "is_visible = :is_visible")
+		args["is_visible"] = *params.IsVisible
+	}
+
+	whereClause := ""
+	if len(whereParts) > 0 {
+		whereClause = fmt.Sprintf("WHERE %s", strings.Join(whereParts, " AND "))
+	}
+
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM services
+		%s
+	`, whereClause)
+
+	var total int
+	rows, err := r.db.NamedQueryContext(ctx, countQuery, args)
+	if err != nil {
+		return 0, nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.Scan(&total); err != nil {
+			return 0, nil, fmt.Errorf("failed to scan count: %w", err)
+		}
+	}
+
+	// Main query with pagination
+	query := fmt.Sprintf(`
+		SELECT
+			id,
+			name,
+			price,
+			duration_minutes,
+			is_addon,
+			is_active,
+			is_visible,
+			COALESCE(note, '') as note,
+			created_at,
+			updated_at
+		FROM services
+		%s
+		ORDER BY %s
+		LIMIT :limit OFFSET :offset
+	`, whereClause, sort)
+
+	var results []GetAllServiceByFilterItem
+	rows, err = r.db.NamedQueryContext(ctx, query, args)
+	if err != nil {
+		return 0, nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item GetAllServiceByFilterItem
+		if err := rows.StructScan(&item); err != nil {
+			return 0, nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		results = append(results, item)
+	}
+
+	return total, results, nil
 }
 
 func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error) {
@@ -212,124 +341,4 @@ func (r *ServiceRepository) GetStoreServices(ctx context.Context, storeID int64,
 	}
 
 	return items, total, nil
-}
-
-// GetStoreServiceListModel represents the database model for admin service list queries
-type GetStoreServiceListModel struct {
-	ID              int64  `db:"id"`
-	Name            string `db:"name"`
-	Price           int64  `db:"price"`
-	DurationMinutes int32  `db:"duration_minutes"`
-	IsAddon         bool   `db:"is_addon"`
-	IsActive        bool   `db:"is_active"`
-	IsVisible       bool   `db:"is_visible"`
-	Note            string `db:"note"`
-}
-
-type GetStoreServiceListParams struct {
-	Name      *string
-	IsAddon   *bool
-	IsActive  *bool
-	IsVisible *bool
-	Limit     *int
-	Offset    *int
-}
-
-// GetStoreServiceList retrieves services for a specific store with admin filtering and pagination
-func (r *ServiceRepository) GetStoreServiceList(ctx context.Context, storeID int64, params GetStoreServiceListParams) ([]GetStoreServiceListModel, int, error) {
-	// Set default pagination values
-	limit := 20
-	offset := 0
-	if params.Limit != nil && *params.Limit > 0 {
-		limit = *params.Limit
-	}
-	if params.Offset != nil && *params.Offset >= 0 {
-		offset = *params.Offset
-	}
-
-	// Build WHERE clause parts
-	whereParts := []string{"store_id = :store_id"}
-	args := map[string]interface{}{
-		"store_id": storeID,
-		"limit":    limit,
-		"offset":   offset,
-	}
-
-	// Add name filter
-	if params.Name != nil && *params.Name != "" {
-		whereParts = append(whereParts, "name ILIKE :name")
-		args["name"] = "%" + *params.Name + "%"
-	}
-
-	// Add isAddon filter
-	if params.IsAddon != nil {
-		whereParts = append(whereParts, "is_addon = :is_addon")
-		args["is_addon"] = *params.IsAddon
-	}
-
-	// Add isActive filter
-	if params.IsActive != nil {
-		whereParts = append(whereParts, "is_active = :is_active")
-		args["is_active"] = *params.IsActive
-	}
-
-	// Add isVisible filter
-	if params.IsVisible != nil {
-		whereParts = append(whereParts, "is_visible = :is_visible")
-		args["is_visible"] = *params.IsVisible
-	}
-
-	// Build WHERE clause
-	whereClause := strings.Join(whereParts, " AND ")
-
-	// Count query for total records
-	countQuery := fmt.Sprintf(`
-		SELECT COUNT(*)
-		FROM services
-		WHERE %s
-	`, whereClause)
-
-	var total int
-	rows, err := r.db.NamedQueryContext(ctx, countQuery, args)
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to execute count query: %w", err)
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err := rows.Scan(&total); err != nil {
-			return nil, 0, fmt.Errorf("failed to scan count: %w", err)
-		}
-	}
-
-	// Main query with pagination
-	query := fmt.Sprintf(`
-		SELECT id, name, price, duration_minutes, is_addon, is_active, is_visible,
-		       COALESCE(note, '') as note
-		FROM services
-		WHERE %s
-		ORDER BY name
-		LIMIT :limit OFFSET :offset
-	`, whereClause)
-
-	var results []GetStoreServiceListModel
-	rows, err = r.db.NamedQueryContext(ctx, query, args)
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to execute query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var item GetStoreServiceListModel
-		if err := rows.StructScan(&item); err != nil {
-			return nil, 0, fmt.Errorf("failed to scan row: %w", err)
-		}
-		results = append(results, item)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, 0, fmt.Errorf("rows iteration error: %w", err)
-	}
-
-	return results, total, nil
 }

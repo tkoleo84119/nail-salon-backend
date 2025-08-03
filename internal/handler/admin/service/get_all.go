@@ -2,11 +2,11 @@ package adminService
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
@@ -24,13 +24,6 @@ func NewGetServiceListHandler(service adminServiceService.GetServiceListServiceI
 }
 
 func (h *GetServiceListHandler) GetServiceList(c *gin.Context) {
-	// Get store ID from path parameter
-	storeID := c.Param("storeId")
-	if storeID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
-		return
-	}
-
 	// Parse and validate query parameters
 	var req adminServiceModel.GetServiceListRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -39,15 +32,33 @@ func (h *GetServiceListHandler) GetServiceList(c *gin.Context) {
 		return
 	}
 
-	// Get staff context from JWT middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthTokenInvalid, nil)
-		return
+	// default limit and offset
+	limit := 20
+	offset := 0
+	if req.Limit != nil && *req.Limit > 0 {
+		limit = *req.Limit
+	}
+	if req.Offset != nil && *req.Offset >= 0 {
+		offset = *req.Offset
+	}
+
+	sort := []string{}
+	if req.Sort != nil {
+		sort = strings.Split(*req.Sort, ",")
+	}
+
+	parsedReq := adminServiceModel.GetServiceListParsedRequest{
+		Name:      req.Name,
+		IsAddon:   req.IsAddon,
+		IsActive:  req.IsActive,
+		IsVisible: req.IsVisible,
+		Limit:     limit,
+		Offset:    offset,
+		Sort:      sort,
 	}
 
 	// Service layer call
-	response, err := h.service.GetServiceList(c.Request.Context(), storeID, req, *staffContext)
+	response, err := h.service.GetServiceList(c.Request.Context(), parsedReq)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

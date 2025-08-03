@@ -83,7 +83,7 @@ type GetStaffListRequest struct {
 	Role     *string `form:"role," binding:"omitempty,oneof=SUPER_ADMIN ADMIN MANAGER STYLIST"`
 	IsActive *bool   `form:"isActive" binding:"omitempty,boolean"`
 	Limit    *int    `form:"limit" binding:"omitempty,min=1,max=100"`
-	Offset   *int    `form:"offset" binding:"omitempty,min=0"`
+	Offset   *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
 	Sort     *string `form:"sort" binding:"omitempty"`
 }
 

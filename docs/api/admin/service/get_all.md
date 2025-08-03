@@ -1,26 +1,28 @@
 ## User Story
 
-作為員工，我希望可以查詢某門市底下所有服務資料，並支援條件查詢與分頁，以利管理與設定服務項目。
+作為員工，我希望可以查詢所有服務資料，並支援條件查詢與分頁，以利管理與設定服務項目。
 
 ---
 
 ## Endpoint
 
-**GET** `/api/admin/stores/{storeId}/services`
+**GET** `/api/admin/services`
 
 ---
 
 ## 說明
 
-- 所有登入員工皆可查詢。
-- 支援條件搜尋：服務名稱、是否附加服務、啟用狀態、前台是否可見。
+- 提供員工查詢所有服務資料。
+- 支援基本查詢條件。
 - 支援分頁（limit、offset）。
+- 支援排序（sort）。
 
 ---
 
 ## 權限
 
-- 任一已登入員工皆可存取（JWT 驗證）。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -28,24 +30,32 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
-
-### Path Parameter
-
-| 參數    | 說明    |
-| ------- | ------- |
-| storeId | 門市 ID |
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Query Parameters
 
-| 參數      | 型別   | 必填 | 預設值 | 說明             |
-| --------- | ------ | ---- | ------ | ---------------- |
-| name      | string | 否   |        | 模糊查詢服務名稱 |
-| isAddon   | bool   | 否   |        | 是否為附加服務   |
-| isActive  | bool   | 否   |        | 是否啟用         |
-| isVisible | bool   | 否   |        | 前台是否可見     |
-| limit     | int    | 否   | 20     | 單頁筆數         |
-| offset    | int    | 否   | 0      | 起始筆數         |
+| 參數      | 型別   | 必填 | 預設值    | 說明                                             |
+| --------- | ------ | ---- | --------- | ------------------------------------------------ |
+| name      | string | 否   |           | 模糊查詢服務名稱                                 |
+| isAddon   | bool   | 否   |           | 是否為附加服務                                   |
+| isActive  | bool   | 否   |           | 是否啟用                                         |
+| isVisible | bool   | 否   |           | 前台是否可見                                     |
+| limit     | int    | 否   | 20        | 單頁筆數                                         |
+| offset    | int    | 否   | 0         | 起始筆數                                         |
+| sort      | string | 否   | createdAt | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序) |
+
+### 驗證規則
+
+| 欄位      | 必填 | 其他規則                                                                   |
+| --------- | ---- | -------------------------------------------------------------------------- |
+| name      | 否   | <li>最大長度100字元                                                        |
+| isAddon   | 否   | <li>是否是布林值                                                           |
+| isActive  | 否   | <li>是否是布林值                                                           |
+| isVisible | 否   | <li>是否是布林值                                                           |
+| limit     | 否   | <li>最小值1<li>最大值100                                                   |
+| offset    | 否   | <li>最小值0<li>最大值1000000                                               |
+| sort      | 否   | <li>可以為 createdAt, updatedAt, isActive, isVisible, isAddon (其餘會忽略) |
 
 ---
 
@@ -66,20 +76,59 @@ Authorization: Bearer <access_token>
         "isAddon": false,
         "isActive": true,
         "isVisible": true,
-        "note": "含修型保養"
+        "note": "含修型保養",
+        "createdAt": "2025-01-01T00:00:00+08:00",
+        "updatedAt": "2025-01-01T00:00:00+08:00"
       }
     ]
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼 | 說明                                  |
+| ------ | ------ | ------------------------------------- |
+| 401    | E1002  | 無效的 accessToken，請重新登入        |
+| 401    | E1003  | accessToken 缺失，請重新登入          |
+| 401    | E1004  | accessToken 格式錯誤，請重新登入      |
+| 401    | E1005  | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006  | 未找到使用者認證資訊，請重新登入      |
+| 400    | E2023  | {field} 最小值為 {param}              |
+| 400    | E2024  | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2026  | {field} 最大值為 {param}              |
+| 400    | E2029  | {field} 必須是布林值                  |
+| 500    | E9001  | 系統發生錯誤，請稍後再試              |
+| 500    | E9002  | 資料庫操作失敗                        |
+
+### 400 Bad Request
+
+#### 400 Bad Request - 參數驗證失敗
+
+```json
+{
+  "errors": [
+    {
+      "code": "E2023",
+      "message": "limit 最小值為 1",
+      "field": "limit"
+    }
+  ]
+}
+```
 
 #### 401 Unauthorized - 未登入/Token失效
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken"
+    }
+  ]
 }
 ```
 
@@ -87,23 +136,25 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "權限不足，無法執行此操作"
+  "errors": [
+    {
+      "code": "E1007",
+      "message": "權限不足，無法執行此操作"
+    }
+  ]
 }
 ```
 
-#### 404 Not Found - 門市不存在
+#### 500 Internal Server Error - 系統錯誤
 
 ```json
 {
-  "message": "門市不存在或已被刪除"
-}
-```
-
-#### 500 Internal Server Error
-
-```json
-{
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
@@ -111,25 +162,19 @@ Authorization: Bearer <access_token>
 
 ## 資料表
 
-- `stores`
 - `services`
 
 ---
 
 ## Service 邏輯
 
-1. 驗證 `storeId` 是否存在。
-2. 驗證 `storeId` 是否為該員工可操作的門市。
-3. 根據條件組合查詢 `services`：
-   - store_id = storeId
-   - name（模糊查詢）
-   - is_addon, is_active, is_visible
-4. 加入 `limit` / `offset` 處理分頁。
-5. 回傳總筆數與項目清單。
+1. 根據 `name`（名稱）與 `is_active` 與 `is_visible` 與 `is_addon` 條件動態查詢。
+2. 加入 `limit` 與 `offset` 處理分頁。
+3. 加入 `sort` 處理排序。
+4. 回傳總筆數與項目清單。
 
 ---
 
 ## 注意事項
 
-- 查詢為該門市綁定的服務，不跨門市資料。
-
+- createdAt 與 updatedAt 會是標準 Iso 8601 格式。

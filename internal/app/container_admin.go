@@ -172,7 +172,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StoreUpdate:  adminStoreService.NewUpdateStoreService(repositories.SQLX),
 
 		// Service management services
-		ServiceGetList: adminServiceService.NewGetServiceListService(queries, repositories.SQLX),
+		ServiceGetList: adminServiceService.NewGetServiceListService(repositories.SQLX),
 		ServiceGet:     adminServiceService.NewGetServiceService(queries),
 		ServiceCreate:  adminServiceService.NewCreateServiceService(queries),
 		ServiceUpdate:  adminServiceService.NewUpdateServiceService(queries, repositories.SQLX),
