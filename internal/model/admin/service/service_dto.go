@@ -2,11 +2,11 @@ package adminService
 
 // CreateServiceRequest represents the request to create a new service
 type CreateServiceRequest struct {
-	Name            string `json:"name" binding:"required,min=1,max=100"`
-	Price           int64  `json:"price" binding:"required,min=0"`
+	Name            string `json:"name" binding:"required,max=100"`
+	Price           int64  `json:"price" binding:"required,min=0,max=1000000"`
 	DurationMinutes int32  `json:"durationMinutes" binding:"required,min=0,max=1440"`
-	IsAddon         bool   `json:"isAddon" binding:"omitempty"`
-	IsVisible       bool   `json:"isVisible" binding:"omitempty"`
+	IsAddon         bool   `json:"isAddon" binding:"omitempty,boolean"`
+	IsVisible       bool   `json:"isVisible" binding:"omitempty,boolean"`
 	Note            string `json:"note" binding:"omitempty,max=255"`
 }
 
@@ -20,6 +20,8 @@ type CreateServiceResponse struct {
 	IsVisible       bool   `json:"isVisible"`
 	IsActive        bool   `json:"isActive"`
 	Note            string `json:"note"`
+	CreatedAt       string `json:"createdAt"`
+	UpdatedAt       string `json:"updatedAt"`
 }
 
 // -------------------------------------------------------------------------------------

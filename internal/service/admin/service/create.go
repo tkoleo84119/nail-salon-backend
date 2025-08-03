@@ -5,18 +5,18 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type CreateServiceService struct {
-	queries dbgen.Querier
+	repo *sqlxRepo.Repositories
 }
 
-func NewCreateServiceService(queries dbgen.Querier) *CreateServiceService {
+func NewCreateServiceService(repo *sqlxRepo.Repositories) *CreateServiceService {
 	return &CreateServiceService{
-		queries: queries,
+		repo: repo,
 	}
 }
 
@@ -27,7 +27,7 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req adminServi
 	}
 
 	// Check if service name already exists
-	exists, err := s.queries.CheckServiceNameExists(ctx, req.Name)
+	exists, err := s.repo.Service.CheckServiceNameExists(ctx, req.Name)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check service existence", err)
 	}
@@ -44,18 +44,15 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req adminServi
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to convert price", err)
 	}
 
-	// Convert note to pgtype.Text
-	noteText := utils.StringPtrToPgText(&req.Note, false)
-
 	// Create service
-	createdService, err := s.queries.CreateService(ctx, dbgen.CreateServiceParams{
+	createdService, err := s.repo.Service.CreateService(ctx, sqlxRepo.CreateServiceParams{
 		ID:              serviceID,
 		Name:            req.Name,
 		Price:           priceNumeric,
 		DurationMinutes: req.DurationMinutes,
 		IsAddon:         utils.BoolPtrToPgBool(&req.IsAddon),
 		IsVisible:       utils.BoolPtrToPgBool(&req.IsVisible),
-		Note:            noteText,
+		Note:            utils.StringPtrToPgText(&req.Note, true),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create service", err)
@@ -67,10 +64,12 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req adminServi
 		Name:            createdService.Name,
 		Price:           req.Price,
 		DurationMinutes: createdService.DurationMinutes,
-		IsAddon:         createdService.IsAddon.Bool,
-		IsVisible:       createdService.IsVisible.Bool,
-		IsActive:        createdService.IsActive.Bool,
-		Note:            createdService.Note.String,
+		IsAddon:         utils.PgBoolToBool(createdService.IsAddon),
+		IsVisible:       utils.PgBoolToBool(createdService.IsVisible),
+		IsActive:        utils.PgBoolToBool(createdService.IsActive),
+		Note:            utils.PgTextToString(createdService.Note),
+		CreatedAt:       utils.PgTimestamptzToTimeString(createdService.CreatedAt),
+		UpdatedAt:       utils.PgTimestamptzToTimeString(createdService.UpdatedAt),
 	}
 
 	return response, nil
@@ -79,7 +78,7 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req adminServi
 // validatePermissions checks if the creator has permission to create services
 func (s *CreateServiceService) validatePermissions(creatorRole string) error {
 	switch creatorRole {
-	case adminStaffModel.RoleSuperAdmin, adminStaffModel.RoleAdmin:
+	case common.RoleSuperAdmin, common.RoleAdmin:
 		return nil
 	default:
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)

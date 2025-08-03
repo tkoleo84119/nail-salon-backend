@@ -14,9 +14,11 @@ import (
 )
 
 type ServiceRepositoryInterface interface {
+	CreateService(ctx context.Context, params CreateServiceParams) (CreateServiceResponse, error)
 	GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error)
 	UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest) (*adminServiceModel.UpdateServiceResponse, error)
 	GetStoreServices(ctx context.Context, storeID int64, isAddon *bool, limit, offset int) ([]storeModel.GetStoreServicesItemModel, int, error)
+	CheckServiceNameExists(ctx context.Context, name string) (bool, error)
 }
 
 type ServiceRepository struct {
@@ -27,6 +29,51 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 	return &ServiceRepository{
 		db: db,
 	}
+}
+
+type CreateServiceParams struct {
+	ID              int64          `db:"id"`
+	Name            string         `db:"name"`
+	Price           pgtype.Numeric `db:"price"`
+	DurationMinutes int32          `db:"duration_minutes"`
+	IsAddon         pgtype.Bool    `db:"is_addon"`
+	IsVisible       pgtype.Bool    `db:"is_visible"`
+	Note            pgtype.Text    `db:"note"`
+}
+
+type CreateServiceResponse struct {
+	ID              int64              `db:"id"`
+	Name            string             `db:"name"`
+	Price           pgtype.Numeric     `db:"price"`
+	DurationMinutes int32              `db:"duration_minutes"`
+	IsAddon         pgtype.Bool        `db:"is_addon"`
+	IsVisible       pgtype.Bool        `db:"is_visible"`
+	IsActive        pgtype.Bool        `db:"is_active"`
+	Note            pgtype.Text        `db:"note"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (r *ServiceRepository) CreateService(ctx context.Context, params CreateServiceParams) (CreateServiceResponse, error) {
+	query := `
+		INSERT INTO services (id, name, price, duration_minutes, is_addon, is_visible, note)
+		VALUES (:id, :name, :price, :duration_minutes, :is_addon, :is_visible, :note)
+		RETURNING id, name, price, duration_minutes, is_addon, is_visible, note, created_at, updated_at
+	`
+
+	var result CreateServiceResponse
+	stmt, err := r.db.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return CreateServiceResponse{}, fmt.Errorf("failed to create service: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowxContext(ctx, params).StructScan(&result)
+	if err != nil {
+		return CreateServiceResponse{}, fmt.Errorf("failed to create service: %w", err)
+	}
+
+	return result, nil
 }
 
 // GetStoreServiceListModel represents the database model for admin service list queries
@@ -341,4 +388,21 @@ func (r *ServiceRepository) GetStoreServices(ctx context.Context, storeID int64,
 	}
 
 	return items, total, nil
+}
+
+func (r *ServiceRepository) CheckServiceNameExists(ctx context.Context, name string) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM services
+			WHERE name = $1
+		)
+	`
+
+	var exists bool
+	err := r.db.GetContext(ctx, &exists, query, name)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }

@@ -1,6 +1,6 @@
 ## User Story
 
-作為一位管理員（`SUPER_ADMIN` / `ADMIN`），我希望能新增服務項目，方便維護可預約之美甲服務。
+作為一位管理員，我希望能新增服務項目，方便維護可預約之美甲服務。
 
 ---
 
@@ -12,7 +12,7 @@
 
 ## 說明
 
-- 僅限 `SUPER_ADMIN`、`ADMIN` 可建立新服務。
+- 提供後台管理員新增服務項目功能。
 - 服務名稱須唯一。
 - 可設定價格、操作時間、是否為附加服務、顯示狀態與備註。
 
@@ -20,6 +20,7 @@
 
 ## 權限
 
+- 需要登入才可使用。
 - 僅 `SUPER_ADMIN`、`ADMIN` 可操作。
 
 ---
@@ -28,12 +29,10 @@
 
 ### Header
 
-```http
-Content-Type: application/json
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
-### Body
+### Body 範例
 
 ```json
 {
@@ -48,14 +47,14 @@ Authorization: Bearer <access_token>
 
 ### 驗證規則
 
-| 欄位            | 規則                                         | 說明     |
-| --------------- | -------------------------------------------- | -------- |
-| name            | <li>必填<li>長度大於1<li>長度小於100<li>唯一 | 服務名稱 |
-| price           | <li>必填<li>數字最小是0                      | 價格     |
-| durationMinutes | <li>必填<li>數字最小是0<li>小於1440          | 操作分鐘 |
-| isAddon         | <li>必填<li>布林值                           | 附加服務 |
-| isVisible       | <li>必填<li>布林值                           | 可見狀態 |
-| note            | <li>選填<li>長度小於255                      | 備註     |
+| 欄位            | 必填 | 其他規則                     | 說明     |
+| --------------- | ---- | ---------------------------- | -------- |
+| name            | 是   | <li>最大長度100字元          | 服務名稱 |
+| price           | 是   | <li>最小值0<li>最大值1000000 | 價格     |
+| durationMinutes | 是   | <li>最小值0<li>最大值1440    | 操作分鐘 |
+| isAddon         | 是   | <li>布林值                   | 附加服務 |
+| isVisible       | 是   | <li>布林值                   | 可見狀態 |
+| note            | 選填 | <li>最大長度255              | 備註     |
 
 ---
 
@@ -73,21 +72,47 @@ Authorization: Bearer <access_token>
     "isAddon": false,
     "isVisible": true,
     "isActive": true,
-    "note": "含基礎修型保養"
+    "note": "含基礎修型保養",
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                                  |
+| ------ | -------- | ------------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入        |
+| 401    | E1003    | accessToken 缺失，請重新登入          |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入      |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入      |
+| 403    | E1010    | 權限不足，無法執行此操作              |
+| 400    | E2001    | JSON 格式錯誤，請檢查                 |
+| 400    | E2004    | 參數類型轉換失敗                      |
+| 400    | E2020    | {field} 為必填項目                    |
+| 400    | E2023    | {field} 最小值為 {param}              |
+| 400    | E2024    | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2026    | {field} 最大值為 {param}              |
+| 400    | E2029    | {field} 必須是布林值                  |
+| 409    | E3SER005 | 服務已存在                            |
+| 500    | E9001    | 系統發生錯誤，請稍後再試              |
+| 500    | E9002    | 資料庫操作失敗                        |
 
 #### 400 Bad Request - 驗證錯誤
 
 ```json
 {
-  "message": "輸入驗證失敗",
-  "errors": {
-    "name": "name為必填項目"
-  }
+  "errors": [
+    {
+      "code": "E2020",
+      "message": "name 為必填項目",
+      "field": "name"
+    }
+  ]
 }
 ```
 
@@ -95,7 +120,12 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
 }
 ```
 
@@ -103,15 +133,38 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "權限不足，僅限管理員新增服務"
+  "errors": [
+    {
+      "code": "E1010",
+      "message": "權限不足，無法執行此操作"
+    }
+  ]
 }
 ```
 
-#### 500 Internal Server Error
+#### 409 Conflict - 服務已存在
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E3SER005",
+      "message": "服務已存在"
+    }
+  ]
+}
+```
+
+#### 500 Internal Server Error - 系統錯誤
+
+```json
+{
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
@@ -125,14 +178,14 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 驗證 `name` 是否唯一。
-2. 建立 `services` 資料。
-3. 回傳新增結果。
+1. 驗證角色是否為 `SUPER_ADMIN` 或 `ADMIN`。
+2. 驗證 `name` 是否唯一。
+3. 建立 `services` 資料。
+4. 回傳新增結果。
 
 ---
 
 ## 注意事項
 
 - 服務名稱不可重複。
-- 支援「主服務」及「附加服務」類型。
 - 設定為不可見或未啟用時，客戶不可從前台預約。
