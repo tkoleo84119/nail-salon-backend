@@ -62,35 +62,38 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID in
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get schedule list", err)
 	}
 
-	stylistMap := make(map[int64]adminScheduleModel.GetScheduleListStylistItem)
+	stylistMap := make(map[int64]*adminScheduleModel.GetScheduleListStylistItem)
+	scheduleMap := make(map[int64]map[int64]*adminScheduleModel.GetScheduleListScheduleItem)
 
 	for _, row := range rows {
 		stylistID := row.StylistID
 
-		stylist, ok := stylistMap[stylistID]
-		if !ok {
-			stylist = adminScheduleModel.GetScheduleListStylistItem{
-				ID:   utils.FormatID(stylistID),
-				Name: utils.PgTextToString(row.StylistName),
+		stylist, exists := stylistMap[stylistID]
+		if !exists {
+			stylist = &adminScheduleModel.GetScheduleListStylistItem{
+				ID:        utils.FormatID(stylistID),
+				Name:      utils.PgTextToString(row.StylistName),
+				Schedules: []adminScheduleModel.GetScheduleListScheduleItem{},
 			}
+
+			stylistMap[stylistID] = stylist
+			scheduleMap[stylistID] = make(map[int64]*adminScheduleModel.GetScheduleListScheduleItem)
 		}
 
-		var schedule *adminScheduleModel.GetScheduleListScheduleItem
-		for i := range stylist.Schedules {
-			if stylist.Schedules[i].ID == utils.FormatID(row.ID) {
-				schedule = &stylist.Schedules[i]
-				break
-			}
-		}
-		if schedule == nil {
+		workID := row.ID
+		sMap := scheduleMap[stylistID]
+		schedule, ok := sMap[workID]
+		if !ok {
 			schedule = &adminScheduleModel.GetScheduleListScheduleItem{
-				ID:        utils.FormatID(row.ID),
+				ID:        utils.FormatID(workID),
 				WorkDate:  utils.PgDateToDateString(row.WorkDate),
 				Note:      utils.PgTextToString(row.Note),
 				TimeSlots: []adminScheduleModel.GetScheduleListTimeSlotInfo{},
 			}
 			stylist.Schedules = append(stylist.Schedules, *schedule)
+			// update scheduleMap with the new schedule pointer
 			schedule = &stylist.Schedules[len(stylist.Schedules)-1]
+			sMap[workID] = schedule
 		}
 
 		schedule.TimeSlots = append(schedule.TimeSlots, adminScheduleModel.GetScheduleListTimeSlotInfo{
@@ -102,11 +105,11 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID in
 	}
 
 	response := adminScheduleModel.GetScheduleListResponse{
-		StylistList: []adminScheduleModel.GetScheduleListStylistItem{},
+		StylistList: make([]adminScheduleModel.GetScheduleListStylistItem, 0, len(stylistMap)),
 	}
 
 	for _, stylist := range stylistMap {
-		response.StylistList = append(response.StylistList, stylist)
+		response.StylistList = append(response.StylistList, *stylist)
 	}
 
 	return &response, nil
