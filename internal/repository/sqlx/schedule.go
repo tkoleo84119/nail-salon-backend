@@ -13,6 +13,7 @@ import (
 // ScheduleRepositoryInterface defines the interface for schedule repository
 type ScheduleRepositoryInterface interface {
 	GetStoreScheduleByDateRange(ctx context.Context, storeID int64, startDate time.Time, endDate time.Time, params GetStoreScheduleByDateRangeParams) ([]GetStoreScheduleByDateRangeItem, error)
+	GetScheduleByID(ctx context.Context, scheduleID int64) ([]GetScheduleByIDItem, error)
 }
 
 type ScheduleRepository struct {
@@ -101,5 +102,57 @@ func (r *ScheduleRepository) GetStoreScheduleByDateRange(ctx context.Context, st
 		}
 		response = append(response, item)
 	}
+	return response, nil
+}
+
+type GetScheduleByIDItem struct {
+	ID          int64       `db:"id"`
+	WorkDate    pgtype.Date `db:"work_date"`
+	Note        pgtype.Text `db:"note"`
+	TimeSlotID  pgtype.Int8 `db:"time_slot_id"`
+	StartTime   pgtype.Time `db:"start_time"`
+	EndTime     pgtype.Time `db:"end_time"`
+	IsAvailable pgtype.Bool `db:"is_available"`
+}
+
+func (r *ScheduleRepository) GetScheduleByID(ctx context.Context, scheduleID int64) ([]GetScheduleByIDItem, error) {
+	query := `
+		SELECT
+			s.id,
+			s.work_date,
+			COALESCE(s.note, '') as note,
+			ts.id as time_slot_id,
+			ts.start_time,
+			ts.end_time,
+			ts.is_available
+		FROM schedules s
+		LEFT JOIN time_slots ts ON s.id = ts.schedule_id
+		WHERE s.id = $1
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, scheduleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	response := []GetScheduleByIDItem{}
+	for rows.Next() {
+		var item GetScheduleByIDItem
+		err := rows.Scan(
+			&item.ID,
+			&item.WorkDate,
+			&item.Note,
+			&item.TimeSlotID,
+			&item.StartTime,
+			&item.EndTime,
+			&item.IsAvailable,
+		)
+		if err != nil {
+			return nil, err
+		}
+		response = append(response, item)
+	}
+
 	return response, nil
 }

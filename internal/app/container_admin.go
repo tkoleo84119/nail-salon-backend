@@ -194,7 +194,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ScheduleUpdateTimeSlot: adminScheduleService.NewUpdateTimeSlotService(queries, repositories.SQLX),
 		ScheduleDeleteTimeSlot: adminScheduleService.NewDeleteTimeSlotService(queries),
 		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(repositories.SQLX),
-		ScheduleGet:            adminScheduleService.NewGetScheduleService(queries),
+		ScheduleGet:            adminScheduleService.NewGetScheduleService(repositories.SQLX),
 
 		// Time slot template services
 		TimeSlotTemplateGetList:    adminTimeSlotTemplateService.NewGetTimeSlotTemplateListService(queries, repositories.SQLX),

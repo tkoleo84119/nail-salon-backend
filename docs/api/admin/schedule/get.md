@@ -1,6 +1,6 @@
 ## User Story
 
-作為員工，我希望可以查詢特定的排班資料，並一併取得該排班對應的美甲師資訊與所有時段（Time Slots），以便確認排班內容與剩餘時段。
+作為員工，我希望可以查詢特定的排班資料，並一併取得排班底下的時段（Time Slots），以便確認排班內容。
 
 ---
 
@@ -12,14 +12,15 @@
 
 ## 說明
 
-- 所有登入員工皆可查詢。
-- 回傳指定排班資料與對應的美甲師與時段資訊。
+- 回傳指定排班資料與對應的時段資訊。
+- 時段依 `start_time` 排序。
 
 ---
 
 ## 權限
 
-- 任一已登入員工皆可使用（JWT 驗證）。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -27,7 +28,8 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameters
 
@@ -47,10 +49,6 @@ Authorization: Bearer <access_token>
   "data": {
     "id": "5000000001",
     "workDate": "2025-08-01",
-    "stylist": {
-      "id": "7000000001",
-      "name": "Ariel"
-    },
     "note": "上班全天",
     "timeSlots": [
       {
@@ -70,13 +68,63 @@ Authorization: Bearer <access_token>
 }
 ```
 
-### 失敗
+### 錯誤處理
 
-#### 401 Unauthorized - 未登入
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼   | 說明                             |
+| ------ | -------- | -------------------------------- |
+| 401    | E1002    | 無效的 accessToken，請重新登入   |
+| 401    | E1003    | accessToken 缺失，請重新登入     |
+| 401    | E1004    | accessToken 格式錯誤，請重新登入 |
+| 401    | E1005    | 未找到有效的員工資訊，請重新登入 |
+| 401    | E1006    | 未找到使用者認證資訊，請重新登入 |
+| 403    | E3001    | 權限不足，無法執行此操作         |
+| 400    | E2002    | 路徑參數缺失，請檢查             |
+| 400    | E2004    | 參數類型轉換失敗                 |
+| 400    | E2020    | {field} 為必填項目               |
+| 404    | E3STO002 | 門市不存在或已被刪除             |
+| 404    | E3SCH005 | 排班不存在或已被刪除             |
+| 500    | E9001    | 系統發生錯誤，請稍後再試         |
+| 500    | E9002    | 資料庫操作失敗                   |
+
+
+#### 400 Bad Request - 參數驗證失敗
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "errors": [
+    {
+      "code": "E2002",
+      "message": "路徑參數缺失，請檢查"
+    }
+  ]
+}
+```
+
+#### 401 Unauthorized - 未登入/Token失效
+
+```json
+{
+  "errors": [
+    {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入"
+    }
+  ]
+}
+```
+
+#### 403 Forbidden - 無權限
+
+```json
+{
+  "errors": [
+    {
+      "code": "E3001",
+      "message": "權限不足，無法執行此操作"
+    }
+  ]
 }
 ```
 
@@ -84,15 +132,25 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "門市不存在或已被刪除"
+  "errors": [
+    {
+      "code": "E3STO002",
+      "message": "門市不存在或已被刪除"
+    }
+  ]
 }
 ```
 
-#### 500 Internal Server Error
+#### 500 Internal Server Error - 系統錯誤
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試"
+    }
+  ]
 }
 ```
 
@@ -111,11 +169,8 @@ Authorization: Bearer <access_token>
 
 1. 驗證門市是否存在。
 2. 驗證員工是否有權限存取該門市。
-3. 驗證排班是否存在。
-4. 查詢指定 `scheduleId` 是否存在，且 `store_id=storeId`。
-5. JOIN `stylists` 表取得美甲師資料。
-6. 查詢該筆排班底下所有 `time_slots`，依 `start_time` 排序。
-7. 回傳合併資訊。
+3. 查詢指定 `scheduleId` 同時 JOIN `time_slots` 表取得時段資料。
+4. 回傳合併資訊。
 
 ---
 

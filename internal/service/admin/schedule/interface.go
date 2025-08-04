@@ -30,3 +30,7 @@ type DeleteTimeSlotServiceInterface interface {
 type GetScheduleListServiceInterface interface {
 	GetScheduleList(ctx context.Context, storeID int64, req adminScheduleModel.GetScheduleListParsedRequest, role string, storeIDs []int64) (*adminScheduleModel.GetScheduleListResponse, error)
 }
+
+type GetScheduleServiceInterface interface {
+	GetSchedule(ctx context.Context, storeID int64, scheduleID int64, role string, storeIDs []int64) (*adminScheduleModel.GetScheduleResponse, error)
+}

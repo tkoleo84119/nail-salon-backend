@@ -9,6 +9,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetScheduleHandler struct {
@@ -28,10 +29,20 @@ func (h *GetScheduleHandler) GetSchedule(c *gin.Context) {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
 		return
 	}
+	parsedStoreID, err := utils.ParseID(storeID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+		return
+	}
 
 	scheduleID := c.Param("scheduleId")
 	if scheduleID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"scheduleId": "scheduleId 為必填項目"})
+		return
+	}
+	parsedScheduleID, err := utils.ParseID(scheduleID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"scheduleId": "scheduleId 類型轉換失敗"})
 		return
 	}
 
@@ -42,8 +53,18 @@ func (h *GetScheduleHandler) GetSchedule(c *gin.Context) {
 		return
 	}
 
+	storeIDs := []int64{}
+	for _, store := range staffContext.StoreList {
+		parsedStoreID, err := utils.ParseID(store.ID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+			return
+		}
+		storeIDs = append(storeIDs, parsedStoreID)
+	}
+
 	// Call service
-	schedule, err := h.service.GetSchedule(c.Request.Context(), storeID, scheduleID, *staffContext)
+	schedule, err := h.service.GetSchedule(c.Request.Context(), parsedStoreID, parsedScheduleID, staffContext.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

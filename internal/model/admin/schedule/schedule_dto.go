@@ -106,15 +106,8 @@ type GetScheduleListTimeSlotInfo struct {
 type GetScheduleResponse struct {
 	ID        string                    `json:"id"`
 	WorkDate  string                    `json:"workDate"`
-	Stylist   GetScheduleStylistInfo    `json:"stylist"`
 	Note      string                    `json:"note"`
 	TimeSlots []GetScheduleTimeSlotInfo `json:"timeSlots"`
-}
-
-// GetScheduleStylistInfo represents stylist info in single schedule response
-type GetScheduleStylistInfo struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
 }
 
 // GetScheduleTimeSlotInfo represents time slot info in single schedule response

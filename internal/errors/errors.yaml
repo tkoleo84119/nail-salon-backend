@@ -191,7 +191,7 @@ SCHEDULE:
     status: 400
   SCHEDULE_NOT_FOUND:
     code: E3SCH005
-    message: 班表不存在
+    message: 排班不存在或已被刪除
     status: 404
   SCHEDULE_ALREADY_EXISTS:
     code: E3SCH006
