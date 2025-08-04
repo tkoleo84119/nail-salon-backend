@@ -2,6 +2,7 @@ package adminStylist
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -30,6 +31,11 @@ func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
 		return
 	}
+	parsedStoreID, err := utils.ParseID(storeID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+		return
+	}
 
 	// Parse and validate query parameters
 	var req adminStylistModel.GetStylistListRequest
@@ -39,6 +45,30 @@ func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
 		return
 	}
 
+	// set default limit and offset
+	limit := 20
+	offset := 0
+	if req.Limit != nil && *req.Limit > 0 {
+		limit = *req.Limit
+	}
+	if req.Offset != nil && *req.Offset >= 0 {
+		offset = *req.Offset
+	}
+
+	// parse sort
+	sort := []string{}
+	if req.Sort != nil && *req.Sort != "" {
+		sort = strings.Split(*req.Sort, ",")
+	}
+
+	parsedReq := adminStylistModel.GetStylistListParsedRequest{
+		Name:        req.Name,
+		IsIntrovert: req.IsIntrovert,
+		Limit:       limit,
+		Offset:      offset,
+		Sort:        sort,
+	}
+
 	// Get staff context from JWT middleware
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
@@ -46,8 +76,18 @@ func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
 		return
 	}
 
+	var storeIDs []int64
+	for _, store := range staffContext.StoreList {
+		storeID, err := utils.ParseID(store.ID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+			return
+		}
+		storeIDs = append(storeIDs, storeID)
+	}
+
 	// Service layer call
-	response, err := h.service.GetStylistList(c.Request.Context(), storeID, req, *staffContext)
+	response, err := h.service.GetStylistList(c.Request.Context(), parsedStoreID, parsedReq, staffContext.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

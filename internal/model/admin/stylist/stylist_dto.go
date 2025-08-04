@@ -30,10 +30,21 @@ func (r *UpdateMyStylistRequest) HasUpdate() bool {
 
 // GetStylistListRequest represents the request to get stylists list
 type GetStylistListRequest struct {
-	Name        *string `form:"name" binding:"omitempty,max=50"`
-	IsIntrovert *bool   `form:"isIntrovert"`
+	Name        *string `form:"name" binding:"omitempty,max=100"`
+	IsIntrovert *bool   `form:"isIntrovert" binding:"omitempty,boolean"`
+	IsActive    *bool   `form:"isActive" binding:"omitempty,boolean"`
 	Limit       *int    `form:"limit" binding:"omitempty,min=1,max=100"`
-	Offset      *int    `form:"offset" binding:"omitempty,min=0"`
+	Offset      *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
+	Sort        *string `form:"sort" binding:"omitempty"`
+}
+
+type GetStylistListParsedRequest struct {
+	Name        *string
+	IsIntrovert *bool
+	IsActive    *bool
+	Limit       int
+	Offset      int
+	Sort        []string
 }
 
 // GetStylistListResponse represents the response with stylists list
@@ -51,4 +62,5 @@ type GetStylistListItem struct {
 	GoodAtColors []string `json:"goodAtColors"`
 	GoodAtStyles []string `json:"goodAtStyles"`
 	IsIntrovert  bool     `json:"isIntrovert"`
+	IsActive     bool     `json:"isActive"`
 }

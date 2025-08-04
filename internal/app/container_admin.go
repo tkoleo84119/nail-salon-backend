@@ -179,7 +179,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Stylist management services
 		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(repositories.SQLX),
-		StylistGetList: adminStylistService.NewGetStylistListService(queries, repositories.SQLX),
+		StylistGetList: adminStylistService.NewGetStylistListService(repositories.SQLX),
 
 		// Booking management services
 		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
