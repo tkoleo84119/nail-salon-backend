@@ -8,7 +8,7 @@ import (
 )
 
 type CreateSchedulesBulkServiceInterface interface {
-	CreateSchedulesBulk(ctx context.Context, req adminScheduleModel.CreateSchedulesBulkRequest, staffContext common.StaffContext) (*adminScheduleModel.CreateSchedulesBulkResponse, error)
+	CreateSchedulesBulk(ctx context.Context, storeID int64, req adminScheduleModel.CreateSchedulesBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminScheduleModel.CreateSchedulesBulkResponse, error)
 }
 
 type DeleteSchedulesBulkServiceInterface interface {

@@ -177,6 +177,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		// Store schedules routes
 		stores.GET("/:storeId/schedules", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleGetList.GetScheduleList)
 		stores.GET("/:storeId/schedules/:scheduleId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleGet.GetSchedule)
+		stores.POST("/:storeId/schedules/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateBulk.CreateSchedulesBulk)
 
 		// Store bookings routes
 		stores.GET("/:storeId/bookings", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingGetList.GetBookingList)
@@ -200,7 +201,6 @@ func setupAdminScheduleRoutes(admin *gin.RouterGroup, cfg *config.Config, querie
 	schedules := admin.Group("/schedules")
 	{
 		// Bulk operations
-		schedules.POST("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateBulk.CreateSchedulesBulk)
 		schedules.DELETE("/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleDeleteBulk.DeleteSchedulesBulk)
 
 		// Time slot operations

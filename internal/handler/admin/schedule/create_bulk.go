@@ -24,6 +24,17 @@ func NewCreateSchedulesBulkHandler(service adminScheduleService.CreateSchedulesB
 }
 
 func (h *CreateSchedulesBulkHandler) CreateSchedulesBulk(c *gin.Context) {
+	storeID := c.Param("storeId")
+	if storeID == "" {
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
+		return
+	}
+	parsedStoreID, err := utils.ParseID(storeID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+		return
+	}
+
 	// Parse and validate request
 	var req adminScheduleModel.CreateSchedulesBulkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -39,8 +50,24 @@ func (h *CreateSchedulesBulkHandler) CreateSchedulesBulk(c *gin.Context) {
 		return
 	}
 
+	creatorID, err := utils.ParseID(staffContext.UserID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffId": "staffId 類型轉換失敗"})
+		return
+	}
+
+	creatorStoreIDs := make([]int64, len(staffContext.StoreList))
+	for i, store := range staffContext.StoreList {
+		parsedStoreID, err := utils.ParseID(store.ID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+			return
+		}
+		creatorStoreIDs[i] = parsedStoreID
+	}
+
 	// Call service
-	response, err := h.service.CreateSchedulesBulk(c.Request.Context(), req, *staffContext)
+	response, err := h.service.CreateSchedulesBulk(c.Request.Context(), parsedStoreID, req, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

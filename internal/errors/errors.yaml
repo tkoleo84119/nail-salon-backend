@@ -118,6 +118,10 @@ VAL:
     code: E2033
     message: "{field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD)"
     status: 400
+  VAL_FIELD_TIME_FORMAT:
+    code: E2034
+    message: "{field} 格式錯誤，請使用正確的時間格式 (HH:mm)"
+    status: 400
 
   VAL_DUPLICATE_WORK_DATE:
     message: 重複的工作日期
@@ -204,6 +208,14 @@ SCHEDULE:
   SCHEDULE_DATE_RANGE_EXCEED_31_DAYS:
     code: E3SCH008
     message: 日期範圍不能超過 31 天
+    status: 400
+  SCHEDULE_DUPLICATE_WORK_DATE_INPUT:
+    code: E3SCH009
+    message: 輸入的工作日期重複
+    status: 400
+  SCHEDULE_CANNOT_CREATE_BEFORE_TODAY:
+    code: E3SCH010
+    message: 不能創建過去的班表
     status: 400
 
 SERVICE:
@@ -331,6 +343,10 @@ TIME_SLOT:
     code: E3TMS011
     message: 時段時間區段重疊
     status: 409
+  TIME_SLOT_END_BEFORE_START:
+    code: E3TMS012
+    message: 結束時間必須在開始時間之後
+    status: 400
 
 SYS:
   SYS_INTERNAL_ERROR:

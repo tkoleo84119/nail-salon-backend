@@ -6,73 +6,58 @@ import (
 	"sort"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
+	"github.com/jmoiron/sqlx"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
-	adminStaff "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type CreateSchedulesBulkService struct {
-	queries dbgen.Querier
-	db      *pgxpool.Pool
+	db   *sqlx.DB
+	repo *sqlxRepo.Repositories
 }
 
-func NewCreateSchedulesBulkService(queries dbgen.Querier, db *pgxpool.Pool) *CreateSchedulesBulkService {
+func NewCreateSchedulesBulkService(db *sqlx.DB, repo *sqlxRepo.Repositories) *CreateSchedulesBulkService {
 	return &CreateSchedulesBulkService{
-		queries: queries,
-		db:      db,
+		db:   db,
+		repo: repo,
 	}
 }
 
-func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, req adminScheduleModel.CreateSchedulesBulkRequest, staffContext common.StaffContext) (*adminScheduleModel.CreateSchedulesBulkResponse, error) {
-	// Parse IDs
-	stylistID, err := utils.ParseID(req.StylistID)
+func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, storeID int64, req adminScheduleModel.CreateSchedulesBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminScheduleModel.CreateSchedulesBulkResponse, error) {
+	parsedStylistID, err := utils.ParseID(req.StylistID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid stylist ID", err)
 	}
 
-	storeID, err := utils.ParseID(req.StoreID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
-	}
-
 	// Check if stylist exists
-	stylist, err := s.queries.GetStylistByID(ctx, stylistID)
+	stylist, err := s.repo.Stylist.GetStylistByID(ctx, parsedStylistID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.StylistNotFound, "stylist not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
 	}
 
 	// Check permission: STYLIST can only create schedules for themselves
-	if staffContext.Role == adminStaff.RoleStylist {
-		staffUserID, err := utils.ParseID(staffContext.UserID)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
-		}
-		if stylist.StaffUserID != staffUserID {
+	if creatorRole == common.RoleStylist {
+		if stylist.ID != creatorID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 	}
 
 	// Check if store exists and is active
-	store, err := s.queries.GetStoreByID(ctx, storeID)
+	store, err := s.repo.Store.GetStoreByID(ctx, storeID, nil)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotFound, "store not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 	}
 	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotActive, "store is not active", err)
+		return nil, errorCodes.NewServiceError(errorCodes.StoreNotActive, "store is not active", err)
 	}
 
 	// Check if staff has access to this store
-	hasAccess := false
-	for _, storeAccess := range staffContext.StoreList {
-		if storeAccess.ID == req.StoreID {
-			hasAccess = true
-			break
-		}
+	hasAccess, err := utils.CheckStoreAccess(storeID, creatorStoreIDs)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
 	}
 	if !hasAccess {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
@@ -85,16 +70,12 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 
 	// Check for existing schedules
 	for _, scheduleReq := range req.Schedules {
-		workDate, err := utils.DateStringToPgDate(scheduleReq.WorkDate)
+		workDate, err := utils.DateStringToTime(scheduleReq.WorkDate)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid work date format", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValFieldDateFormat, "invalid work date format", err)
 		}
 
-		exists, err := s.queries.CheckScheduleExists(ctx, dbgen.CheckScheduleExistsParams{
-			StoreID:   storeID,
-			StylistID: stylistID,
-			WorkDate:  workDate,
-		})
+		exists, err := s.repo.Schedule.CheckScheduleExists(ctx, storeID, parsedStylistID, workDate)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check schedule existence", err)
 		}
@@ -104,7 +85,7 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 	}
 
 	// Prepare batch data for schedules and time slots
-	scheduleRows, timeSlotRows, createdScheduleIDs, err := s.prepareBatchData(req.Schedules, storeID, stylistID)
+	scheduleRows, timeSlotRows, err := s.prepareBatchData(req.Schedules, storeID, stylist.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,36 +93,28 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 	// Create schedules in transaction using batch insert
 	var response adminScheduleModel.CreateSchedulesBulkResponse
 
-	tx, err := s.db.Begin(ctx)
+	tx, err := s.db.Beginx()
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
 	}
-	defer tx.Rollback(ctx)
-
-	qtx := dbgen.New(tx)
+	defer tx.Rollback()
 
 	// Batch insert schedules
-	if _, err := qtx.BatchCreateSchedules(ctx, scheduleRows); err != nil {
+	if err := s.repo.Schedule.BatchCreateSchedulesTx(ctx, tx, scheduleRows); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to batch create schedules", err)
 	}
 
 	// Batch insert time slots
-	if _, err := qtx.BatchCreateTimeSlots(ctx, timeSlotRows); err != nil {
+	if err := s.repo.TimeSlot.BatchCreateTimeSlotsTx(ctx, tx, timeSlotRows); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to batch create time slots", err)
 	}
 
-	if err := tx.Commit(ctx); err != nil {
+	if err := tx.Commit(); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
-	// Get the created schedules with time slots using efficient join query
-	createdScheduleWithTimeSlots, err := s.queries.GetSchedulesWithTimeSlotsByIDs(ctx, createdScheduleIDs)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get created schedules", err)
-	}
-
 	// Build response
-	response, err = s.buildResponseFromScheduleRows(ctx, createdScheduleWithTimeSlots, storeID, stylistID)
+	response, err = s.buildResponseFromScheduleRows(ctx, scheduleRows, timeSlotRows)
 	if err != nil {
 		return nil, err
 	}
@@ -150,34 +123,29 @@ func (s *CreateSchedulesBulkService) CreateSchedulesBulk(ctx context.Context, re
 }
 
 // prepareBatchData prepares data for batch insertion and returns schedule rows, time slot rows, a mapping, and created schedule IDs
-func (s *CreateSchedulesBulkService) prepareBatchData(schedules []adminScheduleModel.ScheduleRequest, storeID, stylistID int64) ([]dbgen.BatchCreateSchedulesParams, []dbgen.BatchCreateTimeSlotsParams, []int64, error) {
-	now := time.Now()
-	var scheduleRows []dbgen.BatchCreateSchedulesParams
-	var timeSlotRows []dbgen.BatchCreateTimeSlotsParams
-	var createdScheduleIDs []int64
+func (s *CreateSchedulesBulkService) prepareBatchData(schedules []adminScheduleModel.ScheduleRequest, storeID, stylistID int64) ([]sqlxRepo.BatchCreateSchedulesTxParams, []sqlxRepo.BatchCreateTimeSlotsTxParams, error) {
+	var scheduleRows []sqlxRepo.BatchCreateSchedulesTxParams
+	var timeSlotRows []sqlxRepo.BatchCreateTimeSlotsTxParams
 
 	for _, scheduleReq := range schedules {
 		// Parse work date
 		workDate, err := utils.DateStringToPgDate(scheduleReq.WorkDate)
 		if err != nil {
-			return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid work date format", err)
+			return nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid work date format", err)
 		}
 
 		// Generate schedule ID
 		scheduleID := utils.GenerateID()
-		createdScheduleIDs = append(createdScheduleIDs, scheduleID)
 
 		// Prepare schedule row
 		noteValue := utils.StringPtrToPgText(scheduleReq.Note, false)
 
-		scheduleRow := dbgen.BatchCreateSchedulesParams{
+		scheduleRow := sqlxRepo.BatchCreateSchedulesTxParams{
 			ID:        scheduleID,
 			StoreID:   storeID,
 			StylistID: stylistID,
 			WorkDate:  workDate,
 			Note:      noteValue,
-			CreatedAt: utils.TimeToPgTimestamptz(now),
-			UpdatedAt: utils.TimeToPgTimestamptz(now),
 		}
 		scheduleRows = append(scheduleRows, scheduleRow)
 
@@ -185,82 +153,58 @@ func (s *CreateSchedulesBulkService) prepareBatchData(schedules []adminScheduleM
 		for _, timeSlotReq := range scheduleReq.TimeSlots {
 			startTime, err := utils.TimeStringToTime(timeSlotReq.StartTime)
 			if err != nil {
-				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
+				return nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
 			}
 
 			endTime, err := utils.TimeStringToTime(timeSlotReq.EndTime)
 			if err != nil {
-				return nil, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
+				return nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
 			}
 
 			timeSlotID := utils.GenerateID()
-			isAvailable := true
 
-			timeSlotRow := dbgen.BatchCreateTimeSlotsParams{
-				ID:          timeSlotID,
-				ScheduleID:  scheduleID,
-				StartTime:   utils.TimeToPgTime(startTime),
-				EndTime:     utils.TimeToPgTime(endTime),
-				IsAvailable: utils.BoolPtrToPgBool(&isAvailable),
-				CreatedAt:   utils.TimeToPgTimestamptz(now),
-				UpdatedAt:   utils.TimeToPgTimestamptz(now),
+			timeSlotRow := sqlxRepo.BatchCreateTimeSlotsTxParams{
+				ID:         timeSlotID,
+				ScheduleID: scheduleID,
+				StartTime:  utils.TimeToPgTime(startTime),
+				EndTime:    utils.TimeToPgTime(endTime),
 			}
 			timeSlotRows = append(timeSlotRows, timeSlotRow)
 		}
 	}
 
-	return scheduleRows, timeSlotRows, createdScheduleIDs, nil
+	return scheduleRows, timeSlotRows, nil
 }
 
 // buildResponseFromScheduleRows builds the response from joined schedule and time slot data
-func (s *CreateSchedulesBulkService) buildResponseFromScheduleRows(ctx context.Context, scheduleRows []dbgen.GetSchedulesWithTimeSlotsByIDsRow, storeID, stylistID int64) (adminScheduleModel.CreateSchedulesBulkResponse, error) {
-	var response adminScheduleModel.CreateSchedulesBulkResponse
+func (s *CreateSchedulesBulkService) buildResponseFromScheduleRows(ctx context.Context, scheduleRows []sqlxRepo.BatchCreateSchedulesTxParams, timeSlotRows []sqlxRepo.BatchCreateTimeSlotsTxParams) (adminScheduleModel.CreateSchedulesBulkResponse, error) {
+	scheduleGroups := make(map[int64]adminScheduleModel.ScheduleResponse, len(scheduleRows))
 
-	// Group time slots by schedule ID
-	scheduleGroups := make(map[int64][]dbgen.GetSchedulesWithTimeSlotsByIDsRow)
-	scheduleData := make(map[int64]dbgen.GetSchedulesWithTimeSlotsByIDsRow)
-
-	for _, row := range scheduleRows {
-		scheduleGroups[row.ID] = append(scheduleGroups[row.ID], row)
-		scheduleData[row.ID] = row
+	for _, scheduleRow := range scheduleRows {
+		scheduleGroups[scheduleRow.ID] = adminScheduleModel.ScheduleResponse{
+			ID:        utils.FormatID(scheduleRow.ID),
+			WorkDate:  utils.PgDateToDateString(scheduleRow.WorkDate),
+			Note:      utils.PgTextToString(scheduleRow.Note),
+			TimeSlots: []adminScheduleModel.TimeSlotResponse{},
+		}
 	}
 
-	// Build response for each schedule
-	for scheduleID, rows := range scheduleGroups {
-		scheduleIDStr := utils.FormatID(scheduleID)
-		scheduleInfo := scheduleData[scheduleID]
-
-		// Convert time slots to response format
-		var timeSlotResponses []adminScheduleModel.TimeSlotResponse
-		for _, row := range rows {
-			// Skip rows without time slot data (can happen with LEFT JOIN if no time slots exist)
-			if !row.TimeSlotID.Valid {
-				continue
-			}
-
-			timeSlotResponses = append(timeSlotResponses, adminScheduleModel.TimeSlotResponse{
-				ID:        utils.PgInt8ToIDString(row.TimeSlotID),
-				StartTime: utils.PgTimeToTimeString(row.StartTime),
-				EndTime:   utils.PgTimeToTimeString(row.EndTime),
-			})
+	for _, timeSlotRow := range timeSlotRows {
+		timeSlot := adminScheduleModel.TimeSlotResponse{
+			ID:        utils.FormatID(timeSlotRow.ID),
+			StartTime: utils.PgTimeToTimeString(timeSlotRow.StartTime),
+			EndTime:   utils.PgTimeToTimeString(timeSlotRow.EndTime),
 		}
 
-		// Build schedule response
-		var notePtr *string
-		if scheduleInfo.Note.Valid {
-			notePtr = &scheduleInfo.Note.String
+		if schedule, ok := scheduleGroups[timeSlotRow.ScheduleID]; ok {
+			schedule.TimeSlots = append(schedule.TimeSlots, timeSlot)
+			scheduleGroups[timeSlotRow.ScheduleID] = schedule
 		}
+	}
 
-		scheduleResponse := adminScheduleModel.ScheduleResponse{
-			ScheduleID: scheduleIDStr,
-			StylistID:  utils.FormatID(stylistID),
-			StoreID:    utils.FormatID(storeID),
-			WorkDate:   scheduleInfo.WorkDate.Time.Format("2006-01-02"),
-			Note:       notePtr,
-			TimeSlots:  timeSlotResponses,
-		}
-
-		response = append(response, scheduleResponse)
+	var response adminScheduleModel.CreateSchedulesBulkResponse
+	for _, schedule := range scheduleGroups {
+		response.Schedules = append(response.Schedules, schedule)
 	}
 
 	return response, nil
@@ -270,9 +214,14 @@ func (s *CreateSchedulesBulkService) validateSchedules(schedules []adminSchedule
 	workDates := make(map[string]bool)
 
 	for _, scheduleReq := range schedules {
+		// can't pass date before today
+		if scheduleReq.WorkDate < time.Now().Format("2006-01-02") {
+			return errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotCreateBeforeToday)
+		}
+
 		// Check for duplicate work dates
 		if workDates[scheduleReq.WorkDate] {
-			return errorCodes.NewServiceErrorWithCode(errorCodes.ValDuplicateWorkDate)
+			return errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleDuplicateWorkDateInput)
 		}
 		workDates[scheduleReq.WorkDate] = true
 
@@ -286,10 +235,6 @@ func (s *CreateSchedulesBulkService) validateSchedules(schedules []adminSchedule
 }
 
 func (s *CreateSchedulesBulkService) validateTimeSlots(timeSlots []adminScheduleModel.TimeSlotRequest) error {
-	if len(timeSlots) == 0 {
-		return errorCodes.NewServiceErrorWithCode(errorCodes.ValTimeSlotRequired)
-	}
-
 	// Parse and sort time slots
 	type timeSlotParsed struct {
 		StartTime time.Time
@@ -300,16 +245,16 @@ func (s *CreateSchedulesBulkService) validateTimeSlots(timeSlots []adminSchedule
 	for _, slot := range timeSlots {
 		startTime, err := utils.TimeStringToTime(slot.StartTime)
 		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, fmt.Sprintf("invalid start time format: %s", slot.StartTime), err)
+			return errorCodes.NewServiceError(errorCodes.ValFieldTimeFormat, fmt.Sprintf("invalid start time format: %s", slot.StartTime), err)
 		}
 
 		endTime, err := utils.TimeStringToTime(slot.EndTime)
 		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, fmt.Sprintf("invalid end time format: %s", slot.EndTime), err)
+			return errorCodes.NewServiceError(errorCodes.ValFieldTimeFormat, fmt.Sprintf("invalid end time format: %s", slot.EndTime), err)
 		}
 
 		if !endTime.After(startTime) {
-			return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
+			return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotEndBeforeStart)
 		}
 
 		parsedSlots = append(parsedSlots, timeSlotParsed{

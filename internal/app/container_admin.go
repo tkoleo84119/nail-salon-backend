@@ -188,7 +188,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BookingCancel:        adminBookingService.NewCancelBookingService(database.Sqlx, repositories.SQLX),
 
 		// Schedule management services
-		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(queries, database.PgxPool),
+		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(database.Sqlx, repositories.SQLX),
 		ScheduleDeleteBulk:     adminScheduleService.NewDeleteSchedulesBulkService(queries, database.PgxPool),
 		ScheduleCreateTimeSlot: adminScheduleService.NewCreateTimeSlotService(queries),
 		ScheduleUpdateTimeSlot: adminScheduleService.NewUpdateTimeSlotService(queries, repositories.SQLX),

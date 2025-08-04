@@ -36,6 +36,7 @@ const (
 	ValFieldTaiwanMobile    = "VAL_FIELD_TAIWAN_MOBILE"
 	ValFieldDateFormat      = "VAL_FIELD_DATE_FORMAT"
 	ValTimeConversionFailed = "VAL_TIME_CONVERSION_FAILED"
+	ValFieldTimeFormat      = "VAL_FIELD_TIME_FORMAT"
 
 	ValDuplicateWorkDate     = "VAL_DUPLICATE_WORK_DATE"
 	ValTimeSlotRequired      = "VAL_TIME_SLOT_REQUIRED"
@@ -64,6 +65,8 @@ const (
 	ScheduleAlreadyExists            = "SCHEDULE_ALREADY_EXISTS"
 	ScheduleEndBeforeStart           = "SCHEDULE_END_BEFORE_START"
 	ScheduleDateRangeExceed31Days    = "SCHEDULE_DATE_RANGE_EXCEED_31_DAYS"
+	ScheduleDuplicateWorkDateInput   = "SCHEDULE_DUPLICATE_WORK_DATE_INPUT"
+	ScheduleCannotCreateBeforeToday  = "SCHEDULE_CANNOT_CREATE_BEFORE_TODAY"
 
 	// SERVICE - Service operation errors
 	ServiceNotActive      = "SERVICE_NOT_ACTIVE"
@@ -103,6 +106,7 @@ const (
 	TimeSlotTemplateNotFound                = "TIME_SLOT_TEMPLATE_NOT_FOUND"
 	TimeSlotTemplateItemNotFound            = "TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND"
 	TimeSlotConflict                        = "TIME_SLOT_CONFLICT"
+	TimeSlotEndBeforeStart                  = "TIME_SLOT_END_BEFORE_START"
 
 	// SYS - System errors
 	SysInternalError      = "SYS_INTERNAL_ERROR"

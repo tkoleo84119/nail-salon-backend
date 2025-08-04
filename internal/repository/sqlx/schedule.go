@@ -12,8 +12,10 @@ import (
 
 // ScheduleRepositoryInterface defines the interface for schedule repository
 type ScheduleRepositoryInterface interface {
+	BatchCreateSchedulesTx(ctx context.Context, tx *sqlx.Tx, params []BatchCreateSchedulesTxParams) error
 	GetStoreScheduleByDateRange(ctx context.Context, storeID int64, startDate time.Time, endDate time.Time, params GetStoreScheduleByDateRangeParams) ([]GetStoreScheduleByDateRangeItem, error)
 	GetScheduleByID(ctx context.Context, scheduleID int64) ([]GetScheduleByIDItem, error)
+	CheckScheduleExists(ctx context.Context, storeID int64, stylistID int64, workDate time.Time) (bool, error)
 }
 
 type ScheduleRepository struct {
@@ -24,6 +26,52 @@ func NewScheduleRepository(db *sqlx.DB) *ScheduleRepository {
 	return &ScheduleRepository{
 		db: db,
 	}
+}
+
+type BatchCreateSchedulesTxParams struct {
+	ID        int64
+	StoreID   int64
+	StylistID int64
+	WorkDate  pgtype.Date
+	Note      pgtype.Text
+}
+
+func (r *ScheduleRepository) BatchCreateSchedulesTx(ctx context.Context, tx *sqlx.Tx, params []BatchCreateSchedulesTxParams) error {
+	const batchSize = 1000
+
+	var (
+		sb   strings.Builder
+		args []interface{}
+	)
+
+	for i := 0; i < len(params); i += batchSize {
+		end := i + batchSize
+		if end > len(params) {
+			end = len(params)
+		}
+
+		sb.Reset()
+		args = args[:0]
+
+		sb.WriteString(
+			"INSERT INTO schedules (id, store_id, stylist_id, work_date, note) VALUES ",
+		)
+
+		param := 1
+		for j, v := range params[i:end] {
+			sb.WriteString(fmt.Sprintf("($%d,$%d,$%d,$%d,$%d)", param, param+1, param+2, param+3, param+4))
+			if j < end-i-1 {
+				sb.WriteByte(',')
+			}
+			args = append(args, v.ID, v.StoreID, v.StylistID, v.WorkDate, v.Note)
+			param += 5
+		}
+
+		if _, err := tx.ExecContext(ctx, sb.String(), args...); err != nil {
+			return fmt.Errorf("batch insert failed: %w", err)
+		}
+	}
+	return nil
 }
 
 type GetStoreScheduleByDateRangeParams struct {
@@ -155,4 +203,22 @@ func (r *ScheduleRepository) GetScheduleByID(ctx context.Context, scheduleID int
 	}
 
 	return response, nil
+}
+
+func (r *ScheduleRepository) CheckScheduleExists(ctx context.Context, storeID int64, stylistID int64, workDate time.Time) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1 FROM schedules WHERE store_id = $1 AND stylist_id = $2 AND work_date = $3
+		)
+	`
+
+	row := r.db.QueryRowxContext(ctx, query, storeID, stylistID, workDate)
+
+	var exists bool
+	err := row.Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }

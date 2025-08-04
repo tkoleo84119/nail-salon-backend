@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -13,6 +14,7 @@ import (
 
 // TimeSlotRepositoryInterface defines the interface for time slot repository
 type TimeSlotRepositoryInterface interface {
+	BatchCreateTimeSlotsTx(ctx context.Context, tx *sqlx.Tx, params []BatchCreateTimeSlotsTxParams) error
 	UpdateTimeSlot(ctx context.Context, timeSlotID int64, req adminScheduleModel.UpdateTimeSlotRequest) (*adminScheduleModel.UpdateTimeSlotResponse, error)
 }
 
@@ -22,6 +24,50 @@ type TimeSlotRepository struct {
 
 func NewTimeSlotRepository(db *sqlx.DB) *TimeSlotRepository {
 	return &TimeSlotRepository{db: db}
+}
+
+type BatchCreateTimeSlotsTxParams struct {
+	ID         int64
+	ScheduleID int64
+	StartTime  pgtype.Time
+	EndTime    pgtype.Time
+}
+
+func (r *TimeSlotRepository) BatchCreateTimeSlotsTx(ctx context.Context, tx *sqlx.Tx, params []BatchCreateTimeSlotsTxParams) error {
+	const batchSize = 1000
+
+	var (
+		sb   strings.Builder
+		args []interface{}
+	)
+
+	for i := 0; i < len(params); i += batchSize {
+		end := i + batchSize
+		if end > len(params) {
+			end = len(params)
+		}
+
+		sb.Reset()
+		args = args[:0]
+
+		sb.WriteString("INSERT INTO time_slots (id, schedule_id, start_time, end_time) VALUES ")
+
+		param := 1
+		for j, v := range params[i:end] {
+			sb.WriteString(fmt.Sprintf("($%d,$%d,$%d,$%d)", param, param+1, param+2, param+3))
+			if j < end-i-1 {
+				sb.WriteByte(',')
+			}
+			args = append(args, v.ID, v.ScheduleID, v.StartTime, v.EndTime)
+			param += 4
+		}
+
+		if _, err := tx.ExecContext(ctx, sb.String(), args...); err != nil {
+			return fmt.Errorf("batch insert failed: %w", err)
+		}
+	}
+
+	return nil
 }
 
 // UpdateTimeSlot updates time slot with dynamic fields
@@ -103,7 +149,7 @@ func (r *TimeSlotRepository) UpdateTimeSlotAvailability(ctx context.Context, tim
 		SET is_available = :is_available, updated_at = NOW()
 		WHERE id = :id
 	`
-	
+
 	args := map[string]interface{}{
 		"id":           timeSlotID,
 		"is_available": isAvailable,
@@ -124,7 +170,7 @@ func (r *TimeSlotRepository) UpdateTimeSlotAvailabilityTx(ctx context.Context, t
 		SET is_available = :is_available, updated_at = NOW()
 		WHERE id = :id
 	`
-	
+
 	args := map[string]interface{}{
 		"id":           timeSlotID,
 		"is_available": isAvailable,
