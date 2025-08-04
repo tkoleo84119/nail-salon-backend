@@ -34,6 +34,7 @@ const (
 	ValFieldOneof           = "VAL_FIELD_ONEOF"
 	ValFieldTaiwanLandline  = "VAL_FIELD_TAIWAN_LANDLINE"
 	ValFieldTaiwanMobile    = "VAL_FIELD_TAIWAN_MOBILE"
+	ValFieldDateFormat      = "VAL_FIELD_DATE_FORMAT"
 	ValTimeConversionFailed = "VAL_TIME_CONVERSION_FAILED"
 
 	ValDuplicateWorkDate     = "VAL_DUPLICATE_WORK_DATE"
@@ -61,6 +62,8 @@ const (
 	ScheduleNotBelongToStylist       = "SCHEDULE_NOT_BELONG_TO_STYLIST"
 	ScheduleNotFound                 = "SCHEDULE_NOT_FOUND"
 	ScheduleAlreadyExists            = "SCHEDULE_ALREADY_EXISTS"
+	ScheduleEndBeforeStart           = "SCHEDULE_END_BEFORE_START"
+	ScheduleDateRangeExceed31Days    = "SCHEDULE_DATE_RANGE_EXCEED_31_DAYS"
 
 	// SERVICE - Service operation errors
 	ServiceNotActive      = "SERVICE_NOT_ACTIVE"

@@ -1,5 +1,7 @@
 package adminSchedule
 
+import "time"
+
 // TimeSlotRequest represents a time slot in the request
 type TimeSlotRequest struct {
 	StartTime string `json:"startTime" binding:"required"`
@@ -61,27 +63,33 @@ type GetScheduleListRequest struct {
 	StylistID   *string `form:"stylistId"`
 	StartDate   string  `form:"startDate" binding:"required"`
 	EndDate     string  `form:"endDate" binding:"required"`
-	IsAvailable *bool   `form:"isAvailable"`
+	IsAvailable *bool   `form:"isAvailable" binding:"omitempty,boolean"`
 }
 
-// GetScheduleListResponse represents the response with schedules list  
+type GetScheduleListParsedRequest struct {
+	StylistID   *[]int64
+	StartDate   time.Time
+	EndDate     time.Time
+	IsAvailable *bool
+}
+
+// GetScheduleListResponse represents the response with schedules list
 type GetScheduleListResponse struct {
-	Items []GetScheduleListItem `json:"items"`
+	StylistList []GetScheduleListStylistItem `json:"stylistList"`
 }
 
 // GetScheduleListItem represents a single schedule in the list
-type GetScheduleListItem struct {
+type GetScheduleListStylistItem struct {
 	ID        string                        `json:"id"`
-	WorkDate  string                        `json:"workDate"`
-	Stylist   GetScheduleListStylistInfo    `json:"stylist"`
-	Note      string                        `json:"note"`
-	TimeSlots []GetScheduleListTimeSlotInfo `json:"timeSlots"`
+	Name      string                        `json:"name"`
+	Schedules []GetScheduleListScheduleItem `json:"schedules"`
 }
 
-// GetScheduleListStylistInfo represents stylist info in schedule list
-type GetScheduleListStylistInfo struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type GetScheduleListScheduleItem struct {
+	ID        string                        `json:"id"`
+	WorkDate  string                        `json:"workDate"`
+	Note      string                        `json:"note"`
+	TimeSlots []GetScheduleListTimeSlotInfo `json:"timeSlots"`
 }
 
 // GetScheduleListTimeSlotInfo represents time slot info in schedule list
@@ -96,10 +104,10 @@ type GetScheduleListTimeSlotInfo struct {
 
 // GetScheduleResponse represents the response for getting a single schedule
 type GetScheduleResponse struct {
-	ID        string                     `json:"id"`
-	WorkDate  string                     `json:"workDate"`
-	Stylist   GetScheduleStylistInfo     `json:"stylist"`
-	Note      string                     `json:"note"`
+	ID        string                    `json:"id"`
+	WorkDate  string                    `json:"workDate"`
+	Stylist   GetScheduleStylistInfo    `json:"stylist"`
+	Note      string                    `json:"note"`
 	TimeSlots []GetScheduleTimeSlotInfo `json:"timeSlots"`
 }
 

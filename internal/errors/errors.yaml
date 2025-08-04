@@ -114,6 +114,10 @@ VAL:
     code: E2032
     message: "{field} 格式錯誤，請使用正確的台灣手機號碼格式 (0912345678)"
     status: 400
+  VAL_FIELD_DATE_FORMAT:
+    code: E2033
+    message: "{field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD)"
+    status: 400
 
   VAL_DUPLICATE_WORK_DATE:
     message: 重複的工作日期
@@ -193,6 +197,14 @@ SCHEDULE:
     code: E3SCH006
     message: 美甲師班表已存在
     status: 409
+  SCHEDULE_END_BEFORE_START:
+    code: E3SCH007
+    message: 結束日期必須在開始日期之後
+    status: 400
+  SCHEDULE_DATE_RANGE_EXCEED_31_DAYS:
+    code: E3SCH008
+    message: 日期範圍不能超過 31 天
+    status: 400
 
 SERVICE:
   SERVICE_NOT_ACTIVE:
