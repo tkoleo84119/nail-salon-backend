@@ -6,26 +6,40 @@ import (
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateTimeSlotTemplateHandler struct {
-	service adminTimeSlotTemplateService.UpdateTimeSlotTemplateServiceInterface
+type Update struct {
+	service adminTimeSlotTemplateService.UpdateServiceInterface
 }
 
-func NewUpdateTimeSlotTemplateHandler(service adminTimeSlotTemplateService.UpdateTimeSlotTemplateServiceInterface) *UpdateTimeSlotTemplateHandler {
-	return &UpdateTimeSlotTemplateHandler{
+func NewUpdate(service adminTimeSlotTemplateService.UpdateServiceInterface) *Update {
+	return &Update{
 		service: service,
 	}
 }
 
-func (h *UpdateTimeSlotTemplateHandler) UpdateTimeSlotTemplate(c *gin.Context) {
+func (h *Update) Update(c *gin.Context) {
+	templateID := c.Param("templateId")
+	if templateID == "" {
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
+			"templateId": "templateId 為必填項目",
+		})
+		return
+	}
+	parsedTemplateID, err := utils.ParseID(templateID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"templateId": "templateId 類型轉換失敗",
+		})
+		return
+	}
+
 	// Parse and validate request
-	var req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest
+	var req adminTimeSlotTemplateModel.UpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -33,29 +47,13 @@ func (h *UpdateTimeSlotTemplateHandler) UpdateTimeSlotTemplate(c *gin.Context) {
 	}
 
 	// Get template ID from URL parameter
-	templateID := c.Param("templateId")
-	if templateID == "" {
-		validationErrors := map[string]string{
-			"templateId": "templateId為必填項目",
-		}
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, validationErrors)
-		return
-	}
-
 	if !req.HasUpdate() {
-		errorCodes.RespondWithEmptyFieldError(c)
-		return
-	}
-
-	// Get staff context from middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
 	}
 
 	// Call service
-	response, err := h.service.UpdateTimeSlotTemplate(c.Request.Context(), templateID, req, *staffContext)
+	response, err := h.service.Update(c.Request.Context(), parsedTemplateID, req)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

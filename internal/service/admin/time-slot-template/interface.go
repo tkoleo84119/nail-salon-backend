@@ -23,8 +23,8 @@ type GetServiceInterface interface {
 	Get(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.GetResponse, error)
 }
 
-type UpdateTimeSlotTemplateServiceInterface interface {
-	UpdateTimeSlotTemplate(ctx context.Context, templateID string, req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.UpdateTimeSlotTemplateResponse, error)
+type UpdateServiceInterface interface {
+	Update(ctx context.Context, templateID int64, req adminTimeSlotTemplateModel.UpdateRequest) (*adminTimeSlotTemplateModel.UpdateResponse, error)
 }
 
 type CreateTimeSlotTemplateItemServiceInterface interface {

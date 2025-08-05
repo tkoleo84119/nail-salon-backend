@@ -5,47 +5,53 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateTimeSlotTemplateService struct {
+type Update struct {
 	queries dbgen.Querier
 	repo    *sqlx.Repositories
 }
 
-func NewUpdateTimeSlotTemplateService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateTimeSlotTemplateService {
-	return &UpdateTimeSlotTemplateService{
+func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
+	return &Update{
 		queries: queries,
 		repo:    repo,
 	}
 }
 
-func (s *UpdateTimeSlotTemplateService) UpdateTimeSlotTemplate(ctx context.Context, templateID string, req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.UpdateTimeSlotTemplateResponse, error) {
+func (s *Update) Update(ctx context.Context, templateID int64, req adminTimeSlotTemplateModel.UpdateRequest) (*adminTimeSlotTemplateModel.UpdateResponse, error) {
 	// Validate at least one field is provided
 	if !req.HasUpdate() {
 		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
 	}
 
-	// Parse template ID
-	templateIDInt, err := utils.ParseID(templateID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid template ID", err)
-	}
-
 	// Check if template exists
-	_, err = s.queries.GetTimeSlotTemplateByID(ctx, templateIDInt)
+	exist, err := s.queries.CheckTimeSlotTemplateExists(ctx, templateID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotTemplateNotFound, "time slot template not found", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check time slot template exists", err)
+	}
+	if !exist {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotTemplateNotFound)
 	}
 
 	// Update the template using sqlx repository
-	response, err := s.repo.Template.UpdateTimeSlotTemplate(ctx, templateIDInt, req)
+	response, err := s.repo.Template.UpdateTimeSlotTemplate(ctx, templateID, sqlx.UpdateTimeSlotTemplateParams{
+		Name: req.Name,
+		Note: req.Note,
+	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update time slot template", err)
 	}
 
-	return response, nil
+	return &adminTimeSlotTemplateModel.UpdateResponse{
+		ID:        utils.FormatID(response.ID),
+		Name:      response.Name,
+		Note:      utils.PgTextToString(response.Note),
+		Updater:   utils.PgInt8ToIDString(response.Updater),
+		CreatedAt: utils.PgTimestamptzToTimeString(response.CreatedAt),
+		UpdatedAt: utils.PgTimestamptzToTimeString(response.UpdatedAt),
+	}, nil
 }
