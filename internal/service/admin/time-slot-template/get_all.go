@@ -40,7 +40,7 @@ func (s *GetTimeSlotTemplateListService) GetTimeSlotTemplateList(ctx context.Con
 			ID:        utils.FormatID(item.ID),
 			Name:      item.Name,
 			Note:      utils.PgTextToString(item.Note),
-			Updater:   utils.FormatID(item.Updater),
+			Updater:   utils.PgInt8ToIDString(item.Updater),
 			CreatedAt: utils.PgTimestamptzToTimeString(item.CreatedAt),
 			UpdatedAt: utils.PgTimestamptzToTimeString(item.UpdatedAt),
 		}

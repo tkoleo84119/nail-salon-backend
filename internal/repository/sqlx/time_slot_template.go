@@ -83,7 +83,7 @@ type GetAllTimeSlotTemplateByFilterItem struct {
 	ID        int64              `db:"id"`
 	Name      string             `db:"name"`
 	Note      pgtype.Text        `db:"note"`
-	Updater   int64              `db:"updater"`
+	Updater   pgtype.Int8        `db:"updater"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }

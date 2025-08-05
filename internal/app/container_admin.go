@@ -78,7 +78,7 @@ type AdminServices struct {
 	// Time slot template services
 	TimeSlotTemplateGetList    adminTimeSlotTemplateService.GetTimeSlotTemplateListServiceInterface
 	TimeSlotTemplateGet        adminTimeSlotTemplateService.GetTimeSlotTemplateServiceInterface
-	TimeSlotTemplateCreate     *adminTimeSlotTemplateService.CreateTimeSlotTemplateService
+	TimeSlotTemplateCreate     adminTimeSlotTemplateService.CreateServiceInterface
 	TimeSlotTemplateUpdate     *adminTimeSlotTemplateService.UpdateTimeSlotTemplateService
 	TimeSlotTemplateDelete     *adminTimeSlotTemplateService.DeleteTimeSlotTemplateService
 	TimeSlotTemplateCreateItem *adminTimeSlotTemplateService.CreateTimeSlotTemplateItemService
@@ -138,7 +138,7 @@ type AdminHandlers struct {
 	// Time slot template handlers
 	TimeSlotTemplateGetList    *adminTimeSlotTemplateHandler.GetTimeSlotTemplateListHandler
 	TimeSlotTemplateGet        *adminTimeSlotTemplateHandler.GetTimeSlotTemplateHandler
-	TimeSlotTemplateCreate     *adminTimeSlotTemplateHandler.CreateTimeSlotTemplateHandler
+	TimeSlotTemplateCreate     *adminTimeSlotTemplateHandler.Create
 	TimeSlotTemplateUpdate     *adminTimeSlotTemplateHandler.UpdateTimeSlotTemplateHandler
 	TimeSlotTemplateDelete     *adminTimeSlotTemplateHandler.DeleteTimeSlotTemplateHandler
 	TimeSlotTemplateCreateItem *adminTimeSlotTemplateHandler.CreateTimeSlotTemplateItemHandler
@@ -199,7 +199,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Time slot template services
 		TimeSlotTemplateGetList:    adminTimeSlotTemplateService.NewGetTimeSlotTemplateListService(repositories.SQLX),
 		TimeSlotTemplateGet:        adminTimeSlotTemplateService.NewGetTimeSlotTemplateService(queries),
-		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool),
+		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreate(queries, database.PgxPool),
 		TimeSlotTemplateUpdate:     adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, repositories.SQLX),
 		TimeSlotTemplateDelete:     adminTimeSlotTemplateService.NewDeleteTimeSlotTemplateService(queries),
 		TimeSlotTemplateCreateItem: adminTimeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries),
@@ -261,7 +261,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Time slot template handlers
 		TimeSlotTemplateGetList:    adminTimeSlotTemplateHandler.NewGetTimeSlotTemplateListHandler(services.TimeSlotTemplateGetList),
 		TimeSlotTemplateGet:        adminTimeSlotTemplateHandler.NewGetTimeSlotTemplateHandler(services.TimeSlotTemplateGet),
-		TimeSlotTemplateCreate:     adminTimeSlotTemplateHandler.NewCreateTimeSlotTemplateHandler(services.TimeSlotTemplateCreate),
+		TimeSlotTemplateCreate:     adminTimeSlotTemplateHandler.NewCreate(services.TimeSlotTemplateCreate),
 		TimeSlotTemplateUpdate:     adminTimeSlotTemplateHandler.NewUpdateTimeSlotTemplateHandler(services.TimeSlotTemplateUpdate),
 		TimeSlotTemplateDelete:     adminTimeSlotTemplateHandler.NewDeleteTimeSlotTemplateHandler(services.TimeSlotTemplateDelete),
 		TimeSlotTemplateCreateItem: adminTimeSlotTemplateHandler.NewCreateTimeSlotTemplateItemHandler(services.TimeSlotTemplateCreateItem),

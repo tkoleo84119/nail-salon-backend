@@ -7,8 +7,8 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
-type CreateTimeSlotTemplateServiceInterface interface {
-	CreateTimeSlotTemplate(ctx context.Context, req adminTimeSlotTemplateModel.CreateTimeSlotTemplateRequest, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.CreateTimeSlotTemplateResponse, error)
+type CreateServiceInterface interface {
+	Create(ctx context.Context, req adminTimeSlotTemplateModel.CreateRequest, creatorID int64) (*adminTimeSlotTemplateModel.CreateResponse, error)
 }
 
 type UpdateTimeSlotTemplateServiceInterface interface {

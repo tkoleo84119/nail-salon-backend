@@ -17,6 +17,18 @@ INSERT INTO time_slot_template_items (
     created_at,
     updated_at;
 
+-- name: BatchCreateTimeSlotTemplateItems :copyfrom
+INSERT INTO time_slot_template_items (
+    id,
+    template_id,
+    start_time,
+    end_time,
+    created_at,
+    updated_at
+) VALUES (
+    $1, $2, $3, $4, $5, $6
+);
+
 -- name: GetTimeSlotTemplateItemsByTemplateIDExcluding :many
 SELECT id, template_id, start_time, end_time, created_at, updated_at
 FROM time_slot_template_items

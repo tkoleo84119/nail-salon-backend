@@ -13,19 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateTimeSlotTemplateHandler struct {
-	service adminTimeSlotTemplateService.CreateTimeSlotTemplateServiceInterface
+type Create struct {
+	service adminTimeSlotTemplateService.CreateServiceInterface
 }
 
-func NewCreateTimeSlotTemplateHandler(service adminTimeSlotTemplateService.CreateTimeSlotTemplateServiceInterface) *CreateTimeSlotTemplateHandler {
-	return &CreateTimeSlotTemplateHandler{
+func NewCreate(service adminTimeSlotTemplateService.CreateServiceInterface) *Create {
+	return &Create{
 		service: service,
 	}
 }
 
-func (h *CreateTimeSlotTemplateHandler) CreateTimeSlotTemplate(c *gin.Context) {
+func (h *Create) Create(c *gin.Context) {
 	// Parse and validate request
-	var req adminTimeSlotTemplateModel.CreateTimeSlotTemplateRequest
+	var req adminTimeSlotTemplateModel.CreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -38,9 +38,14 @@ func (h *CreateTimeSlotTemplateHandler) CreateTimeSlotTemplate(c *gin.Context) {
 		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
+	creatorID, err := utils.ParseID(staffContext.UserID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffID": "staffID 類型轉換失敗"})
+		return
+	}
 
 	// Call service
-	response, err := h.service.CreateTimeSlotTemplate(c.Request.Context(), req, *staffContext)
+	response, err := h.service.Create(c.Request.Context(), req, creatorID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

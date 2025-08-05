@@ -11,6 +11,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type BatchCreateTimeSlotTemplateItemsParams struct {
+	ID         int64              `db:"id" json:"id"`
+	TemplateID int64              `db:"template_id" json:"template_id"`
+	StartTime  pgtype.Time        `db:"start_time" json:"start_time"`
+	EndTime    pgtype.Time        `db:"end_time" json:"end_time"`
+	CreatedAt  pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
 const createTimeSlotTemplateItem = `-- name: CreateTimeSlotTemplateItem :one
 INSERT INTO time_slot_template_items (
     id,
