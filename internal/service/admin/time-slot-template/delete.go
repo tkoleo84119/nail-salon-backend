@@ -5,41 +5,37 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteTimeSlotTemplateService struct {
+type Delete struct {
 	queries dbgen.Querier
 }
 
-func NewDeleteTimeSlotTemplateService(queries dbgen.Querier) *DeleteTimeSlotTemplateService {
-	return &DeleteTimeSlotTemplateService{
+func NewDelete(queries dbgen.Querier) *Delete {
+	return &Delete{
 		queries: queries,
 	}
 }
 
-func (s *DeleteTimeSlotTemplateService) DeleteTimeSlotTemplate(ctx context.Context, templateID string, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.DeleteTimeSlotTemplateResponse, error) {
-	// Parse template ID
-	templateIDInt, err := utils.ParseID(templateID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid template ID", err)
-	}
-
+func (s *Delete) Delete(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.DeleteResponse, error) {
 	// Check if template exists
-	_, err = s.queries.GetTimeSlotTemplateByID(ctx, templateIDInt)
+	exists, err := s.queries.CheckTimeSlotTemplateExists(ctx, templateID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotTemplateNotFound, "time slot template not found", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check time slot template exists", err)
+	}
+	if !exists {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotTemplateNotFound)
 	}
 
-	// Delete the time slot template (cascade will delete items)
-	err = s.queries.DeleteTimeSlotTemplate(ctx, templateIDInt)
+	// Delete the time slot template
+	err = s.queries.DeleteTimeSlotTemplate(ctx, templateID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to delete time slot template", err)
 	}
 
-	return &adminTimeSlotTemplateModel.DeleteTimeSlotTemplateResponse{
-		Deleted: templateID,
+	return &adminTimeSlotTemplateModel.DeleteResponse{
+		Deleted: utils.FormatID(templateID),
 	}, nil
 }

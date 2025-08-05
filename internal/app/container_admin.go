@@ -80,7 +80,7 @@ type AdminServices struct {
 	TimeSlotTemplateGet        adminTimeSlotTemplateService.GetTimeSlotTemplateServiceInterface
 	TimeSlotTemplateCreate     adminTimeSlotTemplateService.CreateServiceInterface
 	TimeSlotTemplateUpdate     *adminTimeSlotTemplateService.UpdateTimeSlotTemplateService
-	TimeSlotTemplateDelete     *adminTimeSlotTemplateService.DeleteTimeSlotTemplateService
+	TimeSlotTemplateDelete     adminTimeSlotTemplateService.DeleteServiceInterface
 	TimeSlotTemplateCreateItem *adminTimeSlotTemplateService.CreateTimeSlotTemplateItemService
 	TimeSlotTemplateUpdateItem *adminTimeSlotTemplateService.UpdateTimeSlotTemplateItemService
 	TimeSlotTemplateDeleteItem *adminTimeSlotTemplateService.DeleteTimeSlotTemplateItemService
@@ -140,7 +140,7 @@ type AdminHandlers struct {
 	TimeSlotTemplateGet        *adminTimeSlotTemplateHandler.GetTimeSlotTemplateHandler
 	TimeSlotTemplateCreate     *adminTimeSlotTemplateHandler.Create
 	TimeSlotTemplateUpdate     *adminTimeSlotTemplateHandler.UpdateTimeSlotTemplateHandler
-	TimeSlotTemplateDelete     *adminTimeSlotTemplateHandler.DeleteTimeSlotTemplateHandler
+	TimeSlotTemplateDelete     *adminTimeSlotTemplateHandler.Delete
 	TimeSlotTemplateCreateItem *adminTimeSlotTemplateHandler.CreateTimeSlotTemplateItemHandler
 	TimeSlotTemplateUpdateItem *adminTimeSlotTemplateHandler.UpdateTimeSlotTemplateItemHandler
 	TimeSlotTemplateDeleteItem *adminTimeSlotTemplateHandler.DeleteTimeSlotTemplateItemHandler
@@ -201,7 +201,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		TimeSlotTemplateGet:        adminTimeSlotTemplateService.NewGetTimeSlotTemplateService(queries),
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreate(queries, database.PgxPool),
 		TimeSlotTemplateUpdate:     adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, repositories.SQLX),
-		TimeSlotTemplateDelete:     adminTimeSlotTemplateService.NewDeleteTimeSlotTemplateService(queries),
+		TimeSlotTemplateDelete:     adminTimeSlotTemplateService.NewDelete(queries),
 		TimeSlotTemplateCreateItem: adminTimeSlotTemplateService.NewCreateTimeSlotTemplateItemService(queries),
 		TimeSlotTemplateUpdateItem: adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateItemService(queries),
 		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries),
@@ -263,7 +263,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		TimeSlotTemplateGet:        adminTimeSlotTemplateHandler.NewGetTimeSlotTemplateHandler(services.TimeSlotTemplateGet),
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateHandler.NewCreate(services.TimeSlotTemplateCreate),
 		TimeSlotTemplateUpdate:     adminTimeSlotTemplateHandler.NewUpdateTimeSlotTemplateHandler(services.TimeSlotTemplateUpdate),
-		TimeSlotTemplateDelete:     adminTimeSlotTemplateHandler.NewDeleteTimeSlotTemplateHandler(services.TimeSlotTemplateDelete),
+		TimeSlotTemplateDelete:     adminTimeSlotTemplateHandler.NewDelete(services.TimeSlotTemplateDelete),
 		TimeSlotTemplateCreateItem: adminTimeSlotTemplateHandler.NewCreateTimeSlotTemplateItemHandler(services.TimeSlotTemplateCreateItem),
 		TimeSlotTemplateUpdateItem: adminTimeSlotTemplateHandler.NewUpdateTimeSlotTemplateItemHandler(services.TimeSlotTemplateUpdateItem),
 		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(services.TimeSlotTemplateDeleteItem),

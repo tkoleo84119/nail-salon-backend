@@ -11,6 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkTimeSlotTemplateExists = `-- name: CheckTimeSlotTemplateExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM time_slot_templates
+    WHERE id = $1
+)
+`
+
+func (q *Queries) CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkTimeSlotTemplateExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createTimeSlotTemplate = `-- name: CreateTimeSlotTemplate :one
 INSERT INTO time_slot_templates (
     id,

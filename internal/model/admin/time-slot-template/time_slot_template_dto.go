@@ -21,13 +21,6 @@ func (r *UpdateTimeSlotTemplateRequest) HasUpdate() bool {
 
 // -------------------------------------------------------------------------------------
 
-// DeleteTimeSlotTemplateResponse represents the response after deleting a time slot template
-type DeleteTimeSlotTemplateResponse struct {
-	Deleted string `json:"deleted"`
-}
-
-// -------------------------------------------------------------------------------------
-
 // GetTimeSlotTemplateListRequest represents the request to get time slot template list
 type GetTimeSlotTemplateListRequest struct {
 	Name   *string `form:"name" binding:"omitempty,max=100"`

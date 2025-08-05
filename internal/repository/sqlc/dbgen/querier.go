@@ -26,6 +26,7 @@ type Querier interface {
 	CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID int64) (bool, error)
 	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
+	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
 	CreateBookingDetail(ctx context.Context, arg CreateBookingDetailParams) (BookingDetail, error)
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)

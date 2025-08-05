@@ -6,40 +6,40 @@ import (
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteTimeSlotTemplateHandler struct {
-	service adminTimeSlotTemplateService.DeleteTimeSlotTemplateServiceInterface
+type Delete struct {
+	service adminTimeSlotTemplateService.DeleteServiceInterface
 }
 
-func NewDeleteTimeSlotTemplateHandler(service adminTimeSlotTemplateService.DeleteTimeSlotTemplateServiceInterface) *DeleteTimeSlotTemplateHandler {
-	return &DeleteTimeSlotTemplateHandler{
+func NewDelete(service adminTimeSlotTemplateService.DeleteServiceInterface) *Delete {
+	return &Delete{
 		service: service,
 	}
 }
 
-func (h *DeleteTimeSlotTemplateHandler) DeleteTimeSlotTemplate(c *gin.Context) {
+func (h *Delete) Delete(c *gin.Context) {
 	// Validate path parameter
 	templateID := c.Param("templateId")
 	if templateID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
-			"templateId": "templateId為必填項目",
+			"templateId": "templateId 為必填項目",
+		})
+		return
+	}
+	parsedTemplateID, err := utils.ParseID(templateID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"templateId": "templateId 類型轉換失敗",
 		})
 		return
 	}
 
-	// Get staff context from middleware
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
-		return
-	}
-
 	// Call service
-	response, err := h.service.DeleteTimeSlotTemplate(c.Request.Context(), templateID, *staffContext)
+	response, err := h.service.Delete(c.Request.Context(), parsedTemplateID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
