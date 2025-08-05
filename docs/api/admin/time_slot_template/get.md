@@ -12,14 +12,14 @@
 
 ## 說明
 
-- 所有登入員工皆可查詢。
 - 回傳模板主資料與所有時間項目（Time Slot Template Items）。
 
 ---
 
 ## 權限
 
-- 任一已登入員工皆可使用（JWT 驗證）。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -27,7 +27,8 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameter
 
@@ -48,8 +49,8 @@ Authorization: Bearer <access_token>
     "name": "早班模板",
     "note": "適用09:00開工",
     "updater": "1000000001",
-    "createdAt": "2025-06-01T08:00:00Z",
-    "updatedAt": "2025-06-20T08:00:00Z",
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00",
     "items": [
       {
         "id": "1100000001",
@@ -66,29 +67,55 @@ Authorization: Bearer <access_token>
 }
 ```
 
-### 失敗
 
-#### 401 Unauthorized - 未登入
+### 錯誤處理
+
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼 | 說明                                  |
+| ------ | ------ | ------------------------------------- |
+| 401    | E1002  | 無效的 accessToken，請重新登入        |
+| 401    | E1003  | accessToken 缺失，請重新登入          |
+| 401    | E1004  | accessToken 格式錯誤，請重新登入      |
+| 401    | E1005  | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006  | 未找到使用者認證資訊，請重新登入      |
+| 400    | E2002  | 路徑參數缺失，請檢查                  |
+| 400    | E2023  | {field} 最小值為 {param}              |
+| 400    | E2024  | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2026  | {field} 最大值為 {param}              |
+| 500    | E9001  | 系統發生錯誤，請稍後再試              |
+| 500    | E9002  | 資料庫操作失敗                        |
+
+#### 400 Bad Request - 參數類型轉換失敗
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "error": {
+    "code": "E2002",
+    "message": "路徑參數缺失，請檢查"
+  }
 }
 ```
 
-#### 404 Not Found - 模板不存在
+#### 401 Unauthorized - 未登入/Token失效
 
 ```json
 {
-  "message": "範本不存在或已被刪除"
+  "error": {
+    "code": "E1002",
+    "message": "無效的 accessToken，請重新登入"
+  }
 }
 ```
 
-#### 500 Internal Server Error
+#### 500 Internal Server Error - 系統發生錯誤
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "error": {
+    "code": "E9001",
+    "message": "系統發生錯誤，請稍後再試"
+  }
 }
 ```
 
@@ -103,13 +130,11 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 查詢指定的 `templateId` 是否存在於 `time_slot_templates`。
-2. 查詢所有對應的 `time_slot_template_items`，依 `start_time` 排序。
-3. 回傳主檔與時段項目合併結果。
+1. 查詢 `time_slot_templates` 與 `time_slot_template_items` 資料。
+2. 回傳主檔與時段項目合併結果。
 
 ---
 
 ## 注意事項
 
 - 每筆 item 僅含時間區段
-

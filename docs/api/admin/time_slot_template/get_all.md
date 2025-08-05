@@ -66,16 +66,16 @@
         "name": "早班模板",
         "note": "適用09:00開工",
         "updater": "1000000001",
-        "createdAt": "2025-06-01T08:00:00Z",
-        "updatedAt": "2025-06-20T08:00:00Z"
+        "createdAt": "2025-01-01T00:00:00+08:00",
+        "updatedAt": "2025-01-01T00:00:00+08:00"
       },
       {
         "id": "1000000002",
         "name": "午班模板",
         "note": "含午休",
         "updater": "1000000002",
-        "createdAt": "2025-06-02T08:00:00Z",
-        "updatedAt": "2025-06-21T08:00:00Z"
+        "createdAt": "2025-01-01T00:00:00+08:00",
+        "updatedAt": "2025-01-01T00:00:00+08:00"
       }
     ]
   }
@@ -152,4 +152,4 @@
 
 ## 注意事項
 
-- 僅回傳模板主資料（不包含子項 item 時段），若需明細請查詢單筆 API (GET `/api/admin/time-slot-templates/{timeSlotTemplateId}`)。
+- 僅回傳模板主資料（不包含子項 item 時段），若需明細請查詢單筆 API (GET `/api/admin/time-slot-templates/{templateId}`)。

@@ -74,6 +74,7 @@ type Querier interface {
 	GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (TimeSlotTemplateItem, error)
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]TimeSlotTemplateItem, error)
 	GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]TimeSlotTemplateItem, error)
+	GetTimeSlotTemplateWithItemsByID(ctx context.Context, id int64) ([]GetTimeSlotTemplateWithItemsByIDRow, error)
 	GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (CustomerToken, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (StaffUserToken, error)

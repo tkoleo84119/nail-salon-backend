@@ -140,3 +140,61 @@ func (q *Queries) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, temp
 	}
 	return items, nil
 }
+
+const getTimeSlotTemplateWithItemsByID = `-- name: GetTimeSlotTemplateWithItemsByID :many
+SELECT
+    t.id,
+    t.name,
+    t.note,
+    t.updater,
+    t.created_at,
+    t.updated_at,
+    ti.id as item_id,
+    ti.start_time,
+    ti.end_time
+FROM time_slot_templates t
+LEFT JOIN time_slot_template_items ti ON t.id = ti.template_id
+WHERE t.id = $1
+`
+
+type GetTimeSlotTemplateWithItemsByIDRow struct {
+	ID        int64              `db:"id" json:"id"`
+	Name      string             `db:"name" json:"name"`
+	Note      pgtype.Text        `db:"note" json:"note"`
+	Updater   pgtype.Int8        `db:"updater" json:"updater"`
+	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	ItemID    pgtype.Int8        `db:"item_id" json:"item_id"`
+	StartTime pgtype.Time        `db:"start_time" json:"start_time"`
+	EndTime   pgtype.Time        `db:"end_time" json:"end_time"`
+}
+
+func (q *Queries) GetTimeSlotTemplateWithItemsByID(ctx context.Context, id int64) ([]GetTimeSlotTemplateWithItemsByIDRow, error) {
+	rows, err := q.db.Query(ctx, getTimeSlotTemplateWithItemsByID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetTimeSlotTemplateWithItemsByIDRow{}
+	for rows.Next() {
+		var i GetTimeSlotTemplateWithItemsByIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Note,
+			&i.Updater,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ItemID,
+			&i.StartTime,
+			&i.EndTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -34,3 +34,7 @@ type DeleteTimeSlotTemplateItemServiceInterface interface {
 type GetTimeSlotTemplateListServiceInterface interface {
 	GetTimeSlotTemplateList(ctx context.Context, req adminTimeSlotTemplateModel.GetTimeSlotTemplateListParsedRequest) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateListResponse, error)
 }
+
+type GetTimeSlotTemplateServiceInterface interface {
+	GetTimeSlotTemplate(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse, error)
+}

@@ -2,21 +2,12 @@ package adminTimeSlotTemplate
 
 import (
 	"context"
-	"errors"
-
-	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
-
-// GetTimeSlotTemplateServiceInterface defines the interface for getting a single time slot template
-type GetTimeSlotTemplateServiceInterface interface {
-	GetTimeSlotTemplate(ctx context.Context, templateID string, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse, error)
-}
 
 type GetTimeSlotTemplateService struct {
 	queries *dbgen.Queries
@@ -28,47 +19,38 @@ func NewGetTimeSlotTemplateService(queries *dbgen.Queries) *GetTimeSlotTemplateS
 	}
 }
 
-func (s *GetTimeSlotTemplateService) GetTimeSlotTemplate(ctx context.Context, templateID string, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse, error) {
-	// Parse template ID
-	templateIDInt, err := utils.ParseID(templateID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "Invalid template ID", err)
-	}
-
+func (s *GetTimeSlotTemplateService) GetTimeSlotTemplate(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse, error) {
 	// Get time slot template by ID
-	template, err := s.queries.GetTimeSlotTemplateByID(ctx, templateIDInt)
+	rows, err := s.queries.GetTimeSlotTemplateWithItemsByID(ctx, templateID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotTemplateNotFound)
-		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get time slot template", err)
 	}
-
-	// Get time slot template items
-	templateItems, err := s.queries.GetTimeSlotTemplateItemsByTemplateID(ctx, templateIDInt)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get time slot template items", err)
+	if len(rows) == 0 {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotTemplateNotFound)
 	}
 
 	// Build time slot template items response
-	items := make([]adminTimeSlotTemplateModel.GetTimeSlotTemplateItemInfo, 0, len(templateItems))
-	for _, item := range templateItems {
-		items = append(items, adminTimeSlotTemplateModel.GetTimeSlotTemplateItemInfo{
-			ID:        utils.FormatID(item.ID),
-			StartTime: utils.PgTimeToTimeString(item.StartTime),
-			EndTime:   utils.PgTimeToTimeString(item.EndTime),
-		})
+	response := &adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse{
+		Items: make([]adminTimeSlotTemplateModel.GetTimeSlotTemplateItemInfo, 0, len(rows)),
 	}
 
-	// Build response
-	response := &adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse{
-		ID:        utils.FormatID(template.ID),
-		Name:      template.Name,
-		Note:      utils.PgTextToString(template.Note),
-		Updater:   utils.PgInt8ToIDString(template.Updater),
-		CreatedAt: template.CreatedAt.Time.String(),
-		UpdatedAt: template.UpdatedAt.Time.String(),
-		Items:     items,
+	for i, row := range rows {
+		if i == 0 {
+			response.ID = utils.FormatID(row.ID)
+			response.Name = row.Name
+			response.Note = utils.PgTextToString(row.Note)
+			response.Updater = utils.PgInt8ToIDString(row.Updater)
+			response.CreatedAt = utils.PgTimestamptzToTimeString(row.CreatedAt)
+			response.UpdatedAt = utils.PgTimestamptzToTimeString(row.UpdatedAt)
+		}
+
+		if row.ItemID.Valid {
+			response.Items = append(response.Items, adminTimeSlotTemplateModel.GetTimeSlotTemplateItemInfo{
+				ID:        utils.FormatID(row.ItemID.Int64),
+				StartTime: utils.PgTimeToTimeString(row.StartTime),
+				EndTime:   utils.PgTimeToTimeString(row.EndTime),
+			})
+		}
 	}
 
 	return response, nil
