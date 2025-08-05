@@ -223,6 +223,6 @@ func setupAdminTimeSlotTemplateRoutes(admin *gin.RouterGroup, cfg *config.Config
 		// Template item management
 		timeSlotTemplates.POST("/:templateId/items", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateItemCreate.Create)
 		timeSlotTemplates.PATCH("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateUpdateItem.Update)
-		timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateDeleteItem.DeleteTimeSlotTemplateItem)
+		timeSlotTemplates.DELETE("/:templateId/items/:itemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.TimeSlotTemplateDeleteItem.Delete)
 	}
 }

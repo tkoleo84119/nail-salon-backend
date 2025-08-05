@@ -78,16 +78,16 @@ type AdminServices struct {
 	ScheduleGet            adminScheduleService.GetScheduleServiceInterface
 
 	// Time slot template services
-	TimeSlotTemplateGetAll     adminTimeSlotTemplateService.GetAllServiceInterface
-	TimeSlotTemplateGet        adminTimeSlotTemplateService.GetServiceInterface
-	TimeSlotTemplateCreate     adminTimeSlotTemplateService.CreateServiceInterface
-	TimeSlotTemplateDelete     adminTimeSlotTemplateService.DeleteServiceInterface
-	TimeSlotTemplateUpdate     adminTimeSlotTemplateService.UpdateServiceInterface
-	TimeSlotTemplateDeleteItem *adminTimeSlotTemplateService.DeleteTimeSlotTemplateItemService
+	TimeSlotTemplateGetAll adminTimeSlotTemplateService.GetAllServiceInterface
+	TimeSlotTemplateGet    adminTimeSlotTemplateService.GetServiceInterface
+	TimeSlotTemplateCreate adminTimeSlotTemplateService.CreateServiceInterface
+	TimeSlotTemplateDelete adminTimeSlotTemplateService.DeleteServiceInterface
+	TimeSlotTemplateUpdate adminTimeSlotTemplateService.UpdateServiceInterface
 
 	// Time slot template item services
 	TimeSlotTemplateItemCreate adminTimeSlotTemplateItemService.CreateServiceInterface
 	TimeSlotTemplateUpdateItem adminTimeSlotTemplateItemService.UpdateServiceInterface
+	TimeSlotTemplateDeleteItem adminTimeSlotTemplateItemService.DeleteServiceInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -140,16 +140,16 @@ type AdminHandlers struct {
 	ScheduleGet            *adminScheduleHandler.GetScheduleHandler
 
 	// Time slot template handlers
-	TimeSlotTemplateGetAll     *adminTimeSlotTemplateHandler.GetAll
-	TimeSlotTemplateGet        *adminTimeSlotTemplateHandler.Get
-	TimeSlotTemplateCreate     *adminTimeSlotTemplateHandler.Create
-	TimeSlotTemplateUpdate     *adminTimeSlotTemplateHandler.Update
-	TimeSlotTemplateDelete     *adminTimeSlotTemplateHandler.Delete
-	TimeSlotTemplateDeleteItem *adminTimeSlotTemplateHandler.DeleteTimeSlotTemplateItemHandler
+	TimeSlotTemplateGetAll *adminTimeSlotTemplateHandler.GetAll
+	TimeSlotTemplateGet    *adminTimeSlotTemplateHandler.Get
+	TimeSlotTemplateCreate *adminTimeSlotTemplateHandler.Create
+	TimeSlotTemplateUpdate *adminTimeSlotTemplateHandler.Update
+	TimeSlotTemplateDelete *adminTimeSlotTemplateHandler.Delete
 
 	// Time slot template item handlers
 	TimeSlotTemplateItemCreate *adminTimeSlotTemplateItemHandler.Create
 	TimeSlotTemplateUpdateItem *adminTimeSlotTemplateItemHandler.Update
+	TimeSlotTemplateDeleteItem *adminTimeSlotTemplateItemHandler.Delete
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -203,16 +203,16 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ScheduleGet:            adminScheduleService.NewGetScheduleService(repositories.SQLX),
 
 		// Time slot template services
-		TimeSlotTemplateGetAll:     adminTimeSlotTemplateService.NewGetAll(repositories.SQLX),
-		TimeSlotTemplateGet:        adminTimeSlotTemplateService.NewGet(queries),
-		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreate(queries, database.PgxPool),
-		TimeSlotTemplateUpdate:     adminTimeSlotTemplateService.NewUpdate(queries, repositories.SQLX),
-		TimeSlotTemplateDelete:     adminTimeSlotTemplateService.NewDelete(queries),
-		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateService.NewDeleteTimeSlotTemplateItemService(queries),
+		TimeSlotTemplateGetAll: adminTimeSlotTemplateService.NewGetAll(repositories.SQLX),
+		TimeSlotTemplateGet:    adminTimeSlotTemplateService.NewGet(queries),
+		TimeSlotTemplateCreate: adminTimeSlotTemplateService.NewCreate(queries, database.PgxPool),
+		TimeSlotTemplateUpdate: adminTimeSlotTemplateService.NewUpdate(queries, repositories.SQLX),
+		TimeSlotTemplateDelete: adminTimeSlotTemplateService.NewDelete(queries),
 
 		// Time slot template item services
 		TimeSlotTemplateItemCreate: adminTimeSlotTemplateItemService.NewCreate(queries),
 		TimeSlotTemplateUpdateItem: adminTimeSlotTemplateItemService.NewUpdate(queries),
+		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateItemService.NewDelete(queries),
 	}
 }
 
@@ -267,15 +267,15 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ScheduleGet:            adminScheduleHandler.NewGetScheduleHandler(services.ScheduleGet),
 
 		// Time slot template handlers
-		TimeSlotTemplateGetAll:     adminTimeSlotTemplateHandler.NewGetAll(services.TimeSlotTemplateGetAll),
-		TimeSlotTemplateGet:        adminTimeSlotTemplateHandler.NewGet(services.TimeSlotTemplateGet),
-		TimeSlotTemplateCreate:     adminTimeSlotTemplateHandler.NewCreate(services.TimeSlotTemplateCreate),
-		TimeSlotTemplateUpdate:     adminTimeSlotTemplateHandler.NewUpdate(services.TimeSlotTemplateUpdate),
-		TimeSlotTemplateDelete:     adminTimeSlotTemplateHandler.NewDelete(services.TimeSlotTemplateDelete),
-		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateHandler.NewDeleteTimeSlotTemplateItemHandler(services.TimeSlotTemplateDeleteItem),
+		TimeSlotTemplateGetAll: adminTimeSlotTemplateHandler.NewGetAll(services.TimeSlotTemplateGetAll),
+		TimeSlotTemplateGet:    adminTimeSlotTemplateHandler.NewGet(services.TimeSlotTemplateGet),
+		TimeSlotTemplateCreate: adminTimeSlotTemplateHandler.NewCreate(services.TimeSlotTemplateCreate),
+		TimeSlotTemplateUpdate: adminTimeSlotTemplateHandler.NewUpdate(services.TimeSlotTemplateUpdate),
+		TimeSlotTemplateDelete: adminTimeSlotTemplateHandler.NewDelete(services.TimeSlotTemplateDelete),
 
 		// Time slot template item handlers
 		TimeSlotTemplateItemCreate: adminTimeSlotTemplateItemHandler.NewCreate(services.TimeSlotTemplateItemCreate),
 		TimeSlotTemplateUpdateItem: adminTimeSlotTemplateItemHandler.NewUpdate(services.TimeSlotTemplateUpdateItem),
+		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateItemHandler.NewDelete(services.TimeSlotTemplateDeleteItem),
 	}
 }

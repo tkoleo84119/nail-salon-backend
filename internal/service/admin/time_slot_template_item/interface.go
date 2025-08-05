@@ -13,3 +13,7 @@ type CreateServiceInterface interface {
 type UpdateServiceInterface interface {
 	Update(ctx context.Context, templateID int64, itemID int64, req adminTimeSlotTemplateItemModel.UpdateRequest) (*adminTimeSlotTemplateItemModel.UpdateResponse, error)
 }
+
+type DeleteServiceInterface interface {
+	Delete(ctx context.Context, templateID int64, itemID int64) (*adminTimeSlotTemplateItemModel.DeleteResponse, error)
+}
