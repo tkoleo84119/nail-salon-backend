@@ -20,6 +20,26 @@ type BatchCreateTimeSlotTemplateItemsParams struct {
 	UpdatedAt  pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
+const checkTimeSlotTemplateItemExistsByIDAndTemplateID = `-- name: CheckTimeSlotTemplateItemExistsByIDAndTemplateID :one
+SELECT EXISTS (
+    SELECT 1
+    FROM time_slot_template_items
+    WHERE id = $1 AND template_id = $2
+)
+`
+
+type CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams struct {
+	ID         int64 `db:"id" json:"id"`
+	TemplateID int64 `db:"template_id" json:"template_id"`
+}
+
+func (q *Queries) CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.Context, arg CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkTimeSlotTemplateItemExistsByIDAndTemplateID, arg.ID, arg.TemplateID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createTimeSlotTemplateItem = `-- name: CreateTimeSlotTemplateItem :one
 INSERT INTO time_slot_template_items (
     id,
@@ -133,7 +153,7 @@ func (q *Queries) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, temp
 }
 
 const getTimeSlotTemplateItemsByTemplateIDExcluding = `-- name: GetTimeSlotTemplateItemsByTemplateIDExcluding :many
-SELECT id, template_id, start_time, end_time, created_at, updated_at
+SELECT id, template_id, start_time, end_time
 FROM time_slot_template_items
 WHERE template_id = $1 AND id != $2
 `
@@ -143,22 +163,27 @@ type GetTimeSlotTemplateItemsByTemplateIDExcludingParams struct {
 	ID         int64 `db:"id" json:"id"`
 }
 
-func (q *Queries) GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]TimeSlotTemplateItem, error) {
+type GetTimeSlotTemplateItemsByTemplateIDExcludingRow struct {
+	ID         int64       `db:"id" json:"id"`
+	TemplateID int64       `db:"template_id" json:"template_id"`
+	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
+}
+
+func (q *Queries) GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]GetTimeSlotTemplateItemsByTemplateIDExcludingRow, error) {
 	rows, err := q.db.Query(ctx, getTimeSlotTemplateItemsByTemplateIDExcluding, arg.TemplateID, arg.ID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []TimeSlotTemplateItem{}
+	items := []GetTimeSlotTemplateItemsByTemplateIDExcludingRow{}
 	for rows.Next() {
-		var i TimeSlotTemplateItem
+		var i GetTimeSlotTemplateItemsByTemplateIDExcludingRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.TemplateID,
 			&i.StartTime,
 			&i.EndTime,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -177,7 +202,7 @@ SET
     end_time = $3,
     updated_at = NOW()
 WHERE id = $1
-RETURNING id, template_id, start_time, end_time, created_at, updated_at
+RETURNING id, template_id, start_time, end_time
 `
 
 type UpdateTimeSlotTemplateItemParams struct {
@@ -186,16 +211,21 @@ type UpdateTimeSlotTemplateItemParams struct {
 	EndTime   pgtype.Time `db:"end_time" json:"end_time"`
 }
 
-func (q *Queries) UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (TimeSlotTemplateItem, error) {
+type UpdateTimeSlotTemplateItemRow struct {
+	ID         int64       `db:"id" json:"id"`
+	TemplateID int64       `db:"template_id" json:"template_id"`
+	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
+}
+
+func (q *Queries) UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (UpdateTimeSlotTemplateItemRow, error) {
 	row := q.db.QueryRow(ctx, updateTimeSlotTemplateItem, arg.ID, arg.StartTime, arg.EndTime)
-	var i TimeSlotTemplateItem
+	var i UpdateTimeSlotTemplateItemRow
 	err := row.Scan(
 		&i.ID,
 		&i.TemplateID,
 		&i.StartTime,
 		&i.EndTime,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
