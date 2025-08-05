@@ -197,7 +197,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ScheduleGet:            adminScheduleService.NewGetScheduleService(repositories.SQLX),
 
 		// Time slot template services
-		TimeSlotTemplateGetList:    adminTimeSlotTemplateService.NewGetTimeSlotTemplateListService(queries, repositories.SQLX),
+		TimeSlotTemplateGetList:    adminTimeSlotTemplateService.NewGetTimeSlotTemplateListService(repositories.SQLX),
 		TimeSlotTemplateGet:        adminTimeSlotTemplateService.NewGetTimeSlotTemplateService(queries),
 		TimeSlotTemplateCreate:     adminTimeSlotTemplateService.NewCreateTimeSlotTemplateService(queries, database.PgxPool),
 		TimeSlotTemplateUpdate:     adminTimeSlotTemplateService.NewUpdateTimeSlotTemplateService(queries, repositories.SQLX),

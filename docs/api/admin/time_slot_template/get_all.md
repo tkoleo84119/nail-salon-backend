@@ -12,16 +12,16 @@
 
 ## 說明
 
-- 所有登入員工皆可查詢。
-- 用於查詢系統中建立的時段模板列表。
-- 可依名稱 `name` 模糊搜尋。
+- 支援基本查詢條件。
 - 支援分頁（limit、offset）。
+- 支援排序（sort）。
 
 ---
 
 ## 權限
 
-- 任一已登入員工皆可使用（JWT 驗證）。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -29,15 +29,26 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Query Parameters
 
-| 參數   | 型別   | 必填 | 預設值 | 說明             |
-| ------ | ------ | ---- | ------ | ---------------- |
-| name   | string | 否   |        | 模糊查詢模板名稱 |
-| limit  | int    | 否   | 20     | 單頁筆數         |
-| offset | int    | 否   | 0      | 起始筆數         |
+| 參數   | 型別   | 必填 | 預許值    | 說明                                             |
+| ------ | ------ | ---- | --------- | ------------------------------------------------ |
+| name   | string | 否   |           | 模糊查詢模板名稱                                 |
+| limit  | int    | 否   | 20        | 單頁筆數                                         |
+| offset | int    | 否   | 0         | 起始筆數                                         |
+| sort   | string | 否   | updatedAt | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序) |
+
+### 驗證規則
+
+| 欄位   | 必填 | 其他規則                                       |
+| ------ | ---- | ---------------------------------------------- |
+| name   | 否   | 最大長度100字元                                |
+| limit  | 否   | 最小值1<li>最大值100                           |
+| offset | 否   | 最小值0<li>最大值1000000                       |
+| sort   | 否   | 可以為 createdAt, updatedAt, name (其餘會忽略) |
 
 ---
 
@@ -71,21 +82,54 @@ Authorization: Bearer <access_token>
 }
 ```
 
-### 失敗
+### 錯誤處理
 
-#### 401 Unauthorized - 未登入
+#### 錯誤總覽
+
+| 狀態碼 | 錯誤碼 | 說明                                  |
+| ------ | ------ | ------------------------------------- |
+| 401    | E1002  | 無效的 accessToken，請重新登入        |
+| 401    | E1003  | accessToken 缺失，請重新登入          |
+| 401    | E1004  | accessToken 格式錯誤，請重新登入      |
+| 401    | E1005  | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006  | 未找到使用者認證資訊，請重新登入      |
+| 400    | E2023  | {field} 最小值為 {param}              |
+| 400    | E2024  | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2026  | {field} 最大值為 {param}              |
+| 500    | E9001  | 系統發生錯誤，請稍後再試              |
+| 500    | E9002  | 資料庫操作失敗                        |
+
+#### 400 Bad Request - 參數類型轉換失敗
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "error": {
+    "code": "E2023",
+    "message": "limit 最小值為 1",
+    "field": "limit"
+  }
 }
 ```
 
-#### 500 Internal Server Error
+#### 401 Unauthorized - 未登入/Token失效
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "error": {
+    "code": "E1002",
+    "message": "無效的 accessToken，請重新登入"
+  }
+}
+```
+
+#### 500 Internal Server Error - 系統發生錯誤
+
+```json
+{
+  "error": {
+    "code": "E9001",
+    "message": "系統發生錯誤，請稍後再試"
+  }
 }
 ```
 
@@ -101,10 +145,11 @@ Authorization: Bearer <access_token>
 
 1. 根據 `name` 模糊查詢 `time_slot_templates` 表的 `name` 欄位。
 2. 加入 `limit` / `offset` 處理分頁。
-3. 回傳總筆數與模板清單。
+3. 加入 `sort` 處理排序。
+4. 回傳總筆數與模板清單。
 
 ---
 
 ## 注意事項
 
-- 僅回傳模板主資料（不包含子項 item 時段），若需明細請查詢單筆 API。
+- 僅回傳模板主資料（不包含子項 item 時段），若需明細請查詢單筆 API (GET `/api/admin/time-slot-templates/{timeSlotTemplateId}`)。

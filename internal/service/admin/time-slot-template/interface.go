@@ -3,8 +3,8 @@ package adminTimeSlotTemplate
 import (
 	"context"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 type CreateTimeSlotTemplateServiceInterface interface {
@@ -29,4 +29,8 @@ type DeleteTimeSlotTemplateServiceInterface interface {
 
 type DeleteTimeSlotTemplateItemServiceInterface interface {
 	DeleteTimeSlotTemplateItem(ctx context.Context, templateID string, itemID string, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.DeleteTimeSlotTemplateItemResponse, error)
+}
+
+type GetTimeSlotTemplateListServiceInterface interface {
+	GetTimeSlotTemplateList(ctx context.Context, req adminTimeSlotTemplateModel.GetTimeSlotTemplateListParsedRequest) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateListResponse, error)
 }

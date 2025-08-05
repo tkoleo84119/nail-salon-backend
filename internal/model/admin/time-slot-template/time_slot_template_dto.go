@@ -60,9 +60,17 @@ type DeleteTimeSlotTemplateResponse struct {
 
 // GetTimeSlotTemplateListRequest represents the request to get time slot template list
 type GetTimeSlotTemplateListRequest struct {
-	Name   *string `form:"name" binding:"omitempty,max=50"`
+	Name   *string `form:"name" binding:"omitempty,max=100"`
 	Limit  *int    `form:"limit" binding:"omitempty,min=1,max=100"`
-	Offset *int    `form:"offset" binding:"omitempty,min=0"`
+	Offset *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
+	Sort   *string `form:"sort" binding:"omitempty"`
+}
+
+type GetTimeSlotTemplateListParsedRequest struct {
+	Name   *string
+	Limit  int
+	Offset int
+	Sort   []string
 }
 
 // GetTimeSlotTemplateListResponse represents the response with time slot template list

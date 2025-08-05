@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -13,7 +14,7 @@ import (
 // TimeSlotTemplateRepositoryInterface defines the interface for time slot template repository
 type TimeSlotTemplateRepositoryInterface interface {
 	UpdateTimeSlotTemplate(ctx context.Context, templateID int64, req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest) (*adminTimeSlotTemplateModel.UpdateTimeSlotTemplateResponse, error)
-	GetTimeSlotTemplateList(ctx context.Context, params GetTimeSlotTemplateListParams) ([]TimeSlotTemplateModel, int, error)
+	GetAllTimeSlotTemplateByFilter(ctx context.Context, params GetAllTimeSlotTemplateByFilterParams) (int, []GetAllTimeSlotTemplateByFilterItem, error)
 }
 
 type TimeSlotTemplateRepository struct {
@@ -78,38 +79,24 @@ func (r *TimeSlotTemplateRepository) UpdateTimeSlotTemplate(ctx context.Context,
 	}, nil
 }
 
-type TimeSlotTemplateModel struct {
-	ID        int64  `db:"id"`
-	Name      string `db:"name"`
-	Note      string `db:"note"`
-	Updater   int64  `db:"updater"`
-	CreatedAt string `db:"created_at"`
-	UpdatedAt string `db:"updated_at"`
+type GetAllTimeSlotTemplateByFilterItem struct {
+	ID        int64              `db:"id"`
+	Name      string             `db:"name"`
+	Note      pgtype.Text        `db:"note"`
+	Updater   int64              `db:"updater"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
 
-type GetTimeSlotTemplateListParams struct {
+type GetAllTimeSlotTemplateByFilterParams struct {
 	Name   *string
 	Limit  *int
 	Offset *int
+	Sort   *[]string
 }
 
 // GetTimeSlotTemplateList retrieves time slot templates with pagination and name filtering
-func (r *TimeSlotTemplateRepository) GetTimeSlotTemplateList(ctx context.Context, params GetTimeSlotTemplateListParams) ([]TimeSlotTemplateModel, int, error) {
-	// Build WHERE clause
-	whereParts := []string{}
-	args := map[string]interface{}{}
-
-	// Add name filter if provided
-	if params.Name != nil && *params.Name != "" {
-		whereParts = append(whereParts, "name ILIKE :name")
-		args["name"] = "%" + *params.Name + "%"
-	}
-
-	whereClause := ""
-	if len(whereParts) > 0 {
-		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
-	}
-
+func (r *TimeSlotTemplateRepository) GetAllTimeSlotTemplateByFilter(ctx context.Context, params GetAllTimeSlotTemplateByFilterParams) (int, []GetAllTimeSlotTemplateByFilterItem, error) {
 	// Set pagination defaults
 	limit := 20
 	if params.Limit != nil {
@@ -120,48 +107,69 @@ func (r *TimeSlotTemplateRepository) GetTimeSlotTemplateList(ctx context.Context
 		offset = *params.Offset
 	}
 
-	args["limit"] = limit
-	args["offset"] = offset
+	sort := utils.HandleSort([]string{"created_at", "updated_at", "name"}, "updated_at", "DESC", params.Sort)
+
+	// Build WHERE clause
+	whereParts := []string{}
+	args := []interface{}{}
+
+	// Add name filter if provided
+	if params.Name != nil && *params.Name != "" {
+		whereParts = append(whereParts, fmt.Sprintf("name ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*params.Name+"%")
+	}
+
+	whereClause := ""
+	if len(whereParts) > 0 {
+		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
+	}
 
 	// Query for total count
 	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM time_slot_templates %s`, whereClause)
 	var total int
-	rows, err := r.db.NamedQuery(countQuery, args)
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to count time slot templates: %w", err)
+	row := r.db.QueryRowContext(ctx, countQuery, args...)
+	if err := row.Scan(&total); err != nil {
+		return 0, nil, fmt.Errorf("count time slot templates failed: %w", err)
 	}
-	defer rows.Close()
 
-	if rows.Next() {
-		if err := rows.Scan(&total); err != nil {
-			return nil, 0, fmt.Errorf("failed to scan count: %w", err)
-		}
-	}
+	limitIdx := len(args) + 1
+	offsetIdx := limitIdx + 1
 
 	// Query for templates
 	templatesQuery := fmt.Sprintf(`
-		SELECT id, name, note, updater, created_at, updated_at
+		SELECT
+			id,
+			name,
+			COALESCE(note, '') as note,
+			updater,
+			created_at,
+			updated_at
 		FROM time_slot_templates
 		%s
-		ORDER BY created_at DESC, id DESC
-		LIMIT :limit OFFSET :offset`,
-		whereClause)
+		ORDER BY %s
+		LIMIT $%d OFFSET $%d`,
+		whereClause,
+		sort,
+		limitIdx,
+		offsetIdx,
+	)
 
-	var results []TimeSlotTemplateModel
+	argsWithLimit := append(args, limit, offset)
 
-	rows, err = r.db.NamedQuery(templatesQuery, args)
+	var results []GetAllTimeSlotTemplateByFilterItem
+	rows, err := r.db.QueryxContext(ctx, templatesQuery, argsWithLimit...)
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to query time slot templates: %w", err)
+		return 0, nil, fmt.Errorf("failed to query time slot templates: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var result TimeSlotTemplateModel
+		var result GetAllTimeSlotTemplateByFilterItem
 		if err := rows.StructScan(&result); err != nil {
-			return nil, 0, fmt.Errorf("failed to scan time slot template: %w", err)
+			return 0, nil, fmt.Errorf("failed to scan time slot template: %w", err)
 		}
 		results = append(results, result)
 	}
 
-	return results, total, nil
+	return total, results, nil
 }
