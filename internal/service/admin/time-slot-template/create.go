@@ -45,7 +45,7 @@ func (s *Create) Create(ctx context.Context, req adminTimeSlotTemplateModel.Crea
 	template, err := qtx.CreateTimeSlotTemplate(ctx, dbgen.CreateTimeSlotTemplateParams{
 		ID:      templateID,
 		Name:    req.Name,
-		Note:    utils.StringPtrToPgText(&req.Note, true),
+		Note:    utils.StringPtrToPgText(req.Note, true),
 		Updater: utils.Int64ToPgInt8(creatorID),
 	})
 	if err != nil {
