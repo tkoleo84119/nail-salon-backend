@@ -11,17 +11,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetTimeSlotTemplateHandler struct {
-	service adminTimeSlotTemplateService.GetTimeSlotTemplateServiceInterface
+type Get struct {
+	service adminTimeSlotTemplateService.GetServiceInterface
 }
 
-func NewGetTimeSlotTemplateHandler(service adminTimeSlotTemplateService.GetTimeSlotTemplateServiceInterface) *GetTimeSlotTemplateHandler {
-	return &GetTimeSlotTemplateHandler{
+func NewGet(service adminTimeSlotTemplateService.GetServiceInterface) *Get {
+	return &Get{
 		service: service,
 	}
 }
 
-func (h *GetTimeSlotTemplateHandler) GetTimeSlotTemplate(c *gin.Context) {
+func (h *Get) Get(c *gin.Context) {
 	// Get path parameter
 	templateID := c.Param("templateId")
 	if templateID == "" {
@@ -35,7 +35,7 @@ func (h *GetTimeSlotTemplateHandler) GetTimeSlotTemplate(c *gin.Context) {
 	}
 
 	// Call service
-	template, err := h.service.GetTimeSlotTemplate(c.Request.Context(), parsedTemplateID)
+	template, err := h.service.Get(c.Request.Context(), parsedTemplateID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

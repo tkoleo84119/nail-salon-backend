@@ -13,19 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetTimeSlotTemplateListHandler struct {
-	service adminTimeSlotTemplateService.GetTimeSlotTemplateListServiceInterface
+type GetAll struct {
+	service adminTimeSlotTemplateService.GetAllServiceInterface
 }
 
-func NewGetTimeSlotTemplateListHandler(service adminTimeSlotTemplateService.GetTimeSlotTemplateListServiceInterface) *GetTimeSlotTemplateListHandler {
-	return &GetTimeSlotTemplateListHandler{
+func NewGetAll(service adminTimeSlotTemplateService.GetAllServiceInterface) *GetAll {
+	return &GetAll{
 		service: service,
 	}
 }
 
-func (h *GetTimeSlotTemplateListHandler) GetTimeSlotTemplateList(c *gin.Context) {
+func (h *GetAll) GetAll(c *gin.Context) {
 	// Parse query parameters
-	var req adminTimeSlotTemplateModel.GetTimeSlotTemplateListRequest
+	var req adminTimeSlotTemplateModel.GetAllRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -48,7 +48,7 @@ func (h *GetTimeSlotTemplateListHandler) GetTimeSlotTemplateList(c *gin.Context)
 		sort = strings.Split(*req.Sort, ",")
 	}
 
-	parsedRequest := adminTimeSlotTemplateModel.GetTimeSlotTemplateListParsedRequest{
+	parsedRequest := adminTimeSlotTemplateModel.GetAllParsedRequest{
 		Name:   req.Name,
 		Limit:  limit,
 		Offset: offset,
@@ -56,7 +56,7 @@ func (h *GetTimeSlotTemplateListHandler) GetTimeSlotTemplateList(c *gin.Context)
 	}
 
 	// Call service
-	response, err := h.service.GetTimeSlotTemplateList(c.Request.Context(), parsedRequest)
+	response, err := h.service.GetAll(c.Request.Context(), parsedRequest)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

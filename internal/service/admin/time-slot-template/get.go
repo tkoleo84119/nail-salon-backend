@@ -9,17 +9,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetTimeSlotTemplateService struct {
+type Get struct {
 	queries *dbgen.Queries
 }
 
-func NewGetTimeSlotTemplateService(queries *dbgen.Queries) *GetTimeSlotTemplateService {
-	return &GetTimeSlotTemplateService{
+func NewGet(queries *dbgen.Queries) *Get {
+	return &Get{
 		queries: queries,
 	}
 }
 
-func (s *GetTimeSlotTemplateService) GetTimeSlotTemplate(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse, error) {
+func (s *Get) Get(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.GetResponse, error) {
 	// Get time slot template by ID
 	rows, err := s.queries.GetTimeSlotTemplateWithItemsByID(ctx, templateID)
 	if err != nil {
@@ -30,8 +30,8 @@ func (s *GetTimeSlotTemplateService) GetTimeSlotTemplate(ctx context.Context, te
 	}
 
 	// Build time slot template items response
-	response := &adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse{
-		Items: make([]adminTimeSlotTemplateModel.GetTimeSlotTemplateItemInfo, 0, len(rows)),
+	response := &adminTimeSlotTemplateModel.GetResponse{
+		Items: make([]adminTimeSlotTemplateModel.GetItemInfo, 0, len(rows)),
 	}
 
 	for i, row := range rows {
@@ -45,7 +45,7 @@ func (s *GetTimeSlotTemplateService) GetTimeSlotTemplate(ctx context.Context, te
 		}
 
 		if row.ItemID.Valid {
-			response.Items = append(response.Items, adminTimeSlotTemplateModel.GetTimeSlotTemplateItemInfo{
+			response.Items = append(response.Items, adminTimeSlotTemplateModel.GetItemInfo{
 				ID:        utils.FormatID(row.ItemID.Int64),
 				StartTime: utils.PgTimeToTimeString(row.StartTime),
 				EndTime:   utils.PgTimeToTimeString(row.EndTime),

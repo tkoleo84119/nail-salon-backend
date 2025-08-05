@@ -9,17 +9,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetTimeSlotTemplateListService struct {
+type GetAll struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewGetTimeSlotTemplateListService(repo *sqlxRepo.Repositories) *GetTimeSlotTemplateListService {
-	return &GetTimeSlotTemplateListService{
+func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
+	return &GetAll{
 		repo: repo,
 	}
 }
 
-func (s *GetTimeSlotTemplateListService) GetTimeSlotTemplateList(ctx context.Context, req adminTimeSlotTemplateModel.GetTimeSlotTemplateListParsedRequest) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateListResponse, error) {
+func (s *GetAll) GetAll(ctx context.Context, req adminTimeSlotTemplateModel.GetAllParsedRequest) (*adminTimeSlotTemplateModel.GetAllResponse, error) {
 	total, timeSlotTemplates, err := s.repo.Template.GetAllTimeSlotTemplateByFilter(ctx, sqlxRepo.GetAllTimeSlotTemplateByFilterParams{
 		Name:   req.Name,
 		Limit:  &req.Limit,
@@ -30,13 +30,13 @@ func (s *GetTimeSlotTemplateListService) GetTimeSlotTemplateList(ctx context.Con
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get time slot template list", err)
 	}
 
-	response := &adminTimeSlotTemplateModel.GetTimeSlotTemplateListResponse{
+	response := &adminTimeSlotTemplateModel.GetAllResponse{
 		Total: total,
-		Items: make([]adminTimeSlotTemplateModel.GetTimeSlotTemplateListItem, len(timeSlotTemplates)),
+		Items: make([]adminTimeSlotTemplateModel.GetAllItem, len(timeSlotTemplates)),
 	}
 
 	for i, item := range timeSlotTemplates {
-		response.Items[i] = adminTimeSlotTemplateModel.GetTimeSlotTemplateListItem{
+		response.Items[i] = adminTimeSlotTemplateModel.GetAllItem{
 			ID:        utils.FormatID(item.ID),
 			Name:      item.Name,
 			Note:      utils.PgTextToString(item.Note),

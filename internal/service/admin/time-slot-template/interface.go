@@ -15,6 +15,14 @@ type DeleteServiceInterface interface {
 	Delete(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.DeleteResponse, error)
 }
 
+type GetAllServiceInterface interface {
+	GetAll(ctx context.Context, req adminTimeSlotTemplateModel.GetAllParsedRequest) (*adminTimeSlotTemplateModel.GetAllResponse, error)
+}
+
+type GetServiceInterface interface {
+	Get(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.GetResponse, error)
+}
+
 type UpdateTimeSlotTemplateServiceInterface interface {
 	UpdateTimeSlotTemplate(ctx context.Context, templateID string, req adminTimeSlotTemplateModel.UpdateTimeSlotTemplateRequest, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.UpdateTimeSlotTemplateResponse, error)
 }
@@ -29,12 +37,4 @@ type UpdateTimeSlotTemplateItemServiceInterface interface {
 
 type DeleteTimeSlotTemplateItemServiceInterface interface {
 	DeleteTimeSlotTemplateItem(ctx context.Context, templateID string, itemID string, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.DeleteTimeSlotTemplateItemResponse, error)
-}
-
-type GetTimeSlotTemplateListServiceInterface interface {
-	GetTimeSlotTemplateList(ctx context.Context, req adminTimeSlotTemplateModel.GetTimeSlotTemplateListParsedRequest) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateListResponse, error)
-}
-
-type GetTimeSlotTemplateServiceInterface interface {
-	GetTimeSlotTemplate(ctx context.Context, templateID int64) (*adminTimeSlotTemplateModel.GetTimeSlotTemplateResponse, error)
 }
