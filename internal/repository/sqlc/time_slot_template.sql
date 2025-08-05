@@ -27,18 +27,6 @@ SELECT
 FROM time_slot_templates
 WHERE id = $1;
 
--- name: GetTimeSlotTemplateItemsByTemplateID :many
-SELECT
-    id,
-    template_id,
-    start_time,
-    end_time,
-    created_at,
-    updated_at
-FROM time_slot_template_items
-WHERE template_id = $1
-ORDER BY start_time;
-
 -- name: GetTimeSlotTemplateWithItemsByID :many
 SELECT
     t.id,

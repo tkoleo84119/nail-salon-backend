@@ -34,9 +34,7 @@ INSERT INTO time_slot_template_items (
     id,
     template_id,
     start_time,
-    end_time,
-    created_at,
-    updated_at
+    end_time
 `
 
 type CreateTimeSlotTemplateItemParams struct {
@@ -46,21 +44,26 @@ type CreateTimeSlotTemplateItemParams struct {
 	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
 }
 
-func (q *Queries) CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (TimeSlotTemplateItem, error) {
+type CreateTimeSlotTemplateItemRow struct {
+	ID         int64       `db:"id" json:"id"`
+	TemplateID int64       `db:"template_id" json:"template_id"`
+	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
+}
+
+func (q *Queries) CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (CreateTimeSlotTemplateItemRow, error) {
 	row := q.db.QueryRow(ctx, createTimeSlotTemplateItem,
 		arg.ID,
 		arg.TemplateID,
 		arg.StartTime,
 		arg.EndTime,
 	)
-	var i TimeSlotTemplateItem
+	var i CreateTimeSlotTemplateItemRow
 	err := row.Scan(
 		&i.ID,
 		&i.TemplateID,
 		&i.StartTime,
 		&i.EndTime,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -93,6 +96,40 @@ func (q *Queries) GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (Ti
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getTimeSlotTemplateItemsByTemplateID = `-- name: GetTimeSlotTemplateItemsByTemplateID :many
+SELECT
+    start_time,
+    end_time
+FROM time_slot_template_items
+WHERE template_id = $1
+ORDER BY start_time
+`
+
+type GetTimeSlotTemplateItemsByTemplateIDRow struct {
+	StartTime pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime   pgtype.Time `db:"end_time" json:"end_time"`
+}
+
+func (q *Queries) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]GetTimeSlotTemplateItemsByTemplateIDRow, error) {
+	rows, err := q.db.Query(ctx, getTimeSlotTemplateItemsByTemplateID, templateID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetTimeSlotTemplateItemsByTemplateIDRow{}
+	for rows.Next() {
+		var i GetTimeSlotTemplateItemsByTemplateIDRow
+		if err := rows.Scan(&i.StartTime, &i.EndTime); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getTimeSlotTemplateItemsByTemplateIDExcluding = `-- name: GetTimeSlotTemplateItemsByTemplateIDExcluding :many

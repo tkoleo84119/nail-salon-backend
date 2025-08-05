@@ -107,46 +107,6 @@ func (q *Queries) GetTimeSlotTemplateByID(ctx context.Context, id int64) (TimeSl
 	return i, err
 }
 
-const getTimeSlotTemplateItemsByTemplateID = `-- name: GetTimeSlotTemplateItemsByTemplateID :many
-SELECT
-    id,
-    template_id,
-    start_time,
-    end_time,
-    created_at,
-    updated_at
-FROM time_slot_template_items
-WHERE template_id = $1
-ORDER BY start_time
-`
-
-func (q *Queries) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]TimeSlotTemplateItem, error) {
-	rows, err := q.db.Query(ctx, getTimeSlotTemplateItemsByTemplateID, templateID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []TimeSlotTemplateItem{}
-	for rows.Next() {
-		var i TimeSlotTemplateItem
-		if err := rows.Scan(
-			&i.ID,
-			&i.TemplateID,
-			&i.StartTime,
-			&i.EndTime,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getTimeSlotTemplateWithItemsByID = `-- name: GetTimeSlotTemplateWithItemsByID :many
 SELECT
     t.id,

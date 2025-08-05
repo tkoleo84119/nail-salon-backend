@@ -1,57 +1,49 @@
-package adminTimeSlotTemplate
+package adminTimeSlotTemplateItem
 
 import (
 	"context"
 	"time"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	adminTimeSlotTemplateModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time-slot-template"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+	adminTimeSlotTemplateItemModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time_slot_template_item"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateTimeSlotTemplateItemService struct {
+type Create struct {
 	queries dbgen.Querier
 }
 
-func NewCreateTimeSlotTemplateItemService(queries dbgen.Querier) *CreateTimeSlotTemplateItemService {
-	return &CreateTimeSlotTemplateItemService{
+func NewCreate(queries dbgen.Querier) *Create {
+	return &Create{
 		queries: queries,
 	}
 }
 
-func (s *CreateTimeSlotTemplateItemService) CreateTimeSlotTemplateItem(ctx context.Context, templateID string, req adminTimeSlotTemplateModel.CreateTimeSlotTemplateItemRequest, staffContext common.StaffContext) (*adminTimeSlotTemplateModel.CreateTimeSlotTemplateItemResponse, error) {
-	// Parse template ID
-	templateIDInt, err := utils.ParseID(templateID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid template ID", err)
-	}
-
-	// Check if template exists
-	_, err = s.queries.GetTimeSlotTemplateByID(ctx, templateIDInt)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotTemplateNotFound, "time slot template not found", err)
-	}
-
+func (s *Create) Create(ctx context.Context, templateID int64, req adminTimeSlotTemplateItemModel.CreateRequest) (*adminTimeSlotTemplateItemModel.CreateResponse, error) {
 	// Validate time format and range
 	startTime, err := utils.TimeStringToTime(req.StartTime)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValFieldTimeFormat, "invalid start time format", err)
 	}
 
 	endTime, err := utils.TimeStringToTime(req.EndTime)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValFieldTimeFormat, "invalid end time format", err)
 	}
 
-	// Validate time range
 	if !endTime.After(startTime) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotEndBeforeStart)
+	}
+
+	// Check if template exists
+	_, err = s.queries.CheckTimeSlotTemplateExists(ctx, templateID)
+	if err != nil {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotTemplateNotFound)
 	}
 
 	// Get existing template items to check for conflicts
-	existingItems, err := s.queries.GetTimeSlotTemplateItemsByTemplateID(ctx, templateIDInt)
+	existingItems, err := s.queries.GetTimeSlotTemplateItemsByTemplateID(ctx, templateID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get existing template items", err)
 	}
@@ -67,7 +59,7 @@ func (s *CreateTimeSlotTemplateItemService) CreateTimeSlotTemplateItem(ctx conte
 	// Create time slot template item
 	item, err := s.queries.CreateTimeSlotTemplateItem(ctx, dbgen.CreateTimeSlotTemplateItemParams{
 		ID:         itemID,
-		TemplateID: templateIDInt,
+		TemplateID: templateID,
 		StartTime:  utils.TimeToPgTime(startTime),
 		EndTime:    utils.TimeToPgTime(endTime),
 	})
@@ -75,16 +67,16 @@ func (s *CreateTimeSlotTemplateItemService) CreateTimeSlotTemplateItem(ctx conte
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create time slot template item", err)
 	}
 
-	return &adminTimeSlotTemplateModel.CreateTimeSlotTemplateItemResponse{
+	return &adminTimeSlotTemplateItemModel.CreateResponse{
 		ID:         utils.FormatID(item.ID),
 		TemplateID: utils.FormatID(item.TemplateID),
-		StartTime:  req.StartTime,
-		EndTime:    req.EndTime,
+		StartTime:  utils.PgTimeToTimeString(item.StartTime),
+		EndTime:    utils.PgTimeToTimeString(item.EndTime),
 	}, nil
 }
 
 // checkTimeConflicts validates that the new time slot doesn't overlap with existing items
-func (s *CreateTimeSlotTemplateItemService) checkTimeConflicts(startTime, endTime time.Time, existingItems []dbgen.TimeSlotTemplateItem) error {
+func (s *Create) checkTimeConflicts(startTime, endTime time.Time, existingItems []dbgen.GetTimeSlotTemplateItemsByTemplateIDRow) error {
 	for _, item := range existingItems {
 		// Convert pgtype.Time to time.Time for comparison
 		existingStart := utils.PgTimeToTime(item.StartTime)
