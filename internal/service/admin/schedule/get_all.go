@@ -2,10 +2,9 @@ package adminSchedule
 
 import (
 	"context"
-	"errors"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
@@ -14,17 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetScheduleListService struct {
-	repo *sqlxRepo.Repositories
+type GetAllService struct {
+	repo    *sqlxRepo.Repositories
+	queries *dbgen.Queries
 }
 
-func NewGetScheduleListService(repo *sqlxRepo.Repositories) *GetScheduleListService {
-	return &GetScheduleListService{
-		repo: repo,
+func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *GetAllService {
+	return &GetAllService{
+		repo:    repo,
+		queries: queries,
 	}
 }
 
-func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID int64, req adminScheduleModel.GetScheduleListParsedRequest, role string, storeIDs []int64) (*adminScheduleModel.GetScheduleListResponse, error) {
+func (s *GetAllService) GetAll(ctx context.Context, storeID int64, req adminScheduleModel.GetAllParsedRequest, role string, storeIDs []int64) (*adminScheduleModel.GetAllResponse, error) {
 	if req.EndDate.Before(req.StartDate) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleEndBeforeStart)
 	}
@@ -34,12 +35,12 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID in
 	}
 
 	// Check store exists
-	_, err := s.repo.Store.GetStoreByID(ctx, storeID, nil)
+	exists, err := s.queries.CheckStoreExistByID(ctx, storeID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get store", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check store exists", err)
+	}
+	if !exists {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 	}
 
 	// Check store access for the staff member (except SUPER_ADMIN)
@@ -62,33 +63,33 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID in
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get schedule list", err)
 	}
 
-	stylistMap := make(map[int64]*adminScheduleModel.GetScheduleListStylistItem)
-	scheduleMap := make(map[int64]map[int64]*adminScheduleModel.GetScheduleListScheduleItem)
+	stylistMap := make(map[int64]*adminScheduleModel.GetAllStylistItem)
+	scheduleMap := make(map[int64]map[int64]*adminScheduleModel.GetAllScheduleItem)
 
 	for _, row := range rows {
 		stylistID := row.StylistID
 
 		stylist, exists := stylistMap[stylistID]
 		if !exists {
-			stylist = &adminScheduleModel.GetScheduleListStylistItem{
+			stylist = &adminScheduleModel.GetAllStylistItem{
 				ID:        utils.FormatID(stylistID),
 				Name:      utils.PgTextToString(row.StylistName),
-				Schedules: []adminScheduleModel.GetScheduleListScheduleItem{},
+				Schedules: []adminScheduleModel.GetAllScheduleItem{},
 			}
 
 			stylistMap[stylistID] = stylist
-			scheduleMap[stylistID] = make(map[int64]*adminScheduleModel.GetScheduleListScheduleItem)
+			scheduleMap[stylistID] = make(map[int64]*adminScheduleModel.GetAllScheduleItem)
 		}
 
 		workID := row.ID
 		sMap := scheduleMap[stylistID]
 		schedule, ok := sMap[workID]
 		if !ok {
-			schedule = &adminScheduleModel.GetScheduleListScheduleItem{
+			schedule = &adminScheduleModel.GetAllScheduleItem{
 				ID:        utils.FormatID(workID),
 				WorkDate:  utils.PgDateToDateString(row.WorkDate),
 				Note:      utils.PgTextToString(row.Note),
-				TimeSlots: []adminScheduleModel.GetScheduleListTimeSlotInfo{},
+				TimeSlots: []adminScheduleModel.GetAllTimeSlotInfo{},
 			}
 			stylist.Schedules = append(stylist.Schedules, *schedule)
 			// update scheduleMap with the new schedule pointer
@@ -96,7 +97,7 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID in
 			sMap[workID] = schedule
 		}
 
-		schedule.TimeSlots = append(schedule.TimeSlots, adminScheduleModel.GetScheduleListTimeSlotInfo{
+		schedule.TimeSlots = append(schedule.TimeSlots, adminScheduleModel.GetAllTimeSlotInfo{
 			ID:          utils.FormatID(row.TimeSlotID),
 			StartTime:   utils.PgTimeToTimeString(row.StartTime),
 			EndTime:     utils.PgTimeToTimeString(row.EndTime),
@@ -104,8 +105,8 @@ func (s *GetScheduleListService) GetScheduleList(ctx context.Context, storeID in
 		})
 	}
 
-	response := adminScheduleModel.GetScheduleListResponse{
-		StylistList: make([]adminScheduleModel.GetScheduleListStylistItem, 0, len(stylistMap)),
+	response := adminScheduleModel.GetAllResponse{
+		StylistList: make([]adminScheduleModel.GetAllStylistItem, 0, len(stylistMap)),
 	}
 
 	for _, stylist := range stylistMap {

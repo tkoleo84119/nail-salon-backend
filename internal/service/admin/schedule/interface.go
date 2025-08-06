@@ -14,8 +14,8 @@ type DeleteBulkInterface interface {
 	DeleteBulk(ctx context.Context, storeID int64, req adminScheduleModel.DeleteBulkParsedRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminScheduleModel.DeleteBulkResponse, error)
 }
 
-type GetScheduleListServiceInterface interface {
-	GetScheduleList(ctx context.Context, storeID int64, req adminScheduleModel.GetScheduleListParsedRequest, role string, storeIDs []int64) (*adminScheduleModel.GetScheduleListResponse, error)
+type GetAllServiceInterface interface {
+	GetAll(ctx context.Context, storeID int64, req adminScheduleModel.GetAllParsedRequest, role string, storeIDs []int64) (*adminScheduleModel.GetAllResponse, error)
 }
 
 type GetScheduleServiceInterface interface {

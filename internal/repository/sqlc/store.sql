@@ -71,3 +71,8 @@ SELECT EXISTS(
 SELECT EXISTS(
     SELECT 1 FROM stores WHERE name = $1 AND id != $2
 );
+
+-- name: CheckStoreExistByID :one
+SELECT EXISTS(
+    SELECT 1 FROM stores WHERE id = $1
+);

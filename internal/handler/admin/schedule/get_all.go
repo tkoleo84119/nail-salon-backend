@@ -14,17 +14,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetScheduleListHandler struct {
-	service adminScheduleService.GetScheduleListServiceInterface
+type GetAll struct {
+	service adminScheduleService.GetAllServiceInterface
 }
 
-func NewGetScheduleListHandler(service adminScheduleService.GetScheduleListServiceInterface) *GetScheduleListHandler {
-	return &GetScheduleListHandler{
+func NewGetAll(service adminScheduleService.GetAllServiceInterface) *GetAll {
+	return &GetAll{
 		service: service,
 	}
 }
 
-func (h *GetScheduleListHandler) GetScheduleList(c *gin.Context) {
+func (h *GetAll) GetAll(c *gin.Context) {
 	// Get store ID from path parameter
 	storeID := c.Param("storeId")
 	if storeID == "" {
@@ -38,7 +38,7 @@ func (h *GetScheduleListHandler) GetScheduleList(c *gin.Context) {
 	}
 
 	// Parse and validate query parameters
-	var req adminScheduleModel.GetScheduleListRequest
+	var req adminScheduleModel.GetAllRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -69,7 +69,7 @@ func (h *GetScheduleListHandler) GetScheduleList(c *gin.Context) {
 		}
 	}
 
-	parsedReq := adminScheduleModel.GetScheduleListParsedRequest{
+	parsedReq := adminScheduleModel.GetAllParsedRequest{
 		StylistID:   &parsedStylistIDList,
 		StartDate:   startDate,
 		EndDate:     endDate,
@@ -94,7 +94,7 @@ func (h *GetScheduleListHandler) GetScheduleList(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetScheduleList(c.Request.Context(), parsedStoreID, parsedReq, staffContext.Role, storeIDs)
+	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedReq, staffContext.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

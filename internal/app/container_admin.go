@@ -76,7 +76,7 @@ type AdminServices struct {
 	ScheduleCreateTimeSlot adminTimeSlotService.CreateInterface
 	ScheduleUpdateTimeSlot adminTimeSlotService.UpdateInterface
 	ScheduleDeleteTimeSlot adminTimeSlotService.DeleteInterface
-	ScheduleGetList        adminScheduleService.GetScheduleListServiceInterface
+	ScheduleGetAll         adminScheduleService.GetAllServiceInterface
 	ScheduleGet            adminScheduleService.GetScheduleServiceInterface
 
 	// Time slot template services
@@ -138,7 +138,7 @@ type AdminHandlers struct {
 	ScheduleCreateTimeSlot *adminTimeSlotHandler.Create
 	ScheduleUpdateTimeSlot *adminTimeSlotHandler.Update
 	ScheduleDeleteTimeSlot *adminTimeSlotHandler.Delete
-	ScheduleGetList        *adminScheduleHandler.GetScheduleListHandler
+	ScheduleGetAll         *adminScheduleHandler.GetAll
 	ScheduleGet            *adminScheduleHandler.GetScheduleHandler
 
 	// Time slot template handlers
@@ -201,7 +201,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ScheduleCreateTimeSlot: adminTimeSlotService.NewCreate(queries),
 		ScheduleUpdateTimeSlot: adminTimeSlotService.NewUpdate(queries, repositories.SQLX),
 		ScheduleDeleteTimeSlot: adminTimeSlotService.NewDelete(queries),
-		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(repositories.SQLX),
+		ScheduleGetAll:         adminScheduleService.NewGetAll(queries, repositories.SQLX),
 		ScheduleGet:            adminScheduleService.NewGetScheduleService(repositories.SQLX),
 
 		// Time slot template services
@@ -265,7 +265,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ScheduleCreateTimeSlot: adminTimeSlotHandler.NewCreate(services.ScheduleCreateTimeSlot),
 		ScheduleUpdateTimeSlot: adminTimeSlotHandler.NewUpdate(services.ScheduleUpdateTimeSlot),
 		ScheduleDeleteTimeSlot: adminTimeSlotHandler.NewDelete(services.ScheduleDeleteTimeSlot),
-		ScheduleGetList:        adminScheduleHandler.NewGetScheduleListHandler(services.ScheduleGetList),
+		ScheduleGetAll:         adminScheduleHandler.NewGetAll(services.ScheduleGetAll),
 		ScheduleGet:            adminScheduleHandler.NewGetScheduleHandler(services.ScheduleGet),
 
 		// Time slot template handlers

@@ -67,96 +67,49 @@
 
 ### 錯誤處理
 
-#### 錯誤總覽
-
-| 狀態碼 | 錯誤碼   | 說明                              |
-| ------ | -------- | --------------------------------- |
-| 401    | E1002    | 無效的 accessToken，請重新登入    |
-| 401    | E1003    | accessToken 缺失，請重新登入      |
-| 401    | E1004    | accessToken 格式錯誤，請重新登入  |
-| 401    | E1005    | 未找到有效的員工資訊，請重新登入  |
-| 401    | E1006    | 未找到使用者認證資訊，請重新登入  |
-| 403    | E3001    | 權限不足，無法執行此操作          |
-| 400    | E2002    | 路徑參數缺失，請檢查              |
-| 400    | E2004    | 參數類型轉換失敗                  |
-| 400    | E2020    | {field} 為必填項目                |
-| 400    | E2022    | {field} 至少需要 {param} 個項目   |
-| 400    | E2025    | {field} 最多只能有 {param} 個項目 |
-| 400    | E3STO001 | 門市未啟用                        |
-| 400    | E3SCH001 | 部分班表已被預約，無法刪除        |
-| 400    | E3SCH003 | 部分班表不屬於指定的門市          |
-| 400    | E3SCH004 | 部分班表不屬於指定的美甲師        |
-| 404    | E3STO002 | 門市不存在或已被刪除              |
-| 404    | E3STY001 | 美甲師資料不存在                  |
-| 404    | E3SCH005 | 排班不存在或已被刪除              |
-| 500    | E9001    | 系統發生錯誤，請稍後再試          |
-| 500    | E9002    | 資料庫操作失敗                    |
-
-#### 400 Bad Request - 參數驗證失敗
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
   "errors": [
     {
-      "code": "E2020",
-      "message": "stylistId 為必填項目",
-      "field": "stylistId"
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
     }
   ]
 }
 ```
 
-#### 401 Unauthorized - 未登入/Token失效
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "errors": [
-    {
-      "code": "E1002",
-      "message": "無效的 accessToken，請重新登入"
-    }
-  ]
-}
-```
+| 狀態碼 | 錯誤碼   | 常數名稱                         | 說明                              |
+| ------ | -------- | -------------------------------- | --------------------------------- |
+| 401    | E1002    | AuthInvalidCredentials           | 無效的 accessToken，請重新登入    |
+| 401    | E1003    | AuthTokenMissing                 | accessToken 缺失，請重新登入      |
+| 401    | E1004    | AuthTokenFormatError             | accessToken 格式錯誤，請重新登入  |
+| 401    | E1005    | AuthStaffFailed                  | 未找到有效的員工資訊，請重新登入  |
+| 401    | E1006    | AuthContextMissing               | 未找到使用者認證資訊，請重新登入  |
+| 403    | E1010    | AuthPermissionDenied             | 權限不足，無法執行此操作          |
+| 400    | E2002    | ValPathParamMissing              | 路徑參數缺失，請檢查              |
+| 400    | E2004    | ValTypeConversionFailed          | 參數類型轉換失敗                  |
+| 400    | E2020    | ValFieldRequired                 | {field} 為必填項目                |
+| 400    | E2022    | ValFieldMinItems                 | {field} 至少需要 {param} 個項目   |
+| 400    | E2025    | ValFieldMaxItems                 | {field} 最多只能有 {param} 個項目 |
+| 404    | E3SCH005 | ScheduleNotFound                 | 排班不存在或已被刪除              |
+| 400    | E3SCH001 | ScheduleAlreadyBookedDoNotDelete | 部分班表已被預約，無法刪除        |
+| 400    | E3SCH003 | ScheduleNotBelongToStore         | 部分班表不屬於指定的門市          |
+| 400    | E3SCH004 | ScheduleNotBelongToStylist       | 部分班表不屬於指定的美甲師        |
+| 404    | E3STY001 | StylistNotFound                  | 美甲師資料不存在                  |
+| 404    | E3STO002 | StoreNotFound                    | 門市不存在或已被刪除              |
+| 400    | E3STO001 | StoreNotActive                   | 門市未啟用                        |
+| 500    | E9001    | SysInternalError                 | 系統發生錯誤，請稍後再試          |
+| 500    | E9002    | SysDatabaseError                 | 資料庫操作失敗                    |
 
-#### 403 Forbidden - 無權限
-
-```json
-{
-  "errors": [
-    {
-      "code": "E3001",
-      "message": "權限不足，無法執行此操作"
-    }
-  ]
-}
-```
-
-#### 404 Not Found - 門市不存在
-
-```json
-{
-  "errors": [
-    {
-      "code": "E3STO002",
-      "message": "門市不存在或已被刪除"
-    }
-  ]
-}
-```
-
-#### 500 Internal Server Error - 系統錯誤
-
-```json
-{
-  "errors": [
-    {
-      "code": "E9001",
-      "message": "系統發生錯誤，請稍後再試"
-    }
-  ]
-}
-```
 
 ---
 

@@ -11,6 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkStoreExistByID = `-- name: CheckStoreExistByID :one
+SELECT EXISTS(
+    SELECT 1 FROM stores WHERE id = $1
+)
+`
+
+func (q *Queries) CheckStoreExistByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStoreExistByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkStoreNameExists = `-- name: CheckStoreNameExists :one
 SELECT EXISTS(
     SELECT 1 FROM stores WHERE name = $1
