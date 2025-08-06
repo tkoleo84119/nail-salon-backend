@@ -69,8 +69,8 @@ WHERE schedule_id = ANY($1::bigint[]);
 SELECT EXISTS(
     SELECT 1 FROM time_slots
     WHERE schedule_id = $1
-    AND start_time < $3
-    AND end_time > $2
+    AND start_time < $2
+    AND end_time > $3
 ) AS has_overlap;
 
 -- name: CheckTimeSlotOverlapExcluding :one

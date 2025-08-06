@@ -14,6 +14,7 @@ import (
 	adminStoreHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store"
 	adminStylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/stylist"
 	adminTimeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time-slot-template"
+	adminTimeSlotHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot"
 	adminTimeSlotTemplateItemHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot_template_item"
 
 	// Admin services
@@ -25,6 +26,7 @@ import (
 	adminStoreService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store"
 	adminStylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/stylist"
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
+	adminTimeSlotService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot"
 	adminTimeSlotTemplateItemService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot_template_item"
 )
 
@@ -71,7 +73,7 @@ type AdminServices struct {
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateSchedulesBulkServiceInterface
 	ScheduleDeleteBulk     adminScheduleService.DeleteBulkInterface
-	ScheduleCreateTimeSlot adminScheduleService.CreateTimeSlotServiceInterface
+	ScheduleCreateTimeSlot adminTimeSlotService.CreateInterface
 	ScheduleUpdateTimeSlot adminScheduleService.UpdateTimeSlotServiceInterface
 	ScheduleDeleteTimeSlot adminScheduleService.DeleteTimeSlotServiceInterface
 	ScheduleGetList        adminScheduleService.GetScheduleListServiceInterface
@@ -133,7 +135,7 @@ type AdminHandlers struct {
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateSchedulesBulkHandler
 	ScheduleDeleteBulk     *adminScheduleHandler.DeleteBulk
-	ScheduleCreateTimeSlot *adminScheduleHandler.CreateTimeSlotHandler
+	ScheduleCreateTimeSlot *adminTimeSlotHandler.Create
 	ScheduleUpdateTimeSlot *adminScheduleHandler.UpdateTimeSlotHandler
 	ScheduleDeleteTimeSlot *adminScheduleHandler.DeleteTimeSlotHandler
 	ScheduleGetList        *adminScheduleHandler.GetScheduleListHandler
@@ -196,7 +198,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(database.Sqlx, repositories.SQLX),
 		ScheduleDeleteBulk:     adminScheduleService.NewDeleteBulk(queries),
-		ScheduleCreateTimeSlot: adminScheduleService.NewCreateTimeSlotService(queries),
+		ScheduleCreateTimeSlot: adminTimeSlotService.NewCreate(queries),
 		ScheduleUpdateTimeSlot: adminScheduleService.NewUpdateTimeSlotService(queries, repositories.SQLX),
 		ScheduleDeleteTimeSlot: adminScheduleService.NewDeleteTimeSlotService(queries),
 		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(repositories.SQLX),
@@ -260,7 +262,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),
 		ScheduleDeleteBulk:     adminScheduleHandler.NewDeleteBulk(services.ScheduleDeleteBulk),
-		ScheduleCreateTimeSlot: adminScheduleHandler.NewCreateTimeSlotHandler(services.ScheduleCreateTimeSlot),
+		ScheduleCreateTimeSlot: adminTimeSlotHandler.NewCreate(services.ScheduleCreateTimeSlot),
 		ScheduleUpdateTimeSlot: adminScheduleHandler.NewUpdateTimeSlotHandler(services.ScheduleUpdateTimeSlot),
 		ScheduleDeleteTimeSlot: adminScheduleHandler.NewDeleteTimeSlotHandler(services.ScheduleDeleteTimeSlot),
 		ScheduleGetList:        adminScheduleHandler.NewGetScheduleListHandler(services.ScheduleGetList),

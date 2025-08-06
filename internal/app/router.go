@@ -202,7 +202,7 @@ func setupAdminScheduleRoutes(admin *gin.RouterGroup, cfg *config.Config, querie
 	schedules := admin.Group("/schedules")
 	{
 		// Time slot operations
-		schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateTimeSlot.CreateTimeSlot)
+		schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateTimeSlot.Create)
 		schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleUpdateTimeSlot.UpdateTimeSlot)
 		schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleDeleteTimeSlot.DeleteTimeSlot)
 	}

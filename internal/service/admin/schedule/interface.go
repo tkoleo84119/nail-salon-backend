@@ -15,10 +15,6 @@ type DeleteBulkInterface interface {
 	DeleteBulk(ctx context.Context, storeID int64, req adminScheduleModel.DeleteBulkParsedRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminScheduleModel.DeleteBulkResponse, error)
 }
 
-type CreateTimeSlotServiceInterface interface {
-	CreateTimeSlot(ctx context.Context, scheduleID string, req adminScheduleModel.CreateTimeSlotRequest, staffContext common.StaffContext) (*adminScheduleModel.CreateTimeSlotResponse, error)
-}
-
 type UpdateTimeSlotServiceInterface interface {
 	UpdateTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, req adminScheduleModel.UpdateTimeSlotRequest, staffContext common.StaffContext) (*adminScheduleModel.UpdateTimeSlotResponse, error)
 }
