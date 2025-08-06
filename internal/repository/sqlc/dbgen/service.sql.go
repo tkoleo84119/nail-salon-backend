@@ -63,7 +63,9 @@ INSERT INTO services (
     is_addon,
     is_visible,
     is_active,
-    note
+    note,
+    created_at,
+    updated_at
 `
 
 type CreateServiceParams struct {
@@ -76,18 +78,7 @@ type CreateServiceParams struct {
 	Note            pgtype.Text    `db:"note" json:"note"`
 }
 
-type CreateServiceRow struct {
-	ID              int64          `db:"id" json:"id"`
-	Name            string         `db:"name" json:"name"`
-	Price           pgtype.Numeric `db:"price" json:"price"`
-	DurationMinutes int32          `db:"duration_minutes" json:"duration_minutes"`
-	IsAddon         pgtype.Bool    `db:"is_addon" json:"is_addon"`
-	IsVisible       pgtype.Bool    `db:"is_visible" json:"is_visible"`
-	IsActive        pgtype.Bool    `db:"is_active" json:"is_active"`
-	Note            pgtype.Text    `db:"note" json:"note"`
-}
-
-func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (CreateServiceRow, error) {
+func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (Service, error) {
 	row := q.db.QueryRow(ctx, createService,
 		arg.ID,
 		arg.Name,
@@ -97,7 +88,7 @@ func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (C
 		arg.IsVisible,
 		arg.Note,
 	)
-	var i CreateServiceRow
+	var i Service
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -107,6 +98,8 @@ func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (C
 		&i.IsVisible,
 		&i.IsActive,
 		&i.Note,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -120,25 +113,16 @@ SELECT
     is_addon,
     is_visible,
     is_active,
-    note
+    note,
+    created_at,
+    updated_at
 FROM services
 WHERE id = $1
 `
 
-type GetServiceByIDRow struct {
-	ID              int64          `db:"id" json:"id"`
-	Name            string         `db:"name" json:"name"`
-	Price           pgtype.Numeric `db:"price" json:"price"`
-	DurationMinutes int32          `db:"duration_minutes" json:"duration_minutes"`
-	IsAddon         pgtype.Bool    `db:"is_addon" json:"is_addon"`
-	IsVisible       pgtype.Bool    `db:"is_visible" json:"is_visible"`
-	IsActive        pgtype.Bool    `db:"is_active" json:"is_active"`
-	Note            pgtype.Text    `db:"note" json:"note"`
-}
-
-func (q *Queries) GetServiceByID(ctx context.Context, id int64) (GetServiceByIDRow, error) {
+func (q *Queries) GetServiceByID(ctx context.Context, id int64) (Service, error) {
 	row := q.db.QueryRow(ctx, getServiceByID, id)
-	var i GetServiceByIDRow
+	var i Service
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -148,6 +132,8 @@ func (q *Queries) GetServiceByID(ctx context.Context, id int64) (GetServiceByIDR
 		&i.IsVisible,
 		&i.IsActive,
 		&i.Note,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

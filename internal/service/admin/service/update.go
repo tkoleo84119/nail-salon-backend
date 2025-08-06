@@ -13,17 +13,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateServiceService struct {
+type Update struct {
 	repo *sqlx.Repositories
 }
 
-func NewUpdateServiceService(repo *sqlx.Repositories) *UpdateServiceService {
-	return &UpdateServiceService{
+func NewUpdate(repo *sqlx.Repositories) *Update {
+	return &Update{
 		repo: repo,
 	}
 }
 
-func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID int64, req adminServiceModel.UpdateServiceRequest, updaterRole string) (*adminServiceModel.UpdateServiceResponse, error) {
+func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceModel.UpdateRequest, updaterRole string) (*adminServiceModel.UpdateResponse, error) {
 	// Validate permissions
 	if err := s.validatePermissions(updaterRole); err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID int6
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update service", err)
 	}
 
-	response := adminServiceModel.UpdateServiceResponse{
+	response := adminServiceModel.UpdateResponse{
 		ID:              utils.FormatID(updatedService.ID),
 		Name:            updatedService.Name,
 		Price:           int64(utils.PgNumericToFloat64(updatedService.Price)),
@@ -84,7 +84,7 @@ func (s *UpdateServiceService) UpdateService(ctx context.Context, serviceID int6
 }
 
 // validatePermissions checks if the updater has permission to update services
-func (s *UpdateServiceService) validatePermissions(updaterRole string) error {
+func (s *Update) validatePermissions(updaterRole string) error {
 	switch updaterRole {
 	case common.RoleSuperAdmin, common.RoleAdmin:
 		return nil

@@ -17,7 +17,9 @@ INSERT INTO services (
     is_addon,
     is_visible,
     is_active,
-    note;
+    note,
+    created_at,
+    updated_at;
 
 -- name: GetServiceByID :one
 SELECT
@@ -28,7 +30,9 @@ SELECT
     is_addon,
     is_visible,
     is_active,
-    note
+    note,
+    created_at,
+    updated_at
 FROM services
 WHERE id = $1;
 

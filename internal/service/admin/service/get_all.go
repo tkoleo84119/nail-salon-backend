@@ -9,17 +9,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetServiceListService struct {
+type GetAll struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewGetServiceListService(repo *sqlxRepo.Repositories) *GetServiceListService {
-	return &GetServiceListService{
+func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
+	return &GetAll{
 		repo: repo,
 	}
 }
 
-func (s *GetServiceListService) GetServiceList(ctx context.Context, req adminServiceModel.GetServiceListParsedRequest) (*adminServiceModel.GetServiceListResponse, error) {
+func (s *GetAll) GetAll(ctx context.Context, req adminServiceModel.GetAllParsedRequest) (*adminServiceModel.GetAllResponse, error) {
 	// Get service list from repository
 	total, results, err := s.repo.Service.GetAllServiceByFilter(ctx, sqlxRepo.GetAllServiceByFilterParams{
 		Name:      req.Name,
@@ -34,9 +34,9 @@ func (s *GetServiceListService) GetServiceList(ctx context.Context, req adminSer
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get service list", err)
 	}
 
-	items := make([]adminServiceModel.ServiceListItemDTO, len(results))
+	items := make([]adminServiceModel.GetAllServiceListItemDTO, len(results))
 	for i, result := range results {
-		items[i] = adminServiceModel.ServiceListItemDTO{
+		items[i] = adminServiceModel.GetAllServiceListItemDTO{
 			ID:              utils.FormatID(result.ID),
 			Name:            result.Name,
 			Price:           int64(utils.PgNumericToFloat64(result.Price)),
@@ -50,7 +50,7 @@ func (s *GetServiceListService) GetServiceList(ctx context.Context, req adminSer
 		}
 	}
 
-	response := &adminServiceModel.GetServiceListResponse{
+	response := &adminServiceModel.GetAllResponse{
 		Total: total,
 		Items: items,
 	}

@@ -55,10 +55,10 @@ type AdminServices struct {
 	StoreUpdate  adminStoreService.UpdateStoreServiceInterface
 
 	// Service management services
-	ServiceGetList adminServiceService.GetServiceListServiceInterface
-	ServiceGet     adminServiceService.GetServiceServiceInterface
-	ServiceCreate  adminServiceService.CreateServiceInterface
-	ServiceUpdate  adminServiceService.UpdateServiceInterface
+	ServiceGetList adminServiceService.GetAllInterface
+	ServiceGet     adminServiceService.GetInterface
+	ServiceCreate  adminServiceService.CreateInterface
+	ServiceUpdate  adminServiceService.UpdateInterface
 
 	// Stylist management services
 	StylistUpdate  adminStylistService.UpdateMyStylistServiceInterface
@@ -117,10 +117,10 @@ type AdminHandlers struct {
 	StoreUpdate  *adminStoreHandler.UpdateStoreHandler
 
 	// Service management handlers
-	ServiceGetList *adminServiceHandler.GetServiceListHandler
-	ServiceGet     *adminServiceHandler.GetServiceHandler
-	ServiceCreate  *adminServiceHandler.CreateServiceHandler
-	ServiceUpdate  *adminServiceHandler.UpdateServiceHandler
+	ServiceGetList *adminServiceHandler.GetAll
+	ServiceGet     *adminServiceHandler.Get
+	ServiceCreate  *adminServiceHandler.Create
+	ServiceUpdate  *adminServiceHandler.Update
 
 	// Stylist management handlers
 	StylistUpdate  *adminStylistHandler.UpdateMyStylistHandler
@@ -180,10 +180,10 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StoreUpdate:  adminStoreService.NewUpdateStoreService(repositories.SQLX),
 
 		// Service management services
-		ServiceGetList: adminServiceService.NewGetServiceListService(repositories.SQLX),
-		ServiceGet:     adminServiceService.NewGetServiceService(repositories.SQLX),
-		ServiceCreate:  adminServiceService.NewCreateServiceService(repositories.SQLX),
-		ServiceUpdate:  adminServiceService.NewUpdateServiceService(repositories.SQLX),
+		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
+		ServiceGet:     adminServiceService.NewGet(queries),
+		ServiceCreate:  adminServiceService.NewCreate(queries),
+		ServiceUpdate:  adminServiceService.NewUpdate(repositories.SQLX),
 
 		// Stylist management services
 		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(repositories.SQLX),
@@ -244,10 +244,10 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StoreUpdate:  adminStoreHandler.NewUpdateStoreHandler(services.StoreUpdate),
 
 		// Service management handlers
-		ServiceGetList: adminServiceHandler.NewGetServiceListHandler(services.ServiceGetList),
-		ServiceGet:     adminServiceHandler.NewGetServiceHandler(services.ServiceGet),
-		ServiceCreate:  adminServiceHandler.NewCreateServiceHandler(services.ServiceCreate),
-		ServiceUpdate:  adminServiceHandler.NewUpdateServiceHandler(services.ServiceUpdate),
+		ServiceGetList: adminServiceHandler.NewGetAll(services.ServiceGetList),
+		ServiceGet:     adminServiceHandler.NewGet(services.ServiceGet),
+		ServiceCreate:  adminServiceHandler.NewCreate(services.ServiceCreate),
+		ServiceUpdate:  adminServiceHandler.NewUpdate(services.ServiceUpdate),
 
 		// Stylist management handlers
 		StylistUpdate:  adminStylistHandler.NewUpdateMyStylistHandler(services.StylistUpdate),

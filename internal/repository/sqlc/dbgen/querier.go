@@ -36,7 +36,7 @@ type Querier interface {
 	CreateCustomerAuth(ctx context.Context, arg CreateCustomerAuthParams) (CustomerAuth, error)
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
 	CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error)
-	CreateService(ctx context.Context, arg CreateServiceParams) (CreateServiceRow, error)
+	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
@@ -65,7 +65,7 @@ type Querier interface {
 	GetScheduleByIDWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleByIDWithTimeSlotsByIDRow, error)
 	GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSchedulesByStoreAndStylistParams) ([]Schedule, error)
 	GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error)
-	GetServiceByID(ctx context.Context, id int64) (GetServiceByIDRow, error)
+	GetServiceByID(ctx context.Context, id int64) (Service, error)
 	GetServiceByIds(ctx context.Context, dollar_1 []int64) ([]GetServiceByIdsRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error)

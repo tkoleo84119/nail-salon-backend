@@ -8,23 +8,23 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetServiceService struct {
-	repo *sqlxRepo.Repositories
+type Get struct {
+	queries *dbgen.Queries
 }
 
-func NewGetServiceService(repo *sqlxRepo.Repositories) *GetServiceService {
-	return &GetServiceService{
-		repo: repo,
+func NewGet(queries *dbgen.Queries) *Get {
+	return &Get{
+		queries: queries,
 	}
 }
 
-func (s *GetServiceService) GetService(ctx context.Context, serviceID int64) (*adminServiceModel.GetServiceResponse, error) {
+func (s *Get) Get(ctx context.Context, serviceID int64) (*adminServiceModel.GetResponse, error) {
 	// Get service information
-	service, err := s.repo.Service.GetServiceByID(ctx, serviceID)
+	service, err := s.queries.GetServiceByID(ctx, serviceID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceNotFound)
@@ -33,7 +33,7 @@ func (s *GetServiceService) GetService(ctx context.Context, serviceID int64) (*a
 	}
 
 	// Build response
-	response := &adminServiceModel.GetServiceResponse{
+	response := &adminServiceModel.GetResponse{
 		ID:              utils.FormatID(service.ID),
 		Name:            service.Name,
 		DurationMinutes: service.DurationMinutes,
@@ -41,7 +41,7 @@ func (s *GetServiceService) GetService(ctx context.Context, serviceID int64) (*a
 		IsAddon:         utils.PgBoolToBool(service.IsAddon),
 		IsActive:        utils.PgBoolToBool(service.IsActive),
 		IsVisible:       utils.PgBoolToBool(service.IsVisible),
-		Note:            service.Note.String,
+		Note:            utils.PgTextToString(service.Note),
 		CreatedAt:       utils.PgTimestamptzToTimeString(service.CreatedAt),
 		UpdatedAt:       utils.PgTimestamptzToTimeString(service.UpdatedAt),
 	}

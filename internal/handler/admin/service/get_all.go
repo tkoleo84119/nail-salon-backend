@@ -13,19 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetServiceListHandler struct {
-	service adminServiceService.GetServiceListServiceInterface
+type GetAll struct {
+	service adminServiceService.GetAllInterface
 }
 
-func NewGetServiceListHandler(service adminServiceService.GetServiceListServiceInterface) *GetServiceListHandler {
-	return &GetServiceListHandler{
+func NewGetAll(service adminServiceService.GetAllInterface) *GetAll {
+	return &GetAll{
 		service: service,
 	}
 }
 
-func (h *GetServiceListHandler) GetServiceList(c *gin.Context) {
+func (h *GetAll) GetAll(c *gin.Context) {
 	// Parse and validate query parameters
-	var req adminServiceModel.GetServiceListRequest
+	var req adminServiceModel.GetAllRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -47,7 +47,7 @@ func (h *GetServiceListHandler) GetServiceList(c *gin.Context) {
 		sort = strings.Split(*req.Sort, ",")
 	}
 
-	parsedReq := adminServiceModel.GetServiceListParsedRequest{
+	parsedReq := adminServiceModel.GetAllParsedRequest{
 		Name:      req.Name,
 		IsAddon:   req.IsAddon,
 		IsActive:  req.IsActive,
@@ -58,7 +58,7 @@ func (h *GetServiceListHandler) GetServiceList(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetServiceList(c.Request.Context(), parsedReq)
+	response, err := h.service.GetAll(c.Request.Context(), parsedReq)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

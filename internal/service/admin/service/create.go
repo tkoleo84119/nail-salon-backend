@@ -6,28 +6,28 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateServiceService struct {
-	repo *sqlxRepo.Repositories
+type Create struct {
+	queries *dbgen.Queries
 }
 
-func NewCreateServiceService(repo *sqlxRepo.Repositories) *CreateServiceService {
-	return &CreateServiceService{
-		repo: repo,
+func NewCreate(queries *dbgen.Queries) *Create {
+	return &Create{
+		queries: queries,
 	}
 }
 
-func (s *CreateServiceService) CreateService(ctx context.Context, req adminServiceModel.CreateServiceRequest, creatorRole string) (*adminServiceModel.CreateServiceResponse, error) {
+func (s *Create) Create(ctx context.Context, req adminServiceModel.CreateRequest, creatorRole string) (*adminServiceModel.CreateResponse, error) {
 	// Validate permissions
 	if err := s.validatePermissions(creatorRole); err != nil {
 		return nil, err
 	}
 
 	// Check if service name already exists
-	exists, err := s.repo.Service.CheckServiceNameExists(ctx, req.Name)
+	exists, err := s.queries.CheckServiceNameExists(ctx, req.Name)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check service existence", err)
 	}
@@ -41,25 +41,25 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req adminServi
 	// Convert price to pgtype.Numeric
 	priceNumeric, err := utils.Int64ToPgNumeric(req.Price)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to convert price", err)
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price", err)
 	}
 
 	// Create service
-	createdService, err := s.repo.Service.CreateService(ctx, sqlxRepo.CreateServiceParams{
+	createdService, err := s.queries.CreateService(ctx, dbgen.CreateServiceParams{
 		ID:              serviceID,
 		Name:            req.Name,
 		Price:           priceNumeric,
-		DurationMinutes: req.DurationMinutes,
+		DurationMinutes: *req.DurationMinutes,
 		IsAddon:         utils.BoolPtrToPgBool(&req.IsAddon),
 		IsVisible:       utils.BoolPtrToPgBool(&req.IsVisible),
-		Note:            utils.StringPtrToPgText(&req.Note, true),
+		Note:            utils.StringPtrToPgText(req.Note, true),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create service", err)
 	}
 
 	// Convert to response
-	response := &adminServiceModel.CreateServiceResponse{
+	response := &adminServiceModel.CreateResponse{
 		ID:              utils.FormatID(createdService.ID),
 		Name:            createdService.Name,
 		Price:           req.Price,
@@ -76,7 +76,7 @@ func (s *CreateServiceService) CreateService(ctx context.Context, req adminServi
 }
 
 // validatePermissions checks if the creator has permission to create services
-func (s *CreateServiceService) validatePermissions(creatorRole string) error {
+func (s *Create) validatePermissions(creatorRole string) error {
 	switch creatorRole {
 	case common.RoleSuperAdmin, common.RoleAdmin:
 		return nil
