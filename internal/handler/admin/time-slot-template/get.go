@@ -12,10 +12,10 @@ import (
 )
 
 type Get struct {
-	service adminTimeSlotTemplateService.GetServiceInterface
+	service adminTimeSlotTemplateService.GetInterface
 }
 
-func NewGet(service adminTimeSlotTemplateService.GetServiceInterface) *Get {
+func NewGet(service adminTimeSlotTemplateService.GetInterface) *Get {
 	return &Get{
 		service: service,
 	}

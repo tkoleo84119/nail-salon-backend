@@ -71,81 +71,43 @@
 
 ### 錯誤處理
 
-#### 錯誤總覽
-
-| 狀態碼 | 錯誤碼   | 說明                                           |
-| ------ | -------- | ---------------------------------------------- |
-| 401    | E1002    | 無效的 accessToken，請重新登入                 |
-| 401    | E1003    | accessToken 缺失，請重新登入                   |
-| 401    | E1004    | accessToken 格式錯誤，請重新登入               |
-| 401    | E1005    | 未找到有效的員工資訊，請重新登入               |
-| 401    | E1006    | 未找到使用者認證資訊，請重新登入               |
-| 403    | E1010    | 權限不足，無法執行此操作                       |
-| 400    | E2001    | JSON 格式錯誤，請檢查                          |
-| 400    | E2004    | 參數類型轉換失敗                               |
-| 400    | E2020    | {field} 為必填項目                             |
-| 400    | E2034    | {field} 格式錯誤，請使用正確的時間格式 (HH:mm) |
-| 400    | E3TMS011 | 時段時間區段重疊                               |
-| 400    | E3TMS012 | 結束時間必須在開始時間之後                     |
-| 404    | E3TMS009 | 範本不存在或已被刪除                           |
-| 500    | E9001    | 系統發生錯誤，請稍後再試                       |
-| 500    | E9002    | 資料庫操作失敗                                 |
-
-#### 400 Bad Request - 驗證錯誤
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "error": {
-    "code": "E2001",
-    "message": "JSON 格式錯誤，請檢查",
-    "field": "body"
-  }
+  "errors": [
+    {
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
+    }
+  ]
 }
 ```
 
-#### 401 Unauthorized - 認證失敗
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "error": {
-    "code": "E1002",
-    "message": "無效的 accessToken"
-  }
-}
-```
-
-#### 403 Forbidden - 權限不足
-
-```json
-{
-  "error": {
-    "code": "E1010",
-    "message": "權限不足，無法執行此操作"
-  }
-  }
-```
-
-#### 404 Not Found - 範本不存在或已被刪除
-
-```json
-{
-  "error": {
-    "code": "E3TMS009",
-    "message": "範本不存在或已被刪除"
-  }
-}
-```
-
-#### 500 Internal Server Error - 系統錯誤
-
-```json
-{
-  "error": {
-    "code": "E9001",
-    "message": "系統發生錯誤，請稍後再試"
-  }
-}
-```
+| 狀態碼 | 錯誤碼   | 常數名稱                 | 說明                                           |
+| ------ | -------- | ------------------------ | ---------------------------------------------- |
+| 401    | E1002    | AuthInvalidCredentials   | 無效的 accessToken，請重新登入                 |
+| 401    | E1003    | AuthTokenMissing         | accessToken 缺失，請重新登入                   |
+| 401    | E1004    | AuthTokenFormatError     | accessToken 格式錯誤，請重新登入               |
+| 401    | E1005    | AuthStaffFailed          | 未找到有效的員工資訊，請重新登入               |
+| 401    | E1006    | AuthContextMissing       | 未找到使用者認證資訊，請重新登入               |
+| 403    | E1010    | AuthPermissionDenied     | 權限不足，無法執行此操作                       |
+| 400    | E2002    | ValPathParamMissing      | 路徑參數缺失，請檢查                           |
+| 400    | E2004    | ValTypeConversionFailed  | 參數類型轉換失敗                               |
+| 400    | E2020    | ValFieldRequired         | {field} 為必填項目                             |
+| 400    | E2034    | ValFieldTimeFormat       | {field} 格式錯誤，請使用正確的時間格式 (HH:mm) |
+| 400    | E3TMS011 | TimeSlotConflict         | 時段時間區段重疊                               |
+| 400    | E3TMS012 | TimeSlotEndBeforeStart   | 結束時間必須在開始時間之後                     |
+| 404    | E3TMS010 | TimeSlotTemplateNotFound | 範本項目不存在或已被刪除                       |
+| 500    | E9001    | SysInternalError         | 系統發生錯誤，請稍後再試                       |
+| 500    | E9002    | SysDatabaseError         | 資料庫操作失敗                                 |
 
 ---
 

@@ -95,7 +95,8 @@ SELECT
     t.is_available
 FROM schedules s
 LEFT JOIN time_slots t ON s.id = t.schedule_id
-WHERE s.id = $1;
+WHERE s.id = $1
+ORDER BY t.start_time;
 
 -- name: DeleteSchedulesByIDs :exec
 DELETE FROM schedules

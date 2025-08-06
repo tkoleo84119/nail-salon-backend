@@ -13,10 +13,10 @@ import (
 )
 
 type Create struct {
-	service adminTimeSlotTemplateItemService.CreateServiceInterface
+	service adminTimeSlotTemplateItemService.CreateInterface
 }
 
-func NewCreate(service adminTimeSlotTemplateItemService.CreateServiceInterface) *Create {
+func NewCreate(service adminTimeSlotTemplateItemService.CreateInterface) *Create {
 	return &Create{
 		service: service,
 	}

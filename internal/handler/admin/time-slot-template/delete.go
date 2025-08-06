@@ -12,10 +12,10 @@ import (
 )
 
 type Delete struct {
-	service adminTimeSlotTemplateService.DeleteServiceInterface
+	service adminTimeSlotTemplateService.DeleteInterface
 }
 
-func NewDelete(service adminTimeSlotTemplateService.DeleteServiceInterface) *Delete {
+func NewDelete(service adminTimeSlotTemplateService.DeleteInterface) *Delete {
 	return &Delete{
 		service: service,
 	}

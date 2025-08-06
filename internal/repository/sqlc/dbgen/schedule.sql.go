@@ -196,6 +196,7 @@ SELECT
 FROM schedules s
 LEFT JOIN time_slots t ON s.id = t.schedule_id
 WHERE s.id = $1
+ORDER BY t.start_time
 `
 
 type GetScheduleByIDWithTimeSlotsByIDRow struct {

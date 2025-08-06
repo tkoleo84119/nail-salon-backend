@@ -13,10 +13,10 @@ import (
 )
 
 type Update struct {
-	service adminTimeSlotTemplateItemService.UpdateServiceInterface
+	service adminTimeSlotTemplateItemService.UpdateInterface
 }
 
-func NewUpdate(service adminTimeSlotTemplateItemService.UpdateServiceInterface) *Update {
+func NewUpdate(service adminTimeSlotTemplateItemService.UpdateInterface) *Update {
 	return &Update{
 		service: service,
 	}

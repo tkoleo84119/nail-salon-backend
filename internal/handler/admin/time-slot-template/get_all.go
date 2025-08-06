@@ -14,10 +14,10 @@ import (
 )
 
 type GetAll struct {
-	service adminTimeSlotTemplateService.GetAllServiceInterface
+	service adminTimeSlotTemplateService.GetAllInterface
 }
 
-func NewGetAll(service adminTimeSlotTemplateService.GetAllServiceInterface) *GetAll {
+func NewGetAll(service adminTimeSlotTemplateService.GetAllInterface) *GetAll {
 	return &GetAll{
 		service: service,
 	}

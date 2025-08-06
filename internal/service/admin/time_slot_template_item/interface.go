@@ -6,14 +6,14 @@ import (
 	adminTimeSlotTemplateItemModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time_slot_template_item"
 )
 
-type CreateServiceInterface interface {
+type CreateInterface interface {
 	Create(ctx context.Context, templateID int64, req adminTimeSlotTemplateItemModel.CreateRequest) (*adminTimeSlotTemplateItemModel.CreateResponse, error)
 }
 
-type UpdateServiceInterface interface {
+type UpdateInterface interface {
 	Update(ctx context.Context, templateID int64, itemID int64, req adminTimeSlotTemplateItemModel.UpdateRequest) (*adminTimeSlotTemplateItemModel.UpdateResponse, error)
 }
 
-type DeleteServiceInterface interface {
+type DeleteInterface interface {
 	Delete(ctx context.Context, templateID int64, itemID int64) (*adminTimeSlotTemplateItemModel.DeleteResponse, error)
 }

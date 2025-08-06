@@ -80,16 +80,16 @@ type AdminServices struct {
 	ScheduleGet            adminScheduleService.GetInterface
 
 	// Time slot template services
-	TimeSlotTemplateGetAll adminTimeSlotTemplateService.GetAllServiceInterface
-	TimeSlotTemplateGet    adminTimeSlotTemplateService.GetServiceInterface
-	TimeSlotTemplateCreate adminTimeSlotTemplateService.CreateServiceInterface
-	TimeSlotTemplateDelete adminTimeSlotTemplateService.DeleteServiceInterface
-	TimeSlotTemplateUpdate adminTimeSlotTemplateService.UpdateServiceInterface
+	TimeSlotTemplateGetAll adminTimeSlotTemplateService.GetAllInterface
+	TimeSlotTemplateGet    adminTimeSlotTemplateService.GetInterface
+	TimeSlotTemplateCreate adminTimeSlotTemplateService.CreateInterface
+	TimeSlotTemplateDelete adminTimeSlotTemplateService.DeleteInterface
+	TimeSlotTemplateUpdate adminTimeSlotTemplateService.UpdateInterface
 
 	// Time slot template item services
-	TimeSlotTemplateItemCreate adminTimeSlotTemplateItemService.CreateServiceInterface
-	TimeSlotTemplateUpdateItem adminTimeSlotTemplateItemService.UpdateServiceInterface
-	TimeSlotTemplateDeleteItem adminTimeSlotTemplateItemService.DeleteServiceInterface
+	TimeSlotTemplateItemCreate adminTimeSlotTemplateItemService.CreateInterface
+	TimeSlotTemplateUpdateItem adminTimeSlotTemplateItemService.UpdateInterface
+	TimeSlotTemplateDeleteItem adminTimeSlotTemplateItemService.DeleteInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
