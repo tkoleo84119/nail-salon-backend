@@ -12,6 +12,7 @@ import (
 	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
 	adminStaffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/staff"
 	adminStoreHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store"
+	adminStoreAccessHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store_access"
 	adminStylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/stylist"
 	adminTimeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time-slot-template"
 	adminTimeSlotHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot"
@@ -24,6 +25,7 @@ import (
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
 	adminStoreService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store"
+	adminStoreAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store_access"
 	adminStylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/stylist"
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
 	adminTimeSlotService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot"
@@ -38,15 +40,17 @@ type AdminServices struct {
 	AuthStaffLogout       adminAuthService.LogoutInterface
 
 	// Staff management services
-	StaffCreate            adminStaffService.CreateInterface
-	StaffGetAll            adminStaffService.GetAllInterface
-	StaffUpdate            adminStaffService.UpdateInterface
-	StaffUpdateMe          adminStaffService.UpdateMeInterface
-	StaffGet               adminStaffService.GetInterface
-	StaffGetMe             adminStaffService.GetMeInterface
-	StaffGetStoreAccess    adminStaffService.GetStaffStoreAccessServiceInterface
-	StaffStoreAccess       adminStaffService.CreateStoreAccessServiceInterface
-	StaffDeleteStoreAccess adminStaffService.DeleteStoreAccessBulkServiceInterface
+	StaffCreate   adminStaffService.CreateInterface
+	StaffGetAll   adminStaffService.GetAllInterface
+	StaffUpdate   adminStaffService.UpdateInterface
+	StaffUpdateMe adminStaffService.UpdateMeInterface
+	StaffGet      adminStaffService.GetInterface
+	StaffGetMe    adminStaffService.GetMeInterface
+
+	// Store access services
+	StaffGetStoreAccess        adminStoreAccessService.GetInterface
+	StaffCreateStoreAccess     adminStoreAccessService.CreateInterface
+	StaffDeleteBulkStoreAccess adminStoreAccessService.DeleteBulkInterface
 
 	// Store management services
 	StoreGetList adminStoreService.GetAllInterface
@@ -100,15 +104,17 @@ type AdminHandlers struct {
 	AuthStaffLogout       *adminAuthHandler.Logout
 
 	// Staff management handlers
-	StaffCreate            *adminStaffHandler.Create
-	StaffUpdate            *adminStaffHandler.Update
-	StaffUpdateMe          *adminStaffHandler.UpdateMe
-	StaffGet               *adminStaffHandler.Get
-	StaffGetMe             *adminStaffHandler.GetMe
-	StaffGetAll            *adminStaffHandler.GetAll
-	StaffGetStoreAccess    *adminStaffHandler.GetStaffStoreAccessHandler
-	StaffStoreAccess       *adminStaffHandler.CreateStoreAccessHandler
-	StaffDeleteStoreAccess *adminStaffHandler.DeleteStoreAccessBulkHandler
+	StaffCreate   *adminStaffHandler.Create
+	StaffUpdate   *adminStaffHandler.Update
+	StaffUpdateMe *adminStaffHandler.UpdateMe
+	StaffGet      *adminStaffHandler.Get
+	StaffGetMe    *adminStaffHandler.GetMe
+	StaffGetAll   *adminStaffHandler.GetAll
+
+	// Store access handlers
+	StaffGetStoreAccess        *adminStoreAccessHandler.Get
+	StaffCreateStoreAccess     *adminStoreAccessHandler.Create
+	StaffDeleteBulkStoreAccess *adminStoreAccessHandler.DeleteBulk
 
 	// Store management handlers
 	StoreGetList *adminStoreHandler.GetAll
@@ -163,15 +169,15 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		AuthStaffLogout:       adminAuthService.NewLogout(queries),
 
 		// Staff management services
-		StaffCreate:            adminStaffService.NewCreate(queries, database.PgxPool),
-		StaffUpdate:            adminStaffService.NewUpdate(queries, repositories.SQLX),
-		StaffUpdateMe:          adminStaffService.NewUpdateMe(queries, repositories.SQLX),
-		StaffGet:               adminStaffService.NewGet(queries),
-		StaffGetMe:             adminStaffService.NewGetMe(queries),
-		StaffGetAll:            adminStaffService.NewGetAll(repositories.SQLX),
-		StaffGetStoreAccess:    adminStaffService.NewGetStaffStoreAccessService(repositories.SQLX),
-		StaffStoreAccess:       adminStaffService.NewCreateStoreAccessService(repositories.SQLX),
-		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(repositories.SQLX),
+		StaffCreate:                adminStaffService.NewCreate(queries, database.PgxPool),
+		StaffUpdate:                adminStaffService.NewUpdate(queries, repositories.SQLX),
+		StaffUpdateMe:              adminStaffService.NewUpdateMe(queries, repositories.SQLX),
+		StaffGet:                   adminStaffService.NewGet(queries),
+		StaffGetMe:                 adminStaffService.NewGetMe(queries),
+		StaffGetAll:                adminStaffService.NewGetAll(repositories.SQLX),
+		StaffGetStoreAccess:        adminStoreAccessService.NewGet(queries),
+		StaffCreateStoreAccess:     adminStoreAccessService.NewCreate(queries),
+		StaffDeleteBulkStoreAccess: adminStoreAccessService.NewDeleteBulk(queries),
 
 		// Store management services
 		StoreGetList: adminStoreService.NewGetAll(repositories.SQLX),
@@ -227,15 +233,15 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		AuthStaffLogout:       adminAuthHandler.NewLogout(services.AuthStaffLogout),
 
 		// Staff management handlers
-		StaffCreate:            adminStaffHandler.NewCreate(services.StaffCreate),
-		StaffUpdate:            adminStaffHandler.NewUpdate(services.StaffUpdate),
-		StaffUpdateMe:          adminStaffHandler.NewUpdateMe(services.StaffUpdateMe),
-		StaffGet:               adminStaffHandler.NewGet(services.StaffGet),
-		StaffGetMe:             adminStaffHandler.NewGetMe(services.StaffGetMe),
-		StaffGetAll:            adminStaffHandler.NewGetAll(services.StaffGetAll),
-		StaffGetStoreAccess:    adminStaffHandler.NewGetStaffStoreAccessHandler(services.StaffGetStoreAccess),
-		StaffStoreAccess:       adminStaffHandler.NewCreateStoreAccessHandler(services.StaffStoreAccess),
-		StaffDeleteStoreAccess: adminStaffHandler.NewDeleteStoreAccessBulkHandler(services.StaffDeleteStoreAccess),
+		StaffCreate:                adminStaffHandler.NewCreate(services.StaffCreate),
+		StaffUpdate:                adminStaffHandler.NewUpdate(services.StaffUpdate),
+		StaffUpdateMe:              adminStaffHandler.NewUpdateMe(services.StaffUpdateMe),
+		StaffGet:                   adminStaffHandler.NewGet(services.StaffGet),
+		StaffGetMe:                 adminStaffHandler.NewGetMe(services.StaffGetMe),
+		StaffGetAll:                adminStaffHandler.NewGetAll(services.StaffGetAll),
+		StaffGetStoreAccess:        adminStoreAccessHandler.NewGet(services.StaffGetStoreAccess),
+		StaffCreateStoreAccess:     adminStoreAccessHandler.NewCreate(services.StaffCreateStoreAccess),
+		StaffDeleteBulkStoreAccess: adminStoreAccessHandler.NewDeleteBulk(services.StaffDeleteBulkStoreAccess),
 
 		// Store management handlers
 		StoreGetList: adminStoreHandler.NewGetAll(services.StoreGetList),

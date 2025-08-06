@@ -1,19 +1,18 @@
 ## User Story
 
-作為管理員，我希望可以查詢特定員工資料，以便後台管理。
+作為管理員，我希望可以查詢特定員工的門市存取權限（Store Access），以便了解其可操作的門市範圍。
 
 ---
 
 ## Endpoint
 
-**GET** `/api/admin/staff/{staffId}`
+**GET** `/api/admin/staff/{staffId}/store-access`
 
 ---
 
 ## 說明
 
-- 查詢指定 `staffId` 的員工帳號基本資料。
-- 若該員工同時為美甲師（`stylists.staff_user_id`），則一併回傳 stylist 資訊。
+- 提供管理員查詢特定員工的門市存取權限。
 
 ---
 
@@ -46,23 +45,16 @@
 ```json
 {
   "data": {
-    "id": "6000000002",
-    "username": "stylist88",
-    "email": "s88@salon.com",
-    "role": "STYLIST",
-    "isActive": true,
-    "createdAt": "2025-06-01T08:00:00+08:00",
-    "updatedAt": "2025-06-01T08:00:00+08:00",
-    "stylist": {
-      "id": "7000000001",
-      "name": "Bella",
-      "goodAtShapes": ["方形"],
-      "goodAtColors": ["粉色系"],
-      "goodAtStyles": ["簡約風"],
-      "isIntrovert": false,
-      "createdAt": "2025-06-01T08:00:00+08:00",
-      "updatedAt": "2025-06-01T08:00:00+08:00"
-    }
+    "storeList": [
+      {
+        "storeId": "8000000001",
+        "name": "大安旗艦店"
+      },
+      {
+        "storeId": "8000000003",
+        "name": "信義分店"
+      }
+    ]
   }
 }
 ```
@@ -100,7 +92,6 @@
 | 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查             |
 | 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                 |
 | 404    | E3STA005 | StaffNotFound           | 員工帳號不存在                   |
-| 404    | E3STY001 | StylistNotFound         | 美甲師資料不存在                 |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試         |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                   |
 
@@ -109,18 +100,19 @@
 ## 資料表
 
 - `staff_users`
-- `stylists`
+- `staff_user_store_access`
+- `stores`
 
 ---
 
 ## Service 邏輯
 
-1. 根據 `staffId` 查詢 `staff_users`。
-2. 若該帳號非 `SUPER_ADMIN`，則查詢 `stylists` 資料。
-3. 回傳合併結果。
+1. 確認 `staffId` 是否存在。
+2. 查詢 `staff_user_store_access` 表取得所有該員工可操作的門市資料。
+3. 回傳門市清單。
 
 ---
 
 ## 注意事項
 
-- 若無對應 stylist 資料，`stylist` 欄位為 null。
+- 若無授權任何門市，回傳空陣列。

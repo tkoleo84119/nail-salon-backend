@@ -1,4 +1,4 @@
-package adminStaff
+package adminStoreAccess
 
 import (
 	"context"
@@ -7,25 +7,25 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStaffStoreAccessService struct {
-	repo *sqlxRepo.Repositories
+type Get struct {
+	queries *dbgen.Queries
 }
 
-func NewGetStaffStoreAccessService(repo *sqlxRepo.Repositories) *GetStaffStoreAccessService {
-	return &GetStaffStoreAccessService{
-		repo: repo,
+func NewGet(queries *dbgen.Queries) *Get {
+	return &Get{
+		queries: queries,
 	}
 }
 
-func (s *GetStaffStoreAccessService) GetStaffStoreAccess(ctx context.Context, staffID int64) (*adminStaffModel.GetStaffStoreAccessResponse, error) {
+func (s *Get) Get(ctx context.Context, staffID int64) (*adminStoreAccessModel.GetResponse, error) {
 	// Verify staff user exists
-	_, err := s.repo.Staff.GetStaffUserByID(ctx, staffID)
+	_, err := s.queries.GetStaffUserByID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
@@ -34,7 +34,7 @@ func (s *GetStaffStoreAccessService) GetStaffStoreAccess(ctx context.Context, st
 	}
 
 	// Get staff store access
-	storeAccessList, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, staffID, nil)
+	storeAccessList, err := s.queries.GetAllActiveStoreAccessByStaffId(ctx, staffID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get staff store access", err)
 	}
@@ -44,11 +44,11 @@ func (s *GetStaffStoreAccessService) GetStaffStoreAccess(ctx context.Context, st
 	for _, access := range storeAccessList {
 		items = append(items, common.Store{
 			ID:   utils.FormatID(access.StoreID),
-			Name: access.Name,
+			Name: access.StoreName,
 		})
 	}
 
-	return &adminStaffModel.GetStaffStoreAccessResponse{
+	return &adminStoreAccessModel.GetResponse{
 		StoreList: items,
 	}, nil
 }

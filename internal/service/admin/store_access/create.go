@@ -1,4 +1,4 @@
-package adminStaff
+package adminStoreAccess
 
 import (
 	"context"
@@ -8,25 +8,26 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateStoreAccessService struct {
-	repo *sqlxRepo.Repositories
+type Create struct {
+	queries *dbgen.Queries
 }
 
-func NewCreateStoreAccessService(repo *sqlxRepo.Repositories) *CreateStoreAccessService {
-	return &CreateStoreAccessService{
-		repo: repo,
+func NewCreate(queries *dbgen.Queries) *Create {
+	return &Create{
+		queries: queries,
 	}
 }
 
 // CreateStoreAccess creates store access for a staff member
-func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffID int64, storeID int64, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStoreAccessResponse, bool, error) {
+func (s *Create) Create(ctx context.Context, staffID int64, storeID int64, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStoreAccessModel.CreateResponse, bool, error) {
 	// Check if target staff exists
-	targetStaff, err := s.repo.Staff.GetStaffUserByID(ctx, staffID)
+	targetStaff, err := s.queries.GetStaffUserByID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
@@ -45,13 +46,15 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 	}
 
 	// Check if store exists and is active
-	active := true
-	_, err = s.repo.Store.GetStoreByID(ctx, storeID, &active)
+	store, err := s.queries.GetStoreByID(ctx, storeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 		}
 		return nil, false, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store", err)
+	}
+	if !store.IsActive.Bool {
+		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
 	}
 
 	// Check if creator has access to this store (except SUPER_ADMIN)
@@ -66,7 +69,10 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 	}
 
 	// Check if access already exists
-	exists, err := s.repo.StaffUserStoreAccess.CheckStoreAccessExists(ctx, staffID, storeID)
+	exists, err := s.queries.CheckStoreAccessExists(ctx, dbgen.CheckStoreAccessExistsParams{
+		StaffUserID: staffID,
+		StoreID:     storeID,
+	})
 	if err != nil {
 		return nil, false, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store access", err)
 	}
@@ -74,7 +80,7 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 	isNewlyCreated := false
 	if !exists {
 		// Create new store access
-		err = s.repo.StaffUserStoreAccess.CreateStaffUserStoreAccess(ctx, sqlxRepo.CreateStaffUserStoreAccessTxParams{
+		err = s.queries.CreateStaffUserStoreAccess(ctx, dbgen.CreateStaffUserStoreAccessParams{
 			StoreID:     storeID,
 			StaffUserID: staffID,
 		})
@@ -85,7 +91,7 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 	}
 
 	// Get complete store access list for the staff member
-	storeAccessList, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, staffID, &active)
+	storeAccessList, err := s.queries.GetAllActiveStoreAccessByStaffId(ctx, staffID)
 	if err != nil {
 		return nil, false, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store access", err)
 	}
@@ -95,11 +101,11 @@ func (s *CreateStoreAccessService) CreateStoreAccess(ctx context.Context, staffI
 	for _, access := range storeAccessList {
 		storeList = append(storeList, common.Store{
 			ID:   utils.FormatID(access.StoreID),
-			Name: access.Name,
+			Name: access.StoreName,
 		})
 	}
 
-	response := &adminStaffModel.CreateStoreAccessResponse{
+	response := &adminStoreAccessModel.CreateResponse{
 		StoreList: storeList,
 	}
 

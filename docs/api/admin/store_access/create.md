@@ -1,19 +1,18 @@
 ## User Story
 
-作為管理員，我希望可以查詢特定員工資料，以便後台管理。
+作為一位管理員，我希望可以新增某位員工可操作的門市（單筆）， 以便彈性擴充該員工可管理的門市範圍。
 
 ---
 
 ## Endpoint
 
-**GET** `/api/admin/staff/{staffId}`
+**POST** `/api/admin/staff/{staffId}/store-access`
 
 ---
 
 ## 說明
 
-- 查詢指定 `staffId` 的員工帳號基本資料。
-- 若該員工同時為美甲師（`stylists.staff_user_id`），則一併回傳 stylist 資訊。
+- 提供管理員新增特定員工的門市存取權限。
 
 ---
 
@@ -37,32 +36,50 @@
 | ------- | ----------- |
 | staffId | 員工帳號 ID |
 
+### Body 範例
+
+```json
+{
+  "storeId": "1"
+}
+```
+
+### 驗證規則
+
+| 欄位    | 必填 | 其他規則 | 說明         |
+| ------- | ---- | -------- | ------------ |
+| storeId | 是   |          | 欲新增的門市 |
+
 ---
 
 ## Response
 
-### 成功 200 OK
+### 成功 200 OK（已存在）
 
 ```json
 {
   "data": {
-    "id": "6000000002",
-    "username": "stylist88",
-    "email": "s88@salon.com",
-    "role": "STYLIST",
-    "isActive": true,
-    "createdAt": "2025-06-01T08:00:00+08:00",
-    "updatedAt": "2025-06-01T08:00:00+08:00",
-    "stylist": {
-      "id": "7000000001",
-      "name": "Bella",
-      "goodAtShapes": ["方形"],
-      "goodAtColors": ["粉色系"],
-      "goodAtStyles": ["簡約風"],
-      "isIntrovert": false,
-      "createdAt": "2025-06-01T08:00:00+08:00",
-      "updatedAt": "2025-06-01T08:00:00+08:00"
-    }
+    "storeList": [
+      {
+        "id": "1",
+        "name": "台北總店"
+      }
+    ]
+  }
+}
+```
+
+### 成功 201 Created（成功新增）
+
+```json
+{
+  "data": {
+    "storeList": [
+      {
+        "id": "1",
+        "name": "台北總店"
+      }
+    ]
   }
 }
 ```
@@ -97,10 +114,14 @@
 | 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入 |
 | 401    | E1006    | AuthContextMissing      | 未找到使用者認證資訊，請重新登入 |
 | 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作         |
+| 400    | E2001    | ValJsonFormat           | JSON 格式錯誤，請檢查            |
 | 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查             |
 | 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                 |
+| 400    | E2020    | ValFieldRequired        | {field} 為必填項目               |
+| 403    | E3STA004 | StaffNotUpdateSelf      | 不可更新自己的帳號               |
 | 404    | E3STA005 | StaffNotFound           | 員工帳號不存在                   |
-| 404    | E3STY001 | StylistNotFound         | 美甲師資料不存在                 |
+| 404    | E3STO002 | StoreNotFound           | 門市不存在或已被刪除             |
+| 400    | E3STO001 | StoreNotActive          | 門市未啟用                       |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試         |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                   |
 
@@ -109,18 +130,26 @@
 ## 資料表
 
 - `staff_users`
-- `stylists`
+- `staff_user_store_access`
+- `stores`
 
 ---
 
 ## Service 邏輯
 
-1. 根據 `staffId` 查詢 `staff_users`。
-2. 若該帳號非 `SUPER_ADMIN`，則查詢 `stylists` 資料。
-3. 回傳合併結果。
+
+1. 驗證目標員工是否存在
+2. 不能新增自己的 store access
+3. 目標員工不能為 `SUPER_ADMIN`
+4. 驗證門市是否存在
+5. 檢查該門市是否為該管理員有權限的門市
+6. 查詢是否已有相同的門市權限
+   - 若有：不新增，回傳 200 (全部的 store access)
+   - 若無：新增一筆 `staff_user_store_access` 記錄，回傳 201 (全部的 store access)
 
 ---
 
 ## 注意事項
 
-- 若無對應 stylist 資料，`stylist` 欄位為 null。
+- 一次僅能新增一筆 store access
+- 會回傳全部的 store access 資訊

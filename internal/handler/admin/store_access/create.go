@@ -1,4 +1,4 @@
-package adminStaff
+package adminStoreAccess
 
 import (
 	"net/http"
@@ -6,23 +6,23 @@ import (
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
+	adminStoreAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateStoreAccessHandler struct {
-	service adminStaffService.CreateStoreAccessServiceInterface
+type Create struct {
+	service adminStoreAccessService.CreateInterface
 }
 
-func NewCreateStoreAccessHandler(service adminStaffService.CreateStoreAccessServiceInterface) *CreateStoreAccessHandler {
-	return &CreateStoreAccessHandler{
+func NewCreate(service adminStoreAccessService.CreateInterface) *Create {
+	return &Create{
 		service: service,
 	}
 }
 
-func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
+func (h *Create) Create(c *gin.Context) {
 	// Get target staff ID from path parameter
 	staffID := c.Param("staffId")
 	if staffID == "" {
@@ -38,7 +38,7 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	}
 
 	// Parse and validate request
-	var req adminStaffModel.CreateStoreAccessRequest
+	var req adminStoreAccessModel.CreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -78,7 +78,7 @@ func (h *CreateStoreAccessHandler) CreateStoreAccess(c *gin.Context) {
 	}
 
 	// Call service
-	response, isNewlyCreated, err := h.service.CreateStoreAccess(c.Request.Context(), parsedStaffID, parsedStoreID, creatorID, staffContext.Role, creatorStoreIDs)
+	response, isNewlyCreated, err := h.service.Create(c.Request.Context(), parsedStaffID, parsedStoreID, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

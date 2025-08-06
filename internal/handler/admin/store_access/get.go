@@ -1,4 +1,4 @@
-package adminStaff
+package adminStoreAccess
 
 import (
 	"net/http"
@@ -7,21 +7,21 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
+	adminStoreAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStaffStoreAccessHandler struct {
-	service adminStaffService.GetStaffStoreAccessServiceInterface
+type Get struct {
+	service adminStoreAccessService.GetInterface
 }
 
-func NewGetStaffStoreAccessHandler(service adminStaffService.GetStaffStoreAccessServiceInterface) *GetStaffStoreAccessHandler {
-	return &GetStaffStoreAccessHandler{
+func NewGet(service adminStoreAccessService.GetInterface) *Get {
+	return &Get{
 		service: service,
 	}
 }
 
-func (h *GetStaffStoreAccessHandler) GetStaffStoreAccess(c *gin.Context) {
+func (h *Get) Get(c *gin.Context) {
 	// Get staff ID from path parameter
 	staffID := c.Param("staffId")
 	if staffID == "" {
@@ -35,7 +35,7 @@ func (h *GetStaffStoreAccessHandler) GetStaffStoreAccess(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStaffStoreAccess(c.Request.Context(), parsedStaffID)
+	response, err := h.service.Get(c.Request.Context(), parsedStaffID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -1,19 +1,18 @@
 ## User Story
 
-作為管理員，我希望可以查詢特定員工資料，以便後台管理。
+作為一位管理員，我希望可以刪除某位員工可操作的門市（多筆），以便控管其實際管理範圍。
 
 ---
 
 ## Endpoint
 
-**GET** `/api/admin/staff/{staffId}`
+**DELETE** `/api/admin/staff/{staffId}/store-access/bulk`
 
 ---
 
 ## 說明
 
-- 查詢指定 `staffId` 的員工帳號基本資料。
-- 若該員工同時為美甲師（`stylists.staff_user_id`），則一併回傳 stylist 資訊。
+- 提供管理員刪除特定員工的門市存取權限。
 
 ---
 
@@ -37,6 +36,20 @@
 | ------- | ----------- |
 | staffId | 員工帳號 ID |
 
+### Body 範例
+
+```json
+{
+  "storeIds": ["1", "3"]
+}
+```
+
+### 驗證規則
+
+| 欄位     | 必填 | 其他規則                | 說明                 |
+| -------- | ---- | ----------------------- | -------------------- |
+| storeIds | 是   | <li>最小1筆<li>最大20筆 | 欲移除的門市 ID 清單 |
+
 ---
 
 ## Response
@@ -46,23 +59,7 @@
 ```json
 {
   "data": {
-    "id": "6000000002",
-    "username": "stylist88",
-    "email": "s88@salon.com",
-    "role": "STYLIST",
-    "isActive": true,
-    "createdAt": "2025-06-01T08:00:00+08:00",
-    "updatedAt": "2025-06-01T08:00:00+08:00",
-    "stylist": {
-      "id": "7000000001",
-      "name": "Bella",
-      "goodAtShapes": ["方形"],
-      "goodAtColors": ["粉色系"],
-      "goodAtStyles": ["簡約風"],
-      "isIntrovert": false,
-      "createdAt": "2025-06-01T08:00:00+08:00",
-      "updatedAt": "2025-06-01T08:00:00+08:00"
-    }
+    "deleted": ["6000000011", "6000000012"]
   }
 }
 ```
@@ -99,8 +96,8 @@
 | 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作         |
 | 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查             |
 | 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                 |
+| 403    | E3STA004 | StaffNotUpdateSelf      | 不可更新自己的帳號               |
 | 404    | E3STA005 | StaffNotFound           | 員工帳號不存在                   |
-| 404    | E3STY001 | StylistNotFound         | 美甲師資料不存在                 |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試         |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                   |
 
@@ -109,18 +106,23 @@
 ## 資料表
 
 - `staff_users`
-- `stylists`
+- `staff_user_store_access`
+- `stores`
 
 ---
 
 ## Service 邏輯
 
-1. 根據 `staffId` 查詢 `staff_users`。
-2. 若該帳號非 `SUPER_ADMIN`，則查詢 `stylists` 資料。
-3. 回傳合併結果。
+1. 驗證目標員工是否存在
+2. 不能刪除自己的 store access
+3. 目標員工不能為 `SUPER_ADMIN`
+4. 驗證門市是否存在
+5. 檢查門市是否啟用中，且是否是該管理員有權限的門市
+6. 執行刪除動作（從 `staff_user_store_access` 中移除多筆）
+7. 回傳目前該員工剩餘可操作的門市清單
 
 ---
 
 ## 注意事項
 
-- 若無對應 stylist 資料，`stylist` 欄位為 null。
+- `SUPER_ADMIN` 不能被更動其門市權限

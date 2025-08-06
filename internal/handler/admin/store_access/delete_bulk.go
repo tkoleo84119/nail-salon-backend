@@ -1,4 +1,4 @@
-package adminStaff
+package adminStoreAccess
 
 import (
 	"net/http"
@@ -6,23 +6,23 @@ import (
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
+	adminStoreAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteStoreAccessBulkHandler struct {
-	service adminStaffService.DeleteStoreAccessBulkServiceInterface
+type DeleteBulk struct {
+	service adminStoreAccessService.DeleteBulkInterface
 }
 
-func NewDeleteStoreAccessBulkHandler(service adminStaffService.DeleteStoreAccessBulkServiceInterface) *DeleteStoreAccessBulkHandler {
-	return &DeleteStoreAccessBulkHandler{
+func NewDeleteBulk(service adminStoreAccessService.DeleteBulkInterface) *DeleteBulk {
+	return &DeleteBulk{
 		service: service,
 	}
 }
 
-func (h *DeleteStoreAccessBulkHandler) DeleteStoreAccessBulk(c *gin.Context) {
+func (h *DeleteBulk) DeleteBulk(c *gin.Context) {
 	// Get target staff ID from path parameter
 	staffId := c.Param("staffId")
 	if staffId == "" {
@@ -40,7 +40,7 @@ func (h *DeleteStoreAccessBulkHandler) DeleteStoreAccessBulk(c *gin.Context) {
 	}
 
 	// Parse and validate request
-	var req adminStaffModel.DeleteStoreAccessBulkRequest
+	var req adminStoreAccessModel.DeleteBulkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -88,7 +88,7 @@ func (h *DeleteStoreAccessBulkHandler) DeleteStoreAccessBulk(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.DeleteStoreAccessBulk(c.Request.Context(), parsedStaffId, parsedStoreIDs, creatorID, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.DeleteBulk(c.Request.Context(), parsedStaffId, parsedStoreIDs, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
