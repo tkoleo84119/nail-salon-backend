@@ -43,20 +43,6 @@ type CreateSchedulesBulkResponse struct {
 
 // -------------------------------------------------------------------------------------
 
-// DeleteSchedulesBulkRequest represents the request to delete multiple schedules
-type DeleteSchedulesBulkRequest struct {
-	StylistID   string   `json:"stylistId" binding:"required"`
-	StoreID     string   `json:"storeId" binding:"required"`
-	ScheduleIDs []string `json:"scheduleIds" binding:"required,min=1,max=50"`
-}
-
-// DeleteSchedulesBulkResponse represents the response after deleting multiple schedules
-type DeleteSchedulesBulkResponse struct {
-	Deleted []string `json:"deleted"`
-}
-
-// -------------------------------------------------------------------------------------
-
 // GetScheduleListRequest represents the request to get schedules list
 type GetScheduleListRequest struct {
 	StylistID   *string `form:"stylistId"`

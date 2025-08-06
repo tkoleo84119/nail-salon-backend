@@ -13,23 +13,62 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteSchedulesBulkHandler struct {
-	service adminScheduleService.DeleteSchedulesBulkServiceInterface
+type DeleteBulk struct {
+	service adminScheduleService.DeleteBulkInterface
 }
 
-func NewDeleteSchedulesBulkHandler(service adminScheduleService.DeleteSchedulesBulkServiceInterface) *DeleteSchedulesBulkHandler {
-	return &DeleteSchedulesBulkHandler{
+func NewDeleteBulk(service adminScheduleService.DeleteBulkInterface) *DeleteBulk {
+	return &DeleteBulk{
 		service: service,
 	}
 }
 
-func (h *DeleteSchedulesBulkHandler) DeleteSchedulesBulk(c *gin.Context) {
+func (h *DeleteBulk) DeleteBulk(c *gin.Context) {
+	storeID := c.Param("storeId")
+	if storeID == "" {
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
+			"storeId": "storeId 為必填項目",
+		})
+		return
+	}
+	parsedStoreID, err := utils.ParseID(storeID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"storeId": "storeId 類型轉換失敗",
+		})
+		return
+	}
+
 	// Parse and validate request
-	var req adminScheduleModel.DeleteSchedulesBulkRequest
+	var req adminScheduleModel.DeleteBulkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	parsedStylistID, err := utils.ParseID(req.StylistID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"stylistId": "stylistId 類型轉換失敗",
+		})
+		return
+	}
+
+	parsedScheduleIDs := make([]int64, len(req.ScheduleIDs))
+	for i, scheduleID := range req.ScheduleIDs {
+		parsedScheduleID, err := utils.ParseID(scheduleID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"scheduleId": "scheduleId 類型轉換失敗",
+			})
+		}
+		parsedScheduleIDs[i] = parsedScheduleID
+	}
+
+	parsedReq := adminScheduleModel.DeleteBulkParsedRequest{
+		StylistID:   parsedStylistID,
+		ScheduleIDs: parsedScheduleIDs,
 	}
 
 	// Get staff context from middleware
@@ -39,8 +78,26 @@ func (h *DeleteSchedulesBulkHandler) DeleteSchedulesBulk(c *gin.Context) {
 		return
 	}
 
+	updaterID, err := utils.ParseID(staffContext.UserID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"staffId": "staffId 類型轉換失敗",
+		})
+	}
+
+	updaterStoreIDs := make([]int64, len(staffContext.StoreList))
+	for i, store := range staffContext.StoreList {
+		storeID, err := utils.ParseID(store.ID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"storeId": "storeId 類型轉換失敗",
+			})
+		}
+		updaterStoreIDs[i] = storeID
+	}
+
 	// Call service
-	response, err := h.service.DeleteSchedulesBulk(c.Request.Context(), req, *staffContext)
+	response, err := h.service.DeleteBulk(c.Request.Context(), parsedStoreID, parsedReq, updaterID, staffContext.Role, updaterStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

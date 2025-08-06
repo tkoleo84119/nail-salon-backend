@@ -3,58 +3,33 @@ package adminSchedule
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type DeleteSchedulesBulkService struct {
+type DeleteBulk struct {
 	queries dbgen.Querier
-	db      *pgxpool.Pool
 }
 
-func NewDeleteSchedulesBulkService(queries dbgen.Querier, db *pgxpool.Pool) *DeleteSchedulesBulkService {
-	return &DeleteSchedulesBulkService{
+func NewDeleteBulk(queries dbgen.Querier) *DeleteBulk {
+	return &DeleteBulk{
 		queries: queries,
-		db:      db,
 	}
 }
 
-func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, req adminScheduleModel.DeleteSchedulesBulkRequest, staffContext common.StaffContext) (*adminScheduleModel.DeleteSchedulesBulkResponse, error) {
-	// Parse IDs
-	stylistID, err := utils.ParseID(req.StylistID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid stylist ID", err)
-	}
-
-	storeID, err := utils.ParseID(req.StoreID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid store ID", err)
-	}
-
-	scheduleIDs, err := utils.ParseIDSlice(req.ScheduleIDs)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid schedule IDs", err)
-	}
-
+func (s *DeleteBulk) DeleteBulk(ctx context.Context, storeID int64, req adminScheduleModel.DeleteBulkParsedRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminScheduleModel.DeleteBulkResponse, error) {
 	// Check if stylist exists
-	stylist, err := s.queries.GetStylistByID(ctx, stylistID)
+	stylist, err := s.queries.GetStylistByID(ctx, req.StylistID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.StylistNotFound, "stylist not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
 	}
 
 	// Check permission: STYLIST can only delete their own schedules
-	if staffContext.Role == adminStaffModel.RoleStylist {
-		staffUserID, err := utils.ParseID(staffContext.UserID)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
-		}
-		if stylist.StaffUserID != staffUserID {
+	if updaterRole == common.RoleStylist {
+		if stylist.StaffUserID != updaterID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 	}
@@ -62,32 +37,29 @@ func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, re
 	// Check if store exists and is active
 	store, err := s.queries.GetStoreByID(ctx, storeID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotFound, "store not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 	}
 	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotActive, "store is not active", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
 	}
 
 	// Check if staff has access to this store
-	hasAccess := false
-	for _, storeAccess := range staffContext.StoreList {
-		if storeAccess.ID == req.StoreID {
-			hasAccess = true
-			break
-		}
+	hasAccess, err := utils.CheckStoreAccess(storeID, updaterStoreIDs)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
 	}
 	if !hasAccess {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	// Get schedules with time slots
-	schedules, err := s.queries.GetSchedulesWithTimeSlotsByIDs(ctx, scheduleIDs)
+	schedules, err := s.queries.GetSchedulesWithTimeSlotsByIDs(ctx, req.ScheduleIDs)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get schedules with time slots", err)
 	}
 
 	// Check if all schedules exist and belong to the stylist/store
-	if len(schedules) != len(scheduleIDs) {
+	if uniqueSchedulesCounts(schedules) != len(req.ScheduleIDs) {
 		return nil, errorCodes.NewServiceError(errorCodes.ScheduleNotFound, "some schedules not found", nil)
 	}
 	for _, schedule := range schedules {
@@ -95,7 +67,7 @@ func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, re
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotBelongToStore)
 		}
 
-		if schedule.StylistID != stylistID {
+		if schedule.StylistID != req.StylistID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotBelongToStylist)
 		}
 
@@ -105,33 +77,30 @@ func (s *DeleteSchedulesBulkService) DeleteSchedulesBulk(ctx context.Context, re
 		}
 	}
 
-	// Delete schedules and time slots in transaction
-	tx, err := s.db.Begin(ctx)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
-	}
-	defer tx.Rollback(ctx)
-
-	qtx := dbgen.New(tx)
-
-	// Delete time slots first (foreign key constraint)
-	if err := qtx.DeleteTimeSlotsByScheduleIDs(ctx, scheduleIDs); err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to delete time slots", err)
-	}
-
 	// Delete schedules
-	if err := qtx.DeleteSchedulesByIDs(ctx, scheduleIDs); err != nil {
+	if err := s.queries.DeleteSchedulesByIDs(ctx, req.ScheduleIDs); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to delete schedules", err)
 	}
 
-	if err := tx.Commit(ctx); err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
+	// Build response with deleted schedule IDs
+	response := &adminScheduleModel.DeleteBulkResponse{
+		Deleted: make([]string, len(req.ScheduleIDs)),
 	}
 
-	// Build response with deleted schedule IDs
-	response := &adminScheduleModel.DeleteSchedulesBulkResponse{
-		Deleted: req.ScheduleIDs,
+	for i, id := range req.ScheduleIDs {
+		response.Deleted[i] = utils.FormatID(id)
 	}
 
 	return response, nil
+}
+
+// schedules include many time slots, so we need to count unique schedules
+func uniqueSchedulesCounts(schedules []dbgen.GetSchedulesWithTimeSlotsByIDsRow) int {
+	uniqueMap := make(map[int64]int)
+
+	for _, schedule := range schedules {
+		uniqueMap[schedule.ID]++
+	}
+
+	return len(uniqueMap)
 }
