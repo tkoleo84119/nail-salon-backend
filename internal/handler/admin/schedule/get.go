@@ -12,17 +12,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetScheduleHandler struct {
-	service adminScheduleService.GetScheduleServiceInterface
+type Get struct {
+	service adminScheduleService.GetInterface
 }
 
-func NewGetScheduleHandler(service adminScheduleService.GetScheduleServiceInterface) *GetScheduleHandler {
-	return &GetScheduleHandler{
+func NewGet(service adminScheduleService.GetInterface) *Get {
+	return &Get{
 		service: service,
 	}
 }
 
-func (h *GetScheduleHandler) GetSchedule(c *gin.Context) {
+func (h *Get) Get(c *gin.Context) {
 	// validate storeId and scheduleId
 	storeID := c.Param("storeId")
 	if storeID == "" {
@@ -64,7 +64,7 @@ func (h *GetScheduleHandler) GetSchedule(c *gin.Context) {
 	}
 
 	// Call service
-	schedule, err := h.service.GetSchedule(c.Request.Context(), parsedStoreID, parsedScheduleID, staffContext.Role, storeIDs)
+	schedule, err := h.service.Get(c.Request.Context(), parsedStoreID, parsedScheduleID, staffContext.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

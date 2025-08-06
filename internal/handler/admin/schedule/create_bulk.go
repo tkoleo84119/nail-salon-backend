@@ -14,10 +14,10 @@ import (
 )
 
 type CreateBulk struct {
-	service adminScheduleService.CreateBulkServiceInterface
+	service adminScheduleService.CreateBulkInterface
 }
 
-func NewCreateBulk(service adminScheduleService.CreateBulkServiceInterface) *CreateBulk {
+func NewCreateBulk(service adminScheduleService.CreateBulkInterface) *CreateBulk {
 	return &CreateBulk{
 		service: service,
 	}

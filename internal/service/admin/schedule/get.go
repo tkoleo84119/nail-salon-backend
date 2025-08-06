@@ -9,28 +9,28 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetScheduleService struct {
-	repo *sqlxRepo.Repositories
+type Get struct {
+	queries *dbgen.Queries
 }
 
-func NewGetScheduleService(repo *sqlxRepo.Repositories) *GetScheduleService {
-	return &GetScheduleService{
-		repo: repo,
+func NewGet(queries *dbgen.Queries) *Get {
+	return &Get{
+		queries: queries,
 	}
 }
 
-func (s *GetScheduleService) GetSchedule(ctx context.Context, storeID int64, scheduleID int64, role string, storeIDs []int64) (*adminScheduleModel.GetScheduleResponse, error) {
+func (s *Get) Get(ctx context.Context, storeID int64, scheduleID int64, role string, storeIDs []int64) (*adminScheduleModel.GetResponse, error) {
 	// Verify store exists
-	_, err := s.repo.Store.GetStoreByID(ctx, storeID, nil)
+	exists, err := s.queries.CheckStoreExistByID(ctx, storeID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get store", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check store exists", err)
+	}
+	if !exists {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 	}
 
 	// Check store access for the staff member (except SUPER_ADMIN)
@@ -45,7 +45,7 @@ func (s *GetScheduleService) GetSchedule(ctx context.Context, storeID int64, sch
 	}
 
 	// Get schedule by ID using SQLC (then validate store ID)
-	rows, err := s.repo.Schedule.GetScheduleByID(ctx, scheduleID)
+	rows, err := s.queries.GetScheduleByIDWithTimeSlotsByID(ctx, scheduleID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotFound)
@@ -53,8 +53,8 @@ func (s *GetScheduleService) GetSchedule(ctx context.Context, storeID int64, sch
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get schedule", err)
 	}
 
-	response := adminScheduleModel.GetScheduleResponse{}
-	response.TimeSlots = []adminScheduleModel.GetScheduleTimeSlotInfo{}
+	response := adminScheduleModel.GetResponse{}
+	response.TimeSlots = []adminScheduleModel.GetTimeSlotInfo{}
 	for i, row := range rows {
 		if i == 0 {
 			response.ID = utils.FormatID(row.ID)
@@ -63,7 +63,7 @@ func (s *GetScheduleService) GetSchedule(ctx context.Context, storeID int64, sch
 		}
 
 		if row.TimeSlotID.Valid {
-			response.TimeSlots = append(response.TimeSlots, adminScheduleModel.GetScheduleTimeSlotInfo{
+			response.TimeSlots = append(response.TimeSlots, adminScheduleModel.GetTimeSlotInfo{
 				ID:          utils.FormatID(row.TimeSlotID.Int64),
 				StartTime:   utils.PgTimeToTimeString(row.StartTime),
 				EndTime:     utils.PgTimeToTimeString(row.EndTime),
