@@ -1,30 +1,29 @@
-package adminSchedule
+package adminTimeSlot
 
 import (
 	"context"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	adminTimeSlotModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time_slot"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateTimeSlotService struct {
+type Update struct {
 	queries dbgen.Querier
 	repo    *sqlx.Repositories
 }
 
-func NewUpdateTimeSlotService(queries dbgen.Querier, repo *sqlx.Repositories) *UpdateTimeSlotService {
-	return &UpdateTimeSlotService{
+func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
+	return &Update{
 		queries: queries,
 		repo:    repo,
 	}
 }
 
-func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, req adminScheduleModel.UpdateTimeSlotRequest, staffContext common.StaffContext) (*adminScheduleModel.UpdateTimeSlotResponse, error) {
+func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64, req adminTimeSlotModel.UpdateRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminTimeSlotModel.UpdateResponse, error) {
 	// Validate at least one field is provided
 	if !req.HasUpdate() {
 		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
@@ -35,52 +34,36 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotCannotUpdateSeparately)
 	}
 
-	// Parse IDs
-	scheduleIDInt, err := utils.ParseID(scheduleID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid schedule ID", err)
-	}
-
-	timeSlotIDInt, err := utils.ParseID(timeSlotID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid time slot ID", err)
-	}
-
 	// Get time slot information
-	timeSlot, err := s.queries.GetTimeSlotByID(ctx, timeSlotIDInt)
+	timeSlot, err := s.queries.GetTimeSlotByID(ctx, timeSlotID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.TimeSlotNotFound, "time slot not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotFound)
 	}
 
 	// Verify time slot belongs to the specified schedule
-	if timeSlot.ScheduleID != scheduleIDInt {
+	if timeSlot.ScheduleID != scheduleID {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotBelongToSchedule)
 	}
-
-	// Check if time slot is booked (cannot update booked time slots)
-	if !timeSlot.IsAvailable.Bool {
+	// Check if time slot is booked (cannot update booked time slots, unless isAvailable is set to true)
+	if !timeSlot.IsAvailable.Bool && req.IsAvailable == nil {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotUpdate)
 	}
 
 	// Get schedule information
-	scheduleInfo, err := s.queries.GetScheduleByID(ctx, scheduleIDInt)
+	scheduleInfo, err := s.queries.GetScheduleByID(ctx, scheduleID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ScheduleNotFound, "schedule not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotFound)
 	}
 
 	// Get stylist information
 	stylist, err := s.queries.GetStylistByID(ctx, scheduleInfo.StylistID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.StylistNotFound, "stylist not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
 	}
 
 	// Check permission: STYLIST can only modify their own schedules
-	if staffContext.Role == adminStaffModel.RoleStylist {
-		staffUserID, err := utils.ParseID(staffContext.UserID)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.AuthStaffFailed, "invalid staff user ID", err)
-		}
-		if stylist.StaffUserID != staffUserID {
+	if updaterRole == common.RoleStylist {
+		if stylist.StaffUserID != updaterID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 	}
@@ -88,20 +71,16 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 	// Check if store exists and is active
 	store, err := s.queries.GetStoreByID(ctx, scheduleInfo.StoreID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotFound, "store not found", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 	}
 	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceError(errorCodes.StaffStoreNotActive, "store is not active", err)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
 	}
 
 	// Check if staff has access to this store
-	hasAccess := false
-	storeIDStr := utils.FormatID(scheduleInfo.StoreID)
-	for _, storeAccess := range staffContext.StoreList {
-		if storeAccess.ID == storeIDStr {
-			hasAccess = true
-			break
-		}
+	hasAccess, err := utils.CheckStoreAccess(scheduleInfo.StoreID, updaterStoreIDs)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
 	}
 	if !hasAccess {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
@@ -110,21 +89,21 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 	if req.StartTime != nil && req.EndTime != nil {
 		startTimeParsed, err := utils.TimeStringToTime(*req.StartTime)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid start time format", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValFieldTimeFormat, "invalid start time format", err)
 		}
 		endTimeParsed, err := utils.TimeStringToTime(*req.EndTime)
 		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid end time format", err)
+			return nil, errorCodes.NewServiceError(errorCodes.ValFieldTimeFormat, "invalid end time format", err)
 		}
 
 		// Validate time range
 		if !endTimeParsed.After(startTimeParsed) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotEndBeforeStart)
 		}
 
 		hasOverlap, err := s.queries.CheckTimeSlotOverlapExcluding(ctx, dbgen.CheckTimeSlotOverlapExcludingParams{
-			ScheduleID: scheduleIDInt,
-			ID:         timeSlotIDInt,
+			ScheduleID: scheduleID,
+			ID:         timeSlotID,
 			StartTime:  utils.TimeToPgTime(startTimeParsed),
 			EndTime:    utils.TimeToPgTime(endTimeParsed),
 		})
@@ -137,13 +116,20 @@ func (s *UpdateTimeSlotService) UpdateTimeSlot(ctx context.Context, scheduleID s
 	}
 
 	// Update time slot using sqlx repository
-	response, err := s.repo.TimeSlot.UpdateTimeSlot(ctx, timeSlotIDInt, req)
+	response, err := s.repo.TimeSlot.UpdateTimeSlot(ctx, timeSlotID, sqlx.UpdateTimeSlotParams{
+		StartTime:   req.StartTime,
+		EndTime:     req.EndTime,
+		IsAvailable: req.IsAvailable,
+	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update time slot", err)
 	}
 
-	// Set the correct schedule ID in response
-	response.ScheduleID = scheduleID
-
-	return response, nil
+	return &adminTimeSlotModel.UpdateResponse{
+		ID:          utils.FormatID(response.ID),
+		ScheduleID:  utils.FormatID(response.ScheduleID),
+		StartTime:   utils.PgTimeToTimeString(response.StartTime),
+		EndTime:     utils.PgTimeToTimeString(response.EndTime),
+		IsAvailable: utils.PgBoolToBool(response.IsAvailable),
+	}, nil
 }

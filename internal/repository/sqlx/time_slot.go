@@ -7,15 +7,13 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
-	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // TimeSlotRepositoryInterface defines the interface for time slot repository
 type TimeSlotRepositoryInterface interface {
 	BatchCreateTimeSlotsTx(ctx context.Context, tx *sqlx.Tx, params []BatchCreateTimeSlotsTxParams) error
-	UpdateTimeSlot(ctx context.Context, timeSlotID int64, req adminScheduleModel.UpdateTimeSlotRequest) (*adminScheduleModel.UpdateTimeSlotResponse, error)
+	UpdateTimeSlot(ctx context.Context, timeSlotID int64, params UpdateTimeSlotParams) (UpdateTimeSlotResponse, error)
 }
 
 type TimeSlotRepository struct {
@@ -70,76 +68,73 @@ func (r *TimeSlotRepository) BatchCreateTimeSlotsTx(ctx context.Context, tx *sql
 	return nil
 }
 
+type UpdateTimeSlotParams struct {
+	StartTime   *string
+	EndTime     *string
+	IsAvailable *bool
+}
+
+type UpdateTimeSlotResponse struct {
+	ID          int64
+	ScheduleID  int64
+	StartTime   pgtype.Time
+	EndTime     pgtype.Time
+	IsAvailable pgtype.Bool
+}
+
 // UpdateTimeSlot updates time slot with dynamic fields
-func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int64, req adminScheduleModel.UpdateTimeSlotRequest) (*adminScheduleModel.UpdateTimeSlotResponse, error) {
+func (r *TimeSlotRepository) UpdateTimeSlot(ctx context.Context, timeSlotID int64, params UpdateTimeSlotParams) (UpdateTimeSlotResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
-	args := map[string]interface{}{
-		"id": timeSlotID,
-	}
+	args := []interface{}{timeSlotID}
 
-	if req.StartTime != nil {
-		setParts = append(setParts, "start_time = :start_time")
-		// Convert time string to pgtype.Time
-		startTime, err := utils.TimeStringToTime(*req.StartTime)
+	if params.StartTime != nil {
+		setParts = append(setParts, fmt.Sprintf("start_time = $%d", len(args)+1))
+		startTime, err := utils.TimeStringToPgTime(*params.StartTime)
 		if err != nil {
-			return nil, fmt.Errorf("invalid start time format: %w", err)
+			return UpdateTimeSlotResponse{}, fmt.Errorf("failed to convert start time: %w", err)
 		}
-		args["start_time"] = startTime
+		args = append(args, startTime)
 	}
 
-	if req.EndTime != nil {
-		setParts = append(setParts, "end_time = :end_time")
-		// Convert time string to pgtype.Time
-		endTime, err := utils.TimeStringToTime(*req.EndTime)
+	if params.EndTime != nil {
+		setParts = append(setParts, fmt.Sprintf("end_time = $%d", len(args)+1))
+		endTime, err := utils.TimeStringToPgTime(*params.EndTime)
 		if err != nil {
-			return nil, fmt.Errorf("invalid end time format: %w", err)
+			return UpdateTimeSlotResponse{}, fmt.Errorf("failed to convert end time: %w", err)
 		}
-		args["end_time"] = endTime
+		args = append(args, endTime)
 	}
 
-	if req.IsAvailable != nil {
-		setParts = append(setParts, "is_available = :is_available")
-		args["is_available"] = *req.IsAvailable
+	if params.IsAvailable != nil {
+		setParts = append(setParts, fmt.Sprintf("is_available = $%d", len(args)+1))
+		args = append(args, params.IsAvailable)
 	}
 
 	query := fmt.Sprintf(`
 		UPDATE time_slots
 		SET %s
-		WHERE id = :id
+		WHERE id = $1
 		RETURNING
 			id,
 			schedule_id,
 			start_time,
 			end_time,
-			is_available,
-			created_at,
-			updated_at
+			is_available
 	`, strings.Join(setParts, ", "))
 
-	var result dbgen.TimeSlot
-	rows, err := r.db.NamedQuery(query, args)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute update query: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, fmt.Errorf("no rows returned from update")
-	}
-
-	if err := rows.StructScan(&result); err != nil {
-		return nil, fmt.Errorf("failed to scan result: %w", err)
+	var result UpdateTimeSlotResponse
+	rows := r.db.QueryRowContext(ctx, query, args...)
+	if err := rows.Scan(
+		&result.ID,
+		&result.ScheduleID,
+		&result.StartTime,
+		&result.EndTime,
+		&result.IsAvailable,
+	); err != nil {
+		return UpdateTimeSlotResponse{}, fmt.Errorf("failed to scan result: %w", err)
 	}
 
-	response := &adminScheduleModel.UpdateTimeSlotResponse{
-		ID:          utils.FormatID(result.ID),
-		ScheduleID:  utils.FormatID(result.ScheduleID),
-		StartTime:   utils.PgTimeToTimeString(result.StartTime),
-		EndTime:     utils.PgTimeToTimeString(result.EndTime),
-		IsAvailable: result.IsAvailable.Bool,
-	}
-
-	return response, nil
+	return result, nil
 }
 
 // UpdateTimeSlotAvailability updates the availability status of a time slot
