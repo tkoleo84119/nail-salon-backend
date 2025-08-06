@@ -6,25 +6,27 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/jmoiron/sqlx"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateStaffService struct {
-	repo sqlxRepo.StaffUserRepositoryInterface
+type Update struct {
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateStaffService(db *sqlx.DB) *UpdateStaffService {
-	return &UpdateStaffService{
-		repo: sqlxRepo.NewStaffUserRepository(db),
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
+	return &Update{
+		queries: queries,
+		repo:    repo,
 	}
 }
 
-func (s *UpdateStaffService) UpdateStaff(ctx context.Context, staffID int64, req adminStaffModel.UpdateStaffRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateStaffResponse, error) {
+func (s *Update) Update(ctx context.Context, staffID int64, req adminStaffModel.UpdateRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateResponse, error) {
 	// validate request has at least one field to update
 	if !req.HasUpdates() {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
@@ -36,7 +38,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, staffID int64, req
 	}
 
 	// Get target staff user
-	targetStaff, err := s.repo.GetStaffUserByID(ctx, staffID)
+	targetStaff, err := s.queries.GetStaffUserByID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
@@ -57,7 +59,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, staffID int64, req
 	}
 
 	// Perform the update
-	updatedStaff, err := s.repo.UpdateStaffUser(ctx, staffID, sqlxRepo.UpdateStaffUserParams{
+	updatedStaff, err := s.repo.Staff.UpdateStaffUser(ctx, staffID, sqlxRepo.UpdateStaffUserParams{
 		Role:     req.Role,
 		IsActive: req.IsActive,
 	})
@@ -65,7 +67,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, staffID int64, req
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff user", err)
 	}
 
-	response := &adminStaffModel.UpdateStaffResponse{
+	response := &adminStaffModel.UpdateResponse{
 		ID:        utils.FormatID(updatedStaff.ID),
 		Username:  updatedStaff.Username,
 		Email:     updatedStaff.Email,
@@ -79,7 +81,7 @@ func (s *UpdateStaffService) UpdateStaff(ctx context.Context, staffID int64, req
 }
 
 // validateUpdatePermissions checks if the updater has permission to update the target staff
-func (s *UpdateStaffService) validateUpdatePermissions(updaterID int64, updaterRole string, targetStaff *sqlxRepo.GetStaffUserByIDResponse) error {
+func (s *Update) validateUpdatePermissions(updaterID int64, updaterRole string, targetStaff dbgen.StaffUser) error {
 	// Cannot update own account
 	if updaterID == targetStaff.ID {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotUpdateSelf)
@@ -99,7 +101,7 @@ func (s *UpdateStaffService) validateUpdatePermissions(updaterID int64, updaterR
 }
 
 // validateRoleChange checks if the role change is allowed
-func (s *UpdateStaffService) validateRoleChange(updaterRole, newRole string) error {
+func (s *Update) validateRoleChange(updaterRole, newRole string) error {
 	// Cannot change to SUPER_ADMIN
 	if newRole == common.RoleSuperAdmin {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)

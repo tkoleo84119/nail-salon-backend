@@ -72,97 +72,52 @@
 }
 ```
 
+
 ### 錯誤處理
 
-#### 錯誤總覽
-
-| 狀態碼 | 錯誤碼   | 說明                                       |
-| ------ | -------- | ------------------------------------------ |
-| 401    | E1002    | 無效的 accessToken，請重新登入             |
-| 401    | E1003    | accessToken 缺失，請重新登入               |
-| 401    | E1004    | accessToken 格式錯誤，請重新登入           |
-| 401    | E1005    | 未找到有效的員工資訊，請重新登入           |
-| 401    | E1006    | 未找到使用者認證資訊，請重新登入           |
-| 403    | E1010    | 權限不足，無法執行此操作                   |
-| 400    | E2001    | JSON 格式錯誤，請檢查                      |
-| 400    | E2004    | 參數類型轉換失敗                           |
-| 400    | E2020    | {field} 為必填項目                         |
-| 400    | E2022    | {field} 至少需要 {param} 個項目            |
-| 400    | E2024    | {field} 長度最多只能有 {param} 個字元      |
-| 400    | E2025    | {field} 最多只能有 {param} 個項目          |
-| 400    | E2027    | {field} 格式錯誤，請使用正確的電子郵件格式 |
-| 400    | E2030    | {field} 必須是 {param} 其中一個值          |
-| 404    | E3STO002 | 門市不存在或已被刪除                       |
-| 409    | E3STA009 | 此帳號已被使用                             |
-| 500    | E9001    | 系統發生錯誤，請稍後再試                   |
-| 500    | E9002    | 資料庫操作失敗                             |
-
-#### 400 Bad Request - 驗證錯誤
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "error": {
-    "code": "E2020",
-    "message": "username 為必填項目",
-    "field": "username"
-  }
+  "errors": [
+    {
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
+    }
+  ]
 }
 ```
 
-#### 401 Unauthorized - 認證失敗
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "error": {
-    "code": "E1002",
-    "message": "無效的 accessToken"
-  }
-}
-```
-
-#### 403 Forbidden - 權限不足
-
-```json
-{
-  "error": {
-    "code": "E1010",
-    "message": "權限不足，無法執行此操作"
-  }
-}
-```
-
-#### 404 Not Found - 資源不存在
-
-```json
-{
-  "error": {
-    "code": "E3STO002",
-    "message": "門市不存在或已被刪除"
-  }
-}
-```
-
-#### 409 Conflict - 資源已存在
-
-```json
-{
-  "error": {
-    "code": "E3STA009",
-    "message": "此帳號已被使用"
-  }
-}
-```
-
-#### 500 Internal Server Error - 系統錯誤
-
-```json
-{
-  "error": {
-    "code": "E9001",
-    "message": "系統發生錯誤，請稍後再試"
-  }
-}
-```
+| 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                       |
+| ------ | -------- | ----------------------- | ------------------------------------------ |
+| 401    | E1002    | AuthInvalidCredentials  | 無效的 accessToken，請重新登入             |
+| 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入               |
+| 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入           |
+| 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入           |
+| 401    | E1006    | AuthContextMissing      | 未找到使用者認證資訊，請重新登入           |
+| 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作                   |
+| 400    | E2001    | ValJsonFormat           | JSON 格式錯誤，請檢查                      |
+| 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查                       |
+| 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                           |
+| 400    | E2020    | ValFieldRequired        | {field} 為必填項目                         |
+| 400    | E2022    | ValFieldArrayMinLength  | {field} 至少需要 {param} 個項目            |
+| 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元      |
+| 400    | E2025    | ValFieldArrayMaxLength  | {field} 最多只能有 {param} 個項目          |
+| 400    | E2027    | ValFieldInvalidEmail    | {field} 格式錯誤，請使用正確的電子郵件格式 |
+| 400    | E2030    | ValFieldOneof           | {field} 必須是 {param} 其中一個值          |
+| 400    | E3STA001 | StaffInvalidRole        | 無效的角色                                 |
+| 409    | E3STA007 | StaffAlreadyExists      | 帳號或Email已存在                          |
+| 400    | E3STO001 | StoreNotActive          | 門市未啟用                                 |
+| 404    | E3STO002 | StoreNotFound           | 門市不存在或已被刪除                       |
+| 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試                   |
+| 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                             |
 
 ---
 

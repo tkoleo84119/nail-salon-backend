@@ -24,10 +24,10 @@ SELECT
 FROM staff_users
 WHERE id = $1;
 
--- name: CheckStaffUserExists :one
+-- name: CheckStaffUserExistsByUsername :one
 SELECT EXISTS(
     SELECT 1 FROM staff_users
-    WHERE username = $1 OR email = $2
+    WHERE username = $1
 ) as exists;
 
 -- name: CreateStaffUser :one

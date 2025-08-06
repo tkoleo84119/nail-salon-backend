@@ -13,18 +13,18 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateStaffHandler struct {
-	service adminStaffService.CreateStaffServiceInterface
+type Create struct {
+	service adminStaffService.CreateInterface
 }
 
-func NewCreateStaffHandler(service adminStaffService.CreateStaffServiceInterface) *CreateStaffHandler {
-	return &CreateStaffHandler{
+func NewCreate(service adminStaffService.CreateInterface) *Create {
+	return &Create{
 		service: service,
 	}
 }
 
-func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
-	var req adminStaffModel.CreateStaffRequest
+func (h *Create) Create(c *gin.Context) {
+	var req adminStaffModel.CreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -43,7 +43,7 @@ func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
 		storeIDs[i] = parsedStoreID
 	}
 
-	parsedReq := adminStaffModel.CreateStaffParsedRequest{
+	parsedReq := adminStaffModel.CreateParsedRequest{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: req.Password,
@@ -69,7 +69,7 @@ func (h *CreateStaffHandler) CreateStaff(c *gin.Context) {
 		creatorStoreIDs[i] = storeID
 	}
 
-	response, err := h.service.CreateStaff(c.Request.Context(), parsedReq, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.Create(c.Request.Context(), parsedReq, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

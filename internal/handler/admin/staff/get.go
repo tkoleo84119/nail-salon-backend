@@ -11,17 +11,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStaffHandler struct {
-	service adminStaffService.GetStaffServiceInterface
+type Get struct {
+	service adminStaffService.GetInterface
 }
 
-func NewGetStaffHandler(service adminStaffService.GetStaffServiceInterface) *GetStaffHandler {
-	return &GetStaffHandler{
+func NewGet(service adminStaffService.GetInterface) *Get {
+	return &Get{
 		service: service,
 	}
 }
 
-func (h *GetStaffHandler) GetStaff(c *gin.Context) {
+func (h *Get) Get(c *gin.Context) {
 	// Get staff ID from path parameter
 	staffID := c.Param("staffId")
 	if staffID == "" {
@@ -35,7 +35,7 @@ func (h *GetStaffHandler) GetStaff(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStaff(c.Request.Context(), parsedStaffID)
+	response, err := h.service.Get(c.Request.Context(), parsedStaffID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

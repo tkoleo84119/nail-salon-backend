@@ -8,23 +8,23 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetMyStaffService struct {
-	repo *sqlxRepo.Repositories
+type GetMe struct {
+	queries *dbgen.Queries
 }
 
-func NewGetMyStaffService(repo *sqlxRepo.Repositories) *GetMyStaffService {
-	return &GetMyStaffService{
-		repo: repo,
+func NewGetMe(queries *dbgen.Queries) *GetMe {
+	return &GetMe{
+		queries: queries,
 	}
 }
 
-func (s *GetMyStaffService) GetMyStaff(ctx context.Context, staffUserID int64) (*adminStaffModel.GetMyStaffResponse, error) {
+func (s *GetMe) GetMe(ctx context.Context, staffUserID int64) (*adminStaffModel.GetMeResponse, error) {
 	// Get staff user information
-	staffUser, err := s.repo.Staff.GetStaffUserByID(ctx, staffUserID)
+	staffUser, err := s.queries.GetStaffUserByID(ctx, staffUserID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
@@ -33,7 +33,7 @@ func (s *GetMyStaffService) GetMyStaff(ctx context.Context, staffUserID int64) (
 	}
 
 	// Convert to response format
-	response := &adminStaffModel.GetMyStaffResponse{
+	response := &adminStaffModel.GetMeResponse{
 		ID:        utils.FormatID(staffUser.ID),
 		Username:  staffUser.Username,
 		Email:     staffUser.Email,
@@ -48,12 +48,12 @@ func (s *GetMyStaffService) GetMyStaff(ctx context.Context, staffUserID int64) (
 		return response, nil
 	}
 
-	stylist, err := s.repo.Stylist.GetStylistByStaffUserID(ctx, staffUserID)
+	stylist, err := s.queries.GetStylistByStaffUserID(ctx, staffUserID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get stylist", err)
 	}
 
-	response.Stylist = &adminStaffModel.StaffStylistInfo{
+	response.Stylist = &adminStaffModel.GetStaffStylistInfo{
 		ID:           utils.FormatID(stylist.ID),
 		Name:         utils.PgTextToString(stylist.Name),
 		GoodAtShapes: stylist.GoodAtShapes,

@@ -5,28 +5,31 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateMyStaffService struct {
-	repo *sqlxRepo.Repositories
+type UpdateMe struct {
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateMyStaffService(repo *sqlxRepo.Repositories) *UpdateMyStaffService {
-	return &UpdateMyStaffService{
-		repo: repo,
+func NewUpdateMe(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *UpdateMe {
+	return &UpdateMe{
+		queries: queries,
+		repo:    repo,
 	}
 }
 
-func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req adminStaffModel.UpdateMyStaffRequest, staffUserID int64) (*adminStaffModel.UpdateMyStaffResponse, error) {
+func (s *UpdateMe) UpdateMe(ctx context.Context, req adminStaffModel.UpdateMeRequest, staffUserID int64) (*adminStaffModel.UpdateMeResponse, error) {
 	// Check if request has any fields to update
 	if !req.HasUpdates() {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
 	}
 
 	// Check if staff user exists
-	_, err := s.repo.Staff.GetStaffUserByID(ctx, staffUserID)
+	_, err := s.queries.GetStaffUserByID(ctx, staffUserID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.StaffNotFound, "failed to get staff user", err)
 	}
@@ -39,7 +42,7 @@ func (s *UpdateMyStaffService) UpdateMyStaff(ctx context.Context, req adminStaff
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff own information", err)
 	}
 
-	response := &adminStaffModel.UpdateMyStaffResponse{
+	response := &adminStaffModel.UpdateMeResponse{
 		ID:        utils.FormatID(updatedStaffUser.ID),
 		Username:  updatedStaffUser.Username,
 		Email:     updatedStaffUser.Email,

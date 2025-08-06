@@ -6,16 +6,28 @@ import (
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 )
 
-type CreateStaffServiceInterface interface {
-	CreateStaff(ctx context.Context, req adminStaffModel.CreateStaffParsedRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStaffResponse, error)
+type CreateInterface interface {
+	Create(ctx context.Context, req adminStaffModel.CreateParsedRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateResponse, error)
 }
 
-type UpdateStaffServiceInterface interface {
-	UpdateStaff(ctx context.Context, targetID int64, req adminStaffModel.UpdateStaffRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateStaffResponse, error)
+type GetAllInterface interface {
+	GetAll(ctx context.Context, req adminStaffModel.GetAllParsedRequest) (*adminStaffModel.GetAllResponse, error)
 }
 
-type UpdateMyStaffServiceInterface interface {
-	UpdateMyStaff(ctx context.Context, req adminStaffModel.UpdateMyStaffRequest, staffUserID int64) (*adminStaffModel.UpdateMyStaffResponse, error)
+type GetInterface interface {
+	Get(ctx context.Context, staffID int64) (*adminStaffModel.GetResponse, error)
+}
+
+type GetMeInterface interface {
+	GetMe(ctx context.Context, staffUserID int64) (*adminStaffModel.GetMeResponse, error)
+}
+
+type UpdateInterface interface {
+	Update(ctx context.Context, targetID int64, req adminStaffModel.UpdateRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateResponse, error)
+}
+
+type UpdateMeInterface interface {
+	UpdateMe(ctx context.Context, req adminStaffModel.UpdateMeRequest, staffUserID int64) (*adminStaffModel.UpdateMeResponse, error)
 }
 
 type CreateStoreAccessServiceInterface interface {
@@ -24,18 +36,6 @@ type CreateStoreAccessServiceInterface interface {
 
 type DeleteStoreAccessBulkServiceInterface interface {
 	DeleteStoreAccessBulk(ctx context.Context, targetID int64, storeIDs []int64, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.DeleteStoreAccessBulkResponse, error)
-}
-
-type GetStaffListServiceInterface interface {
-	GetStaffList(ctx context.Context, req adminStaffModel.GetStaffListParsedRequest) (*adminStaffModel.GetStaffListResponse, error)
-}
-
-type GetMyStaffServiceInterface interface {
-	GetMyStaff(ctx context.Context, staffUserID int64) (*adminStaffModel.GetMyStaffResponse, error)
-}
-
-type GetStaffServiceInterface interface {
-	GetStaff(ctx context.Context, staffID int64) (*adminStaffModel.GetStaffResponse, error)
 }
 
 type GetStaffStoreAccessServiceInterface interface {

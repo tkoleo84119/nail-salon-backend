@@ -13,19 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStaffListHandler struct {
-	service adminStaffService.GetStaffListServiceInterface
+type GetAll struct {
+	service adminStaffService.GetAllInterface
 }
 
-func NewGetStaffListHandler(service adminStaffService.GetStaffListServiceInterface) *GetStaffListHandler {
-	return &GetStaffListHandler{
+func NewGetAll(service adminStaffService.GetAllInterface) *GetAll {
+	return &GetAll{
 		service: service,
 	}
 }
 
-func (h *GetStaffListHandler) GetStaffList(c *gin.Context) {
+func (h *GetAll) GetAll(c *gin.Context) {
 	// Bind query parameters
-	var req adminStaffModel.GetStaffListRequest
+	var req adminStaffModel.GetAllRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -48,7 +48,7 @@ func (h *GetStaffListHandler) GetStaffList(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStaffList(c.Request.Context(), adminStaffModel.GetStaffListParsedRequest{
+	response, err := h.service.GetAll(c.Request.Context(), adminStaffModel.GetAllParsedRequest{
 		Username: req.Username,
 		Email:    req.Email,
 		Role:     req.Role,

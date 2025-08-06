@@ -2,31 +2,32 @@ package adminStaff
 
 import (
 	"context"
+	"time"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateStaffService struct {
-	db   *sqlx.DB
-	repo *sqlxRepo.Repositories
+type Create struct {
+	db      *pgxpool.Pool
+	queries *dbgen.Queries
 }
 
-func NewCreateStaffService(db *sqlx.DB, repo *sqlxRepo.Repositories) *CreateStaffService {
-	return &CreateStaffService{
-		db:   db,
-		repo: repo,
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
+	return &Create{
+		db:      db,
+		queries: queries,
 	}
 }
 
-func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffModel.CreateStaffParsedRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateStaffResponse, error) {
+func (s *Create) Create(ctx context.Context, req adminStaffModel.CreateParsedRequest, creatorRole string, creatorStoreIDs []int64) (*adminStaffModel.CreateResponse, error) {
 	// validate role is valid
-	if !common.IsValidRole(req.Role) || req.Role == adminStaffModel.RoleSuperAdmin {
+	if !common.IsValidRole(req.Role) || req.Role == common.RoleSuperAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffInvalidRole)
 	}
 
@@ -38,8 +39,8 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 		return nil, err
 	}
 
-	// check if username or email already exists
-	exists, err := s.repo.Staff.CheckStaffUserExists(ctx, req.Username)
+	// check if username already exists
+	exists, err := s.queries.CheckStaffUserExistsByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check user existence", err)
 	}
@@ -48,12 +49,15 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 	}
 
 	// check if stores exist and active
-	storeCount, err := s.repo.Store.CheckStoresExistAndActive(ctx, req.StoreIDs)
+	countInfo, err := s.queries.CheckStoresExistAndActive(ctx, req.StoreIDs)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check stores", err)
 	}
-	if storeCount != len(req.StoreIDs) {
+	if countInfo.TotalCount != int64(len(req.StoreIDs)) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
+	}
+	if countInfo.ActiveCount != int64(len(req.StoreIDs)) {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
 	}
 
 	hashedPassword, err := utils.HashPassword(req.Password)
@@ -63,22 +67,25 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 
 	// prepare of insert data
 	staffID := utils.GenerateID()
+	now := utils.TimeToPgTimestamptz(time.Now())
 
-	storeAccessParams := make([]sqlxRepo.CreateStaffUserStoreAccessTxParams, 0, len(req.StoreIDs))
+	storeAccessParams := make([]dbgen.BatchCreateStaffUserStoreAccessParams, 0, len(req.StoreIDs))
 	for _, storeID := range req.StoreIDs {
-		storeAccessParams = append(storeAccessParams, sqlxRepo.CreateStaffUserStoreAccessTxParams{
+		storeAccessParams = append(storeAccessParams, dbgen.BatchCreateStaffUserStoreAccessParams{
 			StoreID:     storeID,
 			StaffUserID: staffID,
+			CreatedAt:   now,
+			UpdatedAt:   now,
 		})
 	}
 
-	tx, err := s.db.Beginx()
+	tx, err := s.db.Begin(ctx)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
 	}
-	defer tx.Rollback()
+	defer tx.Rollback(ctx)
 
-	createdStaff, err := s.repo.Staff.CreateStaffUserTx(ctx, tx, sqlxRepo.CreateStaffUserTxParams{
+	createdStaff, err := s.queries.CreateStaffUser(ctx, dbgen.CreateStaffUserParams{
 		ID:           staffID,
 		Username:     req.Username,
 		Email:        req.Email,
@@ -90,25 +97,26 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 	}
 
 	// batch create store access records
-	err = s.repo.StaffUserStoreAccess.BatchCreateStaffUserStoreAccessTx(ctx, tx, storeAccessParams)
+	_, err = s.queries.BatchCreateStaffUserStoreAccess(ctx, storeAccessParams)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store access", err)
 	}
 
-	_, err = s.repo.Stylist.CreateStylistTx(ctx, tx, sqlxRepo.CreateStylistTxParams{
+	_, err = s.queries.CreateStylist(ctx, dbgen.CreateStylistParams{
 		ID:          staffID,
 		StaffUserID: staffID,
+		Name:        utils.StringPtrToPgText(&req.Username, false),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create stylist", err)
 	}
 
 	// Commit transaction
-	if err := tx.Commit(); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
-	response := &adminStaffModel.CreateStaffResponse{
+	response := &adminStaffModel.CreateResponse{
 		ID:        utils.FormatID(createdStaff.ID),
 		Username:  createdStaff.Username,
 		Email:     createdStaff.Email,
@@ -122,17 +130,17 @@ func (s *CreateStaffService) CreateStaff(ctx context.Context, req adminStaffMode
 }
 
 // check if creator has permission to create staff with target role
-func (s *CreateStaffService) validatePermissions(creatorRole, targetRole string) error {
+func (s *Create) validatePermissions(creatorRole, targetRole string) error {
 	switch creatorRole {
-	case adminStaffModel.RoleSuperAdmin:
+	case common.RoleSuperAdmin:
 		// SUPER_ADMIN can create all roles except SUPER_ADMIN
-		if targetRole == adminStaffModel.RoleSuperAdmin {
+		if targetRole == common.RoleSuperAdmin {
 			return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 		return nil
-	case adminStaffModel.RoleAdmin:
+	case common.RoleAdmin:
 		// ADMIN can only create MANAGER and STYLIST
-		if targetRole == adminStaffModel.RoleManager || targetRole == adminStaffModel.RoleStylist {
+		if targetRole == common.RoleManager || targetRole == common.RoleStylist {
 			return nil
 		}
 		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
@@ -142,9 +150,9 @@ func (s *CreateStaffService) validatePermissions(creatorRole, targetRole string)
 }
 
 // check if creator has permission to assign these stores
-func (s *CreateStaffService) validateStoreAccess(creatorRole string, creatorStoreIDs, targetStoreIDs []int64) error {
+func (s *Create) validateStoreAccess(creatorRole string, creatorStoreIDs, targetStoreIDs []int64) error {
 	// SUPER_ADMIN can assign any store
-	if creatorRole == adminStaffModel.RoleSuperAdmin {
+	if creatorRole == common.RoleSuperAdmin {
 		return nil
 	}
 

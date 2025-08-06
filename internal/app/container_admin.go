@@ -38,12 +38,12 @@ type AdminServices struct {
 	AuthStaffLogout       adminAuthService.LogoutInterface
 
 	// Staff management services
-	StaffCreate            adminStaffService.CreateStaffServiceInterface
-	StaffUpdate            adminStaffService.UpdateStaffServiceInterface
-	StaffUpdateMe          adminStaffService.UpdateMyStaffServiceInterface
-	StaffGet               adminStaffService.GetStaffServiceInterface
-	StaffGetMe             adminStaffService.GetMyStaffServiceInterface
-	StaffGetList           adminStaffService.GetStaffListServiceInterface
+	StaffCreate            adminStaffService.CreateInterface
+	StaffGetAll            adminStaffService.GetAllInterface
+	StaffUpdate            adminStaffService.UpdateInterface
+	StaffUpdateMe          adminStaffService.UpdateMeInterface
+	StaffGet               adminStaffService.GetInterface
+	StaffGetMe             adminStaffService.GetMeInterface
 	StaffGetStoreAccess    adminStaffService.GetStaffStoreAccessServiceInterface
 	StaffStoreAccess       adminStaffService.CreateStoreAccessServiceInterface
 	StaffDeleteStoreAccess adminStaffService.DeleteStoreAccessBulkServiceInterface
@@ -100,12 +100,12 @@ type AdminHandlers struct {
 	AuthStaffLogout       *adminAuthHandler.Logout
 
 	// Staff management handlers
-	StaffCreate            *adminStaffHandler.CreateStaffHandler
-	StaffUpdate            *adminStaffHandler.UpdateStaffHandler
-	StaffUpdateMe          *adminStaffHandler.UpdateMyStaffHandler
-	StaffGet               *adminStaffHandler.GetStaffHandler
-	StaffGetMe             *adminStaffHandler.GetMyStaffHandler
-	StaffGetList           *adminStaffHandler.GetStaffListHandler
+	StaffCreate            *adminStaffHandler.Create
+	StaffUpdate            *adminStaffHandler.Update
+	StaffUpdateMe          *adminStaffHandler.UpdateMe
+	StaffGet               *adminStaffHandler.Get
+	StaffGetMe             *adminStaffHandler.GetMe
+	StaffGetAll            *adminStaffHandler.GetAll
 	StaffGetStoreAccess    *adminStaffHandler.GetStaffStoreAccessHandler
 	StaffStoreAccess       *adminStaffHandler.CreateStoreAccessHandler
 	StaffDeleteStoreAccess *adminStaffHandler.DeleteStoreAccessBulkHandler
@@ -163,12 +163,12 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		AuthStaffLogout:       adminAuthService.NewLogout(queries),
 
 		// Staff management services
-		StaffCreate:            adminStaffService.NewCreateStaffService(database.Sqlx, repositories.SQLX),
-		StaffUpdate:            adminStaffService.NewUpdateStaffService(database.Sqlx),
-		StaffUpdateMe:          adminStaffService.NewUpdateMyStaffService(repositories.SQLX),
-		StaffGet:               adminStaffService.NewGetStaffService(repositories.SQLX),
-		StaffGetMe:             adminStaffService.NewGetMyStaffService(repositories.SQLX),
-		StaffGetList:           adminStaffService.NewGetStaffListService(repositories.SQLX),
+		StaffCreate:            adminStaffService.NewCreate(queries, database.PgxPool),
+		StaffUpdate:            adminStaffService.NewUpdate(queries, repositories.SQLX),
+		StaffUpdateMe:          adminStaffService.NewUpdateMe(queries, repositories.SQLX),
+		StaffGet:               adminStaffService.NewGet(queries),
+		StaffGetMe:             adminStaffService.NewGetMe(queries),
+		StaffGetAll:            adminStaffService.NewGetAll(repositories.SQLX),
 		StaffGetStoreAccess:    adminStaffService.NewGetStaffStoreAccessService(repositories.SQLX),
 		StaffStoreAccess:       adminStaffService.NewCreateStoreAccessService(repositories.SQLX),
 		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(repositories.SQLX),
@@ -227,12 +227,12 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		AuthStaffLogout:       adminAuthHandler.NewLogout(services.AuthStaffLogout),
 
 		// Staff management handlers
-		StaffCreate:            adminStaffHandler.NewCreateStaffHandler(services.StaffCreate),
-		StaffUpdate:            adminStaffHandler.NewUpdateStaffHandler(services.StaffUpdate),
-		StaffUpdateMe:          adminStaffHandler.NewUpdateMyStaffHandler(services.StaffUpdateMe),
-		StaffGet:               adminStaffHandler.NewGetStaffHandler(services.StaffGet),
-		StaffGetMe:             adminStaffHandler.NewGetMyStaffHandler(services.StaffGetMe),
-		StaffGetList:           adminStaffHandler.NewGetStaffListHandler(services.StaffGetList),
+		StaffCreate:            adminStaffHandler.NewCreate(services.StaffCreate),
+		StaffUpdate:            adminStaffHandler.NewUpdate(services.StaffUpdate),
+		StaffUpdateMe:          adminStaffHandler.NewUpdateMe(services.StaffUpdateMe),
+		StaffGet:               adminStaffHandler.NewGet(services.StaffGet),
+		StaffGetMe:             adminStaffHandler.NewGetMe(services.StaffGetMe),
+		StaffGetAll:            adminStaffHandler.NewGetAll(services.StaffGetAll),
 		StaffGetStoreAccess:    adminStaffHandler.NewGetStaffStoreAccessHandler(services.StaffGetStoreAccess),
 		StaffStoreAccess:       adminStaffHandler.NewCreateStoreAccessHandler(services.StaffStoreAccess),
 		StaffDeleteStoreAccess: adminStaffHandler.NewDeleteStoreAccessBulkHandler(services.StaffDeleteStoreAccess),

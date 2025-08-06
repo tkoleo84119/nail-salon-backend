@@ -30,20 +30,15 @@ func (q *Queries) CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailU
 	return exists, err
 }
 
-const checkStaffUserExists = `-- name: CheckStaffUserExists :one
+const checkStaffUserExistsByUsername = `-- name: CheckStaffUserExistsByUsername :one
 SELECT EXISTS(
     SELECT 1 FROM staff_users
-    WHERE username = $1 OR email = $2
+    WHERE username = $1
 ) as exists
 `
 
-type CheckStaffUserExistsParams struct {
-	Username string `db:"username" json:"username"`
-	Email    string `db:"email" json:"email"`
-}
-
-func (q *Queries) CheckStaffUserExists(ctx context.Context, arg CheckStaffUserExistsParams) (bool, error) {
-	row := q.db.QueryRow(ctx, checkStaffUserExists, arg.Username, arg.Email)
+func (q *Queries) CheckStaffUserExistsByUsername(ctx context.Context, username string) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStaffUserExistsByUsername, username)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err

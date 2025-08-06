@@ -13,18 +13,18 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateMyStaffHandler struct {
-	service adminStaffService.UpdateMyStaffServiceInterface
+type UpdateMe struct {
+	service adminStaffService.UpdateMeInterface
 }
 
-func NewUpdateMyStaffHandler(service adminStaffService.UpdateMyStaffServiceInterface) *UpdateMyStaffHandler {
-	return &UpdateMyStaffHandler{
+func NewUpdateMe(service adminStaffService.UpdateMeInterface) *UpdateMe {
+	return &UpdateMe{
 		service: service,
 	}
 }
 
-func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
-	var req adminStaffModel.UpdateMyStaffRequest
+func (h *UpdateMe) UpdateMe(c *gin.Context) {
+	var req adminStaffModel.UpdateMeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -50,7 +50,7 @@ func (h *UpdateMyStaffHandler) UpdateMyStaff(c *gin.Context) {
 		return
 	}
 
-	response, err := h.service.UpdateMyStaff(c.Request.Context(), req, staffUserID)
+	response, err := h.service.UpdateMe(c.Request.Context(), req, staffUserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

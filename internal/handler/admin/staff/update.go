@@ -12,17 +12,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateStaffHandler struct {
-	service adminStaffService.UpdateStaffServiceInterface
+type Update struct {
+	service adminStaffService.UpdateInterface
 }
 
-func NewUpdateStaffHandler(service adminStaffService.UpdateStaffServiceInterface) *UpdateStaffHandler {
-	return &UpdateStaffHandler{
+func NewUpdate(service adminStaffService.UpdateInterface) *Update {
+	return &Update{
 		service: service,
 	}
 }
 
-func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
+func (h *Update) Update(c *gin.Context) {
 	// Get target staff ID from path parameter
 	staffId := c.Param("staffId")
 	if staffId == "" {
@@ -40,7 +40,7 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 	}
 
 	// Parse and validate request
-	var req adminStaffModel.UpdateStaffRequest
+	var req adminStaffModel.UpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -69,7 +69,7 @@ func (h *UpdateStaffHandler) UpdateStaff(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.UpdateStaff(c.Request.Context(), parsedStaffId, req, updaterID, staffContext.Role)
+	response, err := h.service.Update(c.Request.Context(), parsedStaffId, req, updaterID, staffContext.Role)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -9,17 +9,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStaffListService struct {
+type GetAll struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewGetStaffListService(repo *sqlxRepo.Repositories) *GetStaffListService {
-	return &GetStaffListService{
+func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
+	return &GetAll{
 		repo: repo,
 	}
 }
 
-func (s *GetStaffListService) GetStaffList(ctx context.Context, req adminStaffModel.GetStaffListParsedRequest) (*adminStaffModel.GetStaffListResponse, error) {
+func (s *GetAll) GetAll(ctx context.Context, req adminStaffModel.GetAllParsedRequest) (*adminStaffModel.GetAllResponse, error) {
 	total, items, err := s.repo.Staff.GetAllStaffByFilter(ctx, sqlxRepo.GetAllStaffByFilterParams{
 		Username: req.Username,
 		Email:    req.Email,
@@ -33,9 +33,9 @@ func (s *GetStaffListService) GetStaffList(ctx context.Context, req adminStaffMo
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get staff list", err)
 	}
 
-	itemsDTO := make([]adminStaffModel.StaffListItemDTO, len(items))
+	itemsDTO := make([]adminStaffModel.GetAllStaffListItem, len(items))
 	for i, item := range items {
-		itemsDTO[i] = adminStaffModel.StaffListItemDTO{
+		itemsDTO[i] = adminStaffModel.GetAllStaffListItem{
 			ID:        utils.FormatID(item.ID),
 			Username:  item.Username,
 			Email:     item.Email,
@@ -46,7 +46,7 @@ func (s *GetStaffListService) GetStaffList(ctx context.Context, req adminStaffMo
 		}
 	}
 
-	return &adminStaffModel.GetStaffListResponse{
+	return &adminStaffModel.GetAllResponse{
 		Total: total,
 		Items: itemsDTO,
 	}, nil

@@ -12,17 +12,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetMyStaffHandler struct {
-	service adminStaffService.GetMyStaffServiceInterface
+type GetMe struct {
+	service adminStaffService.GetMeInterface
 }
 
-func NewGetMyStaffHandler(service adminStaffService.GetMyStaffServiceInterface) *GetMyStaffHandler {
-	return &GetMyStaffHandler{
+func NewGetMe(service adminStaffService.GetMeInterface) *GetMe {
+	return &GetMe{
 		service: service,
 	}
 }
 
-func (h *GetMyStaffHandler) GetMyStaff(c *gin.Context) {
+func (h *GetMe) GetMe(c *gin.Context) {
 	// Get staff context from JWT middleware
 	staffContext, exists := middleware.GetStaffFromContext(c)
 	if !exists {
@@ -38,7 +38,7 @@ func (h *GetMyStaffHandler) GetMyStaff(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetMyStaff(c.Request.Context(), staffUserID)
+	response, err := h.service.GetMe(c.Request.Context(), staffUserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -9,23 +9,23 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStaffService struct {
-	repo *sqlxRepo.Repositories
+type Get struct {
+	queries *dbgen.Queries
 }
 
-func NewGetStaffService(repo *sqlxRepo.Repositories) *GetStaffService {
-	return &GetStaffService{
-		repo: repo,
+func NewGet(queries *dbgen.Queries) *Get {
+	return &Get{
+		queries: queries,
 	}
 }
 
-func (s *GetStaffService) GetStaff(ctx context.Context, staffID int64) (*adminStaffModel.GetStaffResponse, error) {
+func (s *Get) Get(ctx context.Context, staffID int64) (*adminStaffModel.GetResponse, error) {
 	// Get staff user information
-	staffUser, err := s.repo.Staff.GetStaffUserByID(ctx, staffID)
+	staffUser, err := s.queries.GetStaffUserByID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
@@ -34,7 +34,7 @@ func (s *GetStaffService) GetStaff(ctx context.Context, staffID int64) (*adminSt
 	}
 
 	// Prepare response with staff information
-	response := &adminStaffModel.GetStaffResponse{
+	response := &adminStaffModel.GetResponse{
 		ID:        utils.FormatID(staffUser.ID),
 		Username:  staffUser.Username,
 		Email:     staffUser.Email,
@@ -50,7 +50,7 @@ func (s *GetStaffService) GetStaff(ctx context.Context, staffID int64) (*adminSt
 	}
 
 	// Try to get stylist information
-	stylist, err := s.repo.Stylist.GetStylistByStaffUserID(ctx, staffID)
+	stylist, err := s.queries.GetStylistByStaffUserID(ctx, staffID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
@@ -59,7 +59,7 @@ func (s *GetStaffService) GetStaff(ctx context.Context, staffID int64) (*adminSt
 	}
 
 	// Convert stylist information
-	response.Stylist = &adminStaffModel.StaffStylistInfo{
+	response.Stylist = &adminStaffModel.GetStaffStylistInfo{
 		ID:           utils.FormatID(stylist.ID),
 		Name:         utils.PgTextToString(stylist.Name),
 		GoodAtShapes: stylist.GoodAtShapes,
