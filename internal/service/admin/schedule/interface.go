@@ -6,8 +6,8 @@ import (
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
 )
 
-type CreateSchedulesBulkServiceInterface interface {
-	CreateSchedulesBulk(ctx context.Context, storeID int64, req adminScheduleModel.CreateSchedulesBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminScheduleModel.CreateSchedulesBulkResponse, error)
+type CreateBulkServiceInterface interface {
+	CreateBulk(ctx context.Context, storeID int64, req adminScheduleModel.CreateBulkRequest, creatorID int64, creatorRole string, creatorStoreIDs []int64) (*adminScheduleModel.CreateBulkResponse, error)
 }
 
 type DeleteBulkInterface interface {

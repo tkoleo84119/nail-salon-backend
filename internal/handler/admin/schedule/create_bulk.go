@@ -13,17 +13,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateSchedulesBulkHandler struct {
-	service adminScheduleService.CreateSchedulesBulkServiceInterface
+type CreateBulk struct {
+	service adminScheduleService.CreateBulkServiceInterface
 }
 
-func NewCreateSchedulesBulkHandler(service adminScheduleService.CreateSchedulesBulkServiceInterface) *CreateSchedulesBulkHandler {
-	return &CreateSchedulesBulkHandler{
+func NewCreateBulk(service adminScheduleService.CreateBulkServiceInterface) *CreateBulk {
+	return &CreateBulk{
 		service: service,
 	}
 }
 
-func (h *CreateSchedulesBulkHandler) CreateSchedulesBulk(c *gin.Context) {
+func (h *CreateBulk) CreateBulk(c *gin.Context) {
 	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
@@ -36,7 +36,7 @@ func (h *CreateSchedulesBulkHandler) CreateSchedulesBulk(c *gin.Context) {
 	}
 
 	// Parse and validate request
-	var req adminScheduleModel.CreateSchedulesBulkRequest
+	var req adminScheduleModel.CreateBulkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -67,7 +67,7 @@ func (h *CreateSchedulesBulkHandler) CreateSchedulesBulk(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.CreateSchedulesBulk(c.Request.Context(), parsedStoreID, req, creatorID, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.CreateBulk(c.Request.Context(), parsedStoreID, req, creatorID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -43,8 +43,8 @@ func (s *Create) Create(ctx context.Context, scheduleID int64, req adminTimeSlot
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotFound)
 	}
 
-	// Check if schedule date is not before
-	if scheduleInfo.WorkDate.Time.Before(time.Now()) {
+	// Check if schedule date is not before (time need to reset to 00:00:00)
+	if scheduleInfo.WorkDate.Time.Before(time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.UTC)) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotCreateBeforeToday)
 	}
 

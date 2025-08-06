@@ -71,7 +71,7 @@ type AdminServices struct {
 	BookingCancel        adminBookingService.CancelBookingServiceInterface
 
 	// Schedule management services
-	ScheduleCreateBulk     adminScheduleService.CreateSchedulesBulkServiceInterface
+	ScheduleCreateBulk     adminScheduleService.CreateBulkServiceInterface
 	ScheduleDeleteBulk     adminScheduleService.DeleteBulkInterface
 	ScheduleCreateTimeSlot adminTimeSlotService.CreateInterface
 	ScheduleUpdateTimeSlot adminTimeSlotService.UpdateInterface
@@ -133,7 +133,7 @@ type AdminHandlers struct {
 	BookingCancel        *adminBookingHandler.CancelBookingHandler
 
 	// Schedule management handlers
-	ScheduleCreateBulk     *adminScheduleHandler.CreateSchedulesBulkHandler
+	ScheduleCreateBulk     *adminScheduleHandler.CreateBulk
 	ScheduleDeleteBulk     *adminScheduleHandler.DeleteBulk
 	ScheduleCreateTimeSlot *adminTimeSlotHandler.Create
 	ScheduleUpdateTimeSlot *adminTimeSlotHandler.Update
@@ -196,7 +196,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BookingCancel:        adminBookingService.NewCancelBookingService(database.Sqlx, repositories.SQLX),
 
 		// Schedule management services
-		ScheduleCreateBulk:     adminScheduleService.NewCreateSchedulesBulkService(database.Sqlx, repositories.SQLX),
+		ScheduleCreateBulk:     adminScheduleService.NewCreateBulk(queries, database.PgxPool),
 		ScheduleDeleteBulk:     adminScheduleService.NewDeleteBulk(queries),
 		ScheduleCreateTimeSlot: adminTimeSlotService.NewCreate(queries),
 		ScheduleUpdateTimeSlot: adminTimeSlotService.NewUpdate(queries, repositories.SQLX),
@@ -260,7 +260,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		BookingCancel:        adminBookingHandler.NewCancelBookingHandler(services.BookingCancel),
 
 		// Schedule management handlers
-		ScheduleCreateBulk:     adminScheduleHandler.NewCreateSchedulesBulkHandler(services.ScheduleCreateBulk),
+		ScheduleCreateBulk:     adminScheduleHandler.NewCreateBulk(services.ScheduleCreateBulk),
 		ScheduleDeleteBulk:     adminScheduleHandler.NewDeleteBulk(services.ScheduleDeleteBulk),
 		ScheduleCreateTimeSlot: adminTimeSlotHandler.NewCreate(services.ScheduleCreateTimeSlot),
 		ScheduleUpdateTimeSlot: adminTimeSlotHandler.NewUpdate(services.ScheduleUpdateTimeSlot),
