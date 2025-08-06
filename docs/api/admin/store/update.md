@@ -82,93 +82,45 @@
 
 ### 錯誤處理
 
-#### 錯誤總覽
-
-| 狀態碼 | 錯誤碼   | 說明                                                         |
-| ------ | -------- | ------------------------------------------------------------ |
-| 401    | E1002    | 無效的 accessToken，請重新登入                               |
-| 401    | E1003    | accessToken 缺失，請重新登入                                 |
-| 401    | E1004    | accessToken 格式錯誤，請重新登入                             |
-| 401    | E1005    | 未找到有效的員工資訊，請重新登入                             |
-| 401    | E1006    | 未找到使用者認證資訊，請重新登入                             |
-| 403    | E1010    | 權限不足，無法執行此操作                                     |
-| 400    | E2001    | JSON 格式錯誤，請檢查                                        |
-| 400    | E2003    | 至少需要提供一個欄位進行更新                                 |
-| 400    | E2004    | 參數類型轉換失敗                                             |
-| 400    | E2020    | {field} 為必填項目                                           |
-| 400    | E2021    | {field} 長度至少需要 {param} 個字元                          |
-| 400    | E2024    | {field} 長度最多只能有 {param} 個字元                        |
-| 400    | E2031    | {field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX) |
-| 400    | E2029    | {field} 必須是布林值                                         |
-| 409    | E3STO003 | 門市已存在，請創建其他門市                                   |
-| 500    | E9001    | 系統發生錯誤，請稍後再試                                     |
-| 500    | E9002    | 資料庫操作失敗                                               |
-
-#### 400 Bad Request - 驗證錯誤
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "error": [
+  "errors": [
     {
-      "code": "E2031",
-      "message": "phone 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX)",
-      "field": "phone"
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
     }
   ]
 }
 ```
 
-#### 401 Unauthorized - 未登入/Token失效
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "error": [
-    {
-      "code": "E1002",
-      "message": "無效的 accessToken，請重新登入"
-    }
-  ]
-}
-```
-
-#### 403 Forbidden - 權限不足
-
-```json
-{
-  "error": [
-    {
-      "code": "E1010",
-      "message": "權限不足，無法執行此操作"
-    }
-  ]
-}
-```
-
-#### 404 Not Found - 門市不存在
-
-```json
-{
-  "error": [
-    {
-      "code": "E3STO003",
-      "message": "門市已存在，請創建其他門市"
-    }
-  ]
-}
-```
-
-#### 500 Internal Server Error - 系統錯誤
-
-```json
-{
-  "error": [
-    {
-      "code": "E9001",
-      "message": "系統發生錯誤，請稍後再試"
-    }
-  ]
-}
-```
+| 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                  |
+| ------ | -------- | ----------------------- | ------------------------------------- |
+| 401    | E1002    | AuthInvalidCredentials  | 無效的 accessToken，請重新登入        |
+| 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入          |
+| 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入      |
+| 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006    | AuthContextMissing      | 未找到使用者認證資訊，請重新登入      |
+| 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作              |
+| 400    | E2001    | ValJsonFormat           | JSON 格式錯誤，請檢查                 |
+| 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查                  |
+| 400    | E2003    | ValAllFieldsEmpty       | 至少需要提供一個欄位進行更新          |
+| 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                      |
+| 400    | E2023    | ValFieldMinNumber       | {field} 最小值為 {param}              |
+| 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2026    | ValFieldMaxNumber       | {field} 最大值為 {param}              |
+| 400    | E2029    | ValFieldBoolean         | {field} 必須是布林值                  |
+| 409    | E3STO003 | StoreAlreadyExists      | 門市已存在，請創建其他門市            |
+| 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試              |
+| 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                        |
 
 ---
 

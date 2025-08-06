@@ -13,17 +13,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateStoreHandler struct {
-	service adminStoreService.UpdateStoreServiceInterface
+type Update struct {
+	service adminStoreService.UpdateInterface
 }
 
-func NewUpdateStoreHandler(service adminStoreService.UpdateStoreServiceInterface) *UpdateStoreHandler {
-	return &UpdateStoreHandler{
+func NewUpdate(service adminStoreService.UpdateInterface) *Update {
+	return &Update{
 		service: service,
 	}
 }
 
-func (h *UpdateStoreHandler) UpdateStore(c *gin.Context) {
+func (h *Update) Update(c *gin.Context) {
 	// Get store ID from path parameter & parse to int64
 	storeID := c.Param("storeId")
 	if storeID == "" {
@@ -39,7 +39,7 @@ func (h *UpdateStoreHandler) UpdateStore(c *gin.Context) {
 	}
 
 	// Input JSON validation
-	var req adminStoreModel.UpdateStoreRequest
+	var req adminStoreModel.UpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -69,7 +69,7 @@ func (h *UpdateStoreHandler) UpdateStore(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.UpdateStore(c.Request.Context(), parsedStoreID, req, staffContext.Role, storeIds)
+	response, err := h.service.Update(c.Request.Context(), parsedStoreID, req, staffContext.Role, storeIds)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

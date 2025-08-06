@@ -13,19 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateStoreHandler struct {
-	service adminStoreService.CreateStoreServiceInterface
+type Create struct {
+	service adminStoreService.CreateInterface
 }
 
-func NewCreateStoreHandler(service adminStoreService.CreateStoreServiceInterface) *CreateStoreHandler {
-	return &CreateStoreHandler{
+func NewCreate(service adminStoreService.CreateInterface) *Create {
+	return &Create{
 		service: service,
 	}
 }
 
-func (h *CreateStoreHandler) CreateStore(c *gin.Context) {
+func (h *Create) Create(c *gin.Context) {
 	// Parse and validate request
-	var req adminStoreModel.CreateStoreRequest
+	var req adminStoreModel.CreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -47,7 +47,7 @@ func (h *CreateStoreHandler) CreateStore(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.CreateStore(c.Request.Context(), req, staffId, staffContext.Role)
+	response, err := h.service.Create(c.Request.Context(), req, staffId, staffContext.Role)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

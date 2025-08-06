@@ -1,11 +1,3 @@
--- name: GetAllActiveStoreAccessByStaffId :many
-SELECT
-    sa.store_id,
-    s.name as store_name
-FROM staff_user_store_access sa
-JOIN stores s ON sa.store_id = s.id
-WHERE sa.staff_user_id = $1 AND s.is_active = true;
-
 -- name: CreateStaffUserStoreAccess :exec
 INSERT INTO staff_user_store_access (
     store_id,
@@ -15,6 +7,14 @@ INSERT INTO staff_user_store_access (
 ) VALUES (
     $1, $2, NOW(), NOW()
 );
+
+-- name: GetAllActiveStoreAccessByStaffId :many
+SELECT
+    sa.store_id,
+    s.name as store_name
+FROM staff_user_store_access sa
+JOIN stores s ON sa.store_id = s.id
+WHERE sa.staff_user_id = $1 AND s.is_active = true;
 
 -- name: BatchCreateStaffUserStoreAccess :copyfrom
 INSERT INTO staff_user_store_access (

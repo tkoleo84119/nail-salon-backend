@@ -11,17 +11,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStoreHandler struct {
-	service adminStoreService.GetStoreServiceInterface
+type Get struct {
+	service adminStoreService.GetInterface
 }
 
-func NewGetStoreHandler(service adminStoreService.GetStoreServiceInterface) *GetStoreHandler {
-	return &GetStoreHandler{
+func NewGet(service adminStoreService.GetInterface) *Get {
+	return &Get{
 		service: service,
 	}
 }
 
-func (h *GetStoreHandler) GetStore(c *gin.Context) {
+func (h *Get) Get(c *gin.Context) {
 	// Get store ID from path parameter & parse to int64
 	storeID := c.Param("storeId")
 	if storeID == "" {
@@ -35,7 +35,7 @@ func (h *GetStoreHandler) GetStore(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStore(c.Request.Context(), parsedStoreID)
+	response, err := h.service.Get(c.Request.Context(), parsedStoreID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

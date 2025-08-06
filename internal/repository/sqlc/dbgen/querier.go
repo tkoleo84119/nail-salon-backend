@@ -40,7 +40,7 @@ type Querier interface {
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
-	CreateStore(ctx context.Context, arg CreateStoreParams) (Store, error)
+	CreateStore(ctx context.Context, arg CreateStoreParams) (CreateStoreRow, error)
 	CreateStylist(ctx context.Context, arg CreateStylistParams) (Stylist, error)
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
 	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)

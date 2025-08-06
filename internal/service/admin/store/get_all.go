@@ -9,17 +9,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStoreListService struct {
+type GetAll struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewGetStoreListService(repo *sqlxRepo.Repositories) *GetStoreListService {
-	return &GetStoreListService{
+func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
+	return &GetAll{
 		repo: repo,
 	}
 }
 
-func (s *GetStoreListService) GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListParsedRequest) (*adminStoreModel.GetStoreListResponse, error) {
+func (s *GetAll) GetAll(ctx context.Context, req adminStoreModel.GetAllParsedRequest) (*adminStoreModel.GetAllResponse, error) {
 	total, items, err := s.repo.Store.GetAllStoreByFilter(ctx, sqlxRepo.GetAllStoreByFilterParams{
 		Name:     req.Name,
 		IsActive: req.IsActive,
@@ -31,9 +31,9 @@ func (s *GetStoreListService) GetStoreList(ctx context.Context, req adminStoreMo
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get store list", err)
 	}
 
-	itemsDTO := make([]adminStoreModel.StoreListItemDTO, len(items))
+	itemsDTO := make([]adminStoreModel.GetAllStoreListItem, len(items))
 	for i, item := range items {
-		itemsDTO[i] = adminStoreModel.StoreListItemDTO{
+		itemsDTO[i] = adminStoreModel.GetAllStoreListItem{
 			ID:        utils.FormatID(item.ID),
 			Name:      item.Name,
 			Address:   utils.PgTextToString(item.Address),
@@ -44,7 +44,7 @@ func (s *GetStoreListService) GetStoreList(ctx context.Context, req adminStoreMo
 		}
 	}
 
-	response := &adminStoreModel.GetStoreListResponse{
+	response := &adminStoreModel.GetAllResponse{
 		Total: total,
 		Items: itemsDTO,
 	}

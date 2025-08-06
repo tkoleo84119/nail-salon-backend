@@ -90,9 +90,7 @@ INSERT INTO stores (
     name,
     address,
     phone,
-    is_active,
-    created_at,
-    updated_at
+    is_active
 `
 
 type CreateStoreParams struct {
@@ -102,22 +100,28 @@ type CreateStoreParams struct {
 	Phone   pgtype.Text `db:"phone" json:"phone"`
 }
 
-func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store, error) {
+type CreateStoreRow struct {
+	ID       int64       `db:"id" json:"id"`
+	Name     string      `db:"name" json:"name"`
+	Address  pgtype.Text `db:"address" json:"address"`
+	Phone    pgtype.Text `db:"phone" json:"phone"`
+	IsActive pgtype.Bool `db:"is_active" json:"is_active"`
+}
+
+func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (CreateStoreRow, error) {
 	row := q.db.QueryRow(ctx, createStore,
 		arg.ID,
 		arg.Name,
 		arg.Address,
 		arg.Phone,
 	)
-	var i Store
+	var i CreateStoreRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Address,
 		&i.Phone,
 		&i.IsActive,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }

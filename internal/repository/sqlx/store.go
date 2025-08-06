@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 
-	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
 	storeModel "github.com/tkoleo84119/nail-salon-backend/internal/model/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -21,7 +20,6 @@ type StoreRepositoryInterface interface {
 	GetStore(ctx context.Context, storeID int64) (GetStoreResponse, error)
 	UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
-	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListRequest) (*adminStoreModel.GetStoreListResponse, error)
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
 	CheckStoreNameExistsExcluding(ctx context.Context, name string, id int64) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (int, error)
@@ -403,15 +401,6 @@ func (r *StoreRepository) GetStores(ctx context.Context, limit, offset int) ([]s
 	}
 
 	return items, total, nil
-}
-
-// GetStoreListModel represents the database model for admin store list queries
-type GetStoreListModel struct {
-	ID       int64       `db:"id"`
-	Name     string      `db:"name"`
-	Address  pgtype.Text `db:"address"`
-	Phone    pgtype.Text `db:"phone"`
-	IsActive pgtype.Bool `db:"is_active"`
 }
 
 func (r *StoreRepository) CheckNameExists(ctx context.Context, name string) (bool, error) {

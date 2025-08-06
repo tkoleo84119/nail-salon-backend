@@ -13,19 +13,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStoreListHandler struct {
-	service adminStoreService.GetStoreListServiceInterface
+type GetAll struct {
+	service adminStoreService.GetAllInterface
 }
 
-func NewGetStoreListHandler(service adminStoreService.GetStoreListServiceInterface) *GetStoreListHandler {
-	return &GetStoreListHandler{
+func NewGetAll(service adminStoreService.GetAllInterface) *GetAll {
+	return &GetAll{
 		service: service,
 	}
 }
 
-func (h *GetStoreListHandler) GetStoreList(c *gin.Context) {
+func (h *GetAll) GetAll(c *gin.Context) {
 	// Parse and validate query parameters
-	var req adminStoreModel.GetStoreListRequest
+	var req adminStoreModel.GetAllRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -47,7 +47,7 @@ func (h *GetStoreListHandler) GetStoreList(c *gin.Context) {
 		sort = strings.Split(*req.Sort, ",")
 	}
 
-	parsedReq := adminStoreModel.GetStoreListParsedRequest{
+	parsedReq := adminStoreModel.GetAllParsedRequest{
 		Name:     req.Name,
 		IsActive: req.IsActive,
 		Limit:    limit,
@@ -56,7 +56,7 @@ func (h *GetStoreListHandler) GetStoreList(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStoreList(c.Request.Context(), parsedReq)
+	response, err := h.service.GetAll(c.Request.Context(), parsedReq)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -10,17 +10,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateStoreService struct {
+type Update struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewUpdateStoreService(repo *sqlxRepo.Repositories) *UpdateStoreService {
-	return &UpdateStoreService{
+func NewUpdate(repo *sqlxRepo.Repositories) *Update {
+	return &Update{
 		repo: repo,
 	}
 }
 
-func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest, role string, storeIDs []int64) (*adminStoreModel.UpdateStoreResponse, error) {
+func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.UpdateRequest, role string, storeIDs []int64) (*adminStoreModel.UpdateResponse, error) {
 	// Validate role permissions (only SUPER_ADMIN and ADMIN can update stores)
 	if role != adminStaffModel.RoleSuperAdmin && role != adminStaffModel.RoleAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
@@ -70,7 +70,7 @@ func (s *UpdateStoreService) UpdateStore(ctx context.Context, storeID int64, req
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update store", err)
 	}
 
-	response := &adminStoreModel.UpdateStoreResponse{
+	response := &adminStoreModel.UpdateResponse{
 		ID:        utils.FormatID(updatedStore.ID),
 		Name:      updatedStore.Name,
 		Address:   utils.PgTextToString(updatedStore.Address),

@@ -6,18 +6,18 @@ import (
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
 )
 
-type CreateStoreServiceInterface interface {
-	CreateStore(ctx context.Context, req adminStoreModel.CreateStoreRequest, staffId int64, role string) (*adminStoreModel.CreateStoreResponse, error)
+type CreateInterface interface {
+	Create(ctx context.Context, req adminStoreModel.CreateRequest, staffId int64, role string) (*adminStoreModel.CreateResponse, error)
 }
 
-type UpdateStoreServiceInterface interface {
-	UpdateStore(ctx context.Context, storeID int64, req adminStoreModel.UpdateStoreRequest, role string, storeIDList []int64) (*adminStoreModel.UpdateStoreResponse, error)
+type GetAllInterface interface {
+	GetAll(ctx context.Context, req adminStoreModel.GetAllParsedRequest) (*adminStoreModel.GetAllResponse, error)
 }
 
-type GetStoreListServiceInterface interface {
-	GetStoreList(ctx context.Context, req adminStoreModel.GetStoreListParsedRequest) (*adminStoreModel.GetStoreListResponse, error)
+type GetInterface interface {
+	Get(ctx context.Context, storeID int64) (*adminStoreModel.GetResponse, error)
 }
 
-type GetStoreServiceInterface interface {
-	GetStore(ctx context.Context, storeID int64) (*adminStoreModel.GetStoreResponse, error)
+type UpdateInterface interface {
+	Update(ctx context.Context, storeID int64, req adminStoreModel.UpdateRequest, role string, storeIDList []int64) (*adminStoreModel.UpdateResponse, error)
 }

@@ -49,10 +49,10 @@ type AdminServices struct {
 	StaffDeleteStoreAccess adminStaffService.DeleteStoreAccessBulkServiceInterface
 
 	// Store management services
-	StoreGetList adminStoreService.GetStoreListServiceInterface
-	StoreGet     adminStoreService.GetStoreServiceInterface
-	StoreCreate  adminStoreService.CreateStoreServiceInterface
-	StoreUpdate  adminStoreService.UpdateStoreServiceInterface
+	StoreGetList adminStoreService.GetAllInterface
+	StoreGet     adminStoreService.GetInterface
+	StoreCreate  adminStoreService.CreateInterface
+	StoreUpdate  adminStoreService.UpdateInterface
 
 	// Service management services
 	ServiceGetList adminServiceService.GetAllInterface
@@ -111,10 +111,10 @@ type AdminHandlers struct {
 	StaffDeleteStoreAccess *adminStaffHandler.DeleteStoreAccessBulkHandler
 
 	// Store management handlers
-	StoreGetList *adminStoreHandler.GetStoreListHandler
-	StoreGet     *adminStoreHandler.GetStoreHandler
-	StoreCreate  *adminStoreHandler.CreateStoreHandler
-	StoreUpdate  *adminStoreHandler.UpdateStoreHandler
+	StoreGetList *adminStoreHandler.GetAll
+	StoreGet     *adminStoreHandler.Get
+	StoreCreate  *adminStoreHandler.Create
+	StoreUpdate  *adminStoreHandler.Update
 
 	// Service management handlers
 	ServiceGetList *adminServiceHandler.GetAll
@@ -174,10 +174,10 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffDeleteStoreAccess: adminStaffService.NewDeleteStoreAccessBulkService(repositories.SQLX),
 
 		// Store management services
-		StoreGetList: adminStoreService.NewGetStoreListService(repositories.SQLX),
-		StoreGet:     adminStoreService.NewGetStoreService(repositories.SQLX),
-		StoreCreate:  adminStoreService.NewCreateStoreService(database.Sqlx, repositories.SQLX),
-		StoreUpdate:  adminStoreService.NewUpdateStoreService(repositories.SQLX),
+		StoreGetList: adminStoreService.NewGetAll(repositories.SQLX),
+		StoreGet:     adminStoreService.NewGet(queries),
+		StoreCreate:  adminStoreService.NewCreate(queries, database.PgxPool),
+		StoreUpdate:  adminStoreService.NewUpdate(repositories.SQLX),
 
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
@@ -238,10 +238,10 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StaffDeleteStoreAccess: adminStaffHandler.NewDeleteStoreAccessBulkHandler(services.StaffDeleteStoreAccess),
 
 		// Store management handlers
-		StoreGetList: adminStoreHandler.NewGetStoreListHandler(services.StoreGetList),
-		StoreGet:     adminStoreHandler.NewGetStoreHandler(services.StoreGet),
-		StoreCreate:  adminStoreHandler.NewCreateStoreHandler(services.StoreCreate),
-		StoreUpdate:  adminStoreHandler.NewUpdateStoreHandler(services.StoreUpdate),
+		StoreGetList: adminStoreHandler.NewGetAll(services.StoreGetList),
+		StoreGet:     adminStoreHandler.NewGet(services.StoreGet),
+		StoreCreate:  adminStoreHandler.NewCreate(services.StoreCreate),
+		StoreUpdate:  adminStoreHandler.NewUpdate(services.StoreUpdate),
 
 		// Service management handlers
 		ServiceGetList: adminServiceHandler.NewGetAll(services.ServiceGetList),

@@ -13,9 +13,7 @@ INSERT INTO stores (
     name,
     address,
     phone,
-    is_active,
-    created_at,
-    updated_at;
+    is_active;
 
 -- name: GetAllActiveStoresName :many
 SELECT
@@ -40,7 +38,6 @@ SELECT
     is_active
 FROM stores
 WHERE id = ANY($1::bigint[]);
-
 
 -- name: GetStoreDetailByID :one
 SELECT

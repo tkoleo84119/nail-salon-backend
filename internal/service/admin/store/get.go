@@ -8,23 +8,23 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStoreService struct {
-	repo *sqlxRepo.Repositories
+type Get struct {
+	queries *dbgen.Queries
 }
 
-func NewGetStoreService(repo *sqlxRepo.Repositories) *GetStoreService {
-	return &GetStoreService{
-		repo: repo,
+func NewGet(queries *dbgen.Queries) *Get {
+	return &Get{
+		queries: queries,
 	}
 }
 
-func (s *GetStoreService) GetStore(ctx context.Context, storeID int64) (*adminStoreModel.GetStoreResponse, error) {
+func (s *Get) Get(ctx context.Context, storeID int64) (*adminStoreModel.GetResponse, error) {
 	// Get store information
-	store, err := s.repo.Store.GetStore(ctx, storeID)
+	store, err := s.queries.GetStoreDetailByID(ctx, storeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
@@ -33,7 +33,7 @@ func (s *GetStoreService) GetStore(ctx context.Context, storeID int64) (*adminSt
 	}
 
 	// Build response
-	response := &adminStoreModel.GetStoreResponse{
+	response := &adminStoreModel.GetResponse{
 		ID:        utils.FormatID(store.ID),
 		Name:      store.Name,
 		Address:   utils.PgTextToString(store.Address),
