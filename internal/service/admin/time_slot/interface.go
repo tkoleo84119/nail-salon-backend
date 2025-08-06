@@ -13,3 +13,7 @@ type CreateInterface interface {
 type UpdateInterface interface {
 	Update(ctx context.Context, scheduleID int64, timeSlotID int64, req adminTimeSlotModel.UpdateRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminTimeSlotModel.UpdateResponse, error)
 }
+
+type DeleteInterface interface {
+	Delete(ctx context.Context, scheduleID int64, timeSlotID int64, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminTimeSlotModel.DeleteResponse, error)
+}

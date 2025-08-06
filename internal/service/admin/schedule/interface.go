@@ -4,7 +4,6 @@ import (
 	"context"
 
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 type CreateSchedulesBulkServiceInterface interface {
@@ -13,10 +12,6 @@ type CreateSchedulesBulkServiceInterface interface {
 
 type DeleteBulkInterface interface {
 	DeleteBulk(ctx context.Context, storeID int64, req adminScheduleModel.DeleteBulkParsedRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminScheduleModel.DeleteBulkResponse, error)
-}
-
-type DeleteTimeSlotServiceInterface interface {
-	DeleteTimeSlot(ctx context.Context, scheduleID string, timeSlotID string, staffContext common.StaffContext) (*adminScheduleModel.DeleteTimeSlotResponse, error)
 }
 
 type GetScheduleListServiceInterface interface {

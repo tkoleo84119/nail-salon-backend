@@ -75,7 +75,7 @@ type AdminServices struct {
 	ScheduleDeleteBulk     adminScheduleService.DeleteBulkInterface
 	ScheduleCreateTimeSlot adminTimeSlotService.CreateInterface
 	ScheduleUpdateTimeSlot adminTimeSlotService.UpdateInterface
-	ScheduleDeleteTimeSlot adminScheduleService.DeleteTimeSlotServiceInterface
+	ScheduleDeleteTimeSlot adminTimeSlotService.DeleteInterface
 	ScheduleGetList        adminScheduleService.GetScheduleListServiceInterface
 	ScheduleGet            adminScheduleService.GetScheduleServiceInterface
 
@@ -137,7 +137,7 @@ type AdminHandlers struct {
 	ScheduleDeleteBulk     *adminScheduleHandler.DeleteBulk
 	ScheduleCreateTimeSlot *adminTimeSlotHandler.Create
 	ScheduleUpdateTimeSlot *adminTimeSlotHandler.Update
-	ScheduleDeleteTimeSlot *adminScheduleHandler.DeleteTimeSlotHandler
+	ScheduleDeleteTimeSlot *adminTimeSlotHandler.Delete
 	ScheduleGetList        *adminScheduleHandler.GetScheduleListHandler
 	ScheduleGet            *adminScheduleHandler.GetScheduleHandler
 
@@ -200,7 +200,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ScheduleDeleteBulk:     adminScheduleService.NewDeleteBulk(queries),
 		ScheduleCreateTimeSlot: adminTimeSlotService.NewCreate(queries),
 		ScheduleUpdateTimeSlot: adminTimeSlotService.NewUpdate(queries, repositories.SQLX),
-		ScheduleDeleteTimeSlot: adminScheduleService.NewDeleteTimeSlotService(queries),
+		ScheduleDeleteTimeSlot: adminTimeSlotService.NewDelete(queries),
 		ScheduleGetList:        adminScheduleService.NewGetScheduleListService(repositories.SQLX),
 		ScheduleGet:            adminScheduleService.NewGetScheduleService(repositories.SQLX),
 
@@ -264,7 +264,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ScheduleDeleteBulk:     adminScheduleHandler.NewDeleteBulk(services.ScheduleDeleteBulk),
 		ScheduleCreateTimeSlot: adminTimeSlotHandler.NewCreate(services.ScheduleCreateTimeSlot),
 		ScheduleUpdateTimeSlot: adminTimeSlotHandler.NewUpdate(services.ScheduleUpdateTimeSlot),
-		ScheduleDeleteTimeSlot: adminScheduleHandler.NewDeleteTimeSlotHandler(services.ScheduleDeleteTimeSlot),
+		ScheduleDeleteTimeSlot: adminTimeSlotHandler.NewDelete(services.ScheduleDeleteTimeSlot),
 		ScheduleGetList:        adminScheduleHandler.NewGetScheduleListHandler(services.ScheduleGetList),
 		ScheduleGet:            adminScheduleHandler.NewGetScheduleHandler(services.ScheduleGet),
 
