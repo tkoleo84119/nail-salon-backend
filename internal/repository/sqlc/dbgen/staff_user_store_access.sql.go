@@ -73,7 +73,7 @@ func (q *Queries) DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaf
 	return err
 }
 
-const getStaffUserStoreAccess = `-- name: GetStaffUserStoreAccess :many
+const getAllActiveStoreAccessByStaffId = `-- name: GetAllActiveStoreAccessByStaffId :many
 SELECT
     sa.store_id,
     s.name as store_name
@@ -82,20 +82,20 @@ JOIN stores s ON sa.store_id = s.id
 WHERE sa.staff_user_id = $1 AND s.is_active = true
 `
 
-type GetStaffUserStoreAccessRow struct {
+type GetAllActiveStoreAccessByStaffIdRow struct {
 	StoreID   int64  `db:"store_id" json:"store_id"`
 	StoreName string `db:"store_name" json:"store_name"`
 }
 
-func (q *Queries) GetStaffUserStoreAccess(ctx context.Context, staffUserID int64) ([]GetStaffUserStoreAccessRow, error) {
-	rows, err := q.db.Query(ctx, getStaffUserStoreAccess, staffUserID)
+func (q *Queries) GetAllActiveStoreAccessByStaffId(ctx context.Context, staffUserID int64) ([]GetAllActiveStoreAccessByStaffIdRow, error) {
+	rows, err := q.db.Query(ctx, getAllActiveStoreAccessByStaffId, staffUserID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetStaffUserStoreAccessRow{}
+	items := []GetAllActiveStoreAccessByStaffIdRow{}
 	for rows.Next() {
-		var i GetStaffUserStoreAccessRow
+		var i GetAllActiveStoreAccessByStaffIdRow
 		if err := rows.Scan(&i.StoreID, &i.StoreName); err != nil {
 			return nil, err
 		}

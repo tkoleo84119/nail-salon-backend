@@ -33,9 +33,9 @@ import (
 // AdminServices contains all admin-facing services
 type AdminServices struct {
 	// Authentication services
-	AuthStaffLogin        adminAuthService.StaffLoginServiceInterface
-	AuthStaffRefreshToken adminAuthService.StaffRefreshTokenServiceInterface
-	AuthStaffLogout       adminAuthService.StaffLogoutServiceInterface
+	AuthStaffLogin        adminAuthService.LoginInterface
+	AuthStaffRefreshToken adminAuthService.RefreshTokenInterface
+	AuthStaffLogout       adminAuthService.LogoutInterface
 
 	// Staff management services
 	StaffCreate            adminStaffService.CreateStaffServiceInterface
@@ -95,9 +95,9 @@ type AdminServices struct {
 // AdminHandlers contains all admin-facing handlers
 type AdminHandlers struct {
 	// Authentication handlers
-	AuthStaffLogin        *adminAuthHandler.StaffLoginHandler
-	AuthStaffRefreshToken *adminAuthHandler.StaffRefreshTokenHandler
-	AuthStaffLogout       *adminAuthHandler.StaffLogoutHandler
+	AuthStaffLogin        *adminAuthHandler.Login
+	AuthStaffRefreshToken *adminAuthHandler.RefreshToken
+	AuthStaffLogout       *adminAuthHandler.Logout
 
 	// Staff management handlers
 	StaffCreate            *adminStaffHandler.CreateStaffHandler
@@ -158,9 +158,9 @@ type AdminHandlers struct {
 func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config) AdminServices {
 	return AdminServices{
 		// Authentication services
-		AuthStaffLogin:        adminAuthService.NewStaffLoginService(repositories.SQLX, cfg.JWT),
-		AuthStaffRefreshToken: adminAuthService.NewStaffRefreshTokenService(repositories.SQLX, cfg.JWT),
-		AuthStaffLogout:       adminAuthService.NewStaffLogoutService(repositories.SQLX),
+		AuthStaffLogin:        adminAuthService.NewLogin(queries, cfg.JWT),
+		AuthStaffRefreshToken: adminAuthService.NewRefreshToken(queries, cfg.JWT),
+		AuthStaffLogout:       adminAuthService.NewLogout(queries),
 
 		// Staff management services
 		StaffCreate:            adminStaffService.NewCreateStaffService(database.Sqlx, repositories.SQLX),
@@ -222,9 +222,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 func NewAdminHandlers(services AdminServices) AdminHandlers {
 	return AdminHandlers{
 		// Authentication handlers
-		AuthStaffLogin:        adminAuthHandler.NewStaffLoginHandler(services.AuthStaffLogin),
-		AuthStaffRefreshToken: adminAuthHandler.NewStaffRefreshTokenHandler(services.AuthStaffRefreshToken),
-		AuthStaffLogout:       adminAuthHandler.NewStaffLogoutHandler(services.AuthStaffLogout),
+		AuthStaffLogin:        adminAuthHandler.NewLogin(services.AuthStaffLogin),
+		AuthStaffRefreshToken: adminAuthHandler.NewRefreshToken(services.AuthStaffRefreshToken),
+		AuthStaffLogout:       adminAuthHandler.NewLogout(services.AuthStaffLogout),
 
 		// Staff management handlers
 		StaffCreate:            adminStaffHandler.NewCreateStaffHandler(services.StaffCreate),

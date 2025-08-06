@@ -115,6 +115,7 @@
 | 403    | E1010    | AuthPermissionDenied             | 權限不足，無法執行此操作                       |
 | 400    | E2002    | ValPathParamMissing              | 路徑參數缺失，請檢查                           |
 | 400    | E2004    | ValTypeConversionFailed          | 參數類型轉換失敗                               |
+| 400    | E2001    | ValJsonFormat                    | JSON 格式錯誤，請檢查                          |
 | 400    | E2003    | ValAllFieldsEmpty                | 至少需要提供一個欄位進行更新                   |
 | 400    | E2034    | ValFieldTimeFormat               | {field} 格式錯誤，請使用正確的時間格式 (HH:mm) |
 | 400    | E3TMS001 | TimeSlotCannotUpdateSeparately   | 時段起始時間和結束時間必須同時傳入             |

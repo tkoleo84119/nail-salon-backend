@@ -122,7 +122,7 @@ func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store
 	return i, err
 }
 
-const getAllActiveStores = `-- name: GetAllActiveStores :many
+const getAllActiveStoresName = `-- name: GetAllActiveStoresName :many
 SELECT
     id,
     name
@@ -131,20 +131,20 @@ WHERE is_active = true
 ORDER BY name
 `
 
-type GetAllActiveStoresRow struct {
+type GetAllActiveStoresNameRow struct {
 	ID   int64  `db:"id" json:"id"`
 	Name string `db:"name" json:"name"`
 }
 
-func (q *Queries) GetAllActiveStores(ctx context.Context) ([]GetAllActiveStoresRow, error) {
-	rows, err := q.db.Query(ctx, getAllActiveStores)
+func (q *Queries) GetAllActiveStoresName(ctx context.Context) ([]GetAllActiveStoresNameRow, error) {
+	rows, err := q.db.Query(ctx, getAllActiveStoresName)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetAllActiveStoresRow{}
+	items := []GetAllActiveStoresNameRow{}
 	for rows.Next() {
-		var i GetAllActiveStoresRow
+		var i GetAllActiveStoresNameRow
 		if err := rows.Scan(&i.ID, &i.Name); err != nil {
 			return nil, err
 		}

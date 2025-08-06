@@ -1,4 +1,4 @@
--- name: GetStaffUserByUsername :one
+-- name: GetActiveStaffUserByUsername :one
 SELECT
     id,
     username,
@@ -26,7 +26,7 @@ WHERE id = $1;
 
 -- name: CheckStaffUserExists :one
 SELECT EXISTS(
-    SELECT 1 FROM staff_users 
+    SELECT 1 FROM staff_users
     WHERE username = $1 OR email = $2
 ) as exists;
 
@@ -42,7 +42,7 @@ INSERT INTO staff_users (
     updated_at
 ) VALUES (
     $1, $2, $3, $4, $5, true, NOW(), NOW()
-) RETURNING 
+) RETURNING
     id,
     username,
     email,
@@ -53,7 +53,7 @@ INSERT INTO staff_users (
 
 -- name: CheckEmailUniqueForUpdate :one
 SELECT EXISTS(
-    SELECT 1 FROM staff_users 
+    SELECT 1 FROM staff_users
     WHERE email = $1 AND id != $2
 ) as exists;
 

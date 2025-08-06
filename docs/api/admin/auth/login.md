@@ -75,61 +75,37 @@
 
 ### 錯誤處理
 
-#### 錯誤總覽
-
-| 狀態碼 | 錯誤碼 | 說明                                  |
-| ------ | ------ | ------------------------------------- |
-| 400    | E2001  | JSON 格式錯誤，請檢查                 |
-| 400    | E2020  | {field} 為必填項目                    |
-| 400    | E2024  | {field} 長度最多只能有 {param} 個字元 |
-| 401    | E1001  | 帳號或密碼錯誤                        |
-| 500    | E9001  | 系統發生錯誤，請稍後再試              |
-| 500    | E9002  | 資料庫操作失敗                        |
-
-#### 400 Bad Request - 輸入驗證失敗
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
   "errors": [
     {
-      "code": "E2020",
-      "message": "username 欄位為必填項目",
-      "field": "username"
-    },
-    {
-      "code": "E2024",
-      "message": "password 長度最多只能有 100 個字元",
-      "field": "password"
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
     }
   ]
 }
 ```
 
-#### 401 Unauthorized - 認證失敗
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "errors": [
-    {
-      "code": "E1001",
-      "message": "帳號或密碼錯誤"
-    }
-  ]
-}
-```
-
-#### 500 Internal Server Error - 系統錯誤
-
-```json
-{
-  "errors": [
-    {
-      "code": "E9001",
-      "message": "系統發生錯誤，請稍後再試"
-    }
-  ]
-}
-```
+| 狀態碼 | 錯誤碼 | 常數名稱                | 說明                                  |
+| ------ | ------ | ----------------------- | ------------------------------------- |
+| 401    | E1001  | AuthInvalidCredentials  | 帳號或密碼錯誤                        |
+| 401    | E1005  | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入      |
+| 401    | E1006  | AuthContextMissing      | 未找到使用者認證資訊，請重新登入      |
+| 400    | E2001  | ValJsonFormat           | JSON 格式錯誤，請檢查                 |
+| 400    | E2020  | ValFieldRequired        | {field} 為必填項目                    |
+| 400    | E2024  | ValFieldMaxLength       | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2004  | ValTypeConversionFailed | 參數類型轉換失敗                      |
+| 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試              |
+| 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                        |
 
 ---
 

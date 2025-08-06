@@ -104,6 +104,7 @@
 | 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入               |
 | 401    | E1006    | AuthContextMissing      | 未找到使用者認證資訊，請重新登入               |
 | 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作                       |
+| 400    | E2001    | ValJsonFormat           | JSON 格式錯誤，請檢查                          |
 | 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查                           |
 | 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                               |
 | 400    | E2020    | ValFieldRequired        | {field} 為必填項目                             |

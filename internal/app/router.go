@@ -127,12 +127,12 @@ func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries
 func setupAdminAuthRoutes(admin *gin.RouterGroup, handlers Handlers) {
 	auth := admin.Group("/auth")
 	{
-		auth.POST("/login", handlers.Admin.AuthStaffLogin.StaffLogin)
+		auth.POST("/login", handlers.Admin.AuthStaffLogin.Login)
 
 		token := auth.Group("/token")
 		{
-			token.POST("/refresh", handlers.Admin.AuthStaffRefreshToken.StaffRefreshToken)
-			token.POST("/revoke", handlers.Admin.AuthStaffLogout.StaffLogout)
+			token.POST("/refresh", handlers.Admin.AuthStaffRefreshToken.RefreshToken)
+			token.POST("/revoke", handlers.Admin.AuthStaffLogout.Logout)
 		}
 	}
 }

@@ -6,10 +6,14 @@ import (
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
 )
 
-type StaffLoginServiceInterface interface {
-	StaffLogin(ctx context.Context, req adminAuthModel.StaffLoginRequest, loginCtx adminAuthModel.StaffLoginContext) (*adminAuthModel.StaffLoginResponse, error)
+type LoginInterface interface {
+	Login(ctx context.Context, req adminAuthModel.LoginRequest, loginCtx adminAuthModel.LoginContext) (*adminAuthModel.LoginResponse, error)
 }
 
-type StaffRefreshTokenServiceInterface interface {
-	StaffRefreshToken(ctx context.Context, req adminAuthModel.StaffRefreshTokenRequest) (*adminAuthModel.StaffRefreshTokenResponse, error)
+type LogoutInterface interface {
+	Logout(ctx context.Context, req adminAuthModel.LogoutRequest) (*adminAuthModel.LogoutResponse, error)
+}
+
+type RefreshTokenInterface interface {
+	RefreshToken(ctx context.Context, req adminAuthModel.RefreshTokenRequest) (*adminAuthModel.RefreshTokenResponse, error)
 }

@@ -9,25 +9,25 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type StaffRefreshTokenService struct {
-	repo      *sqlxRepo.Repositories
+type RefreshToken struct {
+	queries   *dbgen.Queries
 	jwtConfig config.JWTConfig
 }
 
-func NewStaffRefreshTokenService(repo *sqlxRepo.Repositories, jwtConfig config.JWTConfig) *StaffRefreshTokenService {
-	return &StaffRefreshTokenService{
-		repo:      repo,
+func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig) *RefreshToken {
+	return &RefreshToken{
+		queries:   queries,
 		jwtConfig: jwtConfig,
 	}
 }
 
-func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req adminAuthModel.StaffRefreshTokenRequest) (*adminAuthModel.StaffRefreshTokenResponse, error) {
+func (s *RefreshToken) RefreshToken(ctx context.Context, req adminAuthModel.RefreshTokenRequest) (*adminAuthModel.RefreshTokenResponse, error) {
 	// Validate refresh token exists and is not revoked/expired
-	refreshTokenInfo, err := s.repo.StaffUserTokens.GetStaffUserTokenValid(ctx, req.RefreshToken)
+	refreshTokenInfo, err := s.queries.GetValidStaffUserToken(ctx, req.RefreshToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthRefreshTokenInvalid)
@@ -36,9 +36,12 @@ func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req ad
 	}
 
 	// Get staff user information to rebuild JWT claims
-	staffUser, err := s.repo.Staff.GetStaffUserByID(ctx, refreshTokenInfo.StaffUserID)
+	staffUser, err := s.queries.GetStaffUserByID(ctx, refreshTokenInfo.StaffUserID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get staff user", err)
+	}
+	if !staffUser.IsActive.Bool {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthStaffFailed)
 	}
 
 	// Get store access for the staff user
@@ -54,7 +57,7 @@ func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req ad
 	}
 
 	// Build response
-	return &adminAuthModel.StaffRefreshTokenResponse{
+	return &adminAuthModel.RefreshTokenResponse{
 		AccessToken: accessToken,
 		ExpiresIn:   s.jwtConfig.ExpiryHours * 3600,
 		User: adminAuthModel.User{
@@ -67,13 +70,13 @@ func (s *StaffRefreshTokenService) StaffRefreshToken(ctx context.Context, req ad
 }
 
 // getStoreAccess is a helper method to get store access based on staff role
-func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetStaffUserByIDResponse) ([]common.Store, error) {
+func (s *RefreshToken) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
 	var storeList []common.Store
 
 	switch staffUser.Role {
 	case common.RoleSuperAdmin:
 		// Super admin has access to all active stores
-		stores, err := s.repo.Store.GetAllStore(ctx, nil)
+		stores, err := s.queries.GetAllActiveStoresName(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -85,14 +88,14 @@ func (s *StaffRefreshTokenService) getStoreAccess(ctx context.Context, staffUser
 		}
 	case common.RoleAdmin, common.RoleManager, common.RoleStylist:
 		// Other roles have access based on store access table
-		storeAccess, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, staffUser.ID, nil)
+		storeAccess, err := s.queries.GetAllActiveStoreAccessByStaffId(ctx, staffUser.ID)
 		if err != nil {
 			return nil, err
 		}
 		for _, access := range storeAccess {
 			storeList = append(storeList, common.Store{
 				ID:   utils.FormatID(access.StoreID),
-				Name: access.Name,
+				Name: access.StoreName,
 			})
 		}
 	}

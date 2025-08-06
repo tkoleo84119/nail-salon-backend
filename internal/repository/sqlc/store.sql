@@ -1,4 +1,3 @@
-
 -- name: CreateStore :one
 INSERT INTO stores (
     id,
@@ -18,7 +17,7 @@ INSERT INTO stores (
     created_at,
     updated_at;
 
--- name: GetAllActiveStores :many
+-- name: GetAllActiveStoresName :many
 SELECT
     id,
     name

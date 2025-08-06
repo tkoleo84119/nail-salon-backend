@@ -54,25 +54,30 @@ func (q *Queries) CreateStaffUserToken(ctx context.Context, arg CreateStaffUserT
 }
 
 const getValidStaffUserToken = `-- name: GetValidStaffUserToken :one
-SELECT id, staff_user_id, refresh_token, user_agent, ip_address, expired_at,
-       is_revoked, created_at, updated_at
+SELECT id, staff_user_id
 FROM staff_user_tokens
 WHERE refresh_token = $1 AND expired_at > NOW() AND is_revoked = false
 `
 
-func (q *Queries) GetValidStaffUserToken(ctx context.Context, refreshToken string) (StaffUserToken, error) {
+type GetValidStaffUserTokenRow struct {
+	ID          int64 `db:"id" json:"id"`
+	StaffUserID int64 `db:"staff_user_id" json:"staff_user_id"`
+}
+
+func (q *Queries) GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error) {
 	row := q.db.QueryRow(ctx, getValidStaffUserToken, refreshToken)
-	var i StaffUserToken
-	err := row.Scan(
-		&i.ID,
-		&i.StaffUserID,
-		&i.RefreshToken,
-		&i.UserAgent,
-		&i.IpAddress,
-		&i.ExpiredAt,
-		&i.IsRevoked,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
+	var i GetValidStaffUserTokenRow
+	err := row.Scan(&i.ID, &i.StaffUserID)
 	return i, err
+}
+
+const revokeStaffUserToken = `-- name: RevokeStaffUserToken :exec
+UPDATE staff_user_tokens
+SET is_revoked = true
+WHERE refresh_token = $1
+`
+
+func (q *Queries) RevokeStaffUserToken(ctx context.Context, refreshToken string) error {
+	_, err := q.db.Exec(ctx, revokeStaffUserToken, refreshToken)
+	return err
 }

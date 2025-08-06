@@ -9,31 +9,28 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type StaffLoginService struct {
-	repo      *sqlxRepo.Repositories
+type Login struct {
+	queries   *dbgen.Queries
 	jwtConfig config.JWTConfig
 }
 
-func NewStaffLoginService(repo *sqlxRepo.Repositories, jwtConfig config.JWTConfig) *StaffLoginService {
-	return &StaffLoginService{
-		repo:      repo,
+func NewLogin(queries *dbgen.Queries, jwtConfig config.JWTConfig) *Login {
+	return &Login{
+		queries:   queries,
 		jwtConfig: jwtConfig,
 	}
 }
 
-func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.StaffLoginRequest, loginCtx adminAuthModel.StaffLoginContext) (*adminAuthModel.StaffLoginResponse, error) {
-	staffUser, err := s.repo.Staff.GetStaffUserByUsername(ctx, req.Username)
+func (s *Login) Login(ctx context.Context, req adminAuthModel.LoginRequest, loginCtx adminAuthModel.LoginContext) (*adminAuthModel.LoginResponse, error) {
+	staffUser, err := s.queries.GetActiveStaffUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
 	if !utils.CheckPassword(req.Password, staffUser.PasswordHash) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
-	}
-	if !staffUser.IsActive.Bool {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
 
@@ -55,7 +52,7 @@ func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.S
 	}
 
 	// Store refresh token
-	tokenInfo := adminAuthModel.StaffTokenInfo{
+	tokenInfo := adminAuthModel.LoginTokenInfo{
 		StaffUserID:  staffUser.ID,
 		RefreshToken: refreshToken,
 		Context:      loginCtx,
@@ -66,7 +63,7 @@ func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.S
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to store refresh token", err)
 	}
 
-	response := &adminAuthModel.StaffLoginResponse{
+	response := &adminAuthModel.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
@@ -82,12 +79,12 @@ func (s *StaffLoginService) StaffLogin(ctx context.Context, req adminAuthModel.S
 }
 
 // getStoreAccess retrieves store access based on user role
-func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser *sqlxRepo.GetStaffUserByUsernameResponse) ([]common.Store, error) {
+func (s *Login) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
 	var storeList []common.Store
 
 	// SUPER_ADMIN can access all stores
 	if staffUser.Role == common.RoleSuperAdmin {
-		stores, err := s.repo.Store.GetAllStore(ctx, nil)
+		stores, err := s.queries.GetAllActiveStoresName(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -99,14 +96,14 @@ func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser *sqlxR
 		}
 	} else {
 		// Get specific store access for other roles
-		storeAccess, err := s.repo.StaffUserStoreAccess.GetStaffUserStoreAccessByStaffId(ctx, staffUser.ID, nil)
+		storeAccess, err := s.queries.GetAllActiveStoreAccessByStaffId(ctx, staffUser.ID)
 		if err != nil {
 			return nil, err
 		}
 		for _, access := range storeAccess {
 			storeList = append(storeList, common.Store{
 				ID:   utils.FormatID(access.StoreID),
-				Name: access.Name,
+				Name: access.StoreName,
 			})
 		}
 	}
@@ -115,16 +112,13 @@ func (s *StaffLoginService) getStoreAccess(ctx context.Context, staffUser *sqlxR
 }
 
 // storeRefreshToken stores the refresh token in database
-func (s *StaffLoginService) storeRefreshToken(ctx context.Context, tokenInfo adminAuthModel.StaffTokenInfo) error {
-	// Convert IP address to string pointer for PostgreSQL INET type
-	var ipAddr *string
-	if tokenInfo.Context.IPAddress != "" {
-		if _, err := netip.ParseAddr(tokenInfo.Context.IPAddress); err == nil {
-			ipAddr = &tokenInfo.Context.IPAddress
-		}
+func (s *Login) storeRefreshToken(ctx context.Context, tokenInfo adminAuthModel.LoginTokenInfo) error {
+	var ipAddr *netip.Addr
+	if addr, err := netip.ParseAddr(tokenInfo.Context.IPAddress); err == nil {
+		ipAddr = &addr
 	}
 
-	_, err := s.repo.StaffUserTokens.CreateStaffUserToken(ctx, sqlxRepo.CreateStaffUserTokenParams{
+	_, err := s.queries.CreateStaffUserToken(ctx, dbgen.CreateStaffUserTokenParams{
 		ID:           utils.GenerateID(),
 		StaffUserID:  tokenInfo.StaffUserID,
 		RefreshToken: tokenInfo.RefreshToken,

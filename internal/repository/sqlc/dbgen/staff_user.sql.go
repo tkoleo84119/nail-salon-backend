@@ -13,7 +13,7 @@ import (
 
 const checkEmailUniqueForUpdate = `-- name: CheckEmailUniqueForUpdate :one
 SELECT EXISTS(
-    SELECT 1 FROM staff_users 
+    SELECT 1 FROM staff_users
     WHERE email = $1 AND id != $2
 ) as exists
 `
@@ -32,7 +32,7 @@ func (q *Queries) CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailU
 
 const checkStaffUserExists = `-- name: CheckStaffUserExists :one
 SELECT EXISTS(
-    SELECT 1 FROM staff_users 
+    SELECT 1 FROM staff_users
     WHERE username = $1 OR email = $2
 ) as exists
 `
@@ -61,7 +61,7 @@ INSERT INTO staff_users (
     updated_at
 ) VALUES (
     $1, $2, $3, $4, $5, true, NOW(), NOW()
-) RETURNING 
+) RETURNING
     id,
     username,
     email,
@@ -110,6 +110,36 @@ func (q *Queries) CreateStaffUser(ctx context.Context, arg CreateStaffUserParams
 	return i, err
 }
 
+const getActiveStaffUserByUsername = `-- name: GetActiveStaffUserByUsername :one
+SELECT
+    id,
+    username,
+    email,
+    password_hash,
+    role,
+    is_active,
+    created_at,
+    updated_at
+FROM staff_users
+WHERE username = $1 AND is_active = true
+`
+
+func (q *Queries) GetActiveStaffUserByUsername(ctx context.Context, username string) (StaffUser, error) {
+	row := q.db.QueryRow(ctx, getActiveStaffUserByUsername, username)
+	var i StaffUser
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Role,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getStaffUserByID = `-- name: GetStaffUserByID :one
 SELECT
     id,
@@ -126,36 +156,6 @@ WHERE id = $1
 
 func (q *Queries) GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error) {
 	row := q.db.QueryRow(ctx, getStaffUserByID, id)
-	var i StaffUser
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Email,
-		&i.PasswordHash,
-		&i.Role,
-		&i.IsActive,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getStaffUserByUsername = `-- name: GetStaffUserByUsername :one
-SELECT
-    id,
-    username,
-    email,
-    password_hash,
-    role,
-    is_active,
-    created_at,
-    updated_at
-FROM staff_users
-WHERE username = $1 AND is_active = true
-`
-
-func (q *Queries) GetStaffUserByUsername(ctx context.Context, username string) (StaffUser, error) {
-	row := q.db.QueryRow(ctx, getStaffUserByUsername, username)
 	var i StaffUser
 	err := row.Scan(
 		&i.ID,

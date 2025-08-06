@@ -1,4 +1,4 @@
--- name: GetStaffUserStoreAccess :many
+-- name: GetAllActiveStoreAccessByStaffId :many
 SELECT
     sa.store_id,
     s.name as store_name

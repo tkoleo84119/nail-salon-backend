@@ -7,37 +7,36 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type StaffRefreshTokenHandler struct {
-	service adminAuthService.StaffRefreshTokenServiceInterface
+type Logout struct {
+	service adminAuthService.LogoutInterface
 }
 
-func NewStaffRefreshTokenHandler(service adminAuthService.StaffRefreshTokenServiceInterface) *StaffRefreshTokenHandler {
-	return &StaffRefreshTokenHandler{
+// NewStaffLogoutHandler creates a new logout handler
+func NewLogout(service adminAuthService.LogoutInterface) *Logout {
+	return &Logout{
 		service: service,
 	}
 }
 
-func (h *StaffRefreshTokenHandler) StaffRefreshToken(c *gin.Context) {
-	// Input JSON validation
-	var req adminAuthModel.StaffRefreshTokenRequest
+// StaffLogout handles the staff logout endpoint
+func (h *Logout) Logout(c *gin.Context) {
+	var req adminAuthModel.LogoutRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
-	// Service layer call
-	response, err := h.service.StaffRefreshToken(c.Request.Context(), req)
+	// Call the logout service
+	response, err := h.service.Logout(c.Request.Context(), req)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
 	}
 
-	// Success response
-	c.JSON(http.StatusOK, common.SuccessResponse(response))
+	c.JSON(http.StatusOK, response)
 }

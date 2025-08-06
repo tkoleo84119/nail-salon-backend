@@ -102,6 +102,7 @@
 | 403    | E1010    | AuthPermissionDenied         | 權限不足，無法執行此操作                       |
 | 400    | E2002    | ValPathParamMissing          | 路徑參數缺失，請檢查                           |
 | 400    | E2004    | ValTypeConversionFailed      | 參數類型轉換失敗                               |
+| 400    | E2001    | ValJsonFormat                | JSON 格式錯誤，請檢查                          |
 | 400    | E2034    | ValFieldTimeFormat           | {field} 格式錯誤，請使用正確的時間格式 (HH:mm) |
 | 400    | E3TMS011 | TimeSlotConflict             | 時段時間區段重疊                               |
 | 400    | E3TMS012 | TimeSlotEndBeforeStart       | 結束時間必須在開始時間之後                     |

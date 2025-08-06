@@ -13,20 +13,20 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type StaffLoginHandler struct {
-	service adminAuthService.StaffLoginServiceInterface
+type Login struct {
+	service adminAuthService.LoginInterface
 }
 
 // NewStaffLoginHandler creates a new login handler
-func NewStaffLoginHandler(service adminAuthService.StaffLoginServiceInterface) *StaffLoginHandler {
-	return &StaffLoginHandler{
+func NewLogin(service adminAuthService.LoginInterface) *Login {
+	return &Login{
 		service: service,
 	}
 }
 
 // StaffLogin handles the staff login endpoint
-func (h *StaffLoginHandler) StaffLogin(c *gin.Context) {
-	var req adminAuthModel.StaffLoginRequest
+func (h *Login) Login(c *gin.Context) {
+	var req adminAuthModel.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -34,14 +34,14 @@ func (h *StaffLoginHandler) StaffLogin(c *gin.Context) {
 	}
 
 	// Extract login context
-	loginCtx := adminAuthModel.StaffLoginContext{
+	loginCtx := adminAuthModel.LoginContext{
 		UserAgent: c.GetHeader("User-Agent"),
 		IPAddress: c.ClientIP(),
 		Timestamp: time.Now(),
 	}
 
 	// Call service layer
-	response, err := h.service.StaffLogin(c.Request.Context(), req, loginCtx)
+	response, err := h.service.Login(c.Request.Context(), req, loginCtx)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
