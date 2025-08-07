@@ -53,14 +53,9 @@ func (h *Get) Get(c *gin.Context) {
 		return
 	}
 
-	storeIDs := []int64{}
-	for _, store := range staffContext.StoreList {
-		parsedStoreID, err := utils.ParseID(store.ID)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
-			return
-		}
-		storeIDs = append(storeIDs, parsedStoreID)
+	storeIDs := make([]int64, len(staffContext.StoreList))
+	for i, store := range staffContext.StoreList {
+		storeIDs[i] = store.ID
 	}
 
 	// Call service

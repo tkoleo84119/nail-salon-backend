@@ -76,14 +76,9 @@ func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
 		return
 	}
 
-	var storeIDs []int64
-	for _, store := range staffContext.StoreList {
-		storeID, err := utils.ParseID(store.ID)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
-			return
-		}
-		storeIDs = append(storeIDs, storeID)
+	storeIDs := make([]int64, len(staffContext.StoreList))
+	for i, store := range staffContext.StoreList {
+		storeIDs[i] = store.ID
 	}
 
 	// Service layer call

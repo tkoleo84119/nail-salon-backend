@@ -59,14 +59,7 @@ func (h *Create) Create(c *gin.Context) {
 
 	creatorStoreIDs := make([]int64, len(staffContext.StoreList))
 	for i, store := range staffContext.StoreList {
-		storeID, err := utils.ParseID(store.ID)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-				"field": "storeIds 類型轉換失敗",
-			})
-			return
-		}
-		creatorStoreIDs[i] = storeID
+		creatorStoreIDs[i] = store.ID
 	}
 
 	response, err := h.service.Create(c.Request.Context(), parsedReq, staffContext.Role, creatorStoreIDs)

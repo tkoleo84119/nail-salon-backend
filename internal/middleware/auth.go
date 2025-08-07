@@ -72,7 +72,7 @@ func validateStaffToken(c *gin.Context, db dbgen.Querier, claims *common.StaffJW
 
 	// Build StaffContext with fresh data from database
 	staffContext := common.StaffContext{
-		UserID:    utils.FormatID(staff.ID),
+		UserID:    staff.ID,
 		Username:  staff.Username,
 		Role:      staff.Role,
 		StoreList: storeList,
@@ -202,7 +202,7 @@ func getStoreAccess(ctx context.Context, db dbgen.Querier, staffUser dbgen.Staff
 		}
 		for _, store := range stores {
 			storeList = append(storeList, common.Store{
-				ID:   utils.FormatID(store.ID),
+				ID:   store.ID,
 				Name: store.Name,
 			})
 		}
@@ -214,7 +214,7 @@ func getStoreAccess(ctx context.Context, db dbgen.Querier, staffUser dbgen.Staff
 		}
 		for _, access := range storeAccess {
 			storeList = append(storeList, common.Store{
-				ID:   utils.FormatID(access.StoreID),
+				ID:   access.StoreID,
 				Name: access.StoreName,
 			})
 		}

@@ -9,12 +9,12 @@ type ApiResponse struct {
 }
 
 type Store struct {
-	ID   string `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
 type StaffContext struct {
-	UserID    string  `json:"userId"`
+	UserID    int64   `json:"userId"`
 	Username  string  `json:"username"`
 	Role      string  `json:"role"`
 	StoreList []Store `json:"storeList"`

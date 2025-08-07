@@ -1,7 +1,10 @@
 package adminStoreAccess
 
-import "github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-
 type GetResponse struct {
-	StoreList []common.Store `json:"storeList"`
+	StoreList []GetStore `json:"storeList"`
+}
+
+type GetStore struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }

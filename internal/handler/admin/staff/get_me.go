@@ -9,7 +9,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
-	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetMe struct {
@@ -30,15 +29,8 @@ func (h *GetMe) GetMe(c *gin.Context) {
 		return
 	}
 
-	// Parse staff user ID from context
-	staffUserID, err := utils.ParseID(staffContext.UserID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "staffUserId 類型轉換失敗"})
-		return
-	}
-
 	// Service layer call
-	response, err := h.service.GetMe(c.Request.Context(), staffUserID)
+	response, err := h.service.GetMe(c.Request.Context(), staffContext.UserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

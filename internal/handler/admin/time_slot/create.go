@@ -54,28 +54,13 @@ func (h *Create) Create(c *gin.Context) {
 		return
 	}
 
-	creatorID, err := utils.ParseID(staffContext.UserID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"staffId": "staffId 類型轉換失敗",
-		})
-		return
-	}
-
 	creatorStoreIDs := make([]int64, len(staffContext.StoreList))
 	for i, store := range staffContext.StoreList {
-		storeID, err := utils.ParseID(store.ID)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-				"storeId": "storeId 類型轉換失敗",
-			})
-			return
-		}
-		creatorStoreIDs[i] = storeID
+		creatorStoreIDs[i] = store.ID
 	}
 
 	// Call service
-	response, err := h.service.Create(c.Request.Context(), parsedScheduleID, req, creatorID, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.Create(c.Request.Context(), parsedScheduleID, req, staffContext.UserID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

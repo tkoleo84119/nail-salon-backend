@@ -8,7 +8,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -40,9 +39,9 @@ func (s *Get) Get(ctx context.Context, staffID int64) (*adminStoreAccessModel.Ge
 	}
 
 	// Convert to response format
-	var items []common.Store
+	var items []adminStoreAccessModel.GetStore
 	for _, access := range storeAccessList {
-		items = append(items, common.Store{
+		items = append(items, adminStoreAccessModel.GetStore{
 			ID:   utils.FormatID(access.StoreID),
 			Name: access.StoreName,
 		})

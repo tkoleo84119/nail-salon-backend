@@ -61,11 +61,7 @@ func (h *Update) Update(c *gin.Context) {
 
 	storeIds := make([]int64, len(staffContext.StoreList))
 	for i, store := range staffContext.StoreList {
-		storeIds[i], err = utils.ParseID(store.ID)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
-			return
-		}
+		storeIds[i] = store.ID
 	}
 
 	// Service layer call

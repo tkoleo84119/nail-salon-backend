@@ -5,6 +5,7 @@ import (
 
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Permission struct{}
@@ -18,13 +19,13 @@ func (s *Permission) Permission(ctx context.Context, staffContext *common.StaffC
 	storeAccess := make([]adminAuthModel.StoreInfo, len(staffContext.StoreList))
 	for i, store := range staffContext.StoreList {
 		storeAccess[i] = adminAuthModel.StoreInfo{
-			ID:   store.ID,
+			ID:   utils.FormatID(store.ID),
 			Name: store.Name,
 		}
 	}
 
 	response := &adminAuthModel.PermissionResponse{
-		ID:          staffContext.UserID,
+		ID:          utils.FormatID(staffContext.UserID),
 		Name:        staffContext.Username,
 		Role:        staffContext.Role,
 		StoreAccess: storeAccess,

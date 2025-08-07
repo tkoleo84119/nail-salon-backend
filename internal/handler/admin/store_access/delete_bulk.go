@@ -65,30 +65,14 @@ func (h *DeleteBulk) DeleteBulk(c *gin.Context) {
 		return
 	}
 
-	// Convert UserID to int64
-	creatorID, err := utils.ParseID(staffContext.UserID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"staffId": "staffId 類型轉換失敗",
-		})
-		return
-	}
-
 	// Convert store IDs to int64 for permission check
-	var creatorStoreIDs []int64
-	for _, storeStr := range staffContext.StoreList {
-		storeID, err := utils.ParseID(storeStr.ID)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-				"storeIds": "storeIds 類型轉換失敗",
-			})
-			return
-		}
-		creatorStoreIDs = append(creatorStoreIDs, storeID)
+	creatorStoreIDs := make([]int64, len(staffContext.StoreList))
+	for i, store := range staffContext.StoreList {
+		creatorStoreIDs[i] = store.ID
 	}
 
 	// Call service
-	response, err := h.service.DeleteBulk(c.Request.Context(), parsedStaffId, parsedStoreIDs, creatorID, staffContext.Role, creatorStoreIDs)
+	response, err := h.service.DeleteBulk(c.Request.Context(), parsedStaffId, parsedStoreIDs, staffContext.UserID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

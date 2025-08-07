@@ -38,14 +38,9 @@ func (h *Create) Create(c *gin.Context) {
 		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
 		return
 	}
-	creatorID, err := utils.ParseID(staffContext.UserID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffID": "staffID 類型轉換失敗"})
-		return
-	}
 
 	// Call service
-	response, err := h.service.Create(c.Request.Context(), req, creatorID)
+	response, err := h.service.Create(c.Request.Context(), req, staffContext.UserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

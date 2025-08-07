@@ -82,13 +82,7 @@ func (h *UpdateMyStylistHandler) UpdateMyStylist(c *gin.Context) {
 		return
 	}
 
-	staffUserID, err := utils.ParseID(staffContext.UserID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "staffUserId 類型轉換失敗"})
-		return
-	}
-
-	response, err := h.service.UpdateMyStylist(c.Request.Context(), req, staffUserID)
+	response, err := h.service.UpdateMyStylist(c.Request.Context(), req, staffContext.UserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

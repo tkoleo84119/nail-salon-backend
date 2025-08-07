@@ -47,8 +47,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		sort = strings.Split(*req.Sort, ",")
 	}
 
-	// Service layer call
-	response, err := h.service.GetAll(c.Request.Context(), adminStaffModel.GetAllParsedRequest{
+	parsedRequest := adminStaffModel.GetAllParsedRequest{
 		Username: req.Username,
 		Email:    req.Email,
 		Role:     req.Role,
@@ -56,7 +55,10 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		Limit:    limit,
 		Offset:   offset,
 		Sort:     sort,
-	})
+	}
+
+	// Service layer call
+	response, err := h.service.GetAll(c.Request.Context(), parsedRequest)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

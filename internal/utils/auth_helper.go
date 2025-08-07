@@ -8,11 +8,7 @@ import (
 func CheckOneStoreAccess(storeID int64, staffContext common.StaffContext) (bool, error) {
 	var storeAccess []int64
 	for _, store := range staffContext.StoreList {
-		storeId, err := ParseID(store.ID)
-		if err != nil {
-			return false, err
-		}
-		storeAccess = append(storeAccess, storeId)
+		storeAccess = append(storeAccess, store.ID)
 	}
 
 	hasAccess := false

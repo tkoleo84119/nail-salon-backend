@@ -59,26 +59,14 @@ func (h *Create) Create(c *gin.Context) {
 		return
 	}
 
-	// Convert UserID to int64
-	creatorID, err := utils.ParseID(staffContext.UserID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"staffUserId": "staffUserId 類型轉換失敗"})
-		return
-	}
-
 	// Extract store IDs from staff context
-	var creatorStoreIDs []int64
-	for _, store := range staffContext.StoreList {
-		storeID, err := utils.ParseID(store.ID)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
-			return
-		}
-		creatorStoreIDs = append(creatorStoreIDs, storeID)
+	creatorStoreIDs := make([]int64, len(staffContext.StoreList))
+	for i, store := range staffContext.StoreList {
+		creatorStoreIDs[i] = store.ID
 	}
 
 	// Call service
-	response, isNewlyCreated, err := h.service.Create(c.Request.Context(), parsedStaffID, parsedStoreID, creatorID, staffContext.Role, creatorStoreIDs)
+	response, isNewlyCreated, err := h.service.Create(c.Request.Context(), parsedStaffID, parsedStoreID, staffContext.UserID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

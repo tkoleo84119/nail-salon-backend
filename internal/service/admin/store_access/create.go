@@ -97,9 +97,9 @@ func (s *Create) Create(ctx context.Context, staffID int64, storeID int64, creat
 	}
 
 	// Convert to response format
-	var storeList []common.Store
+	var storeList []adminStoreAccessModel.CreateStore
 	for _, access := range storeAccessList {
-		storeList = append(storeList, common.Store{
+		storeList = append(storeList, adminStoreAccessModel.CreateStore{
 			ID:   utils.FormatID(access.StoreID),
 			Name: access.StoreName,
 		})
