@@ -50,10 +50,3 @@ INSERT INTO staff_users (
     is_active,
     created_at,
     updated_at;
-
--- name: CheckEmailUniqueForUpdate :one
-SELECT EXISTS(
-    SELECT 1 FROM staff_users
-    WHERE email = $1 AND id != $2
-) as exists;
-

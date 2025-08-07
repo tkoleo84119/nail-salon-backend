@@ -93,8 +93,6 @@
 | 404    | E3TMS008 | TimeSlotNotFound                 | 時段不存在或已被刪除             |
 | 404    | E3SCH005 | ScheduleNotFound                 | 排班不存在或已被刪除             |
 | 404    | E3STY001 | StylistNotFound                  | 美甲師資料不存在                 |
-| 404    | E3STO002 | StoreNotFound                    | 門市不存在或已被刪除             |
-| 400    | E3STO001 | StoreNotActive                   | 門市未啟用                       |
 | 500    | E9001    | SysInternalError                 | 系統發生錯誤，請稍後再試         |
 | 500    | E9002    | SysDatabaseError                 | 資料庫操作失敗                   |
 
@@ -105,7 +103,6 @@
 - `time_slots`
 - `schedules`
 - `stylists`
-- `stores`
 
 ---
 
@@ -117,9 +114,8 @@
 4. 取得 `schedule` 資訊。
 5. 取得 `stylist` 資訊。
 6. 判斷身分是否可操作指定 `time_slot`（美甲師僅可刪除自己的 `time_slot`，管理員可刪除任一美甲師 `time_slot`）。
-7. 檢查是否有權限操作該 `store`。
-8. 執行刪除。
-9. 回傳已刪除 `id`。
+7. 執行刪除。
+8. 回傳已刪除 `id`。
 
 ---
 

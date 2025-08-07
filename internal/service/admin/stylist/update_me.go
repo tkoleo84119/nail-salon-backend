@@ -7,17 +7,20 @@ import (
 	"github.com/jackc/pgx/v5"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStylistModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/stylist"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateMyStylistService struct {
-	repo *sqlxRepo.Repositories
+	queries dbgen.Querier
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateMyStylistService(repo *sqlxRepo.Repositories) *UpdateMyStylistService {
+func NewUpdateMyStylistService(queries dbgen.Querier, repo *sqlxRepo.Repositories) *UpdateMyStylistService {
 	return &UpdateMyStylistService{
-		repo: repo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -28,7 +31,7 @@ func (s *UpdateMyStylistService) UpdateMyStylist(ctx context.Context, req adminS
 	}
 
 	// Check if stylist exists for this staff user
-	_, err := s.repo.Stylist.GetStylistByStaffUserID(ctx, staffUserID)
+	_, err := s.queries.GetStylistByStaffUserID(ctx, staffUserID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)

@@ -119,6 +119,8 @@ func (r *TimeSlotTemplateRepository) GetAllTimeSlotTemplateByFilter(ctx context.
 	return total, results, nil
 }
 
+// ------------------------------------------------------------------------------------------------
+
 type UpdateTimeSlotTemplateParams struct {
 	Name *string
 	Note *string

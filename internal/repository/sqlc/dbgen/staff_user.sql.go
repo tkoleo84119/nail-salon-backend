@@ -11,25 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const checkEmailUniqueForUpdate = `-- name: CheckEmailUniqueForUpdate :one
-SELECT EXISTS(
-    SELECT 1 FROM staff_users
-    WHERE email = $1 AND id != $2
-) as exists
-`
-
-type CheckEmailUniqueForUpdateParams struct {
-	Email string `db:"email" json:"email"`
-	ID    int64  `db:"id" json:"id"`
-}
-
-func (q *Queries) CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailUniqueForUpdateParams) (bool, error) {
-	row := q.db.QueryRow(ctx, checkEmailUniqueForUpdate, arg.Email, arg.ID)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
 const checkStaffUserExistsByUsername = `-- name: CheckStaffUserExistsByUsername :one
 SELECT EXISTS(
     SELECT 1 FROM staff_users

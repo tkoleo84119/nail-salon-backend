@@ -141,7 +141,7 @@
 | 401    | E1005    | AuthStaffFailed                 | 未找到有效的員工資訊，請重新登入                    |
 | 401    | E1006    | AuthContextMissing              | 未找到使用者認證資訊，請重新登入                    |
 | 403    | E1010    | AuthPermissionDenied            | 權限不足，無法執行此操作                            |
-| 400    | E2001    | ValJsonFormat                   | JSON 格式錯誤，請檢查                                |
+| 400    | E2001    | ValJsonFormat                   | JSON 格式錯誤，請檢查                               |
 | 400    | E2002    | ValPathParamMissing             | 路徑參數缺失，請檢查                                |
 | 400    | E2004    | ValTypeConversionFailed         | 參數類型轉換失敗                                    |
 | 400    | E2034    | ValFieldTimeFormat              | {field} 格式錯誤，請使用正確的時間格式 (HH:mm)      |
@@ -152,8 +152,6 @@
 | 409    | E3TMS011 | TimeSlotConflict                | 時段時間區段重疊                                    |
 | 400    | E3TMS012 | TimeSlotEndBeforeStart          | 結束時間必須在開始時間之後                          |
 | 404    | E3STY001 | StylistNotFound                 | 美甲師資料不存在                                    |
-| 404    | E3STO002 | StoreNotFound                   | 門市不存在或已被刪除                                |
-| 400    | E3STO001 | StoreNotActive                  | 門市未啟用                                          |
 | 500    | E9001    | SysInternalError                | 系統發生錯誤，請稍後再試                            |
 | 500    | E9002    | SysDatabaseError                | 資料庫操作失敗                                      |
 
@@ -172,19 +170,18 @@
 
 1. 檢查 `stylistId` 是否存在。
 2. 判斷身分是否可操作指定 stylistId (員工只能建立自己的班表，管理員可建立任一美甲師班表)。
-3. 檢查 `storeId` 是否存在。
-4. 判斷是否有權限操作指定 `storeId`。
-5. 驗證每筆 schedule 的 workDate、timeSlots
-   - 驗證 workDate 格式是否正確。
+3. 判斷是否有權限操作指定 `storeId`。
+4. 驗證每筆 `schedule` 的 `workDate`、`timeSlots`
+   - 驗證 `workDate` 格式是否正確。
    - 不可創建過去的班表。
-   - 不可傳入相同的 workDate。
-   - 驗證 timeSlots 的 startTime、endTime 格式是否正確。
-   - 驗證 timeSlots 的 startTime 必須在 endTime 之前。
-   - 驗證 timeSlots 的 startTime、endTime 不得重疊。
-6. 檢查同一天同店同美甲師是否已有班表（不可重複排班）。
-7. 新增 `schedules` 資料。
-8. 批次建立對應的多筆 `time_slots`。
-9. 回傳新增結果。
+   - 不可傳入相同的 `workDate`。
+   - 驗證 `timeSlots` 的 `startTime`、`endTime` 格式是否正確。
+   - 驗證 `timeSlots` 的 `startTime` 必須在 `endTime` 之前。
+   - 驗證 `timeSlots` 的 `startTime`、`endTime` 不得重疊。
+5. 檢查同一天同店同美甲師是否已有班表（不可重複排班）。
+6. 新增 `schedules` 資料。
+7. 批次建立對應的多筆 `time_slots`。
+8. 回傳新增結果。
 
 ---
 

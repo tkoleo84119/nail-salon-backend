@@ -103,15 +103,15 @@
 
 ### Service 邏輯
 
-1. 驗證 refreshToken 是否存在於資料庫中。
+1. 驗證 `refreshToken` 是否存在於資料庫中。
    - `expired_at > now()`
    - `is_revoked = false`
 2. 取得員工資料，並驗證是否被停用 `is_active = false`
-3. 產生新的 access token
-4. 回傳新的 access token
+3. 產生新的 `accessToken`
+4. 回傳新的 `accessToken`
 
 ---
 
 ## 注意事項
 
-- 暫時不考慮 refresh token 的每次使用都撤銷
+- 暫時不考慮 `refreshToken` 的每次使用都撤銷

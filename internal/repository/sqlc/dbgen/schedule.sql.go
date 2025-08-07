@@ -41,56 +41,6 @@ func (q *Queries) CheckScheduleExists(ctx context.Context, arg CheckScheduleExis
 	return exists, err
 }
 
-const createSchedule = `-- name: CreateSchedule :one
-INSERT INTO schedules (
-    id,
-    store_id,
-    stylist_id,
-    work_date,
-    note,
-    created_at,
-    updated_at
-) VALUES (
-    $1, $2, $3, $4, $5, NOW(), NOW()
-) RETURNING
-    id,
-    store_id,
-    stylist_id,
-    work_date,
-    note,
-    created_at,
-    updated_at
-`
-
-type CreateScheduleParams struct {
-	ID        int64       `db:"id" json:"id"`
-	StoreID   int64       `db:"store_id" json:"store_id"`
-	StylistID int64       `db:"stylist_id" json:"stylist_id"`
-	WorkDate  pgtype.Date `db:"work_date" json:"work_date"`
-	Note      pgtype.Text `db:"note" json:"note"`
-}
-
-func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error) {
-	row := q.db.QueryRow(ctx, createSchedule,
-		arg.ID,
-		arg.StoreID,
-		arg.StylistID,
-		arg.WorkDate,
-		arg.Note,
-	)
-	var i Schedule
-	err := row.Scan(
-		&i.ID,
-		&i.StoreID,
-		&i.StylistID,
-		&i.WorkDate,
-		&i.Note,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const deleteSchedulesByIDs = `-- name: DeleteSchedulesByIDs :exec
 DELETE FROM schedules
 WHERE id = ANY($1::bigint[])
@@ -234,53 +184,6 @@ func (q *Queries) GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([
 			&i.StartTime,
 			&i.EndTime,
 			&i.IsAvailable,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getSchedulesByStoreAndStylist = `-- name: GetSchedulesByStoreAndStylist :many
-SELECT
-    id,
-    store_id,
-    stylist_id,
-    work_date,
-    note,
-    created_at,
-    updated_at
-FROM schedules
-WHERE store_id = $1 AND stylist_id = $2
-ORDER BY work_date
-`
-
-type GetSchedulesByStoreAndStylistParams struct {
-	StoreID   int64 `db:"store_id" json:"store_id"`
-	StylistID int64 `db:"stylist_id" json:"stylist_id"`
-}
-
-func (q *Queries) GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSchedulesByStoreAndStylistParams) ([]Schedule, error) {
-	rows, err := q.db.Query(ctx, getSchedulesByStoreAndStylist, arg.StoreID, arg.StylistID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Schedule{}
-	for rows.Next() {
-		var i Schedule
-		if err := rows.Scan(
-			&i.ID,
-			&i.StoreID,
-			&i.StylistID,
-			&i.WorkDate,
-			&i.Note,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

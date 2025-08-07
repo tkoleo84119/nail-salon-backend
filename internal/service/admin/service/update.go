@@ -9,17 +9,20 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	repo *sqlx.Repositories
+	queries dbgen.Querier
+	repo    *sqlx.Repositories
 }
 
-func NewUpdate(repo *sqlx.Repositories) *Update {
+func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
 	return &Update{
-		repo: repo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -35,7 +38,7 @@ func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceMo
 	}
 
 	// Check if service exists
-	_, err := s.repo.Service.GetServiceByID(ctx, serviceID)
+	_, err := s.queries.GetServiceByID(ctx, serviceID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ServiceNotFound)
@@ -45,7 +48,10 @@ func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceMo
 
 	// Check name uniqueness if name is being updated
 	if req.Name != nil {
-		exists, err := s.repo.Service.CheckServiceNameExistsExcluding(ctx, serviceID, *req.Name)
+		exists, err := s.queries.CheckServiceNameExistsExcluding(ctx, dbgen.CheckServiceNameExistsExcludingParams{
+			ID:   serviceID,
+			Name: *req.Name,
+		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check service name uniqueness", err)
 		}

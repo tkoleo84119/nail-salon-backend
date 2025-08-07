@@ -13,12 +13,9 @@ import (
 
 // StylistRepositoryInterface defines the interface for stylist repository
 type StylistRepositoryInterface interface {
-	CreateStylistTx(ctx context.Context, tx *sqlx.Tx, params CreateStylistTxParams) (int64, error)
-	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (*GetStylistByStaffUserIDResponse, error)
 	GetStoreAllStylistByFilter(ctx context.Context, storeID int64, params GetStoreAllStylistByFilterParams) (int, []GetStoreAllStylistByFilterItem, error)
 	UpdateStylist(ctx context.Context, staffUserID int64, params UpdateStylistParams) (UpdateStylistResponse, error)
 	GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error)
-	GetStylistByID(ctx context.Context, stylistID int64) (*GetStylistByIDResponse, error)
 }
 
 type StylistRepository struct {
@@ -27,79 +24,6 @@ type StylistRepository struct {
 
 func NewStylistRepository(db *sqlx.DB) *StylistRepository {
 	return &StylistRepository{db: db}
-}
-
-type CreateStylistTxParams struct {
-	ID          int64 `db:"id"`
-	StaffUserID int64 `db:"staff_user_id"`
-}
-
-func (r *StylistRepository) CreateStylistTx(ctx context.Context, tx *sqlx.Tx, params CreateStylistTxParams) (int64, error) {
-	query := `
-		INSERT INTO stylists
-		VALUES (:id, :staff_user_id)
-		RETURNING id
-	`
-
-	var id int64
-	stmt, err := tx.PrepareNamedContext(ctx, query)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create store: %w", err)
-	}
-	defer stmt.Close()
-
-	err = stmt.QueryRowxContext(ctx, params).Scan(&id)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create store: %w", err)
-	}
-
-	return id, nil
-}
-
-type GetStylistByStaffUserIDResponse struct {
-	ID           int64              `db:"id"`
-	Name         pgtype.Text        `db:"name"`
-	GoodAtShapes []string           `db:"good_at_shapes"`
-	GoodAtColors []string           `db:"good_at_colors"`
-	GoodAtStyles []string           `db:"good_at_styles"`
-	IsIntrovert  pgtype.Bool        `db:"is_introvert"`
-	CreatedAt    pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
-}
-
-func (r *StylistRepository) GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (*GetStylistByStaffUserIDResponse, error) {
-	query := `
-		SELECT id,
-		name,
-		COALESCE(good_at_shapes, '{}'::text[]) AS good_at_shapes,
-		COALESCE(good_at_colors, '{}'::text[]) AS good_at_colors,
-		COALESCE(good_at_styles, '{}'::text[]) AS good_at_styles,
-		is_introvert,
-		created_at,
-		updated_at
-		FROM stylists
-		WHERE staff_user_id = $1
-	`
-
-	m := pgtype.NewMap()
-	row := r.db.QueryRowContext(ctx, query, staffUserID)
-
-	var result GetStylistByStaffUserIDResponse
-	err := row.Scan(
-		&result.ID,
-		&result.Name,
-		m.SQLScanner(&result.GoodAtShapes),
-		m.SQLScanner(&result.GoodAtColors),
-		m.SQLScanner(&result.GoodAtStyles),
-		&result.IsIntrovert,
-		&result.CreatedAt,
-		&result.UpdatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
 }
 
 type GetStoreAllStylistByFilterParams struct {
@@ -237,6 +161,8 @@ func (r *StylistRepository) GetStoreAllStylistByFilter(ctx context.Context, stor
 	return total, stylists, nil
 }
 
+// ------------------------------------------------------------------------------------------------
+
 type UpdateStylistParams struct {
 	Name         *string   `db:"name"`
 	GoodAtShapes *[]string `db:"good_at_shapes"`
@@ -342,6 +268,8 @@ type GetStoreStylistsModel struct {
 	IsIntrovert  bool     `db:"is_introvert"`
 }
 
+// ------------------------------------------------------------------------------------------------
+
 // GetStoreStylists retrieves stylists for a specific store with flexible filtering
 func (r *StylistRepository) GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error) {
 	args := map[string]interface{}{
@@ -422,51 +350,4 @@ func (r *StylistRepository) GetStoreStylists(ctx context.Context, storeID int64,
 	}
 
 	return items, total, nil
-}
-
-type GetStylistByIDResponse struct {
-	ID           int64              `db:"id"`
-	Name         pgtype.Text        `db:"name"`
-	GoodAtShapes []string           `db:"good_at_shapes"`
-	GoodAtColors []string           `db:"good_at_colors"`
-	GoodAtStyles []string           `db:"good_at_styles"`
-	IsIntrovert  pgtype.Bool        `db:"is_introvert"`
-	CreatedAt    pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
-}
-
-func (r *StylistRepository) GetStylistByID(ctx context.Context, stylistID int64) (*GetStylistByIDResponse, error) {
-	query := `
-		SELECT id,
-		name,
-		COALESCE(good_at_shapes, '{}'::text[]) AS good_at_shapes,
-		COALESCE(good_at_colors, '{}'::text[]) AS good_at_colors,
-		COALESCE(good_at_styles, '{}'::text[]) AS good_at_styles,
-		is_introvert,
-		created_at,
-		updated_at
-		FROM stylists
-		WHERE id = $1
-	`
-
-	row := r.db.QueryRowxContext(ctx, query, stylistID)
-
-	m := pgtype.NewMap()
-
-	var result GetStylistByIDResponse
-	err := row.Scan(
-		&result.ID,
-		&result.Name,
-		m.SQLScanner(&result.GoodAtShapes),
-		m.SQLScanner(&result.GoodAtColors),
-		m.SQLScanner(&result.GoodAtStyles),
-		&result.IsIntrovert,
-		&result.CreatedAt,
-		&result.UpdatedAt,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("scan result failed: %w", err)
-	}
-
-	return &result, nil
 }

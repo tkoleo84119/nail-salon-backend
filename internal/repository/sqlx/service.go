@@ -13,13 +13,9 @@ import (
 )
 
 type ServiceRepositoryInterface interface {
-	CreateService(ctx context.Context, params CreateServiceParams) (CreateServiceResponse, error)
 	GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error)
-	GetServiceByID(ctx context.Context, serviceID int64) (GetServiceByIDResponse, error)
-	UpdateService(ctx context.Context, serviceID int64, params UpdateServiceParams) (UpdateServiceResponse, error)
 	GetStoreServices(ctx context.Context, storeID int64, isAddon *bool, limit, offset int) ([]storeModel.GetStoreServicesItemModel, int, error)
-	CheckServiceNameExists(ctx context.Context, name string) (bool, error)
-	CheckServiceNameExistsExcluding(ctx context.Context, serviceID int64, name string) (bool, error)
+	UpdateService(ctx context.Context, serviceID int64, params UpdateServiceParams) (UpdateServiceResponse, error)
 }
 
 type ServiceRepository struct {
@@ -30,51 +26,6 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 	return &ServiceRepository{
 		db: db,
 	}
-}
-
-type CreateServiceParams struct {
-	ID              int64          `db:"id"`
-	Name            string         `db:"name"`
-	Price           pgtype.Numeric `db:"price"`
-	DurationMinutes int32          `db:"duration_minutes"`
-	IsAddon         pgtype.Bool    `db:"is_addon"`
-	IsVisible       pgtype.Bool    `db:"is_visible"`
-	Note            pgtype.Text    `db:"note"`
-}
-
-type CreateServiceResponse struct {
-	ID              int64              `db:"id"`
-	Name            string             `db:"name"`
-	Price           pgtype.Numeric     `db:"price"`
-	DurationMinutes int32              `db:"duration_minutes"`
-	IsAddon         pgtype.Bool        `db:"is_addon"`
-	IsVisible       pgtype.Bool        `db:"is_visible"`
-	IsActive        pgtype.Bool        `db:"is_active"`
-	Note            pgtype.Text        `db:"note"`
-	CreatedAt       pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
-}
-
-func (r *ServiceRepository) CreateService(ctx context.Context, params CreateServiceParams) (CreateServiceResponse, error) {
-	query := `
-		INSERT INTO services (id, name, price, duration_minutes, is_addon, is_visible, note)
-		VALUES (:id, :name, :price, :duration_minutes, :is_addon, :is_visible, :note)
-		RETURNING id, name, price, duration_minutes, is_addon, is_visible, note, created_at, updated_at
-	`
-
-	var result CreateServiceResponse
-	stmt, err := r.db.PrepareNamedContext(ctx, query)
-	if err != nil {
-		return CreateServiceResponse{}, fmt.Errorf("failed to create service: %w", err)
-	}
-	defer stmt.Close()
-
-	err = stmt.QueryRowxContext(ctx, params).StructScan(&result)
-	if err != nil {
-		return CreateServiceResponse{}, fmt.Errorf("failed to create service: %w", err)
-	}
-
-	return result, nil
 }
 
 // GetStoreServiceListModel represents the database model for admin service list queries
@@ -204,124 +155,7 @@ func (r *ServiceRepository) GetAllServiceByFilter(ctx context.Context, params Ge
 	return total, results, nil
 }
 
-type GetServiceByIDResponse struct {
-	ID              int64              `db:"id"`
-	Name            string             `db:"name"`
-	Price           pgtype.Numeric     `db:"price"`
-	DurationMinutes int32              `db:"duration_minutes"`
-	IsAddon         pgtype.Bool        `db:"is_addon"`
-	IsVisible       pgtype.Bool        `db:"is_visible"`
-	IsActive        pgtype.Bool        `db:"is_active"`
-	Note            pgtype.Text        `db:"note"`
-	CreatedAt       pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
-}
-
-func (r *ServiceRepository) GetServiceByID(ctx context.Context, serviceID int64) (GetServiceByIDResponse, error) {
-	query := `
-		SELECT id, name, price, duration_minutes, is_addon, is_visible, is_active, note, created_at, updated_at
-		FROM services
-		WHERE id = $1
-	`
-
-	var result GetServiceByIDResponse
-	err := r.db.GetContext(ctx, &result, query, serviceID)
-	if err != nil {
-		return GetServiceByIDResponse{}, err
-	}
-
-	return result, nil
-}
-
-type UpdateServiceParams struct {
-	Name            *string
-	Price           *int64
-	DurationMinutes *int32
-	IsAddon         *bool
-	IsVisible       *bool
-	IsActive        *bool
-	Note            *string
-}
-
-type UpdateServiceResponse struct {
-	ID              int64              `db:"id"`
-	Name            string             `db:"name"`
-	Price           pgtype.Numeric     `db:"price"`
-	DurationMinutes int32              `db:"duration_minutes"`
-	IsAddon         pgtype.Bool        `db:"is_addon"`
-	IsVisible       pgtype.Bool        `db:"is_visible"`
-	IsActive        pgtype.Bool        `db:"is_active"`
-	Note            pgtype.Text        `db:"note"`
-	CreatedAt       pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
-}
-
-func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, params UpdateServiceParams) (UpdateServiceResponse, error) {
-	setParts := []string{"updated_at = NOW()"}
-	args := []interface{}{}
-	argIndex := 1
-
-	if params.Name != nil {
-		setParts = append(setParts, fmt.Sprintf("name = $%d", argIndex))
-		args = append(args, *params.Name)
-		argIndex++
-	}
-
-	if params.Price != nil {
-		setParts = append(setParts, fmt.Sprintf("price = $%d", argIndex))
-		args = append(args, *params.Price)
-		argIndex++
-	}
-
-	if params.DurationMinutes != nil {
-		setParts = append(setParts, fmt.Sprintf("duration_minutes = $%d", argIndex))
-		args = append(args, *params.DurationMinutes)
-		argIndex++
-	}
-
-	if params.IsAddon != nil {
-		setParts = append(setParts, fmt.Sprintf("is_addon = $%d", argIndex))
-		args = append(args, *params.IsAddon)
-		argIndex++
-	}
-
-	if params.IsVisible != nil {
-		setParts = append(setParts, fmt.Sprintf("is_visible = $%d", argIndex))
-		args = append(args, *params.IsVisible)
-		argIndex++
-	}
-
-	if params.IsActive != nil {
-		setParts = append(setParts, fmt.Sprintf("is_active = $%d", argIndex))
-		args = append(args, *params.IsActive)
-		argIndex++
-	}
-
-	if params.Note != nil {
-		setParts = append(setParts, fmt.Sprintf("note = $%d", argIndex))
-		args = append(args, *params.Note)
-		argIndex++
-	}
-
-	// Add WHERE clause
-	args = append(args, serviceID)
-	whereClause := fmt.Sprintf("WHERE id = $%d", argIndex)
-
-	query := fmt.Sprintf(`
-		UPDATE services
-		SET %s
-		%s
-		RETURNING id, name, price, duration_minutes, is_addon, is_visible, is_active, note, created_at, updated_at
-	`, strings.Join(setParts, ", "), whereClause)
-
-	var result UpdateServiceResponse
-	err := r.db.GetContext(ctx, &result, query, args...)
-	if err != nil {
-		return UpdateServiceResponse{}, err
-	}
-
-	return result, nil
-}
+// ------------------------------------------------------------------------------------------------
 
 // GetStoreServicesModel represents the database model for store services
 type GetStoreServicesModel struct {
@@ -424,36 +258,94 @@ func (r *ServiceRepository) GetStoreServices(ctx context.Context, storeID int64,
 	return items, total, nil
 }
 
-func (r *ServiceRepository) CheckServiceNameExists(ctx context.Context, name string) (bool, error) {
-	query := `
-		SELECT EXISTS(
-			SELECT 1
-			FROM services
-			WHERE name = $1
-		)
-	`
+// ------------------------------------------------------------------------------------------------
 
-	var exists bool
-	err := r.db.GetContext(ctx, &exists, query, name)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
+type UpdateServiceParams struct {
+	Name            *string
+	Price           *int64
+	DurationMinutes *int32
+	IsAddon         *bool
+	IsVisible       *bool
+	IsActive        *bool
+	Note            *string
 }
 
-func (r *ServiceRepository) CheckServiceNameExistsExcluding(ctx context.Context, serviceID int64, name string) (bool, error) {
-	query := `
-		SELECT EXISTS(
-			SELECT 1
-			FROM services
-			WHERE name = $1 AND id != $2
-		)
-	`
+type UpdateServiceResponse struct {
+	ID              int64              `db:"id"`
+	Name            string             `db:"name"`
+	Price           pgtype.Numeric     `db:"price"`
+	DurationMinutes int32              `db:"duration_minutes"`
+	IsAddon         pgtype.Bool        `db:"is_addon"`
+	IsVisible       pgtype.Bool        `db:"is_visible"`
+	IsActive        pgtype.Bool        `db:"is_active"`
+	Note            pgtype.Text        `db:"note"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
+}
 
-	var exists bool
-	err := r.db.GetContext(ctx, &exists, query, name, serviceID)
-	if err != nil {
-		return false, err
+func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, params UpdateServiceParams) (UpdateServiceResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+	argIndex := 1
+
+	if params.Name != nil {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", argIndex))
+		args = append(args, *params.Name)
+		argIndex++
 	}
-	return exists, nil
+
+	if params.Price != nil {
+		setParts = append(setParts, fmt.Sprintf("price = $%d", argIndex))
+		args = append(args, *params.Price)
+		argIndex++
+	}
+
+	if params.DurationMinutes != nil {
+		setParts = append(setParts, fmt.Sprintf("duration_minutes = $%d", argIndex))
+		args = append(args, *params.DurationMinutes)
+		argIndex++
+	}
+
+	if params.IsAddon != nil {
+		setParts = append(setParts, fmt.Sprintf("is_addon = $%d", argIndex))
+		args = append(args, *params.IsAddon)
+		argIndex++
+	}
+
+	if params.IsVisible != nil {
+		setParts = append(setParts, fmt.Sprintf("is_visible = $%d", argIndex))
+		args = append(args, *params.IsVisible)
+		argIndex++
+	}
+
+	if params.IsActive != nil {
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", argIndex))
+		args = append(args, *params.IsActive)
+		argIndex++
+	}
+
+	if params.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", argIndex))
+		args = append(args, *params.Note)
+		argIndex++
+	}
+
+	// Add WHERE clause
+	args = append(args, serviceID)
+	whereClause := fmt.Sprintf("WHERE id = $%d", argIndex)
+
+	query := fmt.Sprintf(`
+		UPDATE services
+		SET %s
+		%s
+		RETURNING id, name, price, duration_minutes, is_addon, is_visible, is_active, note, created_at, updated_at
+	`, strings.Join(setParts, ", "), whereClause)
+
+	var result UpdateServiceResponse
+	err := r.db.GetContext(ctx, &result, query, args...)
+	if err != nil {
+		return UpdateServiceResponse{}, err
+	}
+
+	return result, nil
 }

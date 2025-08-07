@@ -98,26 +98,6 @@ func (q *Queries) DeleteTimeSlotTemplateItem(ctx context.Context, id int64) erro
 	return err
 }
 
-const getTimeSlotTemplateItemByID = `-- name: GetTimeSlotTemplateItemByID :one
-SELECT id, template_id, start_time, end_time, created_at, updated_at
-FROM time_slot_template_items
-WHERE id = $1
-`
-
-func (q *Queries) GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (TimeSlotTemplateItem, error) {
-	row := q.db.QueryRow(ctx, getTimeSlotTemplateItemByID, id)
-	var i TimeSlotTemplateItem
-	err := row.Scan(
-		&i.ID,
-		&i.TemplateID,
-		&i.StartTime,
-		&i.EndTime,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getTimeSlotTemplateItemsByTemplateID = `-- name: GetTimeSlotTemplateItemsByTemplateID :many
 SELECT
     start_time,

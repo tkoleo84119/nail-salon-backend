@@ -188,16 +188,16 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StoreGetList: adminStoreService.NewGetAll(repositories.SQLX),
 		StoreGet:     adminStoreService.NewGet(queries),
 		StoreCreate:  adminStoreService.NewCreate(queries, database.PgxPool),
-		StoreUpdate:  adminStoreService.NewUpdate(repositories.SQLX),
+		StoreUpdate:  adminStoreService.NewUpdate(queries, repositories.SQLX),
 
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
 		ServiceGet:     adminServiceService.NewGet(queries),
 		ServiceCreate:  adminServiceService.NewCreate(queries),
-		ServiceUpdate:  adminServiceService.NewUpdate(repositories.SQLX),
+		ServiceUpdate:  adminServiceService.NewUpdate(queries, repositories.SQLX),
 
 		// Stylist management services
-		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(repositories.SQLX),
+		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.SQLX),
 		StylistGetList: adminStylistService.NewGetStylistListService(repositories.SQLX),
 
 		// Booking management services

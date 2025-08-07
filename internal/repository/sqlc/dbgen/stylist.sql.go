@@ -11,20 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const checkStylistExistsByStaffUserID = `-- name: CheckStylistExistsByStaffUserID :one
-SELECT EXISTS(
-    SELECT 1 FROM stylists
-    WHERE staff_user_id = $1
-) as exists
-`
-
-func (q *Queries) CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID int64) (bool, error) {
-	row := q.db.QueryRow(ctx, checkStylistExistsByStaffUserID, staffUserID)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
 const createStylist = `-- name: CreateStylist :one
 INSERT INTO stylists (
     id,

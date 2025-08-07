@@ -2,9 +2,6 @@ package adminStylist
 
 import (
 	"context"
-	"errors"
-
-	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStylistModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/stylist"
@@ -24,15 +21,6 @@ func NewGetStylistListService(repo *sqlxRepo.Repositories) *GetStylistListServic
 }
 
 func (s *GetStylistListService) GetStylistList(ctx context.Context, storeID int64, req adminStylistModel.GetStylistListParsedRequest, role string, storeIds []int64) (*adminStylistModel.GetStylistListResponse, error) {
-	// Verify store exists
-	_, err := s.repo.Store.GetStoreByID(ctx, storeID, nil)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get store", err)
-	}
-
 	// Check store access for the staff member (except SUPER_ADMIN)
 	if role != common.RoleSuperAdmin {
 		hasAccess, err := utils.CheckStoreAccess(storeID, storeIds)

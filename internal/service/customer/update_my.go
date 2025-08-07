@@ -31,7 +31,7 @@ func (s *UpdateMyCustomerService) UpdateMyCustomer(ctx context.Context, customer
 	if req.Birthday != nil {
 		_, err := utils.DateStringToTime(*req.Birthday)
 		if err != nil {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValTimeConversionFailed)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValFieldDateFormat)
 		}
 	}
 

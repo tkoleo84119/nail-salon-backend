@@ -354,7 +354,7 @@ func PgTimeToTimeString(t pgtype.Time) string {
 //	startTime := utils.PgTimeToTime(timeSlot.StartTime)
 //	endTime := utils.PgTimeToTime(timeSlot.EndTime)
 //	if !endTime.After(startTime) {
-//	    return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
+//	    return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotEndBeforeStart)
 //	}
 func PgTimeToTime(t pgtype.Time) time.Time {
 	if !t.Valid {
@@ -488,7 +488,7 @@ func DateStringToPgDate(s string) (pgtype.Date, error) {
 //
 //	// Validate time range
 //	if !endTime.After(startTime) {
-//	    return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotInvalidTimeRange)
+//	    return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotEndBeforeStart)
 //	}
 func TimeStringToTime(s string) (time.Time, error) {
 	return time.Parse("15:04", s)

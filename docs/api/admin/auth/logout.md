@@ -96,7 +96,7 @@
 
 ### Service 邏輯
 
-1. 嘗試將資料庫對應 refreshToken 設為 `is_revoked = true`。
+1. 嘗試將資料庫對應 `refreshToken` 設為 `is_revoked = true`。
 2. 不論資料庫操作結果，皆回傳 `{ "success": true }`。
 
 ### 資料表

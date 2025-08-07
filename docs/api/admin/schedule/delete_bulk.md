@@ -105,8 +105,6 @@
 | 400    | E3SCH003 | ScheduleNotBelongToStore         | 部分班表不屬於指定的門市          |
 | 400    | E3SCH004 | ScheduleNotBelongToStylist       | 部分班表不屬於指定的美甲師        |
 | 404    | E3STY001 | StylistNotFound                  | 美甲師資料不存在                  |
-| 404    | E3STO002 | StoreNotFound                    | 門市不存在或已被刪除              |
-| 400    | E3STO001 | StoreNotActive                   | 門市未啟用                        |
 | 500    | E9001    | SysInternalError                 | 系統發生錯誤，請稍後再試          |
 | 500    | E9002    | SysDatabaseError                 | 資料庫操作失敗                    |
 
@@ -125,14 +123,13 @@
 ## Service 邏輯
 
 1. 檢查 `stylistId` 是否存在。
-2. 判斷身分是否可操作指定 stylistId (員工只能刪除自己的班表，管理員可刪除任一美甲師班表)。
-3. 檢查 `storeId` 是否存在。
-4. 判斷是否有權限操作指定 `storeId`。
-5. 取得 `scheduleIds` 的班表資料（含底下所有 `time_slots`）。
-6. 驗證 `scheduleIds` 是否屬於 `stylistId`/`storeId`。
-7. 驗證 `scheduleIds` 的班表是否已被預約。
-8. 執行刪除。
-9. 回傳已刪除班表 id 陣列。
+2. 判斷身分是否可操作指定 `stylistId` (員工只能刪除自己的班表，管理員可刪除任一美甲師班表)。
+3. 判斷是否有權限操作指定 `storeId`。
+4. 取得 `scheduleIds` 的班表資料（含底下所有 `time_slots`）。
+5. 驗證 `scheduleIds` 是否屬於 `stylistId`/`storeId`。
+6. 驗證 `scheduleIds` 的班表是否已被預約。
+7. 執行刪除。
+8. 回傳已刪除班表 id 陣列。
 
 ---
 

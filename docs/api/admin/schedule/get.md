@@ -101,7 +101,6 @@
 | 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查             |
 | 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                 |
 | 404    | E3SCH005 | ScheduleNotFound        | 排班不存在或已被刪除             |
-| 404    | E3STO002 | StoreNotFound           | 門市不存在或已被刪除             |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試         |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                   |
 
@@ -118,10 +117,9 @@
 
 ## Service 邏輯
 
-1. 驗證門市是否存在。
-2. 驗證員工是否有權限存取該門市。
-3. 查詢指定 `scheduleId` 同時 JOIN `time_slots` 表取得時段資料。
-4. 回傳合併資訊。
+1. 驗證員工是否有權限存取該門市。
+2. 查詢指定 `scheduleId` 同時 JOIN `time_slots` 表取得時段資料。
+3. 回傳合併資訊。
 
 ---
 

@@ -24,15 +24,6 @@ func NewGet(queries *dbgen.Queries) *Get {
 }
 
 func (s *Get) Get(ctx context.Context, storeID int64, scheduleID int64, role string, storeIDs []int64) (*adminScheduleModel.GetResponse, error) {
-	// Verify store exists
-	exists, err := s.queries.CheckStoreExistByID(ctx, storeID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check store exists", err)
-	}
-	if !exists {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-	}
-
 	// Check store access for the staff member (except SUPER_ADMIN)
 	if role != common.RoleSuperAdmin {
 		hasAccess, err := utils.CheckStoreAccess(storeID, storeIDs)

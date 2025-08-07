@@ -12,7 +12,6 @@ import (
 
 // TimeSlotRepositoryInterface defines the interface for time slot repository
 type TimeSlotRepositoryInterface interface {
-	BatchCreateTimeSlotsTx(ctx context.Context, tx *sqlx.Tx, params []BatchCreateTimeSlotsTxParams) error
 	UpdateTimeSlot(ctx context.Context, timeSlotID int64, params UpdateTimeSlotParams) (UpdateTimeSlotResponse, error)
 }
 
@@ -21,51 +20,9 @@ type TimeSlotRepository struct {
 }
 
 func NewTimeSlotRepository(db *sqlx.DB) *TimeSlotRepository {
-	return &TimeSlotRepository{db: db}
-}
-
-type BatchCreateTimeSlotsTxParams struct {
-	ID         int64
-	ScheduleID int64
-	StartTime  pgtype.Time
-	EndTime    pgtype.Time
-}
-
-func (r *TimeSlotRepository) BatchCreateTimeSlotsTx(ctx context.Context, tx *sqlx.Tx, params []BatchCreateTimeSlotsTxParams) error {
-	const batchSize = 1000
-
-	var (
-		sb   strings.Builder
-		args []interface{}
-	)
-
-	for i := 0; i < len(params); i += batchSize {
-		end := i + batchSize
-		if end > len(params) {
-			end = len(params)
-		}
-
-		sb.Reset()
-		args = args[:0]
-
-		sb.WriteString("INSERT INTO time_slots (id, schedule_id, start_time, end_time) VALUES ")
-
-		param := 1
-		for j, v := range params[i:end] {
-			sb.WriteString(fmt.Sprintf("($%d,$%d,$%d,$%d)", param, param+1, param+2, param+3))
-			if j < end-i-1 {
-				sb.WriteByte(',')
-			}
-			args = append(args, v.ID, v.ScheduleID, v.StartTime, v.EndTime)
-			param += 4
-		}
-
-		if _, err := tx.ExecContext(ctx, sb.String(), args...); err != nil {
-			return fmt.Errorf("batch insert failed: %w", err)
-		}
+	return &TimeSlotRepository{
+		db: db,
 	}
-
-	return nil
 }
 
 type UpdateTimeSlotParams struct {

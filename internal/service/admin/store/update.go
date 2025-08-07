@@ -6,17 +6,20 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	repo *sqlxRepo.Repositories
+	queries dbgen.Querier
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdate(repo *sqlxRepo.Repositories) *Update {
+func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories) *Update {
 	return &Update{
-		repo: repo,
+		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -29,12 +32,6 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 	// Validate that at least one field has updates
 	if !req.HasUpdates() {
 		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
-	}
-
-	// Check if store exists
-	_, err := s.repo.Store.GetStore(ctx, storeID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store details", err)
 	}
 
 	// For ADMIN role, check store access permission
@@ -50,7 +47,10 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 
 	// Check if name is unique (excluding current store)
 	if req.Name != nil {
-		nameExists, err := s.repo.Store.CheckStoreNameExistsExcluding(ctx, *req.Name, storeID)
+		nameExists, err := s.queries.CheckStoreNameExistsExcluding(ctx, dbgen.CheckStoreNameExistsExcludingParams{
+			ID:   storeID,
+			Name: *req.Name,
+		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name uniqueness", err)
 		}

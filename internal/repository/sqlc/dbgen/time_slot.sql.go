@@ -130,16 +130,6 @@ func (q *Queries) DeleteTimeSlotByID(ctx context.Context, id int64) error {
 	return err
 }
 
-const deleteTimeSlotsByScheduleIDs = `-- name: DeleteTimeSlotsByScheduleIDs :exec
-DELETE FROM time_slots
-WHERE schedule_id = ANY($1::bigint[])
-`
-
-func (q *Queries) DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error {
-	_, err := q.db.Exec(ctx, deleteTimeSlotsByScheduleIDs, dollar_1)
-	return err
-}
-
 const getAvailableTimeSlotsByScheduleID = `-- name: GetAvailableTimeSlotsByScheduleID :many
 SELECT
     ts.id,
@@ -211,48 +201,6 @@ func (q *Queries) GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, erro
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const getTimeSlotsByScheduleID = `-- name: GetTimeSlotsByScheduleID :many
-SELECT
-    id,
-    schedule_id,
-    start_time,
-    end_time,
-    is_available,
-    created_at,
-    updated_at
-FROM time_slots
-WHERE schedule_id = $1
-ORDER BY start_time
-`
-
-func (q *Queries) GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error) {
-	rows, err := q.db.Query(ctx, getTimeSlotsByScheduleID, scheduleID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []TimeSlot{}
-	for rows.Next() {
-		var i TimeSlot
-		if err := rows.Scan(
-			&i.ID,
-			&i.ScheduleID,
-			&i.StartTime,
-			&i.EndTime,
-			&i.IsAvailable,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const updateTimeSlot = `-- name: UpdateTimeSlot :one

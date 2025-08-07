@@ -120,8 +120,6 @@
 | 400    | E2020    | ValFieldRequired        | {field} 為必填項目               |
 | 403    | E3STA004 | StaffNotUpdateSelf      | 不可更新自己的帳號               |
 | 404    | E3STA005 | StaffNotFound           | 員工帳號不存在                   |
-| 404    | E3STO002 | StoreNotFound           | 門市不存在或已被刪除             |
-| 400    | E3STO001 | StoreNotActive          | 門市未啟用                       |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試         |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                   |
 
@@ -141,9 +139,8 @@
 1. 驗證目標員工是否存在
 2. 不能新增自己的 store access
 3. 目標員工不能為 `SUPER_ADMIN`
-4. 驗證門市是否存在
-5. 檢查該門市是否為該管理員有權限的門市
-6. 查詢是否已有相同的門市權限
+4. 檢查該門市是否為該管理員有權限的門市
+5. 查詢是否已有相同的門市權限
    - 若有：不新增，回傳 200 (全部的 store access)
    - 若無：新增一筆 `staff_user_store_access` 記錄，回傳 201 (全部的 store access)
 

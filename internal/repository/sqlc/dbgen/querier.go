@@ -14,7 +14,6 @@ type Querier interface {
 	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
 	CancelBooking(ctx context.Context, arg CancelBookingParams) (CancelBookingRow, error)
-	CheckEmailUniqueForUpdate(ctx context.Context, arg CheckEmailUniqueForUpdateParams) (bool, error)
 	CheckScheduleExists(ctx context.Context, arg CheckScheduleExistsParams) (bool, error)
 	CheckServiceNameExists(ctx context.Context, name string) (bool, error)
 	CheckServiceNameExistsExcluding(ctx context.Context, arg CheckServiceNameExistsExcludingParams) (bool, error)
@@ -24,7 +23,6 @@ type Querier interface {
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
 	CheckStoreNameExistsExcluding(ctx context.Context, arg CheckStoreNameExistsExcludingParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
-	CheckStylistExistsByStaffUserID(ctx context.Context, staffUserID int64) (bool, error)
 	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
@@ -35,7 +33,6 @@ type Querier interface {
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) (Customer, error)
 	CreateCustomerAuth(ctx context.Context, arg CreateCustomerAuthParams) (CustomerAuth, error)
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
-	CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
@@ -51,7 +48,6 @@ type Querier interface {
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplate(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
-	DeleteTimeSlotsByScheduleIDs(ctx context.Context, dollar_1 []int64) error
 	GetActiveStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetAllActiveStoreAccessByStaffId(ctx context.Context, staffUserID int64) ([]GetAllActiveStoreAccessByStaffIdRow, error)
 	GetAllActiveStoresName(ctx context.Context) ([]GetAllActiveStoresNameRow, error)
@@ -63,7 +59,6 @@ type Querier interface {
 	GetCustomerByID(ctx context.Context, id int64) (Customer, error)
 	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)
 	GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error)
-	GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSchedulesByStoreAndStylistParams) ([]Schedule, error)
 	GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error)
 	GetServiceByID(ctx context.Context, id int64) (Service, error)
 	GetServiceByIds(ctx context.Context, dollar_1 []int64) ([]GetServiceByIdsRow, error)
@@ -74,12 +69,9 @@ type Querier interface {
 	GetStylistByID(ctx context.Context, id int64) (Stylist, error)
 	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (Stylist, error)
 	GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error)
-	GetTimeSlotTemplateByID(ctx context.Context, id int64) (TimeSlotTemplate, error)
-	GetTimeSlotTemplateItemByID(ctx context.Context, id int64) (TimeSlotTemplateItem, error)
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]GetTimeSlotTemplateItemsByTemplateIDRow, error)
 	GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]GetTimeSlotTemplateItemsByTemplateIDExcludingRow, error)
 	GetTimeSlotTemplateWithItemsByID(ctx context.Context, id int64) ([]GetTimeSlotTemplateWithItemsByIDRow, error)
-	GetTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (CustomerToken, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error)
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error

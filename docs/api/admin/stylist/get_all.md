@@ -104,7 +104,6 @@
 | 400    | E2024    | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2026    | {field} 最大值為 {param}              |
 | 400    | E2029    | {field} 必須是布林值                  |
-| 404    | E3STO002 | 門市不存在或已被刪除                  |
 | 500    | E9001    | 系統發生錯誤，請稍後再試              |
 | 500    | E9002    | 資料庫操作失敗                        |
 
@@ -187,10 +186,9 @@
 
 ## Service 邏輯
 
-1. 驗證 `storeId` 是否存在。
-2. 驗證員工是否擁有該門市存取權限。
-3. 透過 `store_access` 表查詢與該門市有關聯的 `staff_user_id`。
-4. JOIN `stylists` 表並依查詢條件過濾：
+1. 驗證員工是否擁有該門市存取權限。
+2. 透過 `store_access` 表查詢與該門市有關聯的 `staff_user_id`。
+3. JOIN `stylists` 表並依查詢條件過濾：
    - `name` 過濾
    - `is_introvert` 過濾
    - `staff_users.is_active = true` 過濾

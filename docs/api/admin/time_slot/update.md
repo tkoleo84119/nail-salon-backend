@@ -125,8 +125,6 @@
 | 400    | E3TMS004 | TimeSlotAlreadyBookedDoNotUpdate | 時段已被預約，無法更新                         |
 | 404    | E3SCH005 | ScheduleNotFound                 | 排班不存在或已被刪除                           |
 | 404    | E3STY001 | StylistNotFound                  | 美甲師資料不存在                               |
-| 404    | E3STO002 | StoreNotFound                    | 門市不存在或已被刪除                           |
-| 400    | E3STO001 | StoreNotActive                   | 門市未啟用                                     |
 | 409    | E3TMS011 | TimeSlotConflict                 | 時段時間區段重疊                               |
 | 500    | E9001    | SysInternalError                 | 系統發生錯誤，請稍後再試                       |
 | 500    | E9002    | SysDatabaseError                 | 資料庫操作失敗                                 |
@@ -152,13 +150,12 @@
 6. 檢查 `scheduleId` 是否存在。
 7. 取得 stylist 資訊。
 8. 判斷身分是否可操作指定 time_slot（員工僅可編輯自己的 time_slot，管理員可編輯任一美甲師 time_slot）。
-9. 檢查是否有權限操作該 store。
-10. 若有更新時間，檢查是否時間相關邏輯
+9. 若有更新時間，檢查是否時間相關邏輯
     1.  startTime / endTime 格式是否正確。
     2.  startTime 必須在 endTime 之前。
     3.  startTime / endTime 是否與 schedule 下其他 time_slots 重疊。
-11. 更新 time_slot。
-12. 回傳更新結果。
+10. 更新 time_slot。
+11. 回傳更新結果。
 
 ---
 

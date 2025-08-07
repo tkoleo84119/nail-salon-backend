@@ -16,17 +16,6 @@ INSERT INTO time_slot_templates (
     created_at,
     updated_at;
 
--- name: GetTimeSlotTemplateByID :one
-SELECT
-    id,
-    name,
-    note,
-    updater,
-    created_at,
-    updated_at
-FROM time_slot_templates
-WHERE id = $1;
-
 -- name: GetTimeSlotTemplateWithItemsByID :many
 SELECT
     t.id,
@@ -42,13 +31,13 @@ FROM time_slot_templates t
 LEFT JOIN time_slot_template_items ti ON t.id = ti.template_id
 WHERE t.id = $1;
 
+-- name: DeleteTimeSlotTemplate :exec
+DELETE FROM time_slot_templates
+WHERE id = $1;
+
 -- name: CheckTimeSlotTemplateExists :one
 SELECT EXISTS (
     SELECT 1
     FROM time_slot_templates
     WHERE id = $1
 );
-
--- name: DeleteTimeSlotTemplate :exec
-DELETE FROM time_slot_templates
-WHERE id = $1;

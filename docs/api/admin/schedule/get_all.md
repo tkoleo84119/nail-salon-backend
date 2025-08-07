@@ -12,7 +12,7 @@
 
 ## 說明
 
-- 回傳每筆排班資料（schedule），並包含該筆排班的時段（time slots）。
+- 回傳每筆排班資料（`schedule`），並包含該筆排班的時段（`time_slots`）。
 - 支援查詢條件：美甲師、日期區間。
 - 排班依 `work_date` 排序。
 - 時段依 `start_time` 排序。

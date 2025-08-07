@@ -123,12 +123,6 @@ VAL:
     message: "{field} 格式錯誤，請使用正確的時間格式 (HH:mm)"
     status: 400
 
-  VAL_DUPLICATE_WORK_DATE:
-    message: 重複的工作日期
-    status: 400
-  VAL_TIME_SLOT_REQUIRED:
-    message: 至少需要一個時段
-    status: 400
   VAL_END_BEFORE_START:
     message: 結束日期必須在開始日期之後
     status: 400
@@ -177,13 +171,13 @@ CUSTOMER:
     status: 409
 
 SCHEDULE:
-  SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE:
+  SCHEDULE_ALREADY_BOOKED_DO_NOT_UPDATE:
     code: E3SCH001
-    message: 部分班表已被預約，無法刪除
+    message: 部分時段已被預約，無法更新
     status: 400
-  SCHEDULE_TIME_SLOT_INVALID:
+  SCHEDULE_ALREADY_BOOKED_DO_NOT_DELETE:
     code: E3SCH002
-    message: 時段時間區段錯誤
+    message: 部分班表已被預約，無法刪除
     status: 400
   SCHEDULE_NOT_BELONG_TO_STORE:
     code: E3SCH003
@@ -217,10 +211,6 @@ SCHEDULE:
     code: E3SCH010
     message: 不能創建過去的班表
     status: 400
-  SCHEDULE_ALREADY_BOOKED_DO_NOT_UPDATE:
-    code: E3SCH011
-    message: 部分時段已被預約，無法更新
-    status: 400
 
 SERVICE:
   SERVICE_NOT_ACTIVE:
@@ -249,37 +239,21 @@ STAFF:
     code: E3STA001
     message: 無效的角色
     status: 400
-  STAFF_STORE_NOT_ACTIVE:
-    code: E3STA002
-    message: 部分門市未啟用
-    status: 400
   STAFF_INACTIVE:
-    code: E3STA003
+    code: E3STA002
     message: 帳號已停用
-    status: 403
+    status: 401
   STAFF_NOT_UPDATE_SELF:
-    code: E3STA004
+    code: E3STA003
     message: 不可更新自己的帳號
     status: 403
   STAFF_NOT_FOUND:
-    code: E3STA005
+    code: E3STA004
     message: 員工帳號不存在
     status: 404
-  STAFF_STORE_NOT_FOUND:
-    code: E3STA006
-    message: 指定的門市不存在
-    status: 404
   STAFF_ALREADY_EXISTS:
-    code: E3STA007
-    message: 帳號或Email已存在
-    status: 409
-  STAFF_EMAIL_EXISTS:
-    code: E3STA008
-    message: 此電子郵件已被註冊
-    status: 409
-  STAFF_USERNAME_EXISTS:
-    code: E3STA009
-    message: 此帳號已被使用
+    code: E3STA005
+    message: 帳號已存在
     status: 409
 
 STORE:
@@ -311,44 +285,36 @@ TIME_SLOT:
     code: E3TMS002
     message: 時段不屬於指定的班表
     status: 400
-  TIME_SLOT_TEMPLATE_ITEM_NOT_BELONG_TO_TEMPLATE:
-    code: E3TMS003
-    message: 時段項目不屬於指定的範本
-    status: 400
   TIME_SLOT_ALREADY_BOOKED_DO_NOT_UPDATE:
-    code: E3TMS004
+    code: E3TMS003
     message: 時段已被預約，無法更新
     status: 400
   TIME_SLOT_ALREADY_BOOKED_DO_NOT_DELETE:
-    code: E3TMS005
+    code: E3TMS004
     message: 該時段已被預約，無法刪除
     status: 400
-  TIME_SLOT_INVALID_TIME_RANGE:
-    code: E3TMS006
-    message: 時段時間區段錯誤
-    status: 400
-  TIME_SLOT_NOT_ENOUGH_TIME:
-    code: E3TMS007
-    message: 時段時間不足
-    status: 400
   TIME_SLOT_NOT_FOUND:
-    code: E3TMS008
+    code: E3TMS005
     message: 時段不存在或已被刪除
     status: 404
+  TIME_SLOT_NOT_ENOUGH_TIME:
+    code: E3TMS006
+    message: 時段時間不足
+    status: 400
   TIME_SLOT_TEMPLATE_NOT_FOUND:
-    code: E3TMS009
+    code: E3TMS007
     message: 範本不存在或已被刪除
     status: 404
   TIME_SLOT_TEMPLATE_ITEM_NOT_FOUND:
-    code: E3TMS010
+    code: E3TMS008
     message: 範本項目不存在或已被刪除
     status: 404
   TIME_SLOT_CONFLICT:
-    code: E3TMS011
+    code: E3TMS009
     message: 時段時間區段重疊
     status: 409
   TIME_SLOT_END_BEFORE_START:
-    code: E3TMS012
+    code: E3TMS010
     message: 結束時間必須在開始時間之後
     status: 400
 
@@ -361,11 +327,7 @@ SYS:
     code: E9002
     message: 資料庫操作失敗
     status: 500
-  SYS_SERVICE_UNAVAILABLE:
-    code: E9003
-    message: 服務暫時無法使用
-    status: 503
   SYS_TIMEOUT:
-    code: E9004
+    code: E9003
     message: 請求超時，請稍後再試
     status: 504

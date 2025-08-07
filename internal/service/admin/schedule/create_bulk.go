@@ -45,15 +45,6 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminSch
 		}
 	}
 
-	// Check if store exists and is active
-	store, err := s.queries.GetStoreByID(ctx, storeID)
-	if err != nil {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-	}
-	if !store.IsActive.Bool {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
-	}
-
 	// Check if staff has access to this store
 	hasAccess, err := utils.CheckStoreAccess(storeID, creatorStoreIDs)
 	if err != nil {

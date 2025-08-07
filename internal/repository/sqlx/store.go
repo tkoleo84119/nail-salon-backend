@@ -13,16 +13,9 @@ import (
 )
 
 type StoreRepositoryInterface interface {
-	CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req CreateStoreTxParams) (int64, error)
 	GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error)
-	GetAllStore(ctx context.Context, isActive *bool) ([]GetAllStoreItem, error)
-	GetStoreByID(ctx context.Context, storeID int64, isActive *bool) (GetStoreResponse, error)
-	GetStore(ctx context.Context, storeID int64) (GetStoreResponse, error)
 	UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error)
 	GetStores(ctx context.Context, limit, offset int) ([]storeModel.GetStoresItemModel, int, error)
-	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
-	CheckStoreNameExistsExcluding(ctx context.Context, name string, id int64) (bool, error)
-	CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (int, error)
 }
 
 type StoreRepository struct {
@@ -33,36 +26,6 @@ func NewStoreRepository(db *sqlx.DB) *StoreRepository {
 	return &StoreRepository{
 		db: db,
 	}
-}
-
-type CreateStoreTxParams struct {
-	ID      int64       `db:"id"`
-	Name    string      `db:"name"`
-	Address pgtype.Text `db:"address"`
-	Phone   pgtype.Text `db:"phone"`
-}
-
-// CreateStoreTx creates a new store in a transaction
-func (r *StoreRepository) CreateStoreTx(ctx context.Context, tx *sqlx.Tx, req CreateStoreTxParams) (int64, error) {
-	query := `
-		INSERT INTO stores (id, name, address, phone)
-		VALUES (:id, :name, :address, :phone)
-		RETURNING id
-	`
-
-	var id int64
-	stmt, err := tx.PrepareNamedContext(ctx, query)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create store: %w", err)
-	}
-	defer stmt.Close()
-
-	err = stmt.QueryRowxContext(ctx, req).Scan(&id)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create store: %w", err)
-	}
-
-	return id, nil
 }
 
 type GetAllStoreByFilterParams struct {
@@ -165,97 +128,7 @@ func (r *StoreRepository) GetAllStoreByFilter(ctx context.Context, params GetAll
 	return total, results, nil
 }
 
-type GetAllStoreItem struct {
-	ID       int64       `db:"id"`
-	Name     string      `db:"name"`
-	Address  pgtype.Text `db:"address"`
-	Phone    pgtype.Text `db:"phone"`
-	IsActive pgtype.Bool `db:"is_active"`
-}
-
-// GetAll retrieves all stores, can filter by is_active
-func (r *StoreRepository) GetAllStore(ctx context.Context, isActive *bool) ([]GetAllStoreItem, error) {
-	whereParts := []string{}
-	args := []interface{}{}
-
-	if isActive != nil {
-		whereParts = append(whereParts, "is_active = $1")
-		args = append(args, isActive)
-	}
-
-	whereClause := ""
-	if len(whereParts) > 0 {
-		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
-	}
-
-	query := fmt.Sprintf(`
-		SELECT id, name, address, phone, is_active
-		FROM stores
-		%s
-	`, whereClause)
-
-	var results []GetAllStoreItem
-	err := r.db.SelectContext(ctx, &results, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute query: %w", err)
-	}
-
-	return results, nil
-}
-
-type GetStoreResponse struct {
-	ID        int64              `db:"id"`
-	Name      string             `db:"name"`
-	Address   pgtype.Text        `db:"address"`
-	Phone     pgtype.Text        `db:"phone"`
-	IsActive  pgtype.Bool        `db:"is_active"`
-	CreatedAt pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
-}
-
-func (r *StoreRepository) GetStore(ctx context.Context, storeID int64) (GetStoreResponse, error) {
-	query := `
-		SELECT id, name, address, phone, is_active, created_at, updated_at
-		FROM stores
-		WHERE id = $1
-	`
-
-	var result GetStoreResponse
-	err := r.db.GetContext(ctx, &result, query, storeID)
-	if err != nil {
-		return GetStoreResponse{}, fmt.Errorf("failed to get store: %w", err)
-	}
-
-	return result, nil
-}
-
-func (r *StoreRepository) GetStoreByID(ctx context.Context, storeID int64, isActive *bool) (*GetStoreResponse, error) {
-	whereParts := []string{
-		"id = $1",
-	}
-	args := []interface{}{
-		storeID,
-	}
-
-	if isActive != nil {
-		whereParts = append(whereParts, "is_active = $2")
-		args = append(args, isActive)
-	}
-
-	query := fmt.Sprintf(`
-		SELECT id, name, address, phone, is_active, created_at, updated_at
-		FROM stores
-		WHERE %s
-	`, strings.Join(whereParts, " AND "))
-
-	var result GetStoreResponse
-	err := r.db.GetContext(ctx, &result, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get store: %w", err)
-	}
-
-	return &result, nil
-}
+// ------------------------------------------------------------------------------------------------
 
 type UpdateStoreParams struct {
 	Name     *string
@@ -332,6 +205,8 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req Up
 	return &result, nil
 }
 
+// ------------------------------------------------------------------------------------------------
+
 // GetStoresModel represents the database model for store queries
 type GetStoresModel struct {
 	ID      int64       `db:"id"`
@@ -401,51 +276,4 @@ func (r *StoreRepository) GetStores(ctx context.Context, limit, offset int) ([]s
 	}
 
 	return items, total, nil
-}
-
-func (r *StoreRepository) CheckNameExists(ctx context.Context, name string) (bool, error) {
-	query := `
-		SELECT EXISTS(
-			SELECT 1
-			FROM stores
-			WHERE name = $1
-		)
-	`
-
-	var exists bool
-	if err := r.db.Get(&exists, query, name); err != nil {
-		return false, fmt.Errorf("failed to check name existence: %w", err)
-	}
-
-	return exists, nil
-}
-
-func (r *StoreRepository) CheckStoreNameExistsExcluding(ctx context.Context, name string, id int64) (bool, error) {
-	query := `
-		SELECT EXISTS(
-			SELECT 1
-			FROM stores
-			WHERE name = $1 AND id != $2
-		)
-	`
-
-	var exists bool
-	if err := r.db.Get(&exists, query, name, id); err != nil {
-		return false, fmt.Errorf("failed to check name existence: %w", err)
-	}
-
-	return exists, nil
-}
-
-func (r *StoreRepository) CheckStoresExistAndActive(ctx context.Context, storeIDs []int64) (int, error) {
-	query := `
-		SELECT COUNT(*) FROM stores WHERE id = ANY($1) AND is_active = true
-	`
-
-	var total int
-	if err := r.db.GetContext(ctx, &total, query, storeIDs); err != nil {
-		return 0, fmt.Errorf("failed to check stores existence: %w", err)
-	}
-
-	return total, nil
 }
