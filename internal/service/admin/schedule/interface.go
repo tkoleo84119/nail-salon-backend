@@ -21,3 +21,7 @@ type GetAllInterface interface {
 type GetInterface interface {
 	Get(ctx context.Context, storeID int64, scheduleID int64, role string, storeIDs []int64) (*adminScheduleModel.GetResponse, error)
 }
+
+type UpdateInterface interface {
+	Update(ctx context.Context, storeID int64, scheduleID int64, req adminScheduleModel.UpdateParsedRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminScheduleModel.UpdateResponse, error)
+}

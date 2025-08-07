@@ -180,7 +180,7 @@ func (q *Queries) GetScheduleByID(ctx context.Context, id int64) (Schedule, erro
 	return i, err
 }
 
-const getScheduleByIDWithTimeSlotsByID = `-- name: GetScheduleByIDWithTimeSlotsByID :many
+const getScheduleWithTimeSlotsByID = `-- name: GetScheduleWithTimeSlotsByID :many
 SELECT
     s.id,
     s.store_id,
@@ -199,7 +199,7 @@ WHERE s.id = $1
 ORDER BY t.start_time
 `
 
-type GetScheduleByIDWithTimeSlotsByIDRow struct {
+type GetScheduleWithTimeSlotsByIDRow struct {
 	ID          int64              `db:"id" json:"id"`
 	StoreID     int64              `db:"store_id" json:"store_id"`
 	StylistID   int64              `db:"stylist_id" json:"stylist_id"`
@@ -213,15 +213,15 @@ type GetScheduleByIDWithTimeSlotsByIDRow struct {
 	IsAvailable pgtype.Bool        `db:"is_available" json:"is_available"`
 }
 
-func (q *Queries) GetScheduleByIDWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleByIDWithTimeSlotsByIDRow, error) {
-	rows, err := q.db.Query(ctx, getScheduleByIDWithTimeSlotsByID, id)
+func (q *Queries) GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error) {
+	rows, err := q.db.Query(ctx, getScheduleWithTimeSlotsByID, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetScheduleByIDWithTimeSlotsByIDRow{}
+	items := []GetScheduleWithTimeSlotsByIDRow{}
 	for rows.Next() {
-		var i GetScheduleByIDWithTimeSlotsByIDRow
+		var i GetScheduleWithTimeSlotsByIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.StoreID,

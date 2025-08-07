@@ -217,6 +217,10 @@ SCHEDULE:
     code: E3SCH010
     message: 不能創建過去的班表
     status: 400
+  SCHEDULE_ALREADY_BOOKED_DO_NOT_UPDATE:
+    code: E3SCH011
+    message: 部分時段已被預約，無法更新
+    status: 400
 
 SERVICE:
   SERVICE_NOT_ACTIVE:

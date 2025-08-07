@@ -67,6 +67,7 @@ const (
 	ScheduleDateRangeExceed31Days    = "SCHEDULE_DATE_RANGE_EXCEED_31_DAYS"
 	ScheduleDuplicateWorkDateInput   = "SCHEDULE_DUPLICATE_WORK_DATE_INPUT"
 	ScheduleCannotCreateBeforeToday  = "SCHEDULE_CANNOT_CREATE_BEFORE_TODAY"
+	ScheduleAlreadyBookedDoNotUpdate = "SCHEDULE_ALREADY_BOOKED_DO_NOT_UPDATE"
 
 	// SERVICE - Service operation errors
 	ServiceNotActive      = "SERVICE_NOT_ACTIVE"

@@ -45,7 +45,7 @@ func (s *Get) Get(ctx context.Context, storeID int64, scheduleID int64, role str
 	}
 
 	// Get schedule by ID using SQLC (then validate store ID)
-	rows, err := s.queries.GetScheduleByIDWithTimeSlotsByID(ctx, scheduleID)
+	rows, err := s.queries.GetScheduleWithTimeSlotsByID(ctx, scheduleID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotFound)

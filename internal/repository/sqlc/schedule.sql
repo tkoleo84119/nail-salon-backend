@@ -80,7 +80,7 @@ LEFT JOIN time_slots t ON s.id = t.schedule_id
 WHERE s.id = ANY($1::bigint[])
 ORDER BY s.work_date;
 
--- name: GetScheduleByIDWithTimeSlotsByID :many
+-- name: GetScheduleWithTimeSlotsByID :many
 SELECT
     s.id,
     s.store_id,

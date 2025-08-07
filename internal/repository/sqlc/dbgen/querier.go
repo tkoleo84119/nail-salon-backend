@@ -62,7 +62,7 @@ type Querier interface {
 	GetCustomerAuthByProviderUid(ctx context.Context, arg GetCustomerAuthByProviderUidParams) (GetCustomerAuthByProviderUidRow, error)
 	GetCustomerByID(ctx context.Context, id int64) (Customer, error)
 	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)
-	GetScheduleByIDWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleByIDWithTimeSlotsByIDRow, error)
+	GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error)
 	GetSchedulesByStoreAndStylist(ctx context.Context, arg GetSchedulesByStoreAndStylistParams) ([]Schedule, error)
 	GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error)
 	GetServiceByID(ctx context.Context, id int64) (Service, error)

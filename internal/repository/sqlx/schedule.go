@@ -16,6 +16,7 @@ type ScheduleRepositoryInterface interface {
 	GetStoreScheduleByDateRange(ctx context.Context, storeID int64, startDate time.Time, endDate time.Time, params GetStoreScheduleByDateRangeParams) ([]GetStoreScheduleByDateRangeItem, error)
 	GetScheduleByID(ctx context.Context, scheduleID int64) ([]GetScheduleByIDItem, error)
 	CheckScheduleExists(ctx context.Context, storeID int64, stylistID int64, workDate time.Time) (bool, error)
+	UpdateSchedule(ctx context.Context, scheduleID int64, params UpdateScheduleParams) (UpdateScheduleResponse, error)
 }
 
 type ScheduleRepository struct {
@@ -221,4 +222,54 @@ func (r *ScheduleRepository) CheckScheduleExists(ctx context.Context, storeID in
 	}
 
 	return exists, nil
+}
+
+type UpdateScheduleParams struct {
+	WorkDate *string
+	Note     *string
+}
+
+type UpdateScheduleResponse struct {
+	ID        int64
+	StoreID   int64
+	StylistID int64
+	WorkDate  pgtype.Date
+	Note      pgtype.Text
+}
+
+func (r *ScheduleRepository) UpdateSchedule(ctx context.Context, scheduleID int64, params UpdateScheduleParams) (UpdateScheduleResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{scheduleID}
+
+	if params.WorkDate != nil {
+		setParts = append(setParts, fmt.Sprintf("work_date = $%d", len(args)+1))
+		args = append(args, *params.WorkDate)
+	}
+
+	if params.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
+		args = append(args, *params.Note)
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE schedules
+		SET %s
+		WHERE id = $1
+		RETURNING id, store_id, stylist_id, work_date, note
+	`, strings.Join(setParts, ","))
+
+	row := r.db.QueryRowxContext(ctx, query, args...)
+	var response UpdateScheduleResponse
+	err := row.Scan(
+		&response.ID,
+		&response.StoreID,
+		&response.StylistID,
+		&response.WorkDate,
+		&response.Note,
+	)
+	if err != nil {
+		return UpdateScheduleResponse{}, err
+	}
+
+	return response, nil
 }

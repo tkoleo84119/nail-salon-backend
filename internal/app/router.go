@@ -178,6 +178,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		// Store schedules routes
 		stores.GET("/:storeId/schedules", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleGetAll.GetAll)
 		stores.GET("/:storeId/schedules/:scheduleId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleGet.Get)
+		stores.PATCH("/:storeId/schedules/:scheduleId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleUpdate.Update)
 		stores.POST("/:storeId/schedules/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateBulk.CreateBulk)
 		stores.DELETE("/:storeId/schedules/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleDeleteBulk.DeleteBulk)
 
