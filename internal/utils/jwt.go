@@ -9,14 +9,9 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
-func GenerateJWT(jwtConfig config.JWTConfig, userID int64, username, role string, storeList []common.Store) (string, error) {
-	claims := common.JWTClaims{
-		StaffContext: common.StaffContext{
-			UserID:    FormatID(userID),
-			Username:  username,
-			Role:      role,
-			StoreList: storeList,
-		},
+func GenerateJWT(jwtConfig config.JWTConfig, userID int64) (string, error) {
+	claims := common.StaffJWTClaims{
+		UserID: FormatID(userID),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtConfig.ExpiryHours) * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -28,8 +23,8 @@ func GenerateJWT(jwtConfig config.JWTConfig, userID int64, username, role string
 	return token.SignedString([]byte(jwtConfig.Secret))
 }
 
-func ValidateJWT(jwtConfig config.JWTConfig, tokenString string) (*common.JWTClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &common.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+func ValidateJWT(jwtConfig config.JWTConfig, tokenString string) (*common.StaffJWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &common.StaffJWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -40,7 +35,7 @@ func ValidateJWT(jwtConfig config.JWTConfig, tokenString string) (*common.JWTCla
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(*common.JWTClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(*common.StaffJWTClaims); ok && token.Valid {
 		return claims, nil
 	}
 

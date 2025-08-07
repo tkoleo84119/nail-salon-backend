@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 func TestGenerateJWT(t *testing.T) {
@@ -19,38 +18,25 @@ func TestGenerateJWT(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		userID    int64
-		username  string
-		role      string
-		storeList []common.Store
-		wantErr   bool
+		name    string
+		userID  int64
+		wantErr bool
 	}{
 		{
-			name:     "valid JWT generation",
-			userID:   123,
-			username: "testuser",
-			role:     "ADMIN",
-			storeList: []common.Store{
-				{ID: "1", Name: "Store 1"},
-				{ID: "2", Name: "Store 2"},
-				{ID: "3", Name: "Store 3"},
-			},
+			name:    "valid JWT generation",
+			userID:  123,
 			wantErr: false,
 		},
 		{
-			name:      "empty store IDs",
-			userID:    456,
-			username:  "manager",
-			role:      "MANAGER",
-			storeList: []common.Store{},
-			wantErr:   false,
+			name:    "another valid user",
+			userID:  456,
+			wantErr: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			token, err := GenerateJWT(jwtConfig, tt.userID, tt.username, tt.role, tt.storeList)
+			token, err := GenerateJWT(jwtConfig, tt.userID)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -69,9 +55,7 @@ func TestGenerateJWTWithEmptySecret(t *testing.T) {
 		ExpiryHours: 1,
 	}
 
-	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []common.Store{
-		{ID: "1", Name: "Store 1"},
-	})
+	token, err := GenerateJWT(jwtConfig, 123)
 	// JWT library allows empty secrets, so this should not error
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
@@ -84,24 +68,14 @@ func TestValidateJWT(t *testing.T) {
 	}
 
 	userID := int64(123)
-	username := "testuser"
-	role := "ADMIN"
-	storeList := []common.Store{
-		{ID: "1", Name: "Store 1"},
-		{ID: "2", Name: "Store 2"},
-		{ID: "3", Name: "Store 3"},
-	}
 
-	token, err := GenerateJWT(jwtConfig, userID, username, role, storeList)
+	token, err := GenerateJWT(jwtConfig, userID)
 	require.NoError(t, err)
 
 	claims, err := ValidateJWT(jwtConfig, token)
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
 	assert.Equal(t, strconv.FormatInt(userID, 10), claims.UserID)
-	assert.Equal(t, username, claims.Username)
-	assert.Equal(t, role, claims.Role)
-	assert.Equal(t, storeList, claims.StoreList)
 }
 
 func TestValidateJWTInvalid(t *testing.T) {
@@ -143,9 +117,7 @@ func TestValidateJWTExpired(t *testing.T) {
 		ExpiryHours: 0, // Set to 0 hours to make it expire immediately
 	}
 
-	token, err := GenerateJWT(jwtConfig, 123, "test", "ADMIN", []common.Store{
-		{ID: "1", Name: "Store 1"},
-	})
+	token, err := GenerateJWT(jwtConfig, 123)
 	require.NoError(t, err)
 
 	time.Sleep(time.Second)

@@ -2,8 +2,6 @@ package adminAuth
 
 import (
 	"time"
-
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 // StaffLoginRequest represents the staff login request payload
@@ -17,15 +15,6 @@ type LoginResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 	ExpiresIn    int    `json:"expiresIn"`
-	User         User   `json:"user"`
-}
-
-// User represents the authenticated staff user info
-type User struct {
-	ID        string         `json:"id"`
-	Username  string         `json:"username"`
-	Role      string         `json:"role"`
-	StoreList []common.Store `json:"storeList"`
 }
 
 // StaffLoginContext contains the context information for login

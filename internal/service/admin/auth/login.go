@@ -8,7 +8,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -34,14 +33,8 @@ func (s *Login) Login(ctx context.Context, req adminAuthModel.LoginRequest, logi
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthInvalidCredentials)
 	}
 
-	// Get store access based on role
-	storeList, err := s.getStoreAccess(ctx, staffUser)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store access", err)
-	}
-
 	// Generate tokens
-	accessToken, err := utils.GenerateJWT(s.jwtConfig, staffUser.ID, staffUser.Username, staffUser.Role, storeList)
+	accessToken, err := utils.GenerateJWT(s.jwtConfig, staffUser.ID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate access token", err)
 	}
@@ -67,48 +60,9 @@ func (s *Login) Login(ctx context.Context, req adminAuthModel.LoginRequest, logi
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
-		User: adminAuthModel.User{
-			ID:        utils.FormatID(staffUser.ID),
-			Username:  staffUser.Username,
-			Role:      staffUser.Role,
-			StoreList: storeList,
-		},
 	}
 
 	return response, nil
-}
-
-// getStoreAccess retrieves store access based on user role
-func (s *Login) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
-	var storeList []common.Store
-
-	// SUPER_ADMIN can access all stores
-	if staffUser.Role == common.RoleSuperAdmin {
-		stores, err := s.queries.GetAllActiveStoresName(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, store := range stores {
-			storeList = append(storeList, common.Store{
-				ID:   utils.FormatID(store.ID),
-				Name: store.Name,
-			})
-		}
-	} else {
-		// Get specific store access for other roles
-		storeAccess, err := s.queries.GetAllActiveStoreAccessByStaffId(ctx, staffUser.ID)
-		if err != nil {
-			return nil, err
-		}
-		for _, access := range storeAccess {
-			storeList = append(storeList, common.Store{
-				ID:   utils.FormatID(access.StoreID),
-				Name: access.StoreName,
-			})
-		}
-	}
-
-	return storeList, nil
 }
 
 // storeRefreshToken stores the refresh token in database

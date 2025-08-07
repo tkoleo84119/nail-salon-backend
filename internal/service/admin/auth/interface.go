@@ -4,6 +4,7 @@ import (
 	"context"
 
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 type LoginInterface interface {
@@ -16,4 +17,8 @@ type LogoutInterface interface {
 
 type RefreshTokenInterface interface {
 	RefreshToken(ctx context.Context, req adminAuthModel.RefreshTokenRequest) (*adminAuthModel.RefreshTokenResponse, error)
+}
+
+type PermissionInterface interface {
+	Permission(ctx context.Context, staffContext *common.StaffContext) (*adminAuthModel.PermissionResponse, error)
 }

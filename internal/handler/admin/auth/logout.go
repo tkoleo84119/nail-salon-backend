@@ -7,6 +7,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -38,5 +39,5 @@ func (h *Logout) Logout(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, common.SuccessResponse(response))
 }

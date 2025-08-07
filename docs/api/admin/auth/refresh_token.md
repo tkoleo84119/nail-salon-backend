@@ -27,7 +27,8 @@
 
 ### Header
 
-* Content-Type: application/json
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Body 範例
 
@@ -51,18 +52,9 @@
 
 ```json
 {
-  "accessToken": "new_access_token",
-  "expiresIn": 3600,
-  "user": {
-    "id": "139842394",
-    "username": "admin001",
-    "role": "ADMIN",
-    "storeList": [
-      {
-        "id": "1",
-        "name": "門市1"
-      }
-    ]
+  "data": {
+    "accessToken": "new_access_token",
+    "expiresIn": 3600
   }
 }
 ```
@@ -106,8 +98,6 @@
 
 - `staff_user_tokens`
 - `staff_users`
-- `staff_user_store_access`
-- `stores`
 
 ---
 
@@ -116,10 +106,9 @@
 1. 驗證 refreshToken 是否存在於資料庫中。
    - `expired_at > now()`
    - `is_revoked = false`
-2. 取得員工資料
-3. 取得員工可存取的店家
-4. 產生新的 access token
-5. 回傳新的 access token
+2. 取得員工資料，並驗證是否被停用 `is_active = false`
+3. 產生新的 access token
+4. 回傳新的 access token
 
 ---
 

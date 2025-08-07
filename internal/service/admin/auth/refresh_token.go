@@ -8,7 +8,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -44,14 +43,8 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req adminAuthModel.Refr
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthStaffFailed)
 	}
 
-	// Get store access for the staff user
-	storeList, err := s.getStoreAccess(ctx, staffUser)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store access", err)
-	}
-
 	// Generate new access token
-	accessToken, err := utils.GenerateJWT(s.jwtConfig, staffUser.ID, staffUser.Username, staffUser.Role, storeList)
+	accessToken, err := utils.GenerateJWT(s.jwtConfig, staffUser.ID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate access token", err)
 	}
@@ -60,45 +53,5 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req adminAuthModel.Refr
 	return &adminAuthModel.RefreshTokenResponse{
 		AccessToken: accessToken,
 		ExpiresIn:   s.jwtConfig.ExpiryHours * 3600,
-		User: adminAuthModel.User{
-			ID:        utils.FormatID(staffUser.ID),
-			Username:  staffUser.Username,
-			Role:      staffUser.Role,
-			StoreList: storeList,
-		},
 	}, nil
-}
-
-// getStoreAccess is a helper method to get store access based on staff role
-func (s *RefreshToken) getStoreAccess(ctx context.Context, staffUser dbgen.StaffUser) ([]common.Store, error) {
-	var storeList []common.Store
-
-	switch staffUser.Role {
-	case common.RoleSuperAdmin:
-		// Super admin has access to all active stores
-		stores, err := s.queries.GetAllActiveStoresName(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, store := range stores {
-			storeList = append(storeList, common.Store{
-				ID:   utils.FormatID(store.ID),
-				Name: store.Name,
-			})
-		}
-	case common.RoleAdmin, common.RoleManager, common.RoleStylist:
-		// Other roles have access based on store access table
-		storeAccess, err := s.queries.GetAllActiveStoreAccessByStaffId(ctx, staffUser.ID)
-		if err != nil {
-			return nil, err
-		}
-		for _, access := range storeAccess {
-			storeList = append(storeList, common.Store{
-				ID:   utils.FormatID(access.StoreID),
-				Name: access.StoreName,
-			})
-		}
-	}
-
-	return storeList, nil
 }

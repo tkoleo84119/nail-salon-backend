@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"slices"
 	"strings"
 
@@ -48,7 +49,7 @@ func JWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 }
 
 // validate staff is active with token claims
-func validateStaffToken(c *gin.Context, db dbgen.Querier, claims *common.JWTClaims) error {
+func validateStaffToken(c *gin.Context, db dbgen.Querier, claims *common.StaffJWTClaims) error {
 	userID, err := utils.ParseID(claims.UserID)
 	if err != nil {
 		return err
@@ -63,7 +64,21 @@ func validateStaffToken(c *gin.Context, db dbgen.Querier, claims *common.JWTClai
 		return err
 	}
 
-	c.Set(UserContextKey, claims.StaffContext)
+	// Get store access for the staff user
+	storeList, err := getStoreAccess(c.Request.Context(), db, staff)
+	if err != nil {
+		return err
+	}
+
+	// Build StaffContext with fresh data from database
+	staffContext := common.StaffContext{
+		UserID:    utils.FormatID(staff.ID),
+		Username:  staff.Username,
+		Role:      staff.Role,
+		StoreList: storeList,
+	}
+
+	c.Set(UserContextKey, staffContext)
 	return nil
 }
 
@@ -173,4 +188,37 @@ func GetCustomerFromContext(c *gin.Context) (*common.CustomerContext, bool) {
 
 	customerContext, ok := customer.(common.CustomerContext)
 	return &customerContext, ok
+}
+
+// getStoreAccess retrieves store access based on user role
+func getStoreAccess(ctx context.Context, db dbgen.Querier, staffUser dbgen.StaffUser) ([]common.Store, error) {
+	var storeList []common.Store
+
+	// SUPER_ADMIN can access all stores
+	if staffUser.Role == common.RoleSuperAdmin {
+		stores, err := db.GetAllActiveStoresName(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, store := range stores {
+			storeList = append(storeList, common.Store{
+				ID:   utils.FormatID(store.ID),
+				Name: store.Name,
+			})
+		}
+	} else {
+		// Get specific store access for other roles
+		storeAccess, err := db.GetAllActiveStoreAccessByStaffId(ctx, staffUser.ID)
+		if err != nil {
+			return nil, err
+		}
+		for _, access := range storeAccess {
+			storeList = append(storeList, common.Store{
+				ID:   utils.FormatID(access.StoreID),
+				Name: access.StoreName,
+			})
+		}
+	}
+
+	return storeList, nil
 }

@@ -35,7 +35,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 		// Admin routes
 		admin := api.Group("/admin")
 		{
-			setupAdminAuthRoutes(admin, handlers)
+			setupAdminAuthRoutes(admin, cfg, queries, handlers)
 			setupAdminStaffRoutes(admin, cfg, queries, handlers)
 			setupAdminStylistRoutes(admin, cfg, queries, handlers)
 			setupAdminStoreRoutes(admin, cfg, queries, handlers)
@@ -124,10 +124,11 @@ func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries
 }
 
 // Admin route setup functions
-func setupAdminAuthRoutes(admin *gin.RouterGroup, handlers Handlers) {
+func setupAdminAuthRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	auth := admin.Group("/auth")
 	{
 		auth.POST("/login", handlers.Admin.AuthStaffLogin.Login)
+		auth.GET("/permission", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.AuthStaffPermission.GetPermission)
 
 		token := auth.Group("/token")
 		{

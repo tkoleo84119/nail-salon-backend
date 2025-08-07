@@ -29,6 +29,7 @@
 ### Header
 
 - Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Body 範例
 
@@ -52,7 +53,9 @@
 
 ```json
 {
-  "success": true
+  "data": {
+    "success": true
+  }
 }
 ```
 

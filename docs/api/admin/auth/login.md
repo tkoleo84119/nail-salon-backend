@@ -26,7 +26,8 @@
 
 ### Header
 
-* Content-Type: application/json
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Body 範例
 
@@ -55,18 +56,7 @@
   "data": {
     "accessToken": "<jwt_access_token>",
     "refreshToken": "<secure_refresh_token>",
-    "expiresIn": 3600,
-    "user": {
-      "id": "139842394",
-      "username": "admin001",
-      "role": "ADMIN",
-      "storeList": [
-        {
-          "id": "1",
-          "name": "門市1"
-        }
-      ]
-    }
+    "expiresIn": 3600
   }
 }
 ```
@@ -114,8 +104,6 @@
 ### 資料表
 
 - `staff_users`
-- `staff_user_store_access`
-- `stores`
 - `staff_user_tokens`
 
 ### Service 邏輯
@@ -124,11 +112,8 @@
    - 確認是否存在
    - 檢查 `password_hash`（bcrypt）是否與 `password` 相符
    - 確認是否被停用 `is_active = false`
-2. 查詢該員工可存取的店家（`staff_user_store_access`）
-   - 如果是 `SUPER_ADMIN`，則查詢 `stores` 回傳所有店家
-   - 不論店家是否被停用，都會回傳
-3. 產生 JWT（`access_token`）與 `refresh_token`（儲存於 `staff_user_tokens`）
-4. 回傳登入結果
+2. 產生 JWT（`access_token`）與 `refresh_token`（儲存於 `staff_user_tokens`）
+3. 回傳登入結果
 
 ---
 

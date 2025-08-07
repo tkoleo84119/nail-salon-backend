@@ -20,8 +20,8 @@ type StaffContext struct {
 	StoreList []Store `json:"storeList"`
 }
 
-type JWTClaims struct {
-	StaffContext
+type StaffJWTClaims struct {
+	UserID string `json:"userId"`
 	jwt.RegisteredClaims
 }
 
@@ -30,8 +30,8 @@ type CustomerContext struct {
 }
 
 type LineJWTClaims struct {
-	jwt.RegisteredClaims
 	CustomerID int64 `json:"customerId"`
+	jwt.RegisteredClaims
 }
 
 type ListResponse[T any] struct {
