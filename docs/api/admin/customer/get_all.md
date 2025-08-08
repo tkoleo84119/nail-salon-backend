@@ -75,12 +75,9 @@
         "phone": "0912345678",
         "birthday": "2000-01-01",
         "city": "台北市",
-        "customerNote": "這是顧客的備註",
-        "storeNote": "這是店家的備註",
         "level": "NORMAL",
         "isBlacklisted": false,
         "lastVisitAt": "2025-01-01T00:00:00+08:00",
-        "createdAt": "2025-01-01T00:00:00+08:00",
         "updatedAt": "2025-01-01T00:00:00+08:00"
       },
       {
@@ -89,12 +86,9 @@
         "phone": "0923456789",
         "birthday": "1990-05-15",
         "city": "台中市",
-        "customerNote": "這是顧客的備註",
-        "storeNote": "這是店家的備註",
         "level": "VIP",
         "isBlacklisted": true,
         "lastVisitAt": "2025-01-01T00:00:00+08:00",
-        "createdAt": "2025-01-01T00:00:00+08:00",
         "updatedAt": "2025-01-01T00:00:00+08:00"
       }
     ]

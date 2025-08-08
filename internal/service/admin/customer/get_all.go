@@ -1,4 +1,4 @@
-package customer
+package adminCustomer
 
 import (
 	"context"
@@ -43,18 +43,15 @@ func (s *GetAll) GetAll(ctx context.Context, req adminCustomerModel.GetAllParsed
 			Phone:         result.Phone,
 			Birthday:      utils.PgDateToDateString(result.Birthday),
 			City:          utils.PgTextToString(result.City),
-			CustomerNote:  utils.PgTextToString(result.CustomerNote),
-			StoreNote:     utils.PgTextToString(result.StoreNote),
 			Level:         utils.PgTextToString(result.Level),
 			IsBlacklisted: utils.PgBoolToBool(result.IsBlacklisted),
 			LastVisitAt:   utils.PgTimestamptzToTimeString(result.LastVisitAt),
-			CreatedAt:     utils.PgTimestamptzToTimeString(result.CreatedAt),
 			UpdatedAt:     utils.PgTimestamptzToTimeString(result.UpdatedAt),
 		}
 	}
 
 	return &adminCustomerModel.GetAllResponse{
 		Total: total,
-		Data:  items,
+		Items: items,
 	}, nil
 }

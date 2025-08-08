@@ -17,6 +17,7 @@ import (
 type CustomerRepositoryInterface interface {
 	GetAllCustomersByFilter(ctx context.Context, params GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error)
 	UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error)
+	UpdateCustomer(ctx context.Context, customerID int64, params UpdateCustomerParams) (UpdateCustomerResponse, error)
 }
 
 type CustomerRepository struct {
@@ -44,12 +45,9 @@ type GetAllCustomersByFilterItem struct {
 	Phone         string             `db:"phone"`
 	Birthday      pgtype.Date        `db:"birthday"`
 	City          pgtype.Text        `db:"city"`
-	CustomerNote  pgtype.Text        `db:"customer_note"`
-	StoreNote     pgtype.Text        `db:"store_note"`
 	Level         pgtype.Text        `db:"level"`
 	IsBlacklisted pgtype.Bool        `db:"is_blacklisted"`
 	LastVisitAt   pgtype.Timestamptz `db:"last_visit_at"`
-	CreatedAt     pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
 }
 
@@ -120,8 +118,8 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, req Ge
 	// Data query
 	dataQuery := fmt.Sprintf(`
 		SELECT
-			id, name, phone, birthday, city, customer_note, store_note,
-			level, is_blacklisted, last_visit_at, created_at, updated_at
+			id, name, phone, birthday, city,
+			level, is_blacklisted, last_visit_at, updated_at
 		FROM customers
 		%s
 		ORDER BY %s
@@ -143,12 +141,9 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, req Ge
 			&item.Phone,
 			&item.Birthday,
 			&item.City,
-			&item.CustomerNote,
-			&item.StoreNote,
 			&item.Level,
 			&item.IsBlacklisted,
 			&item.LastVisitAt,
-			&item.CreatedAt,
 			&item.UpdatedAt,
 		)
 		if err != nil {
@@ -265,4 +260,61 @@ func (r *CustomerRepository) UpdateMyCustomer(ctx context.Context, customerID in
 		Referrer:       result.Referrer,
 		CustomerNote:   result.CustomerNote,
 	}, nil
+}
+
+// ------------------------------------------------------------------------------------------------------
+
+type UpdateCustomerParams struct {
+	StoreNote     *string
+	Level         *string
+	IsBlacklisted *bool
+}
+
+type UpdateCustomerResponse struct {
+	ID            int64              `db:"id"`
+	Name          string             `db:"name"`
+	Phone         string             `db:"phone"`
+	Birthday      pgtype.Date        `db:"birthday"`
+	City          pgtype.Text        `db:"city"`
+	Level         pgtype.Text        `db:"level"`
+	IsBlacklisted pgtype.Bool        `db:"is_blacklisted"`
+	LastVisitAt   pgtype.Timestamptz `db:"last_visit_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int64, params UpdateCustomerParams) (UpdateCustomerResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if params.StoreNote != nil {
+		setParts = append(setParts, fmt.Sprintf("store_note = $%d", len(args)+1))
+		args = append(args, *params.StoreNote)
+	}
+
+	if params.Level != nil {
+		setParts = append(setParts, fmt.Sprintf("level = $%d", len(args)+1))
+		args = append(args, *params.Level)
+	}
+
+	if params.IsBlacklisted != nil {
+		setParts = append(setParts, fmt.Sprintf("is_blacklisted = $%d", len(args)+1))
+		args = append(args, *params.IsBlacklisted)
+	}
+
+	args = append(args, customerID)
+
+	query := fmt.Sprintf(`
+		UPDATE customers
+		SET %s
+		WHERE id = $%d
+		RETURNING id, name, phone, birthday, city, level, is_blacklisted, last_visit_at`,
+		strings.Join(setParts, ", "), len(args))
+
+	var result UpdateCustomerResponse
+	err := r.db.GetContext(ctx, &result, query, args...)
+	if err != nil {
+		return UpdateCustomerResponse{}, err
+	}
+
+	return result, nil
 }

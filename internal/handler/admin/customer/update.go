@@ -1,65 +1,55 @@
-package adminService
+package adminCustomer
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
+	adminCustomerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
+	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	service adminServiceService.UpdateInterface
+	service adminCustomerService.UpdateInterface
 }
 
-func NewUpdate(service adminServiceService.UpdateInterface) *Update {
+func NewUpdate(service adminCustomerService.UpdateInterface) *Update {
 	return &Update{
 		service: service,
 	}
 }
 
 func (h *Update) Update(c *gin.Context) {
-	// Get serviceId from path parameter
-	serviceID := c.Param("serviceId")
-	if serviceID == "" {
+	customerID := c.Param("customerId")
+	if customerID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
-			"serviceId": "serviceId為必填項目",
+			"customerId": "customerId 為必填項目",
 		})
 		return
 	}
-	parsedServiceID, err := utils.ParseID(serviceID)
+	parsedCustomerID, err := utils.ParseID(customerID)
 	if err != nil {
 		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"serviceId": "serviceId 類型轉換失敗",
+			"customerId": "customerId 類型轉換失敗",
 		})
 		return
 	}
 
-	var req adminServiceModel.UpdateRequest
+	var req adminCustomerModel.UpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
-	// Check if request has updates
 	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
 	}
 
-	staffContext, exists := middleware.GetStaffFromContext(c)
-	if !exists {
-		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
-		return
-	}
-
-	response, err := h.service.Update(c.Request.Context(), parsedServiceID, req, staffContext.Role)
+	response, err := h.service.Update(c.Request.Context(), parsedCustomerID, req)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

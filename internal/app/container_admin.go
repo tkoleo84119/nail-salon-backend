@@ -69,10 +69,11 @@ type AdminServices struct {
 
 	// Stylist management services
 	StylistUpdateMe adminStylistService.UpdateMeInterface
-	StylistGetAll  adminStylistService.GetAllInterface
+	StylistGetAll   adminStylistService.GetAllInterface
 
 	// Customer management services
 	CustomerGetAll adminCustomerService.GetAllInterface
+	CustomerUpdate adminCustomerService.UpdateInterface
 
 	// Booking management services
 	BookingCreate        adminBookingService.CreateBookingServiceInterface
@@ -138,10 +139,11 @@ type AdminHandlers struct {
 
 	// Stylist management handlers
 	StylistUpdateMe *adminStylistHandler.UpdateMe
-	StylistGetAll  *adminStylistHandler.GetAll
+	StylistGetAll   *adminStylistHandler.GetAll
 
 	// Customer management handlers
 	CustomerGetAll *adminCustomerHandler.GetAll
+	CustomerUpdate *adminCustomerHandler.Update
 
 	// Booking management handlers
 	BookingCreate        *adminBookingHandler.CreateBookingHandler
@@ -206,11 +208,11 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Stylist management services
 		StylistUpdateMe: adminStylistService.NewUpdateMe(queries, repositories.SQLX),
-		StylistGetAll:  adminStylistService.NewGetAll(repositories.SQLX),
+		StylistGetAll:   adminStylistService.NewGetAll(repositories.SQLX),
 
 		// Customer management services
 		CustomerGetAll: adminCustomerService.NewGetAll(repositories.SQLX),
-
+		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX),
 		// Booking management services
 		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
 		BookingGetList:       adminBookingService.NewGetBookingListService(queries, repositories.SQLX),
@@ -275,10 +277,11 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Stylist management handlers
 		StylistUpdateMe: adminStylistHandler.NewUpdateMe(services.StylistUpdateMe),
-		StylistGetAll:  adminStylistHandler.NewGetAll(services.StylistGetAll),
+		StylistGetAll:   adminStylistHandler.NewGetAll(services.StylistGetAll),
 
 		// Customer management handlers
 		CustomerGetAll: adminCustomerHandler.NewGetAll(services.CustomerGetAll),
+		CustomerUpdate: adminCustomerHandler.NewUpdate(services.CustomerUpdate),
 
 		// Booking management handlers
 		BookingCreate:        adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),

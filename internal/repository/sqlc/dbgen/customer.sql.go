@@ -93,6 +93,17 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 	return i, err
 }
 
+const existsCustomerByID = `-- name: ExistsCustomerByID :one
+SELECT EXISTS (SELECT 1 FROM customers WHERE id = $1)
+`
+
+func (q *Queries) ExistsCustomerByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, existsCustomerByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getCustomerByID = `-- name: GetCustomerByID :one
 SELECT id, name, phone, birthday, city, favorite_shapes, favorite_colors,
        favorite_styles, is_introvert, referral_source, referrer, customer_note,

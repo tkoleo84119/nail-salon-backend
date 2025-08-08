@@ -12,3 +12,6 @@ SELECT id, name, phone, birthday, city, favorite_shapes, favorite_colors,
        store_note, level, is_blacklisted, created_at, updated_at
 FROM customers
 WHERE id = $1;
+
+-- name: ExistsCustomerByID :one
+SELECT EXISTS (SELECT 1 FROM customers WHERE id = $1);

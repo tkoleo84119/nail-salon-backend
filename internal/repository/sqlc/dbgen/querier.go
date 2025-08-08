@@ -48,6 +48,7 @@ type Querier interface {
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplate(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
+	ExistsCustomerByID(ctx context.Context, id int64) (bool, error)
 	GetActiveStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetAllActiveStoreAccessByStaffId(ctx context.Context, staffUserID int64) ([]GetAllActiveStoreAccessByStaffIdRow, error)
 	GetAllActiveStoresName(ctx context.Context) ([]GetAllActiveStoresNameRow, error)

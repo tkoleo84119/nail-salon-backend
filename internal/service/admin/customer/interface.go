@@ -1,4 +1,4 @@
-package customer
+package adminCustomer
 
 import (
 	"context"
@@ -8,4 +8,8 @@ import (
 
 type GetAllInterface interface {
 	GetAll(ctx context.Context, req adminCustomerModel.GetAllParsedRequest) (*adminCustomerModel.GetAllResponse, error)
+}
+
+type UpdateInterface interface {
+	Update(ctx context.Context, customerID int64, req adminCustomerModel.UpdateRequest) (*adminCustomerModel.UpdateResponse, error)
 }

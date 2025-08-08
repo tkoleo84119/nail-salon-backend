@@ -1,4 +1,4 @@
-package customer
+package adminCustomer
 
 type GetAllRequest struct {
 	Name          *string `form:"name" binding:"omitempty,max=100"`
@@ -24,7 +24,7 @@ type GetAllParsedRequest struct {
 
 type GetAllResponse struct {
 	Total int                  `json:"total"`
-	Data  []GetAllCustomerItem `json:"data"`
+	Items []GetAllCustomerItem `json:"items"`
 }
 
 type GetAllCustomerItem struct {
@@ -33,11 +33,8 @@ type GetAllCustomerItem struct {
 	Phone         string `json:"phone"`
 	Birthday      string `json:"birthday"`
 	City          string `json:"city"`
-	CustomerNote  string `json:"customerNote"`
-	StoreNote     string `json:"storeNote"`
 	Level         string `json:"level"`
 	IsBlacklisted bool   `json:"isBlacklisted"`
 	LastVisitAt   string `json:"lastVisitAt,omitempty"`
-	CreatedAt     string `json:"createdAt"`
 	UpdatedAt     string `json:"updatedAt"`
 }
