@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 
 	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
@@ -14,6 +15,7 @@ import (
 
 // CustomerRepositoryInterface defines the interface for customer repository
 type CustomerRepositoryInterface interface {
+	GetAllCustomersByFilter(ctx context.Context, params GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error)
 	UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error)
 }
 
@@ -24,6 +26,141 @@ type CustomerRepository struct {
 func NewCustomerRepository(db *sqlx.DB) *CustomerRepository {
 	return &CustomerRepository{db: db}
 }
+
+type GetAllCustomersByFilterParams struct {
+	Name          *string
+	Phone         *string
+	Level         *string
+	IsBlacklisted *bool
+	MinPastDays   *int
+	Limit         *int
+	Offset        *int
+	Sort          *[]string
+}
+
+type GetAllCustomersByFilterItem struct {
+	ID            int64              `db:"id"`
+	Name          string             `db:"name"`
+	Phone         string             `db:"phone"`
+	Birthday      pgtype.Date        `db:"birthday"`
+	City          pgtype.Text        `db:"city"`
+	CustomerNote  pgtype.Text        `db:"customer_note"`
+	StoreNote     pgtype.Text        `db:"store_note"`
+	Level         pgtype.Text        `db:"level"`
+	IsBlacklisted pgtype.Bool        `db:"is_blacklisted"`
+	LastVisitAt   pgtype.Timestamptz `db:"last_visit_at"`
+	CreatedAt     pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
+}
+
+// GetAllCustomers retrieves all customers with filtering, pagination and sorting
+func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, req GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error) {
+	// set default value for limit and offset
+	limit := 20
+	offset := 0
+	if req.Limit != nil && *req.Limit > 0 {
+		limit = *req.Limit
+	}
+	if req.Offset != nil && *req.Offset >= 0 {
+		offset = *req.Offset
+	}
+
+	// set default value for sort
+	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_blacklisted", "last_visit_at"}, "last_visit_at", "DESC", req.Sort)
+
+	whereConditions := []string{}
+	args := []interface{}{}
+
+	if req.Name != nil && *req.Name != "" {
+		whereConditions = append(whereConditions, fmt.Sprintf("name ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*req.Name+"%")
+	}
+
+	if req.Phone != nil && *req.Phone != "" {
+		whereConditions = append(whereConditions, fmt.Sprintf("phone ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*req.Phone+"%")
+	}
+
+	if req.Level != nil && *req.Level != "" {
+		whereConditions = append(whereConditions, fmt.Sprintf("level = $%d", len(args)+1))
+		args = append(args, *req.Level)
+	}
+
+	if req.IsBlacklisted != nil {
+		whereConditions = append(whereConditions, fmt.Sprintf("is_blacklisted = $%d", len(args)+1))
+		args = append(args, *req.IsBlacklisted)
+	}
+
+	if req.MinPastDays != nil && *req.MinPastDays > 0 {
+		whereConditions = append(whereConditions, fmt.Sprintf("(last_visit_at IS NOT NULL AND last_visit_at < NOW() - INTERVAL '%d days')", *req.MinPastDays))
+	}
+
+	// Build WHERE clause
+	whereClause := ""
+	if len(whereConditions) > 0 {
+		whereClause = "WHERE " + strings.Join(whereConditions, " AND ")
+	}
+
+	// Count query
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM customers
+		%s`, whereClause)
+
+	var total int
+	err := r.db.GetContext(ctx, &total, countQuery, args...)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	dataArgs := append(args, limit, offset)
+	limitArgIndex := len(args) + 1
+	offsetArgIndex := limitArgIndex + 1
+
+	// Data query
+	dataQuery := fmt.Sprintf(`
+		SELECT
+			id, name, phone, birthday, city, customer_note, store_note,
+			level, is_blacklisted, last_visit_at, created_at, updated_at
+		FROM customers
+		%s
+		ORDER BY %s
+		LIMIT $%d OFFSET $%d`,
+		whereClause, sort, limitArgIndex, offsetArgIndex)
+
+	rows, err := r.db.QueryContext(ctx, dataQuery, dataArgs...)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer rows.Close()
+
+	var results []GetAllCustomersByFilterItem
+	for rows.Next() {
+		var item GetAllCustomersByFilterItem
+		err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.Phone,
+			&item.Birthday,
+			&item.City,
+			&item.CustomerNote,
+			&item.StoreNote,
+			&item.Level,
+			&item.IsBlacklisted,
+			&item.LastVisitAt,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+		)
+		if err != nil {
+			return 0, nil, err
+		}
+		results = append(results, item)
+	}
+
+	return total, results, nil
+}
+
+// ------------------------------------------------------------------------------------------------------
 
 // UpdateMyCustomer updates customer's own profile information
 func (r *CustomerRepository) UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error) {

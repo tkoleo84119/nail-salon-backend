@@ -35,7 +35,27 @@ type CreateCustomerParams struct {
 	CustomerNote   pgtype.Text `db:"customer_note" json:"customer_note"`
 }
 
-func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) (Customer, error) {
+type CreateCustomerRow struct {
+	ID             int64              `db:"id" json:"id"`
+	Name           string             `db:"name" json:"name"`
+	Phone          string             `db:"phone" json:"phone"`
+	Birthday       pgtype.Date        `db:"birthday" json:"birthday"`
+	City           pgtype.Text        `db:"city" json:"city"`
+	FavoriteShapes []string           `db:"favorite_shapes" json:"favorite_shapes"`
+	FavoriteColors []string           `db:"favorite_colors" json:"favorite_colors"`
+	FavoriteStyles []string           `db:"favorite_styles" json:"favorite_styles"`
+	IsIntrovert    pgtype.Bool        `db:"is_introvert" json:"is_introvert"`
+	ReferralSource []string           `db:"referral_source" json:"referral_source"`
+	Referrer       pgtype.Text        `db:"referrer" json:"referrer"`
+	CustomerNote   pgtype.Text        `db:"customer_note" json:"customer_note"`
+	StoreNote      pgtype.Text        `db:"store_note" json:"store_note"`
+	Level          pgtype.Text        `db:"level" json:"level"`
+	IsBlacklisted  pgtype.Bool        `db:"is_blacklisted" json:"is_blacklisted"`
+	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) (CreateCustomerRow, error) {
 	row := q.db.QueryRow(ctx, createCustomer,
 		arg.ID,
 		arg.Name,
@@ -50,7 +70,7 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 		arg.Referrer,
 		arg.CustomerNote,
 	)
-	var i Customer
+	var i CreateCustomerRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -81,9 +101,29 @@ FROM customers
 WHERE id = $1
 `
 
-func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (Customer, error) {
+type GetCustomerByIDRow struct {
+	ID             int64              `db:"id" json:"id"`
+	Name           string             `db:"name" json:"name"`
+	Phone          string             `db:"phone" json:"phone"`
+	Birthday       pgtype.Date        `db:"birthday" json:"birthday"`
+	City           pgtype.Text        `db:"city" json:"city"`
+	FavoriteShapes []string           `db:"favorite_shapes" json:"favorite_shapes"`
+	FavoriteColors []string           `db:"favorite_colors" json:"favorite_colors"`
+	FavoriteStyles []string           `db:"favorite_styles" json:"favorite_styles"`
+	IsIntrovert    pgtype.Bool        `db:"is_introvert" json:"is_introvert"`
+	ReferralSource []string           `db:"referral_source" json:"referral_source"`
+	Referrer       pgtype.Text        `db:"referrer" json:"referrer"`
+	CustomerNote   pgtype.Text        `db:"customer_note" json:"customer_note"`
+	StoreNote      pgtype.Text        `db:"store_note" json:"store_note"`
+	Level          pgtype.Text        `db:"level" json:"level"`
+	IsBlacklisted  pgtype.Bool        `db:"is_blacklisted" json:"is_blacklisted"`
+	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByIDRow, error) {
 	row := q.db.QueryRow(ctx, getCustomerByID, id)
-	var i Customer
+	var i GetCustomerByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,

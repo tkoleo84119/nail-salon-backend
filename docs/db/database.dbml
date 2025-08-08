@@ -69,6 +69,7 @@ Table customers {
   store_note text // 店家的備註
   level varchar(20) // NORMAL, VIP, VVIP
   is_blacklisted boolean [default: false]
+  last_visit_at timestamptz
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }

@@ -38,6 +38,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 			setupAdminAuthRoutes(admin, cfg, queries, handlers)
 			setupAdminStaffRoutes(admin, cfg, queries, handlers)
 			setupAdminStylistRoutes(admin, cfg, queries, handlers)
+			setupAdminCustomerRoutes(admin, cfg, queries, handlers)
 			setupAdminStoreRoutes(admin, cfg, queries, handlers)
 			setupAdminServiceRoutes(admin, cfg, queries, handlers)
 			setupAdminScheduleRoutes(admin, cfg, queries, handlers)
@@ -207,6 +208,14 @@ func setupAdminScheduleRoutes(admin *gin.RouterGroup, cfg *config.Config, querie
 		schedules.POST("/:scheduleId/time-slots", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleCreateTimeSlot.Create)
 		schedules.PATCH("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleUpdateTimeSlot.Update)
 		schedules.DELETE("/:scheduleId/time-slots/:timeSlotId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleDeleteTimeSlot.Delete)
+	}
+}
+
+func setupAdminCustomerRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	customers := admin.Group("/customers")
+	{
+		// Customer management - all staff can view customers
+		customers.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerGetAll.GetAll)
 	}
 }
 

@@ -109,6 +109,7 @@ type Customer struct {
 	IsBlacklisted  pgtype.Bool        `db:"is_blacklisted" json:"is_blacklisted"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	LastVisitAt    pgtype.Timestamptz `db:"last_visit_at" json:"last_visit_at"`
 }
 
 type CustomerAuth struct {
