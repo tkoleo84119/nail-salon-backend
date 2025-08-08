@@ -10,17 +10,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStylistListService struct {
+type GetAll struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewGetStylistListService(repo *sqlxRepo.Repositories) *GetStylistListService {
-	return &GetStylistListService{
+func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
+	return &GetAll{
 		repo: repo,
 	}
 }
 
-func (s *GetStylistListService) GetStylistList(ctx context.Context, storeID int64, req adminStylistModel.GetStylistListParsedRequest, role string, storeIds []int64) (*adminStylistModel.GetStylistListResponse, error) {
+func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminStylistModel.GetAllParsedRequest, role string, storeIds []int64) (*adminStylistModel.GetAllResponse, error) {
 	// Check store access for the staff member (except SUPER_ADMIN)
 	if role != common.RoleSuperAdmin {
 		hasAccess, err := utils.CheckStoreAccess(storeID, storeIds)
@@ -46,9 +46,9 @@ func (s *GetStylistListService) GetStylistList(ctx context.Context, storeID int6
 	}
 
 	// Convert to response models
-	itemDTOs := make([]adminStylistModel.GetStylistListItem, len(stylists))
+	itemDTOs := make([]adminStylistModel.GetAllItem, len(stylists))
 	for i, stylist := range stylists {
-		itemDTOs[i] = adminStylistModel.GetStylistListItem{
+		itemDTOs[i] = adminStylistModel.GetAllItem{
 			ID:           utils.FormatID(stylist.ID),
 			StaffUserID:  utils.FormatID(stylist.StaffUserID),
 			Name:         utils.PgTextToString(stylist.Name),
@@ -60,7 +60,7 @@ func (s *GetStylistListService) GetStylistList(ctx context.Context, storeID int6
 		}
 	}
 
-	return &adminStylistModel.GetStylistListResponse{
+	return &adminStylistModel.GetAllResponse{
 		Total: total,
 		Items: itemDTOs,
 	}, nil

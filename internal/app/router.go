@@ -161,7 +161,7 @@ func setupAdminStylistRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	stylists := admin.Group("/stylists")
 	{
 		// Self-service stylist operations
-		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.Admin.StylistUpdate.UpdateMyStylist)
+		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.Admin.StylistUpdateMe.UpdateMe)
 	}
 }
 
@@ -174,7 +174,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.StoreUpdate.Update)
 
 		// Store stylists routes
-		stores.GET("/:storeId/stylists", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.StylistGetList.GetStylistList)
+		stores.GET("/:storeId/stylists", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.StylistGetAll.GetAll)
 
 		// Store schedules routes
 		stores.GET("/:storeId/schedules", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleGetAll.GetAll)

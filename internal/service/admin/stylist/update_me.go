@@ -12,19 +12,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateMyStylistService struct {
+type UpdateMe struct {
 	queries dbgen.Querier
 	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateMyStylistService(queries dbgen.Querier, repo *sqlxRepo.Repositories) *UpdateMyStylistService {
-	return &UpdateMyStylistService{
+func NewUpdateMe(queries dbgen.Querier, repo *sqlxRepo.Repositories) *UpdateMe {
+	return &UpdateMe{
 		queries: queries,
 		repo:    repo,
 	}
 }
 
-func (s *UpdateMyStylistService) UpdateMyStylist(ctx context.Context, req adminStylistModel.UpdateMyStylistRequest, staffUserID int64) (*adminStylistModel.UpdateMyStylistResponse, error) {
+func (s *UpdateMe) UpdateMe(ctx context.Context, req adminStylistModel.UpdateMeRequest, staffUserID int64) (*adminStylistModel.UpdateMeResponse, error) {
 	// ensure at least one field is provided for update
 	if !req.HasUpdate() {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
@@ -51,7 +51,7 @@ func (s *UpdateMyStylistService) UpdateMyStylist(ctx context.Context, req adminS
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update stylist", err)
 	}
 
-	response := &adminStylistModel.UpdateMyStylistResponse{
+	response := &adminStylistModel.UpdateMeResponse{
 		ID:           utils.FormatID(updateStylist.ID),
 		StaffUserID:  utils.FormatID(staffUserID),
 		Name:         utils.PgTextToString(updateStylist.Name),

@@ -13,12 +13,12 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type UpdateMyStylistHandler struct {
-	service adminStylistService.UpdateMyStylistServiceInterface
+type UpdateMe struct {
+	service adminStylistService.UpdateMeInterface
 }
 
-func NewUpdateMyStylistHandler(service adminStylistService.UpdateMyStylistServiceInterface) *UpdateMyStylistHandler {
-	return &UpdateMyStylistHandler{
+func NewUpdateMe(service adminStylistService.UpdateMeInterface) *UpdateMe {
+	return &UpdateMe{
 		service: service,
 	}
 }
@@ -35,8 +35,8 @@ var validGoodAtStyles = map[string]struct{}{
 	"暈染": {}, "手繪": {}, "貓眼": {}, "鏡面": {}, "可愛": {}, "法式": {}, "漸層": {}, "氣質溫柔": {}, "個性": {}, "日系": {}, "簡約": {}, "優雅": {}, "典雅": {}, "小眾": {},
 }
 
-func (h *UpdateMyStylistHandler) UpdateMyStylist(c *gin.Context) {
-	var req adminStylistModel.UpdateMyStylistRequest
+func (h *UpdateMe) UpdateMe(c *gin.Context) {
+	var req adminStylistModel.UpdateMeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -82,7 +82,7 @@ func (h *UpdateMyStylistHandler) UpdateMyStylist(c *gin.Context) {
 		return
 	}
 
-	response, err := h.service.UpdateMyStylist(c.Request.Context(), req, staffContext.UserID)
+	response, err := h.service.UpdateMe(c.Request.Context(), req, staffContext.UserID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

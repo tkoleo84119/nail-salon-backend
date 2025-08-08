@@ -14,17 +14,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStylistListHandler struct {
-	service adminStylistService.GetStylistListServiceInterface
+type GetAll struct {
+	service adminStylistService.GetAllInterface
 }
 
-func NewGetStylistListHandler(service adminStylistService.GetStylistListServiceInterface) *GetStylistListHandler {
-	return &GetStylistListHandler{
+func NewGetAll(service adminStylistService.GetAllInterface) *GetAll {
+	return &GetAll{
 		service: service,
 	}
 }
 
-func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
+func (h *GetAll) GetAll(c *gin.Context) {
 	// Get store ID from path parameter
 	storeID := c.Param("storeId")
 	if storeID == "" {
@@ -38,7 +38,7 @@ func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
 	}
 
 	// Parse and validate query parameters
-	var req adminStylistModel.GetStylistListRequest
+	var req adminStylistModel.GetAllRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -61,7 +61,7 @@ func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
 		sort = strings.Split(*req.Sort, ",")
 	}
 
-	parsedReq := adminStylistModel.GetStylistListParsedRequest{
+	parsedReq := adminStylistModel.GetAllParsedRequest{
 		Name:        req.Name,
 		IsIntrovert: req.IsIntrovert,
 		Limit:       limit,
@@ -82,7 +82,7 @@ func (h *GetStylistListHandler) GetStylistList(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStylistList(c.Request.Context(), parsedStoreID, parsedReq, staffContext.Role, storeIDs)
+	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedReq, staffContext.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

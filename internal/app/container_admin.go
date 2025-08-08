@@ -68,8 +68,8 @@ type AdminServices struct {
 	ServiceUpdate  adminServiceService.UpdateInterface
 
 	// Stylist management services
-	StylistUpdate  adminStylistService.UpdateMyStylistServiceInterface
-	StylistGetList adminStylistService.GetStylistListServiceInterface
+	StylistUpdateMe adminStylistService.UpdateMeInterface
+	StylistGetAll  adminStylistService.GetAllInterface
 
 	// Customer management services
 	CustomerGetAll adminCustomerService.GetAllInterface
@@ -137,8 +137,8 @@ type AdminHandlers struct {
 	ServiceUpdate  *adminServiceHandler.Update
 
 	// Stylist management handlers
-	StylistUpdate  *adminStylistHandler.UpdateMyStylistHandler
-	StylistGetList *adminStylistHandler.GetStylistListHandler
+	StylistUpdateMe *adminStylistHandler.UpdateMe
+	StylistGetAll  *adminStylistHandler.GetAll
 
 	// Customer management handlers
 	CustomerGetAll *adminCustomerHandler.GetAll
@@ -205,8 +205,8 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ServiceUpdate:  adminServiceService.NewUpdate(queries, repositories.SQLX),
 
 		// Stylist management services
-		StylistUpdate:  adminStylistService.NewUpdateMyStylistService(queries, repositories.SQLX),
-		StylistGetList: adminStylistService.NewGetStylistListService(repositories.SQLX),
+		StylistUpdateMe: adminStylistService.NewUpdateMe(queries, repositories.SQLX),
+		StylistGetAll:  adminStylistService.NewGetAll(repositories.SQLX),
 
 		// Customer management services
 		CustomerGetAll: adminCustomerService.NewGetAll(repositories.SQLX),
@@ -274,8 +274,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ServiceUpdate:  adminServiceHandler.NewUpdate(services.ServiceUpdate),
 
 		// Stylist management handlers
-		StylistUpdate:  adminStylistHandler.NewUpdateMyStylistHandler(services.StylistUpdate),
-		StylistGetList: adminStylistHandler.NewGetStylistListHandler(services.StylistGetList),
+		StylistUpdateMe: adminStylistHandler.NewUpdateMe(services.StylistUpdateMe),
+		StylistGetAll:  adminStylistHandler.NewGetAll(services.StylistGetAll),
 
 		// Customer management handlers
 		CustomerGetAll: adminCustomerHandler.NewGetAll(services.CustomerGetAll),
