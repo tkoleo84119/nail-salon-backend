@@ -73,6 +73,7 @@ type AdminServices struct {
 
 	// Customer management services
 	CustomerGetAll adminCustomerService.GetAllInterface
+	CustomerGet    adminCustomerService.GetInterface
 	CustomerUpdate adminCustomerService.UpdateInterface
 
 	// Booking management services
@@ -143,6 +144,7 @@ type AdminHandlers struct {
 
 	// Customer management handlers
 	CustomerGetAll *adminCustomerHandler.GetAll
+	CustomerGet    *adminCustomerHandler.Get
 	CustomerUpdate *adminCustomerHandler.Update
 
 	// Booking management handlers
@@ -212,6 +214,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Customer management services
 		CustomerGetAll: adminCustomerService.NewGetAll(repositories.SQLX),
+		CustomerGet:    adminCustomerService.NewGet(queries),
 		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX),
 		// Booking management services
 		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
@@ -281,6 +284,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Customer management handlers
 		CustomerGetAll: adminCustomerHandler.NewGetAll(services.CustomerGetAll),
+		CustomerGet:    adminCustomerHandler.NewGet(services.CustomerGet),
 		CustomerUpdate: adminCustomerHandler.NewUpdate(services.CustomerUpdate),
 
 		// Booking management handlers

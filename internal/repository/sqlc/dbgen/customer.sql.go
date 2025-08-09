@@ -79,20 +79,20 @@ func (q *Queries) ExistsCustomerByID(ctx context.Context, id int64) (bool, error
 }
 
 const getCustomerByID = `-- name: GetCustomerByID :one
-SELECT id, line_uid, line_name, name, phone, birthday, city, favorite_shapes, favorite_colors,
+SELECT id, name, line_name, phone, birthday, email, city, favorite_shapes, favorite_colors,
       favorite_styles, is_introvert, referral_source, referrer, customer_note,
-      store_note, level, is_blacklisted, created_at, updated_at
+      store_note, level, is_blacklisted, last_visit_at, created_at, updated_at
 FROM customers
 WHERE id = $1
 `
 
 type GetCustomerByIDRow struct {
 	ID             int64              `db:"id" json:"id"`
-	LineUid        string             `db:"line_uid" json:"line_uid"`
-	LineName       pgtype.Text        `db:"line_name" json:"line_name"`
 	Name           string             `db:"name" json:"name"`
+	LineName       pgtype.Text        `db:"line_name" json:"line_name"`
 	Phone          string             `db:"phone" json:"phone"`
 	Birthday       pgtype.Date        `db:"birthday" json:"birthday"`
+	Email          pgtype.Text        `db:"email" json:"email"`
 	City           pgtype.Text        `db:"city" json:"city"`
 	FavoriteShapes []string           `db:"favorite_shapes" json:"favorite_shapes"`
 	FavoriteColors []string           `db:"favorite_colors" json:"favorite_colors"`
@@ -104,6 +104,7 @@ type GetCustomerByIDRow struct {
 	StoreNote      pgtype.Text        `db:"store_note" json:"store_note"`
 	Level          pgtype.Text        `db:"level" json:"level"`
 	IsBlacklisted  pgtype.Bool        `db:"is_blacklisted" json:"is_blacklisted"`
+	LastVisitAt    pgtype.Timestamptz `db:"last_visit_at" json:"last_visit_at"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
@@ -113,11 +114,11 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByI
 	var i GetCustomerByIDRow
 	err := row.Scan(
 		&i.ID,
-		&i.LineUid,
-		&i.LineName,
 		&i.Name,
+		&i.LineName,
 		&i.Phone,
 		&i.Birthday,
+		&i.Email,
 		&i.City,
 		&i.FavoriteShapes,
 		&i.FavoriteColors,
@@ -129,6 +130,7 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByI
 		&i.StoreNote,
 		&i.Level,
 		&i.IsBlacklisted,
+		&i.LastVisitAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

@@ -216,6 +216,7 @@ func setupAdminCustomerRoutes(admin *gin.RouterGroup, cfg *config.Config, querie
 	{
 		// Customer management - all staff can view customers
 		customers.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerGetAll.GetAll)
+		customers.GET("/:customerId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerGet.Get)
 		customers.PATCH("/:customerId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerUpdate.Update)
 	}
 }
