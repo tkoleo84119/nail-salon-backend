@@ -50,6 +50,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 
 	parsedReq := adminCustomerModel.GetAllParsedRequest{
 		Name:          req.Name,
+		LineName:      req.LineName,
 		Phone:         req.Phone,
 		Level:         req.Level,
 		IsBlacklisted: req.IsBlacklisted,

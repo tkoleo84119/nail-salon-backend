@@ -2,6 +2,7 @@ package adminCustomer
 
 type GetAllRequest struct {
 	Name          *string `form:"name" binding:"omitempty,max=100"`
+	LineName      *string `form:"lineName" binding:"omitempty,max=100"`
 	Phone         *string `form:"phone" binding:"omitempty,max=20"`
 	Level         *string `form:"level" binding:"omitempty,oneof=NORMAL VIP VVIP"`
 	IsBlacklisted *bool   `form:"isBlacklisted" binding:"omitempty,boolean"`
@@ -13,6 +14,7 @@ type GetAllRequest struct {
 
 type GetAllParsedRequest struct {
 	Name          *string
+	LineName      *string
 	Phone         *string
 	Level         *string
 	IsBlacklisted *bool
@@ -30,6 +32,7 @@ type GetAllResponse struct {
 type GetAllCustomerItem struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
+	LineName      string `json:"lineName"`
 	Phone         string `json:"phone"`
 	Birthday      string `json:"birthday"`
 	City          string `json:"city"`

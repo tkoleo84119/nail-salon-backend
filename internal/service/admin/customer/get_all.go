@@ -23,6 +23,7 @@ func (s *GetAll) GetAll(ctx context.Context, req adminCustomerModel.GetAllParsed
 	// Get customers from repository
 	total, results, err := s.repo.Customer.GetAllCustomersByFilter(ctx, sqlxRepo.GetAllCustomersByFilterParams{
 		Name:          req.Name,
+		LineName:      req.LineName,
 		Phone:         req.Phone,
 		Level:         req.Level,
 		IsBlacklisted: req.IsBlacklisted,
@@ -40,6 +41,7 @@ func (s *GetAll) GetAll(ctx context.Context, req adminCustomerModel.GetAllParsed
 		items[i] = adminCustomerModel.GetAllCustomerItem{
 			ID:            utils.FormatID(result.ID),
 			Name:          result.Name,
+			LineName:      utils.PgTextToString(result.LineName),
 			Phone:         result.Phone,
 			Birthday:      utils.PgDateToDateString(result.Birthday),
 			City:          utils.PgTextToString(result.City),

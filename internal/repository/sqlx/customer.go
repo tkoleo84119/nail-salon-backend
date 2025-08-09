@@ -30,6 +30,7 @@ func NewCustomerRepository(db *sqlx.DB) *CustomerRepository {
 
 type GetAllCustomersByFilterParams struct {
 	Name          *string
+	LineName      *string
 	Phone         *string
 	Level         *string
 	IsBlacklisted *bool
@@ -42,6 +43,7 @@ type GetAllCustomersByFilterParams struct {
 type GetAllCustomersByFilterItem struct {
 	ID            int64              `db:"id"`
 	Name          string             `db:"name"`
+	LineName      pgtype.Text        `db:"line_name"`
 	Phone         string             `db:"phone"`
 	Birthday      pgtype.Date        `db:"birthday"`
 	City          pgtype.Text        `db:"city"`
@@ -72,6 +74,11 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, req Ge
 	if req.Name != nil && *req.Name != "" {
 		whereConditions = append(whereConditions, fmt.Sprintf("name ILIKE $%d", len(args)+1))
 		args = append(args, "%"+*req.Name+"%")
+	}
+
+	if req.LineName != nil && *req.LineName != "" {
+		whereConditions = append(whereConditions, fmt.Sprintf("line_name ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*req.LineName+"%")
 	}
 
 	if req.Phone != nil && *req.Phone != "" {
@@ -118,7 +125,7 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, req Ge
 	// Data query
 	dataQuery := fmt.Sprintf(`
 		SELECT
-			id, name, phone, birthday, city,
+			id, name, line_name, phone, birthday, city,
 			level, is_blacklisted, last_visit_at, updated_at
 		FROM customers
 		%s
@@ -138,6 +145,7 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, req Ge
 		err := rows.Scan(
 			&item.ID,
 			&item.Name,
+			&item.LineName,
 			&item.Phone,
 			&item.Birthday,
 			&item.City,
