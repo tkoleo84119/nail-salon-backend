@@ -1,22 +1,20 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with this nail salon backend codebase.
 
 ## Development Commands
 
-### Core Commands
 - `make run` - Run the application server
 - `make test` - Run all tests
-- `make seed-test` - Seed test data into database
-- `make migrate-up` - Run database migrations up (requires DB_URL env var)
-- `make migrate-down` - Run database migrations down (requires DB_URL env var and NUMBER)
+- `make seed-test` - Seed test data
+- `make migrate-up` - Run database migrations up
+- `make migrate-down` - Run database migrations down
 
 ### Go Commands
 - `go run cmd/server/main.go` - Direct server execution
 - `go test ./...` - Run all tests
-- `go run scripts/seed/test_seed.go` - Seed test data
 
-## Architecture Overview
+## Architecture
 
 This is a Go web API for a nail salon management system using:
 - **Framework**: Gin HTTP framework (`github.com/gin-gonic/gin`)
@@ -26,7 +24,6 @@ This is a Go web API for a nail salon management system using:
 - **ID Generation**: Snowflake algorithm (`github.com/bwmarrin/snowflake`) for unique IDs
 - **Password Hashing**: bcrypt (`golang.org/x/crypto/bcrypt`)
 - **Configuration**: Environment-based config with .env file support (`github.com/joho/godotenv`)
-- **Testing**: Testify framework (`github.com/stretchr/testify`)
 
 ## Project Structure
 
@@ -49,226 +46,152 @@ nail-salon-backend/
 └── docs/              # API documentation
 ```
 
-## Authentication System
+## Universal Implementation Pattern
 
-### Dual Authentication Model
-The system supports two distinct authentication contexts:
+All APIs (admin and customer) follow the same 3-layer pattern:
 
-**Customer Authentication (Public API)**
-- LINE OAuth integration for customer login
-- JWT tokens with CustomerContext
-- Routes: `/api/auth/line/login`, `/api/auth/line/register`
-- Middleware: `CustomerJWTAuth`
-- Context extraction: `GetCustomerFromContext()`
+### File Organization
+```
+{context}/             # 'admin' or root level
+├── {domain}/          # auth, booking, store, etc.
+│   ├── {operation}.go # create, get, update, etc.
+│   └── interface.go   # service interfaces (in service layer)
+```
 
-**Staff Authentication (Admin API)**
-- Traditional username/password authentication
-- JWT tokens with StaffContext including roles and store access
-- Routes: `/api/admin/auth/login`, `/api/admin/auth/token/refresh`
-- Middleware: `JWTAuth` with role-based authorization
-- Hierarchical roles: `SUPER_ADMIN` > `ADMIN` > `MANAGER` > `STYLIST`
+### Naming Conventions
+- **Files**: `{operation}.go` (e.g., `create.go`, `get_all.go`, `update_my.go`)
+- **Structs**: `type {Operation} struct` (e.g., `type Create struct`)
+- **Models**: `{Operation}Request/Response` (e.g., `CreateRequest`)
+- **Package Aliases**: `{context}{Domain}Handler/Service/Model`
 
-### Role-Based Access Control (only for admin API)
-- `RequireAdminRoles()` - SUPER_ADMIN, ADMIN only
-- `RequireManagerOrAbove()` - MANAGER, ADMIN, SUPER_ADMIN
-- `RequireAnyStaffRole()` - Any authenticated staff member
-- `RequireRoles(roles...)` - Specific role combinations
+### Layer Pattern
 
-## Database Architecture
-
-### Triple Connection Strategy
+**1. Handler Layer**
 ```go
-type Database struct {
-    Std     *sql.DB        // Standard library compatibility
-    Sqlx    *sqlx.DB       // SQLX for complex operations
-    PgxPool *pgxpool.Pool  // PGX for high performance
+type {Operation} struct {
+    service {domain}Service.{Operation}Interface
+}
+
+func (h *{Operation}) {Operation}(c *gin.Context) {
+    // 1. Bind & validate request
+    var req {domain}Model.{Operation}Request
+    if err := c.ShouldBindJSON(&req); err != nil {
+        validationErrors := utils.ExtractValidationErrors(err)
+        errorCodes.RespondWithValidationErrors(c, validationErrors)
+        return
+    }
+
+    // 2. Extract auth context (if protected)
+    userContext, exists := middleware.Get{User}FromContext(c)
+
+    // 3. Parse string IDs to int64 (if needed)
+    parsedID, err := utils.ParseID(req.ID)
+
+    // 4. Call service
+    response, err := h.service.{Operation}(c.Request.Context(), req, userContext)
+    if err != nil {
+        errorCodes.RespondWithServiceError(c, err)
+        return
+    }
+
+    // 5. Return response
+    c.JSON(http.StatusOK, common.SuccessResponse(response))
 }
 ```
 
-### SQLC Integration
-- Type-safe SQL queries generated from `.sql` files in `/internal/repository/sqlc/`
-- Configuration in `sqlc.yaml` with JSON tags and interfaces enabled
-- Generated code provides `Querier` interface for unified database operations
-- PostgreSQL-specific with pgtype for Go type conversion
-
-### Repository Pattern
-- **SQLC repositories**: Generated CRUD operations with type safety
-- **SQLX repositories**: Complex dynamic queries and partial updates
-- **Interface-based design**: Enables testing and maintainability
-- **Dependency injection**: Services receive repository interfaces
-
-## API Design Patterns
-
-### Route Structure
-**Public/Customer Routes** (`/api/`)
-```
-/api/auth/line/login              # LINE OAuth authentication
-/api/customers/me                 # Customer profile management
-/api/bookings                     # Customer booking operations
-/api/stores                       # Store browsing and services
-/api/stores/:id/stylists          # Store stylist information
-/api/stores/:id/stylists/:id/schedules  # Schedule browsing
-/api/schedules/:id/time-slots     # Available time slot viewing
-```
-
-**Admin Routes** (`/api/admin/`)
-```
-/api/admin/auth/login             # Staff authentication
-/api/admin/staff                  # Staff management
-/api/admin/stores                 # Store management
-/api/admin/services               # Service management
-/api/admin/schedules/bulk         # Bulk schedule operations
-/api/admin/time-slot-templates    # Schedule template management
-```
-
-### Service Layer Organization
-Services are organized by access level and domain:
-
+**2. Service Layer**
 ```go
-Services {
-    Public PublicServices    # Customer-facing business logic
-    Admin  AdminServices     # Staff-facing business logic
+// Interface (in interface.go)
+type {Operation}Interface interface {
+    {Operation}(ctx context.Context, req Model.{Operation}Request, ...) (*Model.{Operation}Response, error)
+}
+
+// Implementation
+type {Operation} struct {
+    queries *dbgen.Queries      // SQLC for simple ops
+    db      *pgxpool.Pool       // Transactions
+    repo    Repository          // Complex queries
+}
+
+func (s *{Operation}) {Operation}(ctx context.Context, req Model.{Operation}Request, ...) (*Model.{Operation}Response, error) {
+    // 1. Validate business rules & permissions
+    // 2. Database operations (with tx if needed)
+    // 3. Return formatted response
 }
 ```
 
-Each service follows the pattern:
-- **Interface definition** for testability
-- **Constructor function** with dependency injection
-- **Context-aware methods** for all operations
-- **ServiceError returns** for consistent error handling
+**3. Model Layer**
+```go
+type {Operation}Request struct {
+    Field1 string   `json:"field1" binding:"required,max=50"`
+    IDs    []string `json:"ids" binding:"required,min=1,max=10"`
+}
+
+type {Operation}Response struct {
+    ID        string `json:"id"`
+    CreatedAt string `json:"createdAt"`
+}
+```
+
+## Database Usage Guide
+
+- **SQLC (queries)**: Standard CRUD, single-table operations, type-safe queries
+- **SQLX (repo)**: Dynamic queries, complex joins, partial updates, filtering
+- **PGX Pool (db)**: Transactions, bulk operations, high-performance needs
+
+## Authentication
+
+**Customer Auth**: LINE OAuth → `GetCustomerFromContext(c)`
+**Staff Auth**: Username/password → `GetStaffFromContext(c)`
+
+**Staff Roles** (hierarchical): `SUPER_ADMIN` > `ADMIN` > `MANAGER` > `STYLIST`
 
 ## Error Handling
 
-### Error Code System
-Hierarchical error codes for different domains:
-- `AUTH_*` - Authentication and authorization errors
-- `BOOKING_*` - Booking-related business logic errors
-- `CUSTOMER_*` - Customer management errors
-- `SCHEDULE_*` - Scheduling system errors
-- `SERVICE_*` - Service management errors
-- `STORE_*` - Store management errors
-- `VAL_*` - Validation errors
-- `SYS_*` - System-level errors
-
-### Error Flow
+Service errors use hierarchical codes: `AUTH_*`, `BOOKING_*`, `CUSTOMER_*`, etc.
 ```go
-// Service layer generates business logic errors
-ServiceError{Code: "CUSTOMER_NOT_FOUND", Message: "Customer not found"}
-
-// Handler layer maps to HTTP responses
+return errorCodes.NewServiceErrorWithCode(errorCodes.CustomerNotFound)
 errorCodes.RespondWithServiceError(c, err)
-
-// Client receives structured error response
-{"error": "CUSTOMER_NOT_FOUND", "message": "Customer not found"}
 ```
 
-## Development Guidelines
+## Common Utilities
 
-### Code Style
-- Follow Go conventions and gofmt formatting
-- Use meaningful package aliases for clarity (e.g., `adminAuthModel`, `customerModel`)
-- Interface-first design for services and repositories
-- Comprehensive error handling with specific error codes
-- Context propagation throughout the application
-- Dependency injection through container pattern
+**ID Handling**:
+```go
+newID := utils.GenerateID()                    // Generate Snowflake ID
+parsed := utils.ParseID(stringID)              // String → int64
+formatted := utils.FormatID(int64ID)           // int64 → string
+```
 
-### Database Guidelines
-- Use SQLC for standard CRUD operations and complex queries
-- Use SQLX for dynamic queries and partial updates
-- Always use parameterized queries to prevent SQL injection
-- Implement proper transaction handling for multi-step operations
-- Use pgtype for PostgreSQL-specific data types (Time, Date, etc.)
+**Time Handling**:
+```go
+pgTime := utils.TimeToPgTimestamptz(time.Now())
+timeString := utils.PgTimestamptzToTimeString(pgTime)
+```
 
-### Security Best Practices
-- JWT token validation on all protected routes
-- Role-based authorization for admin operations
-- Customer blacklist validation before booking operations
-- Store access control based on staff assignments
-- Input validation using struct tags and custom validators
-- Secure password hashing with bcrypt
+## AI Implementation Steps
 
-### Testing Strategy
-- Unit tests for all utility functions
-- Service layer testing with interface mocking
-- Table-driven tests for comprehensive scenario coverage
-- Integration tests for database operations
-- Use testify framework for assertions and test structure
+### Adding New Feature
+1. **Identify domain & context** (admin vs customer)
+2. **Create model** in `/internal/model/{context}/{domain}/{operation}.go`
+3. **Define interface** in `/internal/service/{context}/{domain}/interface.go`
+4. **Implement service** in `/internal/service/{context}/{domain}/{operation}.go`
+5. **Create handler** in `/internal/handler/{context}/{domain}/{operation}.go`
+6. **Register in container** (`container_{context}.go`)
+7. **Add route** in router setup
 
-## Key Business Logic
+### Standard Operations
+- `create.go`, `get.go`, `get_all.go`, `update.go`, `delete.go`
+- `get_my.go`, `update_my.go` (user's own data)
+- `{operation}_bulk.go` (bulk operations)
 
-### Booking System
-- Customers can create, view, update, and cancel bookings
-- Time slot availability checking with booking status validation
-- Store and stylist assignment with access control
-- Blacklist validation prevents bookings from banned customers
+### Key Patterns
+- Always use interface-based dependency injection
+- Validate at both request and business logic levels
+- Use transactions for multi-step operations
+- Extract auth context for protected endpoints
+- Return structured error responses
+- Convert string IDs to int64 for database operations
 
-### Schedule Management
-- Bulk schedule creation and deletion by staff
-- Time slot templates for efficient schedule setup
-- Individual time slot management with duration tracking
-- Available time slot filtering for customer browsing
-
-### Store Management
-- Multi-store support with store-specific staff access
-- Service offerings per store with pricing
-- Stylist assignment and availability per store
-- Store access control based on staff roles
-
-### Customer Management
-- LINE social login integration
-- Customer profile management
-- Booking history and status tracking
-- Blacklist management for access control
-
-## Environment Configuration
-
-Required environment variables:
-- `DB_URL` - PostgreSQL connection string
-- `JWT_SECRET` - JWT signing secret
-- `LINE_CHANNEL_ID` - LINE OAuth channel ID
-- `LINE_CHANNEL_SECRET` - LINE OAuth channel secret
-- `PORT` - Server port (default: 8080)
-
-## Development Workflow
-
-When implementing new features:
-- Define models in appropriate `/internal/model/` subdirectory
-- Create SQLC queries in `/internal/repository/sqlc/` if needed
-- Implement service layer with interface and concrete implementation
-- Create handler with proper error handling and validation
-- Add routes to appropriate router setup function
-- Update dependency injection in container files
-- Write comprehensive tests for new functionality
-- Update API documentation in `/docs/` directory
-
-When modifying existing features:
-- Understand the layered architecture before making changes
-- Follow established patterns for consistency
-- Ensure interface compatibility when updating services
-- Run full test suite to verify no regressions
-- Update documentation if API contracts change
-
-## Common Patterns
-
-### Time Handling
-- Use `time.Time` for Go operations
-- Use `pgtype.Time` for database storage
-- Convert between formats as needed for business logic
-- Handle timezone considerations for scheduling
-
-### ID Generation
-- Use Snowflake algorithm for unique IDs across all entities
-- Initialize node ID based on environment or configuration
-- IDs are int64 but often represented as strings in JSON
-
-### Validation
-- Use struct tags for basic validation (`binding:"required"`)
-- Implement custom validators for business rules (phone numbers, dates)
-- Extract validation errors for user-friendly responses
-- Validate business logic constraints in service layer
-
-### Pagination
-- Implement cursor-based pagination for better performance
-- Use limit/offset for simple cases
-- Provide total counts when feasible
-- Sort by creation time or relevant business criteria
+## Environment Variables
+- `DB_URL`, `JWT_SECRET`, `LINE_CHANNEL_ID`, `LINE_CHANNEL_SECRET`, `PORT`
