@@ -52,25 +52,19 @@ func (q *Queries) CreateCustomerToken(ctx context.Context, arg CreateCustomerTok
 }
 
 const getValidCustomerToken = `-- name: GetValidCustomerToken :one
-SELECT id, customer_id, refresh_token, user_agent, ip_address, expired_at,
-      is_revoked, created_at, updated_at
+SELECT id, customer_id
 FROM customer_tokens
 WHERE refresh_token = $1 AND expired_at > NOW() AND is_revoked = false
 `
 
-func (q *Queries) GetValidCustomerToken(ctx context.Context, refreshToken string) (CustomerToken, error) {
+type GetValidCustomerTokenRow struct {
+	ID         int64 `db:"id" json:"id"`
+	CustomerID int64 `db:"customer_id" json:"customer_id"`
+}
+
+func (q *Queries) GetValidCustomerToken(ctx context.Context, refreshToken string) (GetValidCustomerTokenRow, error) {
 	row := q.db.QueryRow(ctx, getValidCustomerToken, refreshToken)
-	var i CustomerToken
-	err := row.Scan(
-		&i.ID,
-		&i.CustomerID,
-		&i.RefreshToken,
-		&i.UserAgent,
-		&i.IpAddress,
-		&i.ExpiredAt,
-		&i.IsRevoked,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
+	var i GetValidCustomerTokenRow
+	err := row.Scan(&i.ID, &i.CustomerID)
 	return i, err
 }

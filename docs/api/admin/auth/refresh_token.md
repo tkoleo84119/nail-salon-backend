@@ -28,7 +28,6 @@
 ### Header
 
 - Content-Type: application/json
-- Authorization: Bearer <access_token>
 
 ### Body 範例
 

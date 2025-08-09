@@ -12,17 +12,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type RefreshTokenHandler struct {
-	service authService.RefreshTokenServiceInterface
+type RefreshToken struct {
+	service authService.RefreshTokenInterface
 }
 
-func NewRefreshTokenHandler(service authService.RefreshTokenServiceInterface) *RefreshTokenHandler {
-	return &RefreshTokenHandler{
+func NewRefreshToken(service authService.RefreshTokenInterface) *RefreshToken {
+	return &RefreshToken{
 		service: service,
 	}
 }
 
-func (h *RefreshTokenHandler) RefreshToken(c *gin.Context) {
+func (h *RefreshToken) RefreshToken(c *gin.Context) {
 	// Input JSON validation
 	var req authModel.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

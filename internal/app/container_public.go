@@ -23,9 +23,9 @@ import (
 // PublicServices contains all public/customer-facing services
 type PublicServices struct {
 	// Authentication services
-	AuthCustomerLineLogin    authService.CustomerLineLoginServiceInterface
-	AuthCustomerLineRegister authService.CustomerLineRegisterServiceInterface
-	AuthRefreshToken         authService.RefreshTokenServiceInterface
+	AuthLineLogin    authService.LineLoginInterface
+	AuthLineRegister authService.LineRegisterInterface
+	AuthRefreshToken authService.RefreshTokenInterface
 
 	// Customer services
 	CustomerGetMy    *customerService.GetMyCustomerService
@@ -52,9 +52,9 @@ type PublicServices struct {
 // PublicHandlers contains all public/customer-facing handlers
 type PublicHandlers struct {
 	// Authentication handlers
-	AuthCustomerLineLogin    *authHandler.CustomerLineLoginHandler
-	AuthCustomerLineRegister *authHandler.CustomerLineRegisterHandler
-	AuthRefreshToken         *authHandler.RefreshTokenHandler
+	AuthLineLogin    *authHandler.LineLogin
+	AuthLineRegister *authHandler.LineRegister
+	AuthRefreshToken *authHandler.RefreshToken
 
 	// Customer handlers
 	CustomerGetMy    *customerHandler.GetMyCustomerHandler
@@ -82,9 +82,9 @@ type PublicHandlers struct {
 func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config) PublicServices {
 	return PublicServices{
 		// Authentication services
-		AuthCustomerLineLogin:    authService.NewCustomerLineLoginService(queries, cfg.Line, cfg.JWT),
-		AuthCustomerLineRegister: authService.NewCustomerLineRegisterService(queries, database.PgxPool, cfg.Line, cfg.JWT),
-		AuthRefreshToken:         authService.NewRefreshTokenService(queries, cfg.JWT),
+		AuthLineLogin:    authService.NewLineLogin(queries, cfg.Line, cfg.JWT),
+		AuthLineRegister: authService.NewLineRegister(queries, database.PgxPool, cfg.Line, cfg.JWT),
+		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT),
 
 		// Customer services
 		CustomerGetMy:    customerService.NewGetMyCustomerService(queries),
@@ -113,9 +113,9 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 func NewPublicHandlers(services PublicServices) PublicHandlers {
 	return PublicHandlers{
 		// Authentication handlers
-		AuthCustomerLineLogin:    authHandler.NewCustomerLineLoginHandler(services.AuthCustomerLineLogin),
-		AuthCustomerLineRegister: authHandler.NewCustomerLineRegisterHandler(services.AuthCustomerLineRegister),
-		AuthRefreshToken:         authHandler.NewRefreshTokenHandler(services.AuthRefreshToken),
+		AuthLineLogin:    authHandler.NewLineLogin(services.AuthLineLogin),
+		AuthLineRegister: authHandler.NewLineRegister(services.AuthLineRegister),
+		AuthRefreshToken: authHandler.NewRefreshToken(services.AuthRefreshToken),
 
 		// Customer handlers
 		CustomerGetMy:    customerHandler.NewGetMyCustomerHandler(services.CustomerGetMy),

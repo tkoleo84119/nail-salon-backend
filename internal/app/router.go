@@ -55,8 +55,8 @@ func setupPublicAuthRoutes(api *gin.RouterGroup, handlers Handlers) {
 	{
 		line := auth.Group("/line")
 		{
-			line.POST("/login", handlers.Public.AuthCustomerLineLogin.CustomerLineLogin)
-			line.POST("/register", handlers.Public.AuthCustomerLineRegister.CustomerLineRegister)
+			line.POST("/login", handlers.Public.AuthLineLogin.LineLogin)
+			line.POST("/register", handlers.Public.AuthLineRegister.LineRegister)
 		}
 
 		token := auth.Group("/token")

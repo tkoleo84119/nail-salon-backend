@@ -11,17 +11,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCustomer = `-- name: CreateCustomer :one
-INSERT INTO customers (id, name, phone, birthday, city, favorite_shapes, favorite_colors,
-       favorite_styles, is_introvert, referral_source, referrer, customer_note)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-RETURNING id, name, phone, birthday, city, favorite_shapes, favorite_colors,
-       favorite_styles, is_introvert, referral_source, referrer, customer_note,
-       store_note, level, is_blacklisted, created_at, updated_at
+const checkCustomerExistsByLineUid = `-- name: CheckCustomerExistsByLineUid :one
+SELECT EXISTS (SELECT 1 FROM customers WHERE line_uid = $1)
+`
+
+func (q *Queries) CheckCustomerExistsByLineUid(ctx context.Context, lineUid string) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCustomerExistsByLineUid, lineUid)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const createCustomer = `-- name: CreateCustomer :exec
+INSERT INTO customers (id, line_uid, line_name, name, phone, birthday, city, favorite_shapes, favorite_colors,
+      favorite_styles, is_introvert, referral_source, referrer, customer_note, level)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 `
 
 type CreateCustomerParams struct {
 	ID             int64       `db:"id" json:"id"`
+	LineUid        string      `db:"line_uid" json:"line_uid"`
+	LineName       pgtype.Text `db:"line_name" json:"line_name"`
 	Name           string      `db:"name" json:"name"`
 	Phone          string      `db:"phone" json:"phone"`
 	Birthday       pgtype.Date `db:"birthday" json:"birthday"`
@@ -33,31 +43,14 @@ type CreateCustomerParams struct {
 	ReferralSource []string    `db:"referral_source" json:"referral_source"`
 	Referrer       pgtype.Text `db:"referrer" json:"referrer"`
 	CustomerNote   pgtype.Text `db:"customer_note" json:"customer_note"`
+	Level          pgtype.Text `db:"level" json:"level"`
 }
 
-type CreateCustomerRow struct {
-	ID             int64              `db:"id" json:"id"`
-	Name           string             `db:"name" json:"name"`
-	Phone          string             `db:"phone" json:"phone"`
-	Birthday       pgtype.Date        `db:"birthday" json:"birthday"`
-	City           pgtype.Text        `db:"city" json:"city"`
-	FavoriteShapes []string           `db:"favorite_shapes" json:"favorite_shapes"`
-	FavoriteColors []string           `db:"favorite_colors" json:"favorite_colors"`
-	FavoriteStyles []string           `db:"favorite_styles" json:"favorite_styles"`
-	IsIntrovert    pgtype.Bool        `db:"is_introvert" json:"is_introvert"`
-	ReferralSource []string           `db:"referral_source" json:"referral_source"`
-	Referrer       pgtype.Text        `db:"referrer" json:"referrer"`
-	CustomerNote   pgtype.Text        `db:"customer_note" json:"customer_note"`
-	StoreNote      pgtype.Text        `db:"store_note" json:"store_note"`
-	Level          pgtype.Text        `db:"level" json:"level"`
-	IsBlacklisted  pgtype.Bool        `db:"is_blacklisted" json:"is_blacklisted"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-}
-
-func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) (CreateCustomerRow, error) {
-	row := q.db.QueryRow(ctx, createCustomer,
+func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) error {
+	_, err := q.db.Exec(ctx, createCustomer,
 		arg.ID,
+		arg.LineUid,
+		arg.LineName,
 		arg.Name,
 		arg.Phone,
 		arg.Birthday,
@@ -69,28 +62,9 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 		arg.ReferralSource,
 		arg.Referrer,
 		arg.CustomerNote,
+		arg.Level,
 	)
-	var i CreateCustomerRow
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Phone,
-		&i.Birthday,
-		&i.City,
-		&i.FavoriteShapes,
-		&i.FavoriteColors,
-		&i.FavoriteStyles,
-		&i.IsIntrovert,
-		&i.ReferralSource,
-		&i.Referrer,
-		&i.CustomerNote,
-		&i.StoreNote,
-		&i.Level,
-		&i.IsBlacklisted,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	return err
 }
 
 const existsCustomerByID = `-- name: ExistsCustomerByID :one
@@ -105,15 +79,17 @@ func (q *Queries) ExistsCustomerByID(ctx context.Context, id int64) (bool, error
 }
 
 const getCustomerByID = `-- name: GetCustomerByID :one
-SELECT id, name, phone, birthday, city, favorite_shapes, favorite_colors,
-       favorite_styles, is_introvert, referral_source, referrer, customer_note,
-       store_note, level, is_blacklisted, created_at, updated_at
+SELECT id, line_uid, line_name, name, phone, birthday, city, favorite_shapes, favorite_colors,
+      favorite_styles, is_introvert, referral_source, referrer, customer_note,
+      store_note, level, is_blacklisted, created_at, updated_at
 FROM customers
 WHERE id = $1
 `
 
 type GetCustomerByIDRow struct {
 	ID             int64              `db:"id" json:"id"`
+	LineUid        string             `db:"line_uid" json:"line_uid"`
+	LineName       pgtype.Text        `db:"line_name" json:"line_name"`
 	Name           string             `db:"name" json:"name"`
 	Phone          string             `db:"phone" json:"phone"`
 	Birthday       pgtype.Date        `db:"birthday" json:"birthday"`
@@ -137,6 +113,8 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByI
 	var i GetCustomerByIDRow
 	err := row.Scan(
 		&i.ID,
+		&i.LineUid,
+		&i.LineName,
 		&i.Name,
 		&i.Phone,
 		&i.Birthday,
@@ -155,4 +133,17 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByI
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getCustomerByLineUid = `-- name: GetCustomerByLineUid :one
+SELECT id
+FROM customers
+WHERE line_uid = $1
+`
+
+func (q *Queries) GetCustomerByLineUid(ctx context.Context, lineUid string) (int64, error) {
+	row := q.db.QueryRow(ctx, getCustomerByLineUid, lineUid)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }

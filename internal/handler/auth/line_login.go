@@ -13,21 +13,21 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CustomerLineLoginHandler struct {
-	service authService.CustomerLineLoginServiceInterface
+type LineLogin struct {
+	service authService.LineLoginInterface
 }
 
 // NewCustomerLineLoginHandler creates a new LINE login handler
-func NewCustomerLineLoginHandler(service authService.CustomerLineLoginServiceInterface) *CustomerLineLoginHandler {
-	return &CustomerLineLoginHandler{
+func NewLineLogin(service authService.LineLoginInterface) *LineLogin {
+	return &LineLogin{
 		service: service,
 	}
 }
 
 // CustomerLineLogin handles the customer LINE login endpoint
-func (h *CustomerLineLoginHandler) CustomerLineLogin(c *gin.Context) {
+func (h *LineLogin) LineLogin(c *gin.Context) {
 	// Input JSON Validation
-	var req authModel.CustomerLineLoginRequest
+	var req authModel.LineLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -35,14 +35,14 @@ func (h *CustomerLineLoginHandler) CustomerLineLogin(c *gin.Context) {
 	}
 
 	// Extract login context
-	loginCtx := authModel.CustomerLoginContext{
+	loginCtx := authModel.LoginContext{
 		UserAgent: c.GetHeader("User-Agent"),
 		IPAddress: c.ClientIP(),
 		Timestamp: time.Now(),
 	}
 
 	// Call service layer
-	response, err := h.service.CustomerLineLogin(c.Request.Context(), req, loginCtx)
+	response, err := h.service.LineLogin(c.Request.Context(), req, loginCtx)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

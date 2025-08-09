@@ -110,16 +110,9 @@ type Customer struct {
 	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 	LastVisitAt    pgtype.Timestamptz `db:"last_visit_at" json:"last_visit_at"`
-}
-
-type CustomerAuth struct {
-	ID          int64              `db:"id" json:"id"`
-	CustomerID  int64              `db:"customer_id" json:"customer_id"`
-	Provider    string             `db:"provider" json:"provider"`
-	ProviderUid string             `db:"provider_uid" json:"provider_uid"`
-	OtherInfo   []byte             `db:"other_info" json:"other_info"`
-	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	LineUid        string             `db:"line_uid" json:"line_uid"`
+	LineName       pgtype.Text        `db:"line_name" json:"line_name"`
+	Email          pgtype.Text        `db:"email" json:"email"`
 }
 
 type CustomerCoupon struct {

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 type LineVerifyResponse struct {
@@ -43,8 +43,8 @@ func NewLineValidator(channelID string) *LineValidator {
 	}
 }
 
-func (v *LineValidator) ValidateIdToken(idToken string) (*auth.CustomerProfile, error) {
-	if v.channelID == "YOUR_LINE_CHANNEL_ID" || v.channelID == "" {
+func (v *LineValidator) ValidateIdToken(idToken string) (*common.LineProfile, error) {
+	if v.channelID == "MOCK_CHANNEL_ID" {
 		return MockValidateLineIdToken(idToken)
 	}
 
@@ -104,7 +104,7 @@ func (v *LineValidator) ValidateIdToken(idToken string) (*auth.CustomerProfile, 
 		return nil, errorCodes.NewServiceError(errorCodes.AuthLineTokenInvalid, "invalid audience", nil)
 	}
 
-	profile := &auth.CustomerProfile{
+	profile := &common.LineProfile{
 		ProviderUid: verifyResp.Sub,
 		Name:        verifyResp.Name,
 	}
@@ -116,7 +116,7 @@ func (v *LineValidator) ValidateIdToken(idToken string) (*auth.CustomerProfile, 
 	return profile, nil
 }
 
-func MockValidateLineIdToken(idToken string) (*auth.CustomerProfile, error) {
+func MockValidateLineIdToken(idToken string) (*common.LineProfile, error) {
 	if idToken == "" {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthLineTokenInvalid)
 	}
@@ -134,13 +134,13 @@ func MockValidateLineIdToken(idToken string) (*auth.CustomerProfile, error) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthLineTokenInvalid)
 	}
 
-	profile := &auth.CustomerProfile{
-		ProviderUid: "U12345678",
-		Name:        "Test User",
+	profile := &common.LineProfile{
+		ProviderUid: "U123456789",
+		Name:        "Mock User",
 	}
 
 	if strings.Contains(idToken, "with-email") {
-		email := "test@example.com"
+		email := "mock@example.com"
 		profile.Email = &email
 	}
 

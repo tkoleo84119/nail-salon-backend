@@ -1,0 +1,8 @@
+ALTER TABLE customers
+DROP COLUMN IF EXISTS line_uid;
+
+ALTER TABLE customers
+DROP COLUMN IF EXISTS line_name;
+
+ALTER TABLE customers
+DROP COLUMN IF EXISTS email;

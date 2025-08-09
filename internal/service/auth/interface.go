@@ -6,14 +6,14 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 )
 
-type CustomerLineLoginServiceInterface interface {
-	CustomerLineLogin(ctx context.Context, req auth.CustomerLineLoginRequest, loginCtx auth.CustomerLoginContext) (*auth.CustomerLineLoginResponse, error)
+type LineRegisterInterface interface {
+	LineRegister(ctx context.Context, req auth.LineRegisterRequest, loginCtx auth.LoginContext) (*auth.LineRegisterResponse, error)
 }
 
-type CustomerLineRegisterServiceInterface interface {
-	CustomerLineRegister(ctx context.Context, req auth.CustomerLineRegisterRequest, loginCtx auth.CustomerLoginContext) (*auth.CustomerLineRegisterResponse, error)
+type LineLoginInterface interface {
+	LineLogin(ctx context.Context, req auth.LineLoginRequest, loginCtx auth.LoginContext) (*auth.LineLoginResponse, error)
 }
 
-type RefreshTokenServiceInterface interface {
+type RefreshTokenInterface interface {
 	RefreshToken(ctx context.Context, req auth.RefreshTokenRequest) (*auth.RefreshTokenResponse, error)
 }

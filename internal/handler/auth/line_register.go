@@ -8,22 +8,23 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	authModel "github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CustomerLineRegisterHandler struct {
-	service authService.CustomerLineRegisterServiceInterface
+type LineRegister struct {
+	service authService.LineRegisterInterface
 }
 
-func NewCustomerLineRegisterHandler(service authService.CustomerLineRegisterServiceInterface) *CustomerLineRegisterHandler {
-	return &CustomerLineRegisterHandler{
+func NewLineRegister(service authService.LineRegisterInterface) *LineRegister {
+	return &LineRegister{
 		service: service,
 	}
 }
 
-func (h *CustomerLineRegisterHandler) CustomerLineRegister(c *gin.Context) {
-	var req authModel.CustomerLineRegisterRequest
+func (h *LineRegister) LineRegister(c *gin.Context) {
+	var req authModel.LineRegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -31,21 +32,19 @@ func (h *CustomerLineRegisterHandler) CustomerLineRegister(c *gin.Context) {
 	}
 
 	// Create login context
-	loginCtx := authModel.CustomerLoginContext{
+	loginCtx := authModel.LoginContext{
 		UserAgent: c.GetHeader("User-Agent"),
 		IPAddress: c.ClientIP(),
 		Timestamp: time.Now(),
 	}
 
 	// Call service
-	response, err := h.service.CustomerLineRegister(c.Request.Context(), req, loginCtx)
+	response, err := h.service.LineRegister(c.Request.Context(), req, loginCtx)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
 	}
 
 	// Return successful response
-	c.JSON(http.StatusCreated, gin.H{
-		"data": response,
-	})
+	c.JSON(http.StatusCreated, common.SuccessResponse(response))
 }

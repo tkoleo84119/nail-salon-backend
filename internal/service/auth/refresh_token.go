@@ -2,9 +2,9 @@ package auth
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
@@ -12,23 +12,23 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type RefreshTokenService struct {
+type RefreshToken struct {
 	queries   *dbgen.Queries
 	jwtConfig config.JWTConfig
 }
 
-func NewRefreshTokenService(queries *dbgen.Queries, jwtConfig config.JWTConfig) *RefreshTokenService {
-	return &RefreshTokenService{
+func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig) *RefreshToken {
+	return &RefreshToken{
 		queries:   queries,
 		jwtConfig: jwtConfig,
 	}
 }
 
-func (s *RefreshTokenService) RefreshToken(ctx context.Context, req auth.RefreshTokenRequest) (*auth.RefreshTokenResponse, error) {
+func (s *RefreshToken) RefreshToken(ctx context.Context, req auth.RefreshTokenRequest) (*auth.RefreshTokenResponse, error) {
 	// Validate refresh token exists and is not revoked/expired
 	tokenRecord, err := s.queries.GetValidCustomerToken(ctx, req.RefreshToken)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthRefreshTokenInvalid)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to validate refresh token", err)

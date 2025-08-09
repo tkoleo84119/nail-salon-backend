@@ -55,9 +55,12 @@ Ref: staff_user_tokens.staff_user_id > staff_users.id [delete: cascade]
 // ========== 顧客管理 ==========
 Table customers {
   id bigint [pk]
+  line_uid varchar(255) [not null]
+  line_name varchar(100)
   name varchar(100) [not null]
   phone varchar(20) [not null]
   birthday date [not null]
+  email text
   city varchar(100)
   favorite_shapes text[] // 喜歡的指形
   favorite_colors text[] // 喜歡的色系
@@ -73,23 +76,6 @@ Table customers {
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
-
-Table customer_auths {
-  id bigint [pk]
-  customer_id bigint [not null]
-  provider varchar(50) [not null] // LINE, EMAIL, GOOGLE
-  provider_uid varchar(250) [not null] // LINE ID, Google sub, email address
-  other_info jsonb
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
-
-  indexes {
-    (provider, provider_uid) [unique] // 一個帳號對應一個客戶
-    (customer_id, provider) [unique] // 一個客戶一種登入來源(每個人只能有一個Line)
-  }
-}
-
-Ref: customer_auths.customer_id > customers.id [delete: cascade]
 
 Table customer_tokens {
   id bigint [pk]
