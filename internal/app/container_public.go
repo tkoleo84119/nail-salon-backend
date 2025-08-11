@@ -46,7 +46,6 @@ type PublicServices struct {
 	StoreGetServices storeService.GetStoreServicesServiceInterface
 	StoreGetStylists storeService.GetStoreStylistsServiceInterface
 	StoreGetAll      storeService.GetAllInterface
-	StoreGetStore    storeService.GetStoreServiceInterface
 }
 
 // PublicHandlers contains all public/customer-facing handlers
@@ -75,7 +74,6 @@ type PublicHandlers struct {
 	StoreGetServices *storeHandler.GetStoreServicesHandler
 	StoreGetStylists *storeHandler.GetStoreStylistsHandler
 	StoreGetAll      *storeHandler.GetAll
-	StoreGetStore    *storeHandler.GetStoreHandler
 }
 
 // NewPublicServices creates and initializes all public services
@@ -105,7 +103,6 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.SQLX),
 		StoreGetStylists: storeService.NewGetStoreStylistsService(queries, repositories.SQLX),
 		StoreGetAll:      storeService.NewGetAll(repositories.SQLX),
-		StoreGetStore:    storeService.NewGetStoreService(queries),
 	}
 }
 
@@ -136,6 +133,5 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		StoreGetServices: storeHandler.NewGetStoreServicesHandler(services.StoreGetServices),
 		StoreGetStylists: storeHandler.NewGetStoreStylistsHandler(services.StoreGetStylists),
 		StoreGetAll:      storeHandler.NewGetAll(services.StoreGetAll),
-		StoreGetStore:    storeHandler.NewGetStoreHandler(services.StoreGetStore),
 	}
 }

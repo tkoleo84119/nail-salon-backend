@@ -45,13 +45,3 @@ type GetStoreStylistsItemModel struct {
 	GoodAtStyles  []string `json:"goodAtStyles"`
 	IsIntrovert   bool     `json:"isIntrovert"`
 }
-
-// -------------------------------------------------------------------------------------
-
-// GetStoreResponse represents the response for getting a single store
-type GetStoreResponse struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Phone   string `json:"phone"`
-}
