@@ -20,6 +20,7 @@ type Querier interface {
 	CheckServiceNameExistsExcluding(ctx context.Context, arg CheckServiceNameExistsExcludingParams) (bool, error)
 	CheckStaffUserExistsByUsername(ctx context.Context, username string) (bool, error)
 	CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error)
+	CheckStoreExistAndActive(ctx context.Context, id int64) (bool, error)
 	CheckStoreExistByID(ctx context.Context, id int64) (bool, error)
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
 	CheckStoreNameExistsExcluding(ctx context.Context, arg CheckStoreNameExistsExcludingParams) (bool, error)

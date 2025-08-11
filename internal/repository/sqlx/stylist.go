@@ -7,7 +7,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
-	storeModel "github.com/tkoleo84119/nail-salon-backend/internal/model/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -15,7 +14,6 @@ import (
 type StylistRepositoryInterface interface {
 	GetStoreAllStylistByFilter(ctx context.Context, storeID int64, params GetStoreAllStylistByFilterParams) (int, []GetStoreAllStylistByFilterItem, error)
 	UpdateStylist(ctx context.Context, staffUserID int64, params UpdateStylistParams) (UpdateStylistResponse, error)
-	GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error)
 }
 
 type StylistRepository struct {
@@ -49,14 +47,7 @@ type GetStoreAllStylistByFilterItem struct {
 // GetStoreStylistList retrieves stylists for a specific store with dynamic filtering
 func (r *StylistRepository) GetStoreAllStylistByFilter(ctx context.Context, storeID int64, params GetStoreAllStylistByFilterParams) (int, []GetStoreAllStylistByFilterItem, error) {
 	// Set default values
-	limit := 20
-	offset := 0
-	if params.Limit != nil && *params.Limit > 0 {
-		limit = *params.Limit
-	}
-	if params.Offset != nil && *params.Offset >= 0 {
-		offset = *params.Offset
-	}
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
 
 	// Set default sort values
 	sort := utils.HandleSortByMap(map[string]string{
@@ -256,98 +247,4 @@ func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64
 	}
 
 	return result, nil
-}
-
-// GetStoreStylistsModel represents the database model for store stylists
-type GetStoreStylistsModel struct {
-	ID           int64    `db:"id"`
-	Name         string   `db:"name"`
-	GoodAtShapes []string `db:"good_at_shapes"`
-	GoodAtColors []string `db:"good_at_colors"`
-	GoodAtStyles []string `db:"good_at_styles"`
-	IsIntrovert  bool     `db:"is_introvert"`
-}
-
-// ------------------------------------------------------------------------------------------------
-
-// GetStoreStylists retrieves stylists for a specific store with flexible filtering
-func (r *StylistRepository) GetStoreStylists(ctx context.Context, storeID int64, limit, offset int) ([]storeModel.GetStoreStylistsItemModel, int, error) {
-	args := map[string]interface{}{
-		"store_id": storeID,
-		"limit":    limit,
-		"offset":   offset,
-	}
-
-	// Query for stylists working at the specified store
-	// Join stylists -> staff_users -> staff_user_store_access to find stylists with store access
-	// Only return active staff users as specified
-	query := `
-		SELECT
-			s.id,
-			s.name,
-			COALESCE(s.good_at_shapes, '{}') as good_at_shapes,
-			COALESCE(s.good_at_colors, '{}') as good_at_colors,
-			COALESCE(s.good_at_styles, '{}') as good_at_styles,
-			COALESCE(s.is_introvert, false) as is_introvert
-		FROM stylists s
-		INNER JOIN staff_users su ON s.staff_user_id = su.id
-		INNER JOIN staff_user_store_access susa ON su.id = susa.staff_user_id
-		WHERE susa.store_id = :store_id
-		  AND su.is_active = true
-		ORDER BY s.name ASC
-		LIMIT :limit OFFSET :offset
-	`
-
-	var stylists []GetStoreStylistsModel
-	rows, err := r.db.NamedQueryContext(ctx, query, args)
-	if err != nil {
-		return nil, 0, fmt.Errorf("query stylists failed: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var stylist GetStoreStylistsModel
-		if err := rows.StructScan(&stylist); err != nil {
-			return nil, 0, fmt.Errorf("scan stylist failed: %w", err)
-		}
-		stylists = append(stylists, stylist)
-	}
-
-	// Count total records with same conditions
-	countQuery := `
-		SELECT COUNT(DISTINCT s.id)
-		FROM stylists s
-		INNER JOIN staff_users su ON s.staff_user_id = su.id
-		INNER JOIN staff_user_store_access susa ON su.id = susa.staff_user_id
-		WHERE susa.store_id = :store_id
-		  AND su.is_active = true
-	`
-
-	var total int
-	countRow, err := r.db.NamedQueryContext(ctx, countQuery, args)
-	if err != nil {
-		return nil, 0, fmt.Errorf("count stylists failed: %w", err)
-	}
-	defer countRow.Close()
-
-	if countRow.Next() {
-		if err := countRow.Scan(&total); err != nil {
-			return nil, 0, fmt.Errorf("scan count failed: %w", err)
-		}
-	}
-
-	// Convert to response models
-	items := make([]storeModel.GetStoreStylistsItemModel, len(stylists))
-	for i, stylist := range stylists {
-		items[i] = storeModel.GetStoreStylistsItemModel{
-			ID:           utils.FormatID(stylist.ID),
-			Name:         stylist.Name,
-			GoodAtShapes: stylist.GoodAtShapes,
-			GoodAtColors: stylist.GoodAtColors,
-			GoodAtStyles: stylist.GoodAtStyles,
-			IsIntrovert:  stylist.IsIntrovert,
-		}
-	}
-
-	return items, total, nil
 }

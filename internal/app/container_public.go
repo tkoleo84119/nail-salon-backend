@@ -11,6 +11,7 @@ import (
 	customerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer"
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
+	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
 
 	// Public services
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
@@ -18,6 +19,7 @@ import (
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
+	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
 )
 
 // PublicServices contains all public/customer-facing services
@@ -44,8 +46,10 @@ type PublicServices struct {
 
 	// Store services
 	StoreGetServices storeService.GetStoreServicesServiceInterface
-	StoreGetStylists storeService.GetStoreStylistsServiceInterface
 	StoreGetAll      storeService.GetAllInterface
+
+	// Stylist services
+	StylistGetAll stylistService.GetAllInterface
 }
 
 // PublicHandlers contains all public/customer-facing handlers
@@ -72,8 +76,10 @@ type PublicHandlers struct {
 
 	// Store handlers
 	StoreGetServices *storeHandler.GetStoreServicesHandler
-	StoreGetStylists *storeHandler.GetStoreStylistsHandler
 	StoreGetAll      *storeHandler.GetAll
+
+	// Stylist handlers
+	StylistGetAll *stylistHandler.GetAll
 }
 
 // NewPublicServices creates and initializes all public services
@@ -101,8 +107,10 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 
 		// Store services
 		StoreGetServices: storeService.NewGetStoreServicesService(queries, repositories.SQLX),
-		StoreGetStylists: storeService.NewGetStoreStylistsService(queries, repositories.SQLX),
 		StoreGetAll:      storeService.NewGetAll(repositories.SQLX),
+
+		// Stylist services
+		StylistGetAll: stylistService.NewGetAll(queries, repositories.SQLX),
 	}
 }
 
@@ -131,7 +139,9 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 
 		// Store handlers
 		StoreGetServices: storeHandler.NewGetStoreServicesHandler(services.StoreGetServices),
-		StoreGetStylists: storeHandler.NewGetStoreStylistsHandler(services.StoreGetStylists),
 		StoreGetAll:      storeHandler.NewGetAll(services.StoreGetAll),
+
+		// Stylist handlers
+		StylistGetAll: stylistHandler.NewGetAll(services.StylistGetAll),
 	}
 }

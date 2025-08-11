@@ -1,21 +1,21 @@
 ## User Story
 
-作為顧客，我希望能夠取得所有門市的資料，支援分頁，方便快速查找可預約據點。
+作為顧客，我希望能夠取得特定門市的美甲師資料，支援分頁，方便預約時選擇適合美甲師。
 
 ---
 
 ## Endpoint
 
-**GET** `/api/stores`
+**GET** `/api/stores/{storeId}/stylists`
 
 ---
 
 ## 說明
 
-- 提供顧客查詢所有門市資料。
+- 提供顧客查詢特定門市的美甲師資料。
 - 支援分頁（limit、offset）。
 - 支援排序（sort）。
-- 僅回傳 `is_active=true` 的門市。
+- 僅回傳啟用（`staff_users.is_active=true`）的美甲師。
 
 ---
 
@@ -31,6 +31,12 @@
 
 - Content-Type: application/json
 - Authorization: Bearer <access_token>
+
+### Path Parameter
+
+| 參數    | 說明   |
+| ------- | ------ |
+| storeId | 門市ID |
 
 ### Query Parameter
 
@@ -60,10 +66,12 @@
     "total": 10,
     "items": [
       {
-        "id": "8000000001",
-        "name": "大安旗艦店",
-        "address": "台北市大安區復興南路一段100號",
-        "phone": "02-1234-5678"
+        "id": "2000000001",
+        "name": "Ava",
+        "goodAtShapes": ["方形", "圓形"],
+        "goodAtColors": ["裸色", "紅色"],
+        "goodAtStyles": ["法式", "漸層"],
+        "isIntrovert": false
       },
     ]
   }
@@ -108,19 +116,23 @@
 
 ## 資料表
 
+- `staff_users`
+- `staff_user_store_access`
 - `stores`
+- `stylists`
 
 ---
 
 ## Service 邏輯
 
-1. 查詢 `is_active=true` 的門市。
-2. 加入 `limit` 與 `offset` 處理分頁。
-3. 加入 `sort` 處理排序。
-4. 回傳結果與總筆數。
+1. 驗證 `storeId` 是否存在。
+2. 查詢 `staff_users.is_active=true` 的美甲師。
+3. 加入 `limit` 與 `offset` 處理分頁。
+4. 加入 `sort` 處理排序。
+5. 回傳結果與總筆數。
 
 ---
 
 ## 注意事項
 
-- 僅回傳啟用門市。
+- 僅回傳啟用的美甲師。

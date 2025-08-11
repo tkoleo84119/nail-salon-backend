@@ -51,6 +51,11 @@ SELECT
 FROM stores
 WHERE id = $1;
 
+-- name: CheckStoreExistAndActive :one
+SELECT EXISTS(
+    SELECT 1 FROM stores WHERE id = $1 AND is_active = true
+);
+
 -- name: CheckStoresExistAndActive :one
 SELECT
     COUNT(*) as total_count,
