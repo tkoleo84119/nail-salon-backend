@@ -117,7 +117,7 @@ func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries
 	schedules := api.Group("/schedules")
 	{
 		// Schedule time slot routes
-		schedules.GET("/:scheduleId/time-slots", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ScheduleGetTimeSlots.GetTimeSlots)
+		schedules.GET("/:scheduleId/time-slots", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.TimeSlotGetAll.GetAll)
 	}
 }
 

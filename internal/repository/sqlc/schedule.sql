@@ -81,3 +81,9 @@ SELECT EXISTS(
     SELECT 1 FROM schedules
     WHERE store_id = $1 AND stylist_id = $2 AND work_date = $3
 ) as exists;
+
+-- name: CheckScheduleExistsByID :one
+SELECT EXISTS(
+    SELECT 1 FROM schedules
+    WHERE id = $1
+) as exists;

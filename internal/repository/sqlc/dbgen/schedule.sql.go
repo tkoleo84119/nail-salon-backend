@@ -41,6 +41,20 @@ func (q *Queries) CheckScheduleExists(ctx context.Context, arg CheckScheduleExis
 	return exists, err
 }
 
+const checkScheduleExistsByID = `-- name: CheckScheduleExistsByID :one
+SELECT EXISTS(
+    SELECT 1 FROM schedules
+    WHERE id = $1
+) as exists
+`
+
+func (q *Queries) CheckScheduleExistsByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkScheduleExistsByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const deleteSchedulesByIDs = `-- name: DeleteSchedulesByIDs :exec
 DELETE FROM schedules
 WHERE id = ANY($1::bigint[])

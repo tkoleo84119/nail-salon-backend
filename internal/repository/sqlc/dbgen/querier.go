@@ -16,6 +16,7 @@ type Querier interface {
 	CancelBooking(ctx context.Context, arg CancelBookingParams) (CancelBookingRow, error)
 	CheckCustomerExistsByLineUid(ctx context.Context, lineUid string) (bool, error)
 	CheckScheduleExists(ctx context.Context, arg CheckScheduleExistsParams) (bool, error)
+	CheckScheduleExistsByID(ctx context.Context, id int64) (bool, error)
 	CheckServiceNameExists(ctx context.Context, name string) (bool, error)
 	CheckServiceNameExistsExcluding(ctx context.Context, arg CheckServiceNameExistsExcludingParams) (bool, error)
 	CheckStaffUserExistsByUsername(ctx context.Context, username string) (bool, error)

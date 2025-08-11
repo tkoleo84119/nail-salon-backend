@@ -13,6 +13,7 @@ import (
 	serviceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/service"
 	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
 	stylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/stylist"
+	timeSlotHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/time_slot"
 
 	// Public services
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
@@ -22,6 +23,7 @@ import (
 	serviceService "github.com/tkoleo84119/nail-salon-backend/internal/service/service"
 	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
 	stylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/stylist"
+	timeSlotService "github.com/tkoleo84119/nail-salon-backend/internal/service/time_slot"
 )
 
 // PublicServices contains all public/customer-facing services
@@ -43,8 +45,10 @@ type PublicServices struct {
 	BookingGetMySingle bookingService.GetMyBookingServiceInterface
 
 	// Schedule services
-	ScheduleGetAll       scheduleService.GetAllInterface
-	ScheduleGetTimeSlots scheduleService.GetTimeSlotServiceInterface
+	ScheduleGetAll scheduleService.GetAllInterface
+
+	// TimeSlot services
+	TimeSlotGetAll timeSlotService.GetAllInterface
 
 	// Store services
 	StoreGetAll storeService.GetAllInterface
@@ -75,8 +79,10 @@ type PublicHandlers struct {
 	BookingGetMySingle *bookingHandler.GetMyBookingHandler
 
 	// Schedule handlers
-	ScheduleGetAll       *scheduleHandler.GetAll
-	ScheduleGetTimeSlots *scheduleHandler.GetTimeSlotHandler
+	ScheduleGetAll *scheduleHandler.GetAll
+
+	// TimeSlot handlers
+	TimeSlotGetAll *timeSlotHandler.GetAll
 
 	// Store handlers
 	StoreGetAll *storeHandler.GetAll
@@ -108,8 +114,10 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		BookingGetMySingle: bookingService.NewGetMyBookingService(queries),
 
 		// Schedule services
-		ScheduleGetAll:       scheduleService.NewGetAll(queries),
-		ScheduleGetTimeSlots: scheduleService.NewGetTimeSlotService(queries),
+		ScheduleGetAll: scheduleService.NewGetAll(queries),
+
+		// TimeSlot services
+		TimeSlotGetAll: timeSlotService.NewGetAll(queries),
 
 		// Store services
 		StoreGetAll: storeService.NewGetAll(repositories.SQLX),
@@ -142,8 +150,10 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		BookingGetMySingle: bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
 
 		// Schedule handlers
-		ScheduleGetAll:       scheduleHandler.NewGetAll(services.ScheduleGetAll),
-		ScheduleGetTimeSlots: scheduleHandler.NewGetTimeSlotHandler(services.ScheduleGetTimeSlots),
+		ScheduleGetAll: scheduleHandler.NewGetAll(services.ScheduleGetAll),
+
+		// TimeSlot handlers
+		TimeSlotGetAll: timeSlotHandler.NewGetAll(services.TimeSlotGetAll),
 
 		// Store handlers
 		StoreGetAll: storeHandler.NewGetAll(services.StoreGetAll),
