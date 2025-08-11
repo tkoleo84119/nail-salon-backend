@@ -39,7 +39,7 @@ func (s *Create) Create(ctx context.Context, req adminServiceModel.CreateRequest
 	serviceID := utils.GenerateID()
 
 	// Convert price to pgtype.Numeric
-	priceNumeric, err := utils.Int64ToPgNumeric(req.Price)
+	priceNumeric, err := utils.Int64ToPgNumeric(*req.Price)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price", err)
 	}
@@ -62,7 +62,7 @@ func (s *Create) Create(ctx context.Context, req adminServiceModel.CreateRequest
 	response := &adminServiceModel.CreateResponse{
 		ID:              utils.FormatID(createdService.ID),
 		Name:            createdService.Name,
-		Price:           req.Price,
+		Price:           *req.Price,
 		DurationMinutes: createdService.DurationMinutes,
 		IsAddon:         utils.PgBoolToBool(createdService.IsAddon),
 		IsVisible:       utils.PgBoolToBool(createdService.IsVisible),
