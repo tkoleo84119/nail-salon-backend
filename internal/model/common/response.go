@@ -26,7 +26,11 @@ type StaffJWTClaims struct {
 }
 
 type CustomerContext struct {
-	CustomerID int64 `json:"customerId"`
+	CustomerID    int64  `json:"customerId"`
+	LineUID       string `json:"lineUid"`
+	Name          string `json:"name"`
+	Level         string `json:"level"`
+	IsBlacklisted bool   `json:"isBlacklisted"`
 }
 
 type LineJWTClaims struct {

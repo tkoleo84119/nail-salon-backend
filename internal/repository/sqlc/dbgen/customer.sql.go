@@ -79,7 +79,7 @@ func (q *Queries) ExistsCustomerByID(ctx context.Context, id int64) (bool, error
 }
 
 const getCustomerByID = `-- name: GetCustomerByID :one
-SELECT id, name, line_name, phone, birthday, email, city, favorite_shapes, favorite_colors,
+SELECT id, name, line_uid, line_name, phone, birthday, email, city, favorite_shapes, favorite_colors,
       favorite_styles, is_introvert, referral_source, referrer, customer_note,
       store_note, level, is_blacklisted, last_visit_at, created_at, updated_at
 FROM customers
@@ -89,6 +89,7 @@ WHERE id = $1
 type GetCustomerByIDRow struct {
 	ID             int64              `db:"id" json:"id"`
 	Name           string             `db:"name" json:"name"`
+	LineUid        string             `db:"line_uid" json:"line_uid"`
 	LineName       pgtype.Text        `db:"line_name" json:"line_name"`
 	Phone          string             `db:"phone" json:"phone"`
 	Birthday       pgtype.Date        `db:"birthday" json:"birthday"`
@@ -115,6 +116,7 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByI
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.LineUid,
 		&i.LineName,
 		&i.Phone,
 		&i.Birthday,

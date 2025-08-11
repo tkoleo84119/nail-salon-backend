@@ -13,6 +13,7 @@ const (
 	AuthLineTokenExpired    = "AUTH_LINE_TOKEN_EXPIRED"
 	AuthRefreshTokenInvalid = "AUTH_REFRESH_TOKEN_INVALID"
 	AuthPermissionDenied    = "AUTH_PERMISSION_DENIED"
+	AuthCustomerFailed      = "AUTH_CUSTOMER_FAILED"
 
 	// VAL - Input validation errors
 	ValJsonFormat            = "VAL_JSON_FORMAT"
@@ -99,7 +100,7 @@ const (
 	TimeSlotEndBeforeStart           = "TIME_SLOT_END_BEFORE_START"
 
 	// SYS - System errors
-	SysInternalError      = "SYS_INTERNAL_ERROR"
-	SysDatabaseError      = "SYS_DATABASE_ERROR"
-	SysTimeout            = "SYS_TIMEOUT"
+	SysInternalError = "SYS_INTERNAL_ERROR"
+	SysDatabaseError = "SYS_DATABASE_ERROR"
+	SysTimeout       = "SYS_TIMEOUT"
 )

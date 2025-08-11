@@ -153,7 +153,7 @@ func CustomerJWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 		}
 
 		if err := validateCustomerToken(c, db, claims); err != nil {
-			errorCodes.AbortWithError(c, errorCodes.AuthStaffFailed, nil)
+			errorCodes.AbortWithError(c, errorCodes.AuthCustomerFailed, nil)
 			return
 		}
 
@@ -168,13 +168,14 @@ func validateCustomerToken(c *gin.Context, db dbgen.Querier, claims *common.Line
 		return err
 	}
 
-	if customer.IsBlacklisted.Bool {
-		return err
+	customerContext := common.CustomerContext{
+		CustomerID:    claims.CustomerID,
+		LineUID:       customer.LineUid,
+		Name:          customer.Name,
+		Level:         utils.PgTextToString(customer.Level),
+		IsBlacklisted: utils.PgBoolToBool(customer.IsBlacklisted),
 	}
 
-	customerContext := common.CustomerContext{
-		CustomerID: claims.CustomerID,
-	}
 	c.Set(CustomerContextKey, customerContext)
 	return nil
 }

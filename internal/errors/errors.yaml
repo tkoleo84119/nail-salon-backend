@@ -39,6 +39,10 @@ AUTH:
     code: E1010
     message: 權限不足，無法執行此操作
     status: 403
+  AUTH_CUSTOMER_FAILED:
+    code: E1011
+    message: 未找到有效的顧客資訊，請重新登入
+    status: 401
 
 VAL:
   VAL_JSON_FORMAT:

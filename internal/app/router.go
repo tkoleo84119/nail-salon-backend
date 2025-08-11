@@ -91,7 +91,7 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 	stores := api.Group("/stores")
 	{
 		// Store listing
-		stores.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStores.GetStores)
+		stores.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetAll.GetAll)
 
 		// Single store detail
 		stores.GET("/:storeId", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetStore.GetStore)
