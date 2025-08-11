@@ -94,7 +94,7 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 		stores.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetAll.GetAll)
 
 		// Store services browsing
-		stores.GET("/:storeId/services", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetServices.GetStoreServices)
+		stores.GET("/:storeId/services", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ServiceGetAll.GetAll)
 
 		// Store stylists browsing
 		stores.GET("/:storeId/stylists", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StylistGetAll.GetAll)
