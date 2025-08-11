@@ -48,15 +48,8 @@ type GetAllStaffByFilterResponse struct {
 
 // GetStaffList retrieves staff list with dynamic filtering and pagination
 func (r *StaffUserRepository) GetAllStaffByFilter(ctx context.Context, params GetAllStaffByFilterParams) (int, []GetAllStaffByFilterResponse, error) {
-	// Set default pagination values
-	limit := 20
-	offset := 0
-	if params.Limit != nil && *params.Limit > 0 {
-		limit = *params.Limit
-	}
-	if params.Offset != nil && *params.Offset >= 0 {
-		offset = *params.Offset
-	}
+	// Set default values
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
 
 	// Set default sort values
 	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_active", "role"}, "created_at", "ASC", params.Sort)

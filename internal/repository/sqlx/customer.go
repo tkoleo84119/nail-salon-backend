@@ -54,50 +54,43 @@ type GetAllCustomersByFilterItem struct {
 }
 
 // GetAllCustomers retrieves all customers with filtering, pagination and sorting
-func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, req GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error) {
-	// set default value for limit and offset
-	limit := 20
-	offset := 0
-	if req.Limit != nil && *req.Limit > 0 {
-		limit = *req.Limit
-	}
-	if req.Offset != nil && *req.Offset >= 0 {
-		offset = *req.Offset
-	}
+func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error) {
+	// Set default values
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
 
 	// set default value for sort
-	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_blacklisted", "last_visit_at"}, "last_visit_at", "DESC", req.Sort)
+	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_blacklisted", "last_visit_at"}, "last_visit_at", "DESC", params.Sort)
 
 	whereConditions := []string{}
 	args := []interface{}{}
 
-	if req.Name != nil && *req.Name != "" {
+	if params.Name != nil && *params.Name != "" {
 		whereConditions = append(whereConditions, fmt.Sprintf("name ILIKE $%d", len(args)+1))
-		args = append(args, "%"+*req.Name+"%")
+		args = append(args, "%"+*params.Name+"%")
 	}
 
-	if req.LineName != nil && *req.LineName != "" {
+	if params.LineName != nil && *params.LineName != "" {
 		whereConditions = append(whereConditions, fmt.Sprintf("line_name ILIKE $%d", len(args)+1))
-		args = append(args, "%"+*req.LineName+"%")
+		args = append(args, "%"+*params.LineName+"%")
 	}
 
-	if req.Phone != nil && *req.Phone != "" {
+	if params.Phone != nil && *params.Phone != "" {
 		whereConditions = append(whereConditions, fmt.Sprintf("phone ILIKE $%d", len(args)+1))
-		args = append(args, "%"+*req.Phone+"%")
+		args = append(args, "%"+*params.Phone+"%")
 	}
 
-	if req.Level != nil && *req.Level != "" {
+	if params.Level != nil && *params.Level != "" {
 		whereConditions = append(whereConditions, fmt.Sprintf("level = $%d", len(args)+1))
-		args = append(args, *req.Level)
+		args = append(args, *params.Level)
 	}
 
-	if req.IsBlacklisted != nil {
+	if params.IsBlacklisted != nil {
 		whereConditions = append(whereConditions, fmt.Sprintf("is_blacklisted = $%d", len(args)+1))
-		args = append(args, *req.IsBlacklisted)
+		args = append(args, *params.IsBlacklisted)
 	}
 
-	if req.MinPastDays != nil && *req.MinPastDays > 0 {
-		whereConditions = append(whereConditions, fmt.Sprintf("(last_visit_at IS NOT NULL AND last_visit_at < NOW() - INTERVAL '%d days')", *req.MinPastDays))
+	if params.MinPastDays != nil && *params.MinPastDays > 0 {
+		whereConditions = append(whereConditions, fmt.Sprintf("(last_visit_at IS NOT NULL AND last_visit_at < NOW() - INTERVAL '%d days')", *params.MinPastDays))
 	}
 
 	// Build WHERE clause

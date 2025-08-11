@@ -47,6 +47,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		return
 	}
 
+	// set default value
 	limit, offset := utils.SetDefaultValuesOfPagination(req.Limit, req.Offset, 20, 0)
 	sort := utils.TransformSort(req.Sort)
 

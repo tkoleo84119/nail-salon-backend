@@ -42,15 +42,8 @@ type GetAllTimeSlotTemplateByFilterParams struct {
 
 // GetTimeSlotTemplateList retrieves time slot templates with pagination and name filtering
 func (r *TimeSlotTemplateRepository) GetAllTimeSlotTemplateByFilter(ctx context.Context, params GetAllTimeSlotTemplateByFilterParams) (int, []GetAllTimeSlotTemplateByFilterItem, error) {
-	// Set pagination defaults
-	limit := 20
-	if params.Limit != nil {
-		limit = *params.Limit
-	}
-	offset := 0
-	if params.Offset != nil {
-		offset = *params.Offset
-	}
+	// Set default values
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
 
 	sort := utils.HandleSort([]string{"created_at", "updated_at", "name"}, "updated_at", "DESC", params.Sort)
 

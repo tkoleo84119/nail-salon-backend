@@ -54,15 +54,8 @@ type GetAllServiceByFilterParams struct {
 
 // GetStoreServiceList retrieves services for a specific store with admin filtering and pagination
 func (r *ServiceRepository) GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error) {
-	// Set default pagination values
-	limit := 20
-	offset := 0
-	if params.Limit != nil && *params.Limit > 0 {
-		limit = *params.Limit
-	}
-	if params.Offset != nil && *params.Offset >= 0 {
-		offset = *params.Offset
-	}
+	// Set default values
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
 
 	// Set default sort values
 	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_active", "is_visible", "is_addon"}, "created_at", "ASC", params.Sort)

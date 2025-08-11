@@ -2,7 +2,6 @@ package adminCustomer
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -33,20 +32,8 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	}
 
 	// set limit and offset
-	limit := 20
-	offset := 0
-	if req.Limit != nil && *req.Limit > 0 {
-		limit = *req.Limit
-	}
-	if req.Offset != nil && *req.Offset >= 0 {
-		offset = *req.Offset
-	}
-
-	// transform sort
-	sort := []string{}
-	if req.Sort != nil && *req.Sort != "" {
-		sort = strings.Split(*req.Sort, ",")
-	}
+	limit, offset := utils.SetDefaultValuesOfPagination(req.Limit, req.Offset, 20, 0)
+	sort := utils.TransformSort(req.Sort)
 
 	parsedReq := adminCustomerModel.GetAllParsedRequest{
 		Name:          req.Name,
