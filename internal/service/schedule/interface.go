@@ -7,8 +7,8 @@ import (
 	scheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/schedule"
 )
 
-type GetStoreScheduleServiceInterface interface {
-	GetStoreSchedules(ctx context.Context, storeID, stylistID string, req scheduleModel.GetStoreSchedulesRequest, customerContext common.CustomerContext) (*scheduleModel.GetStoreSchedulesResponse, error)
+type GetAllInterface interface {
+	GetAll(ctx context.Context, storeID int64, stylistID int64, req scheduleModel.GetAllParsedRequest, isBlacklisted bool) (*scheduleModel.GetAllResponse, error)
 }
 
 type GetTimeSlotServiceInterface interface {

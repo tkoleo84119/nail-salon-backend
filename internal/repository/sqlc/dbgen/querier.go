@@ -25,6 +25,7 @@ type Querier interface {
 	CheckStoreNameExists(ctx context.Context, name string) (bool, error)
 	CheckStoreNameExistsExcluding(ctx context.Context, arg CheckStoreNameExistsExcludingParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
+	CheckStylistExistAndActive(ctx context.Context, id int64) (bool, error)
 	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)

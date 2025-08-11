@@ -43,8 +43,8 @@ type PublicServices struct {
 	BookingGetMySingle bookingService.GetMyBookingServiceInterface
 
 	// Schedule services
-	ScheduleGetStoreSchedules scheduleService.GetStoreScheduleServiceInterface
-	ScheduleGetTimeSlots      scheduleService.GetTimeSlotServiceInterface
+	ScheduleGetAll       scheduleService.GetAllInterface
+	ScheduleGetTimeSlots scheduleService.GetTimeSlotServiceInterface
 
 	// Store services
 	StoreGetAll storeService.GetAllInterface
@@ -75,8 +75,8 @@ type PublicHandlers struct {
 	BookingGetMySingle *bookingHandler.GetMyBookingHandler
 
 	// Schedule handlers
-	ScheduleGetStoreSchedules *scheduleHandler.GetStoreScheduleHandler
-	ScheduleGetTimeSlots      *scheduleHandler.GetTimeSlotHandler
+	ScheduleGetAll       *scheduleHandler.GetAll
+	ScheduleGetTimeSlots *scheduleHandler.GetTimeSlotHandler
 
 	// Store handlers
 	StoreGetAll *storeHandler.GetAll
@@ -108,8 +108,8 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		BookingGetMySingle: bookingService.NewGetMyBookingService(queries),
 
 		// Schedule services
-		ScheduleGetStoreSchedules: scheduleService.NewGetStoreScheduleService(queries),
-		ScheduleGetTimeSlots:      scheduleService.NewGetTimeSlotService(queries),
+		ScheduleGetAll:       scheduleService.NewGetAll(queries),
+		ScheduleGetTimeSlots: scheduleService.NewGetTimeSlotService(queries),
 
 		// Store services
 		StoreGetAll: storeService.NewGetAll(repositories.SQLX),
@@ -142,8 +142,8 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		BookingGetMySingle: bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
 
 		// Schedule handlers
-		ScheduleGetStoreSchedules: scheduleHandler.NewGetStoreScheduleHandler(services.ScheduleGetStoreSchedules),
-		ScheduleGetTimeSlots:      scheduleHandler.NewGetTimeSlotHandler(services.ScheduleGetTimeSlots),
+		ScheduleGetAll:       scheduleHandler.NewGetAll(services.ScheduleGetAll),
+		ScheduleGetTimeSlots: scheduleHandler.NewGetTimeSlotHandler(services.ScheduleGetTimeSlots),
 
 		// Store handlers
 		StoreGetAll: storeHandler.NewGetAll(services.StoreGetAll),

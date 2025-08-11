@@ -13,22 +13,29 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type GetStoreScheduleHandler struct {
-	service scheduleService.GetStoreScheduleServiceInterface
+type GetAll struct {
+	service scheduleService.GetAllInterface
 }
 
-func NewGetStoreScheduleHandler(service scheduleService.GetStoreScheduleServiceInterface) *GetStoreScheduleHandler {
-	return &GetStoreScheduleHandler{
+func NewGetAll(service scheduleService.GetAllInterface) *GetAll {
+	return &GetAll{
 		service: service,
 	}
 }
 
-func (h *GetStoreScheduleHandler) GetStoreSchedules(c *gin.Context) {
+func (h *GetAll) GetAll(c *gin.Context) {
 	// Path parameter validation
 	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"storeId": "storeId 為必填項目",
+		})
+		return
+	}
+	parsedStoreID, err := utils.ParseID(storeID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"storeId": "storeId 類型轉換失敗",
 		})
 		return
 	}
@@ -40,13 +47,40 @@ func (h *GetStoreScheduleHandler) GetStoreSchedules(c *gin.Context) {
 		})
 		return
 	}
+	parsedStylistID, err := utils.ParseID(stylistID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"stylistId": "stylistId 類型轉換失敗",
+		})
+		return
+	}
 
 	// Query parameter validation
-	var req scheduleModel.GetStoreSchedulesRequest
+	var req scheduleModel.GetAllRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	startDate, err := utils.DateStringToTime(req.StartDate)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValFieldDateFormat, map[string]string{
+			"startDate": "startDate 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD)",
+		})
+		return
+	}
+	endDate, err := utils.DateStringToTime(req.EndDate)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValFieldDateFormat, map[string]string{
+			"endDate": "endDate 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD)",
+		})
+		return
+	}
+
+	parsedReq := scheduleModel.GetAllParsedRequest{
+		StartDate: startDate,
+		EndDate:   endDate,
 	}
 
 	// Authentication context validation
@@ -57,7 +91,7 @@ func (h *GetStoreScheduleHandler) GetStoreSchedules(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStoreSchedules(c.Request.Context(), storeID, stylistID, req, *customerContext)
+	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedStylistID, parsedReq, customerContext.IsBlacklisted)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

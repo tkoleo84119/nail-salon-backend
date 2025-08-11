@@ -11,6 +11,23 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkStylistExistAndActive = `-- name: CheckStylistExistAndActive :one
+SELECT EXISTS(
+    SELECT 1
+    FROM stylists
+    JOIN staff_users ON stylists.staff_user_id = staff_users.id
+    WHERE stylists.id = $1
+    AND staff_users.is_active = true
+)
+`
+
+func (q *Queries) CheckStylistExistAndActive(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStylistExistAndActive, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createStylist = `-- name: CreateStylist :one
 INSERT INTO stylists (
     id,

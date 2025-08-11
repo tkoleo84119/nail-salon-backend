@@ -49,3 +49,12 @@ SELECT
     updated_at
 FROM stylists
 WHERE id = $1;
+
+-- name: CheckStylistExistAndActive :one
+SELECT EXISTS(
+    SELECT 1
+    FROM stylists
+    JOIN staff_users ON stylists.staff_user_id = staff_users.id
+    WHERE stylists.id = $1
+    AND staff_users.is_active = true
+);
