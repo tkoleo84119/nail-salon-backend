@@ -93,9 +93,6 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 		// Store listing
 		stores.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StoreGetAll.GetAll)
 
-		// Store services browsing
-		stores.GET("/:storeId/services", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ServiceGetAll.GetAll)
-
 		// Store stylists browsing
 		stores.GET("/:storeId/stylists", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StylistGetAll.GetAll)
 
@@ -105,12 +102,10 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 }
 
 func setupPublicServiceRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
-	// TODO: Add public service routes for browsing
-	// services := api.Group("/services")
-	// {
-	// 	services.GET("", handlers.Public.ServiceList.List)
-	// 	services.GET("/:serviceId", handlers.Public.ServiceGet.Get)
-	// }
+	services := api.Group("/services")
+	{
+		services.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ServiceGetAll.GetAll)
+	}
 }
 
 func setupPublicScheduleRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {

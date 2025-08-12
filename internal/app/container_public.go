@@ -123,7 +123,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		StoreGetAll: storeService.NewGetAll(repositories.SQLX),
 
 		// Service services
-		ServiceGetAll: serviceService.NewGetAll(queries, repositories.SQLX),
+		ServiceGetAll: serviceService.NewGetAll(repositories.SQLX),
 
 		// Stylist services
 		StylistGetAll: stylistService.NewGetAll(queries, repositories.SQLX),

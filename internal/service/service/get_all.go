@@ -5,33 +5,21 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	serviceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/service"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetAll struct {
-	queries dbgen.Querier
-	repo    *sqlxRepo.Repositories
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetAll(queries dbgen.Querier, repo *sqlxRepo.Repositories) GetAllInterface {
+func NewGetAll(repo *sqlxRepo.Repositories) GetAllInterface {
 	return &GetAll{
-		queries: queries,
-		repo:    repo,
+		repo: repo,
 	}
 }
 
-func (s *GetAll) GetAll(ctx context.Context, storeID int64, queryParams serviceModel.GetAllParsedRequest) (*serviceModel.GetAllResponse, error) {
-	// Validate store exists and is active
-	exists, err := s.queries.CheckStoreExistAndActive(ctx, storeID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store exist and active", err)
-	}
-	if !exists {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-	}
-
+func (s *GetAll) GetAll(ctx context.Context, queryParams serviceModel.GetAllParsedRequest) (*serviceModel.GetAllResponse, error) {
 	trueCondition := true
 	visibleCondition := true
 	// Get services from repository with flexible filtering

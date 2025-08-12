@@ -7,5 +7,5 @@ import (
 )
 
 type GetAllInterface interface {
-	GetAll(ctx context.Context, storeID int64, queryParams serviceModel.GetAllParsedRequest) (*serviceModel.GetAllResponse, error)
+	GetAll(ctx context.Context, queryParams serviceModel.GetAllParsedRequest) (*serviceModel.GetAllResponse, error)
 }

@@ -1,18 +1,18 @@
 ## User Story
 
-作為顧客，我希望能夠取得特定門市的服務項目，支援查詢條件，方便預約時選擇。
+作為顧客，我希望能夠取得全部服務項目，支援查詢條件，方便預約時選擇。
 
 ---
 
 ## Endpoint
 
-**GET** `/api/stores/{storeId}/services`
+**GET** `/api/services`
 
 ---
 
 ## 說明
 
-- 提供顧客查詢特定門市的服務項目。
+- 提供顧客查詢全部服務項目。
 - 支援基本查詢條件。
 - 支援分頁（limit、offset）。
 - 支援排序（sort）。
@@ -32,12 +32,6 @@
 
 - Content-Type: application/json
 - Authorization: Bearer <access_token>
-
-### Path Parameter
-
-| 參數    | 說明   |
-| ------- | ------ |
-| storeId | 門市ID |
 
 ### Query Parameter
 
@@ -126,8 +120,7 @@
 
 ## Service 邏輯
 
-1. 驗證 `storeId` 是否存在。
-2. 查詢該門市下 `is_visible=true` 且 `is_active=true` 的服務 (同時加上 `isAddon` 條件)。
+1. 查詢 `is_visible=true` 且 `is_active=true` 的服務 (同時加上 `isAddon` 條件)。
 3. 加入 `limit` 與 `offset` 處理分頁。
 4. 加入 `sort` 處理排序。
 5. 回傳結果與總筆數。
