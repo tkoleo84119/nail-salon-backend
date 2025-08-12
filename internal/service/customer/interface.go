@@ -10,6 +10,6 @@ type GetMeInterface interface {
 	GetMe(ctx context.Context, customerID int64) (*customerModel.GetMeResponse, error)
 }
 
-type UpdateMyCustomerServiceInterface interface {
-	UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error)
+type UpdateMeInterface interface {
+	UpdateMe(ctx context.Context, customerID int64, req customerModel.UpdateMeRequest) (*customerModel.UpdateMeResponse, error)
 }

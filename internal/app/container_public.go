@@ -35,7 +35,7 @@ type PublicServices struct {
 
 	// Customer services
 	CustomerGetMe    *customerService.GetMe
-	CustomerUpdateMy *customerService.UpdateMyCustomerService
+	CustomerUpdateMe *customerService.UpdateMe
 
 	// Booking services
 	BookingCreateMy    *bookingService.CreateMyBookingService
@@ -69,7 +69,7 @@ type PublicHandlers struct {
 
 	// Customer handlers
 	CustomerGetMe    *customerHandler.GetMe
-	CustomerUpdateMy *customerHandler.UpdateMyCustomerHandler
+	CustomerUpdateMe *customerHandler.UpdateMe
 
 	// Booking handlers
 	BookingCreateMy    *bookingHandler.CreateMyBookingHandler
@@ -104,7 +104,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 
 		// Customer services
 		CustomerGetMe:    customerService.NewGetMe(queries),
-		CustomerUpdateMy: customerService.NewUpdateMyCustomerService(queries, repositories.SQLX),
+		CustomerUpdateMe: customerService.NewUpdateMe(queries, repositories.SQLX),
 
 		// Booking services
 		BookingCreateMy:    bookingService.NewCreateMyBookingService(queries, database.PgxPool),
@@ -140,7 +140,7 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 
 		// Customer handlers
 		CustomerGetMe:    customerHandler.NewGetMe(services.CustomerGetMe),
-		CustomerUpdateMy: customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
+		CustomerUpdateMe: customerHandler.NewUpdateMe(services.CustomerUpdateMe),
 
 		// Booking handlers
 		BookingCreateMy:    bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),

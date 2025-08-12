@@ -1,24 +1,24 @@
-package auth
+package customer
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	authModel "github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
+	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
+	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
+	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type LineRegister struct {
-	service authService.LineRegisterInterface
+type UpdateMe struct {
+	service customerService.UpdateMeInterface
 }
 
-func NewLineRegister(service authService.LineRegisterInterface) *LineRegister {
-	return &LineRegister{
+func NewUpdateMe(service customerService.UpdateMeInterface) *UpdateMe {
+	return &UpdateMe{
 		service: service,
 	}
 }
@@ -35,11 +35,17 @@ var validFavoriteStyles = map[string]struct{}{
 	"暈染": {}, "手繪": {}, "貓眼": {}, "鏡面": {}, "可愛": {}, "法式": {}, "漸層": {}, "氣質溫柔": {}, "個性": {}, "日系": {}, "簡約": {}, "優雅": {}, "典雅": {}, "小眾": {}, "沒有固定": {},
 }
 
-func (h *LineRegister) LineRegister(c *gin.Context) {
-	var req authModel.LineRegisterRequest
+// UpdateMyCustomer handles PATCH /api/customers/me
+func (h *UpdateMe) UpdateMe(c *gin.Context) {
+	var req customerModel.UpdateMeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
+		return
+	}
+
+	if !req.HasUpdates() {
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 
@@ -70,20 +76,18 @@ func (h *LineRegister) LineRegister(c *gin.Context) {
 		}
 	}
 
-	// Create login context
-	loginCtx := authModel.LoginContext{
-		UserAgent: c.GetHeader("User-Agent"),
-		IPAddress: c.ClientIP(),
-		Timestamp: time.Now(),
+	customerContext, exists := middleware.GetCustomerFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		return
 	}
 
-	// Call service
-	response, err := h.service.LineRegister(c.Request.Context(), req, loginCtx)
+	customerID := customerContext.CustomerID
+	result, err := h.service.UpdateMe(c.Request.Context(), customerID, req)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
 	}
 
-	// Return successful response
-	c.JSON(http.StatusCreated, common.SuccessResponse(response))
+	c.JSON(http.StatusOK, common.SuccessResponse(result))
 }

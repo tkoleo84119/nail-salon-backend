@@ -4,19 +4,16 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
 
-	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 // CustomerRepositoryInterface defines the interface for customer repository
 type CustomerRepositoryInterface interface {
 	GetAllCustomersByFilter(ctx context.Context, params GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error)
-	UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error)
 	UpdateCustomer(ctx context.Context, customerID int64, params UpdateCustomerParams) (UpdateCustomerResponse, error)
 }
 
@@ -158,138 +155,98 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 
 // ------------------------------------------------------------------------------------------------------
 
-// UpdateMyCustomer updates customer's own profile information
-func (r *CustomerRepository) UpdateMyCustomer(ctx context.Context, customerID int64, req customerModel.UpdateMyCustomerRequest) (*customerModel.UpdateMyCustomerResponse, error) {
-	setParts := []string{}
-	args := []interface{}{}
-	argIndex := 1
-
-	// Build dynamic SET clause
-	if req.Name != nil {
-		setParts = append(setParts, fmt.Sprintf("name = $%d", argIndex))
-		args = append(args, *req.Name)
-		argIndex++
-	}
-	if req.Phone != nil {
-		setParts = append(setParts, fmt.Sprintf("phone = $%d", argIndex))
-		args = append(args, *req.Phone)
-		argIndex++
-	}
-	if req.Birthday != nil {
-		setParts = append(setParts, fmt.Sprintf("birthday = $%d", argIndex))
-		args = append(args, *req.Birthday)
-		argIndex++
-	}
-	if req.City != nil {
-		setParts = append(setParts, fmt.Sprintf("city = $%d", argIndex))
-		args = append(args, *req.City)
-		argIndex++
-	}
-	if req.FavoriteShapes != nil {
-		setParts = append(setParts, fmt.Sprintf("favorite_shapes = $%d", argIndex))
-		args = append(args, *req.FavoriteShapes)
-		argIndex++
-	}
-	if req.FavoriteColors != nil {
-		setParts = append(setParts, fmt.Sprintf("favorite_colors = $%d", argIndex))
-		args = append(args, *req.FavoriteColors)
-		argIndex++
-	}
-	if req.FavoriteStyles != nil {
-		setParts = append(setParts, fmt.Sprintf("favorite_styles = $%d", argIndex))
-		args = append(args, *req.FavoriteStyles)
-		argIndex++
-	}
-	if req.IsIntrovert != nil {
-		setParts = append(setParts, fmt.Sprintf("is_introvert = $%d", argIndex))
-		args = append(args, *req.IsIntrovert)
-		argIndex++
-	}
-	if req.CustomerNote != nil {
-		setParts = append(setParts, fmt.Sprintf("customer_note = $%d", argIndex))
-		args = append(args, *req.CustomerNote)
-		argIndex++
-	}
-
-	// Add updated_at
-	setParts = append(setParts, fmt.Sprintf("updated_at = $%d", argIndex))
-	args = append(args, time.Now())
-	argIndex++
-
-	// Add customer ID for WHERE clause
-	args = append(args, customerID)
-
-	query := fmt.Sprintf(`
-		UPDATE customers
-		SET %s
-		WHERE id = $%d
-		RETURNING id, name, phone, birthday, city, favorite_shapes, favorite_colors,
-				  favorite_styles, is_introvert, referral_source, referrer, customer_note`,
-		strings.Join(setParts, ", "), argIndex)
-
-	var result struct {
-		ID             int64     `db:"id"`
-		Name           string    `db:"name"`
-		Phone          string    `db:"phone"`
-		Birthday       *string   `db:"birthday"`
-		City           *string   `db:"city"`
-		FavoriteShapes *[]string `db:"favorite_shapes"`
-		FavoriteColors *[]string `db:"favorite_colors"`
-		FavoriteStyles *[]string `db:"favorite_styles"`
-		IsIntrovert    *bool     `db:"is_introvert"`
-		ReferralSource *[]string `db:"referral_source"`
-		Referrer       *string   `db:"referrer"`
-		CustomerNote   *string   `db:"customer_note"`
-	}
-
-	err := r.db.GetContext(ctx, &result, query, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &customerModel.UpdateMyCustomerResponse{
-		ID:             utils.FormatID(result.ID),
-		Name:           result.Name,
-		Phone:          result.Phone,
-		Birthday:       result.Birthday,
-		City:           result.City,
-		FavoriteShapes: result.FavoriteShapes,
-		FavoriteColors: result.FavoriteColors,
-		FavoriteStyles: result.FavoriteStyles,
-		IsIntrovert:    result.IsIntrovert,
-		ReferralSource: result.ReferralSource,
-		Referrer:       result.Referrer,
-		CustomerNote:   result.CustomerNote,
-	}, nil
-}
-
-// ------------------------------------------------------------------------------------------------------
-
 type UpdateCustomerParams struct {
-	StoreNote     *string
-	Level         *string
-	IsBlacklisted *bool
+	Name           *string
+	Phone          *string
+	Birthday       *string
+	Email          *string
+	City           *string
+	FavoriteShapes *[]string
+	FavoriteColors *[]string
+	FavoriteStyles *[]string
+	IsIntrovert    *bool
+	CustomerNote   *string
+	StoreNote      *string
+	Level          *string
+	IsBlacklisted  *bool
 }
 
 type UpdateCustomerResponse struct {
-	ID            int64              `db:"id"`
-	Name          string             `db:"name"`
-	Phone         string             `db:"phone"`
-	Birthday      pgtype.Date        `db:"birthday"`
-	City          pgtype.Text        `db:"city"`
-	Level         pgtype.Text        `db:"level"`
-	IsBlacklisted pgtype.Bool        `db:"is_blacklisted"`
-	LastVisitAt   pgtype.Timestamptz `db:"last_visit_at"`
-	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
+	ID             int64              `db:"id"`
+	Name           string             `db:"name"`
+	Phone          string             `db:"phone"`
+	Birthday       pgtype.Date        `db:"birthday"`
+	Email          pgtype.Text        `db:"email"`
+	City           pgtype.Text        `db:"city"`
+	FavoriteShapes []string           `db:"favorite_shapes"`
+	FavoriteColors []string           `db:"favorite_colors"`
+	FavoriteStyles []string           `db:"favorite_styles"`
+	IsIntrovert    pgtype.Bool        `db:"is_introvert"`
+	CustomerNote   pgtype.Text        `db:"customer_note"`
+	StoreNote      pgtype.Text        `db:"store_note"`
+	Level          pgtype.Text        `db:"level"`
+	IsBlacklisted  pgtype.Bool        `db:"is_blacklisted"`
+	LastVisitAt    pgtype.Timestamptz `db:"last_visit_at"`
+	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
 }
 
 func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int64, params UpdateCustomerParams) (UpdateCustomerResponse, error) {
 	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
 
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *params.Name)
+	}
+
+	if params.Phone != nil && *params.Phone != "" {
+		setParts = append(setParts, fmt.Sprintf("phone = $%d", len(args)+1))
+		args = append(args, *params.Phone)
+	}
+
+	if params.Birthday != nil {
+		setParts = append(setParts, fmt.Sprintf("birthday = $%d", len(args)+1))
+		args = append(args, *params.Birthday)
+	}
+
+	if params.Email != nil {
+		setParts = append(setParts, fmt.Sprintf("email = $%d", len(args)+1))
+		args = append(args, *params.Email)
+	}
+
+	if params.City != nil {
+		setParts = append(setParts, fmt.Sprintf("city = $%d", len(args)+1))
+		args = append(args, *params.City)
+	}
+
+	if params.FavoriteShapes != nil {
+		setParts = append(setParts, fmt.Sprintf("favorite_shapes = $%d", len(args)+1))
+		args = append(args, *params.FavoriteShapes)
+	}
+
+	if params.FavoriteColors != nil {
+		setParts = append(setParts, fmt.Sprintf("favorite_colors = $%d", len(args)+1))
+		args = append(args, *params.FavoriteColors)
+	}
+
+	if params.FavoriteStyles != nil {
+		setParts = append(setParts, fmt.Sprintf("favorite_styles = $%d", len(args)+1))
+		args = append(args, *params.FavoriteStyles)
+	}
+
+	if params.IsIntrovert != nil {
+		setParts = append(setParts, fmt.Sprintf("is_introvert = $%d", len(args)+1))
+		args = append(args, *params.IsIntrovert)
+	}
+
 	if params.StoreNote != nil {
 		setParts = append(setParts, fmt.Sprintf("store_note = $%d", len(args)+1))
 		args = append(args, *params.StoreNote)
+	}
+
+	if params.CustomerNote != nil {
+		setParts = append(setParts, fmt.Sprintf("customer_note = $%d", len(args)+1))
+		args = append(args, *params.CustomerNote)
 	}
 
 	if params.Level != nil {
@@ -308,13 +265,34 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 		UPDATE customers
 		SET %s
 		WHERE id = $%d
-		RETURNING id, name, phone, birthday, city, level, is_blacklisted, last_visit_at`,
+		RETURNING id, name, phone, birthday, email, city, favorite_shapes, favorite_colors, favorite_styles, is_introvert, customer_note, store_note, level, is_blacklisted, last_visit_at, updated_at`,
 		strings.Join(setParts, ", "), len(args))
 
+	row := r.db.QueryRowxContext(ctx, query, args...)
+	m := pgtype.NewMap()
+
 	var result UpdateCustomerResponse
-	err := r.db.GetContext(ctx, &result, query, args...)
+
+	err := row.Scan(
+		&result.ID,
+		&result.Name,
+		&result.Phone,
+		&result.Birthday,
+		&result.Email,
+		&result.City,
+		m.SQLScanner(&result.FavoriteShapes),
+		m.SQLScanner(&result.FavoriteColors),
+		m.SQLScanner(&result.FavoriteStyles),
+		&result.IsIntrovert,
+		&result.CustomerNote,
+		&result.StoreNote,
+		&result.Level,
+		&result.IsBlacklisted,
+		&result.LastVisitAt,
+		&result.UpdatedAt,
+	)
 	if err != nil {
-		return UpdateCustomerResponse{}, err
+		return UpdateCustomerResponse{}, fmt.Errorf("scan result failed: %w", err)
 	}
 
 	return result, nil

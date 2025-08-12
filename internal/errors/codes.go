@@ -38,9 +38,6 @@ const (
 	ValFieldDateFormat      = "VAL_FIELD_DATE_FORMAT"
 	ValFieldTimeFormat      = "VAL_FIELD_TIME_FORMAT"
 
-	ValEndBeforeStart        = "VAL_END_BEFORE_START"
-	ValDateRangeExceed60Days = "VAL_DATE_RANGE_EXCEED_60_DAYS"
-
 	// BOOKING - Booking operation errors
 	BookingStatusNotAllowedToUpdate = "BOOKING_STATUS_NOT_ALLOWED_TO_UPDATE"
 	BookingStatusNotAllowedToCancel = "BOOKING_STATUS_NOT_ALLOWED_TO_CANCEL"
