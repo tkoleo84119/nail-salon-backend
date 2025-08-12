@@ -58,3 +58,11 @@ SELECT EXISTS(
     WHERE stylists.id = $1
     AND staff_users.is_active = true
 );
+
+-- name: GetActiveStylistNameByID :one
+SELECT
+    name
+FROM stylists
+JOIN staff_users ON stylists.staff_user_id = staff_users.id
+WHERE stylists.id = $1
+AND staff_users.is_active = true;

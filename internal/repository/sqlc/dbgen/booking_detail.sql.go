@@ -51,8 +51,9 @@ func (q *Queries) CreateBookingDetail(ctx context.Context, arg CreateBookingDeta
 }
 
 type CreateBookingDetailsParams struct {
-	ID        int64          `db:"id" json:"id"`
-	BookingID int64          `db:"booking_id" json:"booking_id"`
-	ServiceID int64          `db:"service_id" json:"service_id"`
-	Price     pgtype.Numeric `db:"price" json:"price"`
+	ID        int64              `db:"id" json:"id"`
+	BookingID int64              `db:"booking_id" json:"booking_id"`
+	ServiceID int64              `db:"service_id" json:"service_id"`
+	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }

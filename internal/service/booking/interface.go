@@ -7,8 +7,8 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
-type CreateMyBookingServiceInterface interface {
-	CreateMyBooking(ctx context.Context, req bookingModel.CreateMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CreateMyBookingResponse, error)
+type CreateInterface interface {
+	Create(ctx context.Context, req bookingModel.CreateParsedRequest, customerID int64) (*bookingModel.CreateResponse, error)
 }
 
 type UpdateMyBookingServiceInterface interface {

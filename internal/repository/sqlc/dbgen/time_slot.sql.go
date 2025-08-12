@@ -203,6 +203,42 @@ func (q *Queries) GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, erro
 	return i, err
 }
 
+const getTimeSlotWithScheduleByID = `-- name: GetTimeSlotWithScheduleByID :one
+SELECT
+    ts.id,
+    ts.schedule_id,
+    ts.start_time,
+    ts.end_time,
+    ts.is_available,
+    s.work_date
+FROM time_slots ts
+LEFT JOIN schedules s ON ts.schedule_id = s.id
+WHERE ts.id = $1
+`
+
+type GetTimeSlotWithScheduleByIDRow struct {
+	ID          int64       `db:"id" json:"id"`
+	ScheduleID  int64       `db:"schedule_id" json:"schedule_id"`
+	StartTime   pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime     pgtype.Time `db:"end_time" json:"end_time"`
+	IsAvailable pgtype.Bool `db:"is_available" json:"is_available"`
+	WorkDate    pgtype.Date `db:"work_date" json:"work_date"`
+}
+
+func (q *Queries) GetTimeSlotWithScheduleByID(ctx context.Context, id int64) (GetTimeSlotWithScheduleByIDRow, error) {
+	row := q.db.QueryRow(ctx, getTimeSlotWithScheduleByID, id)
+	var i GetTimeSlotWithScheduleByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.ScheduleID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.IsAvailable,
+		&i.WorkDate,
+	)
+	return i, err
+}
+
 const updateTimeSlot = `-- name: UpdateTimeSlot :one
 UPDATE time_slots
 SET
@@ -220,6 +256,28 @@ type UpdateTimeSlotParams struct {
 
 func (q *Queries) UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error) {
 	row := q.db.QueryRow(ctx, updateTimeSlot, arg.ID, arg.IsAvailable)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const updateTimeSlotIsAvailable = `-- name: UpdateTimeSlotIsAvailable :one
+UPDATE time_slots
+SET
+    is_available = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING
+    id
+`
+
+type UpdateTimeSlotIsAvailableParams struct {
+	ID          int64       `db:"id" json:"id"`
+	IsAvailable pgtype.Bool `db:"is_available" json:"is_available"`
+}
+
+func (q *Queries) UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error) {
+	row := q.db.QueryRow(ctx, updateTimeSlotIsAvailable, arg.ID, arg.IsAvailable)
 	var id int64
 	err := row.Scan(&id)
 	return id, err

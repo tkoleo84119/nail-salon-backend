@@ -88,6 +88,22 @@ func (q *Queries) CreateStylist(ctx context.Context, arg CreateStylistParams) (S
 	return i, err
 }
 
+const getActiveStylistNameByID = `-- name: GetActiveStylistNameByID :one
+SELECT
+    name
+FROM stylists
+JOIN staff_users ON stylists.staff_user_id = staff_users.id
+WHERE stylists.id = $1
+AND staff_users.is_active = true
+`
+
+func (q *Queries) GetActiveStylistNameByID(ctx context.Context, id int64) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getActiveStylistNameByID, id)
+	var name pgtype.Text
+	err := row.Scan(&name)
+	return name, err
+}
+
 const getStylistByID = `-- name: GetStylistByID :one
 SELECT
     id,

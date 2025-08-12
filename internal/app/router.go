@@ -81,7 +81,7 @@ func setupPublicBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries 
 		// Customer booking operations
 		bookings.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingGetMy.GetMyBookings)
 		bookings.GET("/:bookingId", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingGetMySingle.GetMyBooking)
-		bookings.POST("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingCreateMy.CreateMyBooking)
+		bookings.POST("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingCreate.Create)
 		bookings.PATCH("/:bookingId", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingUpdateMy.UpdateMyBooking)
 		bookings.PATCH("/:bookingId/cancel", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.BookingCancelMy.CancelMyBooking)
 	}

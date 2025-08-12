@@ -43,6 +43,18 @@ SELECT
 FROM time_slots
 WHERE id = $1;
 
+-- name: GetTimeSlotWithScheduleByID :one
+SELECT
+    ts.id,
+    ts.schedule_id,
+    ts.start_time,
+    ts.end_time,
+    ts.is_available,
+    s.work_date
+FROM time_slots ts
+LEFT JOIN schedules s ON ts.schedule_id = s.id
+WHERE ts.id = $1;
+
 -- name: GetAvailableTimeSlotsByScheduleID :many
 SELECT
     ts.id,
@@ -81,6 +93,15 @@ SELECT EXISTS(
 ) AS has_overlap;
 
 -- name: UpdateTimeSlot :one
+UPDATE time_slots
+SET
+    is_available = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING
+    id;
+
+-- name: UpdateTimeSlotIsAvailable :one
 UPDATE time_slots
 SET
     is_available = $2,

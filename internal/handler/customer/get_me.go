@@ -12,10 +12,10 @@ import (
 )
 
 type GetMe struct {
-	service *customerService.GetMe
+	service customerService.GetMeInterface
 }
 
-func NewGetMe(service *customerService.GetMe) *GetMe {
+func NewGetMe(service customerService.GetMeInterface) *GetMe {
 	return &GetMe{
 		service: service,
 	}

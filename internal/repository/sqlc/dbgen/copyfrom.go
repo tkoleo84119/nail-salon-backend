@@ -180,7 +180,8 @@ func (r iteratorForCreateBookingDetails) Values() ([]interface{}, error) {
 		r.rows[0].ID,
 		r.rows[0].BookingID,
 		r.rows[0].ServiceID,
-		r.rows[0].Price,
+		r.rows[0].CreatedAt,
+		r.rows[0].UpdatedAt,
 	}, nil
 }
 
@@ -189,5 +190,5 @@ func (r iteratorForCreateBookingDetails) Err() error {
 }
 
 func (q *Queries) CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"booking_details"}, []string{"id", "booking_id", "service_id", "price"}, &iteratorForCreateBookingDetails{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"booking_details"}, []string{"id", "booking_id", "service_id", "created_at", "updated_at"}, &iteratorForCreateBookingDetails{rows: arg})
 }

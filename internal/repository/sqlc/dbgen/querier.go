@@ -6,6 +6,8 @@ package dbgen
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
@@ -53,6 +55,7 @@ type Querier interface {
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
 	ExistsCustomerByID(ctx context.Context, id int64) (bool, error)
 	GetActiveStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
+	GetActiveStylistNameByID(ctx context.Context, id int64) (pgtype.Text, error)
 	GetAllActiveStoreAccessByStaffId(ctx context.Context, staffUserID int64) ([]GetAllActiveStoreAccessByStaffIdRow, error)
 	GetAllActiveStoresName(ctx context.Context) ([]GetAllActiveStoresNameRow, error)
 	GetAvailableSchedules(ctx context.Context, arg GetAvailableSchedulesParams) ([]GetAvailableSchedulesRow, error)
@@ -76,11 +79,13 @@ type Querier interface {
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]GetTimeSlotTemplateItemsByTemplateIDRow, error)
 	GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]GetTimeSlotTemplateItemsByTemplateIDExcludingRow, error)
 	GetTimeSlotTemplateWithItemsByID(ctx context.Context, id int64) ([]GetTimeSlotTemplateWithItemsByIDRow, error)
+	GetTimeSlotWithScheduleByID(ctx context.Context, id int64) (GetTimeSlotWithScheduleByIDRow, error)
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (GetValidCustomerTokenRow, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error)
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
 	UpdateBookingByStaff(ctx context.Context, arg UpdateBookingByStaffParams) (int64, error)
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
+	UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (UpdateTimeSlotTemplateItemRow, error)
 }
 

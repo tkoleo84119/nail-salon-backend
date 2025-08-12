@@ -34,11 +34,11 @@ type PublicServices struct {
 	AuthRefreshToken authService.RefreshTokenInterface
 
 	// Customer services
-	CustomerGetMe    *customerService.GetMe
-	CustomerUpdateMe *customerService.UpdateMe
+	CustomerGetMe    customerService.GetMeInterface
+	CustomerUpdateMe customerService.UpdateMeInterface
 
 	// Booking services
-	BookingCreateMy    *bookingService.CreateMyBookingService
+	BookingCreate      bookingService.CreateInterface
 	BookingUpdateMy    *bookingService.UpdateMyBookingService
 	BookingCancelMy    bookingService.CancelMyBookingServiceInterface
 	BookingGetMy       bookingService.GetMyBookingsServiceInterface
@@ -72,7 +72,7 @@ type PublicHandlers struct {
 	CustomerUpdateMe *customerHandler.UpdateMe
 
 	// Booking handlers
-	BookingCreateMy    *bookingHandler.CreateMyBookingHandler
+	BookingCreate      *bookingHandler.Create
 	BookingUpdateMy    *bookingHandler.UpdateMyBookingHandler
 	BookingCancelMy    *bookingHandler.CancelMyBookingHandler
 	BookingGetMy       *bookingHandler.GetMyBookingsHandler
@@ -107,7 +107,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		CustomerUpdateMe: customerService.NewUpdateMe(queries, repositories.SQLX),
 
 		// Booking services
-		BookingCreateMy:    bookingService.NewCreateMyBookingService(queries, database.PgxPool),
+		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool),
 		BookingUpdateMy:    bookingService.NewUpdateMyBookingService(queries, repositories.SQLX, database.PgxPool),
 		BookingCancelMy:    bookingService.NewCancelMyBookingService(queries),
 		BookingGetMy:       bookingService.NewGetMyBookingsService(repositories.SQLX),
@@ -143,7 +143,7 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		CustomerUpdateMe: customerHandler.NewUpdateMe(services.CustomerUpdateMe),
 
 		// Booking handlers
-		BookingCreateMy:    bookingHandler.NewCreateMyBookingHandler(services.BookingCreateMy),
+		BookingCreate:      bookingHandler.NewCreate(services.BookingCreate),
 		BookingUpdateMy:    bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
 		BookingCancelMy:    bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
 		BookingGetMy:       bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
