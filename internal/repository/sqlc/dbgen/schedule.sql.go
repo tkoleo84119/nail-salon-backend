@@ -66,7 +66,7 @@ func (q *Queries) DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) er
 }
 
 const getAvailableSchedules = `-- name: GetAvailableSchedules :many
-SELECT s.work_date, COUNT(*) AS available_slots
+SELECT s.id, s.work_date, COUNT(*) AS available_slots
 FROM schedules s
 JOIN time_slots ts ON s.id = ts.schedule_id
 LEFT JOIN bookings b ON ts.id = b.time_slot_id AND b.status != 'CANCELLED'
@@ -75,7 +75,7 @@ WHERE s.store_id = $1
   AND s.work_date BETWEEN $3 AND $4
   AND ts.is_available = true
   AND b.id IS NULL
-GROUP BY s.work_date
+GROUP BY s.id, s.work_date
 ORDER BY s.work_date ASC
 `
 
@@ -87,6 +87,7 @@ type GetAvailableSchedulesParams struct {
 }
 
 type GetAvailableSchedulesRow struct {
+	ID             int64       `db:"id" json:"id"`
 	WorkDate       pgtype.Date `db:"work_date" json:"work_date"`
 	AvailableSlots int64       `db:"available_slots" json:"available_slots"`
 }
@@ -105,7 +106,7 @@ func (q *Queries) GetAvailableSchedules(ctx context.Context, arg GetAvailableSch
 	items := []GetAvailableSchedulesRow{}
 	for rows.Next() {
 		var i GetAvailableSchedulesRow
-		if err := rows.Scan(&i.WorkDate, &i.AvailableSlots); err != nil {
+		if err := rows.Scan(&i.ID, &i.WorkDate, &i.AvailableSlots); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -76,6 +76,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, stylistID int64, req
 
 	for _, row := range rows {
 		schedules = append(schedules, scheduleModel.GetAllItem{
+			ID:             utils.FormatID(row.ID),
 			Date:           utils.PgDateToDateString(row.WorkDate),
 			AvailableSlots: int(row.AvailableSlots),
 		})
