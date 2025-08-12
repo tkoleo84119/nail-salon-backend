@@ -70,7 +70,7 @@ func setupPublicCustomerRoutes(api *gin.RouterGroup, cfg *config.Config, queries
 	customers := api.Group("/customers")
 	{
 		// Customer self-service
-		customers.GET("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerGetMy.GetMyCustomer)
+		customers.GET("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerGetMe.GetMe)
 		customers.PATCH("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerUpdateMy.UpdateMyCustomer)
 	}
 }

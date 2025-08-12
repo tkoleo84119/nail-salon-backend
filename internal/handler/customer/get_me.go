@@ -11,17 +11,17 @@ import (
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
 )
 
-type GetMyCustomerHandler struct {
-	service *customerService.GetMyCustomerService
+type GetMe struct {
+	service *customerService.GetMe
 }
 
-func NewGetMyCustomerHandler(service *customerService.GetMyCustomerService) *GetMyCustomerHandler {
-	return &GetMyCustomerHandler{
+func NewGetMe(service *customerService.GetMe) *GetMe {
+	return &GetMe{
 		service: service,
 	}
 }
 
-func (h *GetMyCustomerHandler) GetMyCustomer(c *gin.Context) {
+func (h *GetMe) GetMe(c *gin.Context) {
 	// Authentication context validation
 	customerContext, exists := middleware.GetCustomerFromContext(c)
 	if !exists {
@@ -30,7 +30,7 @@ func (h *GetMyCustomerHandler) GetMyCustomer(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetMyCustomer(c.Request.Context(), *customerContext)
+	response, err := h.service.GetMe(c.Request.Context(), customerContext.CustomerID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

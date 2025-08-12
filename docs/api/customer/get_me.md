@@ -12,15 +12,13 @@
 
 ## 說明
 
-- 僅支援已登入客戶（access token 驗證）。
-- 回傳當前登入客戶的完整資料。
-- 適用於「我的帳號」、「個人中心」等場景。
+- 提供顧客取得自己的資料。
 
 ---
 
 ## 權限
 
-- 僅客戶本人可查詢（JWT 驗證）。
+- 需要登入才可使用。
 
 ---
 
@@ -28,9 +26,8 @@
 
 ### Header
 
-```http
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ---
 
@@ -45,35 +42,48 @@ Authorization: Bearer <access_token>
     "name": "王小美",
     "phone": "0912345678",
     "birthday": "1992-02-29",
+    "email": "test@test.com",
     "city": "台北市",
     "favoriteShapes": ["方形"],
     "favoriteColors": ["粉色"],
     "favoriteStyles": ["法式"],
     "isIntrovert": false,
-    "referralSource": ["朋友推薦"],
-    "referrer": "黃小姐",
     "customerNote": "容易指緣乾裂"
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
 
-#### 401 Unauthorized - 未登入/Token 失效
-
-```json
-{
-  "message": "無效的 accessToken"
-}
-```
-
-#### 500 Internal Server Error
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
+    }
+  ]
 }
 ```
+
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
+
+| 狀態碼 | 錯誤碼 | 常數名稱               | 說明                             |
+| ------ | ------ | ---------------------- | -------------------------------- |
+| 401    | E1002  | AuthInvalidCredentials | 無效的 accessToken，請重新登入   |
+| 401    | E1003  | AuthTokenMissing       | accessToken 缺失，請重新登入     |
+| 401    | E1004  | AuthTokenFormatError   | accessToken 格式錯誤，請重新登入 |
+| 401    | E1006  | AuthContextMissing     | 未找到使用者認證資訊，請重新登入 |
+| 401    | E1011  | AuthCustomerFailed     | 未找到有效的顧客資訊，請重新登入 |
+| 500    | E9001  | SysInternalError       | 系統發生錯誤，請稍後再試         |
+| 500    | E9002  | SysDatabaseError       | 資料庫操作失敗                   |
 
 ---
 
@@ -85,11 +95,11 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 查詢並回傳該客戶的完整資料。
+1. 根據 `accessToken` 取得顧客ID。
+2. 查詢並回傳該顧客的完整資料。
 
 ---
 
 ## 注意事項
 
 - 僅允許本人查詢。
-

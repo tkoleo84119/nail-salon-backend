@@ -35,21 +35,3 @@ func (req *UpdateMyCustomerRequest) HasUpdates() bool {
 		req.City != nil || req.FavoriteShapes != nil || req.FavoriteColors != nil ||
 		req.FavoriteStyles != nil || req.IsIntrovert != nil || req.CustomerNote != nil
 }
-
-// -------------------------------------------------------------------------------------
-
-// GetMyCustomerResponse represents the response for getting customer's own profile
-type GetMyCustomerResponse struct {
-	ID             string    `json:"id"`
-	Name           string    `json:"name"`
-	Phone          string    `json:"phone"`
-	Birthday       string    `json:"birthday"`
-	City           string    `json:"city"`
-	FavoriteShapes *[]string `json:"favoriteShapes,omitempty"`
-	FavoriteColors *[]string `json:"favoriteColors,omitempty"`
-	FavoriteStyles *[]string `json:"favoriteStyles,omitempty"`
-	IsIntrovert    bool      `json:"isIntrovert,omitempty"`
-	ReferralSource *[]string `json:"referralSource,omitempty"`
-	Referrer       string    `json:"referrer,omitempty"`
-	CustomerNote   string    `json:"customerNote,omitempty"`
-}

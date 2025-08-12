@@ -34,7 +34,7 @@ type PublicServices struct {
 	AuthRefreshToken authService.RefreshTokenInterface
 
 	// Customer services
-	CustomerGetMy    *customerService.GetMyCustomerService
+	CustomerGetMe    *customerService.GetMe
 	CustomerUpdateMy *customerService.UpdateMyCustomerService
 
 	// Booking services
@@ -68,7 +68,7 @@ type PublicHandlers struct {
 	AuthRefreshToken *authHandler.RefreshToken
 
 	// Customer handlers
-	CustomerGetMy    *customerHandler.GetMyCustomerHandler
+	CustomerGetMe    *customerHandler.GetMe
 	CustomerUpdateMy *customerHandler.UpdateMyCustomerHandler
 
 	// Booking handlers
@@ -103,7 +103,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT),
 
 		// Customer services
-		CustomerGetMy:    customerService.NewGetMyCustomerService(queries),
+		CustomerGetMe:    customerService.NewGetMe(queries),
 		CustomerUpdateMy: customerService.NewUpdateMyCustomerService(queries, repositories.SQLX),
 
 		// Booking services
@@ -139,7 +139,7 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		AuthRefreshToken: authHandler.NewRefreshToken(services.AuthRefreshToken),
 
 		// Customer handlers
-		CustomerGetMy:    customerHandler.NewGetMyCustomerHandler(services.CustomerGetMy),
+		CustomerGetMe:    customerHandler.NewGetMe(services.CustomerGetMe),
 		CustomerUpdateMy: customerHandler.NewUpdateMyCustomerHandler(services.CustomerUpdateMy),
 
 		// Booking handlers
