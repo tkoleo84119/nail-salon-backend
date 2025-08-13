@@ -12,15 +12,16 @@
 
 ## 說明
 
-- 僅支援已登入顧客（access token 驗證）。
-- 回傳當前顧客所有預約資訊，支援分頁與依狀態查詢。
-- 適用於「我的預約」、「預約管理」等場景。
+- 提供顧客查詢自己所有的預約資訊。
+- 支援分頁（limit、offset）。
+- 支援排序（sort）。
+- 不回傳 `status` 為 `NO_SHOW` 的預約。
 
 ---
 
 ## 權限
 
-- 僅顧客本人可查詢（JWT 驗證）。
+- 需要登入才可使用。
 
 ---
 
@@ -28,20 +29,26 @@
 
 ### Header
 
-```http
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Query Parameter
 
-| 參數   | 型別   | 預設值    | 說明                          |
-| ------ | ------ | --------- | ----------------------------- |
-| limit  | int    | 20        | 單頁筆數                      |
-| offset | int    | 0         | 起始筆數                      |
-| status | string | SCHEDULED | 預約狀態 (可多選，用逗號分隔) |
+| 參數   | 型別   | 預設值 | 說明                                             |
+| ------ | ------ | ------ | ------------------------------------------------ |
+| limit  | int    | 20     | 單頁筆數                                         |
+| offset | int    | 0      | 起始筆數                                         |
+| sort   | string | -date  | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序) |
+| status | string |        | 預約狀態 (可多選，用逗號分隔)                    |
 
-- status 支援：`SCHEDULED`, `CANCELLED`, `COMPLETED` 等。
-- 可只查詢特定狀態。
+### 驗證規則
+
+| 欄位   | 必填 | 其他規則                                          |
+| ------ | ---- | ------------------------------------------------- |
+| limit  | 否   | <li>最小值1<li>最大值100                          |
+| offset | 否   | <li>最小值0<li>最大值1000000                      |
+| sort   | 否   | <li>可以為 status, date (其餘會忽略)              |
+| status | 否   | <li>值只能為`SCHEDULED`, `CANCELLED`, `COMPLETED` |
 
 ---
 
@@ -61,11 +68,9 @@ Authorization: Bearer <access_token>
         "stylistId": "2000000001",
         "stylistName": "Ava",
         "date": "2025-08-02",
-        "timeSlot": {
-          "id": "3000000001",
-          "startTime": "10:00",
-          "endTime": "12:00"
-        },
+        "timeSlotId": "3000000001",
+        "startTime": "10:00",
+        "endTime": "12:00",
         "status": "SCHEDULED"
       },
     ]
@@ -73,23 +78,40 @@ Authorization: Bearer <access_token>
 }
 ```
 
-### 失敗
+### 錯誤處理
 
-#### 401 Unauthorized - 未登入/Token 失效
-
-```json
-{
-  "message": "無效的 accessToken"
-}
-```
-
-#### 500 Internal Server Error
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "message": "系統發生錯誤，請稍後再試"
+  "errors": [
+    {
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
+    }
+  ]
 }
 ```
+
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
+
+| 狀態碼 | 錯誤碼 | 常數名稱               | 說明                              |
+| ------ | ------ | ---------------------- | --------------------------------- |
+| 401    | E1002  | AuthInvalidCredentials | 無效的 accessToken，請重新登入    |
+| 401    | E1003  | AuthTokenMissing       | accessToken 缺失，請重新登入      |
+| 401    | E1004  | AuthTokenFormatError   | accessToken 格式錯誤，請重新登入  |
+| 401    | E1006  | AuthContextMissing     | 未找到使用者認證資訊，請重新登入  |
+| 401    | E1011  | AuthCustomerFailed     | 未找到有效的顧客資訊，請重新登入  |
+| 400    | E2023  | ValFieldMinNumber      | {field} 最小值為 {param}          |
+| 400    | E2026  | ValFieldMaxNumber      | {field} 最大值為 {param}          |
+| 400    | E2027  | ValFieldOneof          | {field} 必須是 {param} 其中一個值 |
+| 500    | E9001  | SysInternalError       | 系統發生錯誤，請稍後再試          |
+| 500    | E9002  | SysDatabaseError       | 資料庫操作失敗                    |
 
 ---
 
@@ -105,8 +127,8 @@ Authorization: Bearer <access_token>
 
 ## Service 邏輯
 
-1. 依傳入條件查詢 bookings（分頁、狀態等）。
-2. 關聯查詢對應時段、美甲師、門市資訊。
+1. 查詢 `customer_id` 的預約資訊。
+2. 關聯查詢對應時段、美甲師、門市資訊 (排除 `status` 為 `NO_SHOW` 的預約)。
 3. 回傳分頁結果。
 
 ---

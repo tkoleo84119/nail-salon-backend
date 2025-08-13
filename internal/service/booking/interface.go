@@ -15,12 +15,12 @@ type UpdateInterface interface {
 	Update(ctx context.Context, bookingID int64, req bookingModel.UpdateParsedRequest, customerID int64) (*bookingModel.UpdateResponse, error)
 }
 
-type CancelMyBookingServiceInterface interface {
-	CancelMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.CancelMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CancelMyBookingResponse, error)
+type GetAllInterface interface {
+	GetAll(ctx context.Context, queryParams bookingModel.GetAllParsedRequest, customerID int64) (*bookingModel.GetAllResponse, error)
 }
 
-type GetMyBookingsServiceInterface interface {
-	GetMyBookings(ctx context.Context, queryParams bookingModel.GetMyBookingsQueryParams, customerContext common.CustomerContext) (*bookingModel.GetMyBookingsResponse, error)
+type CancelMyBookingServiceInterface interface {
+	CancelMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.CancelMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CancelMyBookingResponse, error)
 }
 
 type GetMyBookingServiceInterface interface {

@@ -2,8 +2,8 @@ package service
 
 type GetAllRequest struct {
 	IsAddon *bool   `form:"isAddon" binding:"omitempty"`
-	Limit   *int    `form:"limit,default=20" binding:"omitempty,min=1,max=100"`
-	Offset  *int    `form:"offset,default=0" binding:"omitempty,min=0,max=1000000"`
+	Limit   *int    `form:"limit" binding:"omitempty,min=1,max=100"`
+	Offset  *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
 	Sort    *string `form:"sort" binding:"omitempty"`
 }
 

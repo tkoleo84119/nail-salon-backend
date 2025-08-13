@@ -32,25 +32,28 @@ func HandleSort(allowedFields []string, defaultSort string, defaultSortDirection
 
 // HandleSortByMap handles the sort parameter by map => for join table sort
 func HandleSortByMap(allowedFields map[string]string, defaultSort string, defaultSortDirection string, sort *[]string) string {
-	sortStr := ""
+	var sortParts []string
+
 	if sort != nil && len(*sort) > 0 {
 		for _, s := range *sort {
 			// if start with -, order by desc
-			field := CamelToSnake(strings.TrimPrefix(s, "-"))
-			column, ok := allowedFields[field]
+			rowField := strings.TrimPrefix(s, "-")
+			column, ok := allowedFields[rowField]
 			if !ok {
 				continue
 			}
 
 			if strings.HasPrefix(s, "-") {
-				sortStr = column + " DESC"
+				sortParts = append(sortParts, column+" DESC")
 			} else {
-				sortStr = column + " ASC"
+				sortParts = append(sortParts, column+" ASC")
 			}
 		}
 	}
-	if sortStr == "" {
-		sortStr = defaultSort + " " + defaultSortDirection
+
+	if len(sortParts) == 0 {
+		sortParts = append(sortParts, defaultSort+" "+defaultSortDirection)
 	}
-	return sortStr
+
+	return strings.Join(sortParts, ", ")
 }
