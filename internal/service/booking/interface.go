@@ -19,10 +19,10 @@ type GetAllInterface interface {
 	GetAll(ctx context.Context, queryParams bookingModel.GetAllParsedRequest, customerID int64) (*bookingModel.GetAllResponse, error)
 }
 
-type CancelMyBookingServiceInterface interface {
-	CancelMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.CancelMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CancelMyBookingResponse, error)
+type GetInterface interface {
+	Get(ctx context.Context, bookingID int64, customerID int64) (*bookingModel.GetResponse, error)
 }
 
-type GetMyBookingServiceInterface interface {
-	GetMyBooking(ctx context.Context, bookingIDStr string, customerContext common.CustomerContext) (*bookingModel.GetMyBookingResponse, error)
+type CancelMyBookingServiceInterface interface {
+	CancelMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.CancelMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CancelMyBookingResponse, error)
 }

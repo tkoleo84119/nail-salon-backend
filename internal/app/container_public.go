@@ -42,7 +42,7 @@ type PublicServices struct {
 	BookingUpdate      bookingService.UpdateInterface
 	BookingCancelMy    bookingService.CancelMyBookingServiceInterface
 	BookingGetAll      bookingService.GetAllInterface
-	BookingGetMySingle bookingService.GetMyBookingServiceInterface
+	BookingGetMySingle bookingService.GetInterface
 
 	// Schedule services
 	ScheduleGetAll scheduleService.GetAllInterface
@@ -76,7 +76,7 @@ type PublicHandlers struct {
 	BookingUpdate      *bookingHandler.Update
 	BookingCancelMy    *bookingHandler.CancelMyBookingHandler
 	BookingGetAll      *bookingHandler.GetAll
-	BookingGetMySingle *bookingHandler.GetMyBookingHandler
+	BookingGetMySingle *bookingHandler.Get
 
 	// Schedule handlers
 	ScheduleGetAll *scheduleHandler.GetAll
@@ -111,7 +111,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
 		BookingCancelMy:    bookingService.NewCancelMyBookingService(queries),
 		BookingGetAll:      bookingService.NewGetAll(repositories.SQLX),
-		BookingGetMySingle: bookingService.NewGetMyBookingService(queries),
+		BookingGetMySingle: bookingService.NewGet(queries),
 
 		// Schedule services
 		ScheduleGetAll: scheduleService.NewGetAll(queries),
@@ -147,7 +147,7 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		BookingUpdate:      bookingHandler.NewUpdate(services.BookingUpdate),
 		BookingCancelMy:    bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
 		BookingGetAll:      bookingHandler.NewGetAll(services.BookingGetAll),
-		BookingGetMySingle: bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),
+		BookingGetMySingle: bookingHandler.NewGet(services.BookingGetMySingle),
 
 		// Schedule handlers
 		ScheduleGetAll: scheduleHandler.NewGetAll(services.ScheduleGetAll),
