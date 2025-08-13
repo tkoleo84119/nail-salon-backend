@@ -31,7 +31,7 @@ func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDS
 	}
 
 	// Verify booking exists and belongs to customer
-	bookingInfo, err := s.queries.GetBookingByID(ctx, bookingID)
+	bookingInfo, err := s.queries.GetBookingDetailByID(ctx, bookingID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingNotFound)

@@ -1,5 +1,7 @@
 package booking
 
+import "github.com/jackc/pgx/v5/pgtype"
+
 type CreateRequest struct {
 	StoreId       string   `json:"storeId" binding:"required"`
 	StylistId     string   `json:"stylistId" binding:"required"`
@@ -43,4 +45,5 @@ type CreateBookingServiceInfo struct {
 	ServiceId     int64
 	ServiceName   string
 	IsMainService bool
+	Price         pgtype.Numeric
 }

@@ -60,7 +60,7 @@ type Querier interface {
 	GetAllActiveStoresName(ctx context.Context) ([]GetAllActiveStoresNameRow, error)
 	GetAvailableSchedules(ctx context.Context, arg GetAvailableSchedulesParams) ([]GetAvailableSchedulesRow, error)
 	GetAvailableTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
-	GetBookingByID(ctx context.Context, id int64) (GetBookingByIDRow, error)
+	GetBookingDetailByID(ctx context.Context, id int64) (GetBookingDetailByIDRow, error)
 	GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error)
 	GetCustomerByID(ctx context.Context, id int64) (GetCustomerByIDRow, error)
 	GetCustomerByLineUid(ctx context.Context, lineUid string) (int64, error)

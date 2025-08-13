@@ -152,6 +152,10 @@ BOOKING:
     code: E3BK006
     message: 該時段已被預約，請重新選擇
     status: 409
+  BOOKING_UPDATE_INCOMPLETE:
+    code: E3BK007
+    message: 預約更新資訊不完整，所有必要資訊必須一起傳入
+    status: 400
 
 CUSTOMER:
   CUSTOMER_NOT_FOUND:

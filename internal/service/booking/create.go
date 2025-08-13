@@ -111,17 +111,22 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 		ServiceId:     mainService.ID,
 		ServiceName:   mainService.Name,
 		IsMainService: true,
+		Price:         mainService.Price,
 	}
 	for i, subService := range subServices {
 		services[i+1] = bookingModel.CreateBookingServiceInfo{
 			ServiceId:     subService.ID,
 			ServiceName:   subService.Name,
 			IsMainService: false,
+			Price:         subService.Price,
 		}
 	}
 
 	bookingId := utils.GenerateID()
-	bookingDetails := s.parseBookingDetails(bookingId, services)
+	bookingDetails, err := s.parseBookingDetails(bookingId, services)
+	if err != nil {
+		return nil, err
+	}
 	isChatEnabled := req.IsChatEnabled != nil && *req.IsChatEnabled
 
 	tx, err := s.db.Begin(ctx)
@@ -196,7 +201,7 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 	return response, nil
 }
 
-func (s *Create) parseBookingDetails(bookingId int64, services []bookingModel.CreateBookingServiceInfo) []dbgen.CreateBookingDetailsParams {
+func (s *Create) parseBookingDetails(bookingId int64, services []bookingModel.CreateBookingServiceInfo) ([]dbgen.CreateBookingDetailsParams, error) {
 	bookingDetails := make([]dbgen.CreateBookingDetailsParams, len(services))
 	now := utils.TimeToPgTimestamptz(time.Now())
 
@@ -205,9 +210,10 @@ func (s *Create) parseBookingDetails(bookingId int64, services []bookingModel.Cr
 			ID:        utils.GenerateID(),
 			BookingID: bookingId,
 			ServiceID: service.ServiceId,
+			Price:     service.Price,
 			CreatedAt: now,
 			UpdatedAt: now,
 		}
 	}
-	return bookingDetails
+	return bookingDetails, nil
 }

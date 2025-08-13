@@ -45,6 +45,7 @@ const (
 	BookingNotFound                 = "BOOKING_NOT_FOUND"
 	BookingTimeSlotNotFound         = "BOOKING_TIME_SLOT_NOT_FOUND"
 	BookingTimeSlotUnavailable      = "BOOKING_TIME_SLOT_UNAVAILABLE"
+	BookingUpdateIncomplete         = "BOOKING_UPDATE_INCOMPLETE"
 
 	// CUSTOMER - Customer operation errors
 	CustomerNotFound      = "CUSTOMER_NOT_FOUND"

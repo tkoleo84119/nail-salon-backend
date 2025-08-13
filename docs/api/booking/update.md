@@ -12,15 +12,16 @@
 
 ## 說明
 
-- 僅支援已登入顧客（access token 驗證）。
-- 可變更門市、美甲師、日期、時段、服務（可含多個）、備註等。
+- 提供顧客修改自己的預約。
+- 可變更門市、美甲師、時段、服務（可含多個）、備註等。
 - 異動時會自動檢查新時段與服務項目的可用性與衝突。
+- 異動時段會更新舊有時段狀態為可預約。
 
 ---
 
 ## 權限
 
-- 僅顧客本人可修改自己預約（JWT 驗證）。
+- 需要登入才可使用。
 
 ---
 
@@ -28,10 +29,8 @@
 
 ### Header
 
-```http
-Content-Type: application/json
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameter
 
@@ -39,7 +38,7 @@ Authorization: Bearer <access_token>
 | --------- | ------ |
 | bookingId | 預約ID |
 
-### Body
+### Body 範例
 
 ```json
 {
@@ -53,23 +52,20 @@ Authorization: Bearer <access_token>
 }
 ```
 
-- 欄位皆為選填，至少需要傳入一個欄位
-
 ### 驗證規則
 
-| 欄位          | 規則                                      | 說明            |
-| ------------- | ----------------------------------------- | --------------- |
-| storeId       | <li>選填                                  | 預約門市        |
-| stylistId     | <li>選填                                  | 美甲師ID        |
-| timeSlotId    | <li>選填                                  | 時段ID          |
-| mainServiceId | <li>選填                                  | 主服務項目ID    |
-| subServiceIds | <li>選填<li>陣列<li>最多5項<li>可為空陣列 | 附加服務項目IDs |
-| isChatEnabled | <li>選填                                  | 是否要聊天      |
-| note          | <li>選填<li>最長500字                     | 備註說明        |
+| 欄位          | 必填 | 其他規則      | 說明          |
+| ------------- | ---- | ------------- | ------------- |
+| storeId       | 否   |               | 預約門市      |
+| stylistId     | 否   |               | 美甲師ID      |
+| timeSlotId    | 否   |               | 時段ID        |
+| mainServiceId | 否   |               | 主服務項目ID  |
+| subServiceIds | 否   | <li>最多5項   | 副服務項目IDs |
+| isChatEnabled | 否   | <li>布林值    | 是否要聊天    |
+| note          | 否   | <li>最長255字 | 備註說明      |
 
-
+- 欄位皆為選填，至少需要傳入一個欄位
 - storeId、stylistId、timeSlotId、mainServiceId、subServiceIds 必須一起傳入
-- subServiceIds 可以傳入空陣列 => 代表不加任何附加服務
 
 ---
 
@@ -100,58 +96,58 @@ Authorization: Bearer <access_token>
 }
 ```
 
-### 失敗
+### 錯誤處理
 
-#### 400 Bad Request - 驗證錯誤
-
-```json
-{
-  "message": "輸入驗證失敗",
-  "errors": {
-    "note": "note長度最多500個字元"
-  }
-}
-```
-
-#### 401 Unauthorized - 未登入/Token失效
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "errors": [
+    {
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
+    }
+  ]
 }
 ```
 
-#### 403 Forbidden - 權限不足
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "message": "權限不足，僅限本人操作"
-}
-```
-
-#### 404 Not Found - 指定資源不存在
-
-```json
-{
-  "message": "指定時段、服務或預約不存在"
-}
-```
-
-#### 409 Conflict - 時段已被預約
-
-```json
-{
-  "message": "該時段已被預約，請重新選擇"
-}
-```
-
-#### 500 Internal Server Error
-
-```json
-{
-  "message": "系統發生錯誤，請稍後再試"
-}
-```
+| 狀態碼 | 錯誤碼   | 常數名稱                        | 說明                                         |
+| ------ | -------- | ------------------------------- | -------------------------------------------- |
+| 401    | E1002    | AuthInvalidCredentials          | 無效的 accessToken，請重新登入               |
+| 401    | E1003    | AuthTokenMissing                | accessToken 缺失，請重新登入                 |
+| 401    | E1004    | AuthTokenFormatError            | accessToken 格式錯誤，請重新登入             |
+| 401    | E1006    | AuthContextMissing              | 未找到使用者認證資訊，請重新登入             |
+| 401    | E1011    | AuthCustomerFailed              | 未找到有效的顧客資訊，請重新登入             |
+| 403    | E1010    | AuthPermissionDenied            | 權限不足，無法執行此操作                     |
+| 400    | E2001    | ValJSONFormatError              | JSON 格式錯誤，請檢查                        |
+| 400    | E2002    | ValPathParamMissing             | 路徑參數缺失，請檢查                         |
+| 400    | E2003    | ValAllFieldsEmpty               | 至少需要提供一個欄位進行更新                 |
+| 400    | E2004    | ValTypeConversionFailed         | 參數類型轉換失敗                             |
+| 400    | E2024    | ValFieldStringMaxLength         | {field} 長度最多只能有 {param} 個字元        |
+| 400    | E2025    | ValFieldArrayMaxLength          | {field} 最多只能有 {param} 個項目            |
+| 400    | E2029    | ValFieldBoolean                 | {field} 必須是布林值                         |
+| 400    | E3BK002  | BookingStatusNotAllowedToUpdate | 預約狀態不允許更新                           |
+| 400    | E3BK007  | BookingUpdateIncomplete         | 預約更新資訊不完整，所有必要資訊必須一起傳入 |
+| 400    | E3STO001 | StoreNotActive                  | 門市未啟用                                   |
+| 400    | E3SER001 | ServiceNotActive                | 服務未啟用                                   |
+| 400    | E3SER002 | ServiceNotMainService           | 服務不是主服務                               |
+| 400    | E3SER003 | ServiceNotAddon                 | 服務不是附屬服務                             |
+| 400    | E3TMS006 | TimeSlotNotEnoughTime           | 時段時間不足                                 |
+| 404    | E3BK001  | BookingNotFound                 | 預約不存在或已被取消                         |
+| 404    | E3STO002 | StoreNotFound                   | 門市不存在或已被刪除                         |
+| 404    | E3TMS005 | TimeSlotNotFound                | 時段不存在或已被刪除                         |
+| 404    | E3SER004 | ServiceNotFound                 | 服務不存在或已被刪除                         |
+| 404    | E3STY001 | StylistNotFound                 | 美甲師資料不存在                             |
+| 409    | E3BK006  | BookingTimeSlotUnavailable      | 該時段已被預約，請重新選擇                   |
+| 500    | E9001    | SysInternalError                | 系統發生錯誤，請稍後再試                     |
+| 500    | E9002    | SysDatabaseError                | 資料庫操作失敗                               |
 
 ---
 
@@ -160,6 +156,9 @@ Authorization: Bearer <access_token>
 - `bookings`
 - `booking_details`
 - `time_slots`
+- `services`
+- `stylists`
+- `stores`
 
 ---
 
@@ -172,7 +171,7 @@ Authorization: Bearer <access_token>
    3. 驗證服務是否可用
    4. 驗證時段時間是否足夠
    5. 驗證附加服務是否可用
-3. 更新預約內容（bookings、booking_details）。
+3. 更新預約內容（`bookings`、`booking_details`）。
 4. 回傳最新預約資訊。
 
 ---

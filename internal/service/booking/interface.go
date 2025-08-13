@@ -11,8 +11,8 @@ type CreateInterface interface {
 	Create(ctx context.Context, req bookingModel.CreateParsedRequest, customerID int64) (*bookingModel.CreateResponse, error)
 }
 
-type UpdateMyBookingServiceInterface interface {
-	UpdateMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.UpdateMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.UpdateMyBookingResponse, error)
+type UpdateInterface interface {
+	Update(ctx context.Context, bookingID int64, req bookingModel.UpdateParsedRequest, customerID int64) (*bookingModel.UpdateResponse, error)
 }
 
 type CancelMyBookingServiceInterface interface {

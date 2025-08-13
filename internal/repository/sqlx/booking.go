@@ -8,9 +8,17 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
-	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
+
+type BookingRepositoryInterface interface {
+	UpdateBookingTx(ctx context.Context, tx *sqlx.Tx, bookingID int64, params UpdateBookingParams) (int64, error)
+	GetMyBookings(ctx context.Context, customerID int64, statuses []string, limit, offset int) ([]GetMyBookingsModel, int, error)
+	GetStoreBookingList(ctx context.Context, storeID int64, params GetStoreBookingListParams) ([]GetStoreBookingListModel, int, error)
+	UpdateBookingByStaff(ctx context.Context, bookingID int64, storeID int64, timeSlotID *int64, isChatEnabled *bool, note *string) (*UpdateBookingByStaffModel, error)
+	GetByID(ctx context.Context, bookingID int64) (*GetByIDRow, error)
+	CancelBooking(ctx context.Context, tx *sqlx.Tx, bookingID int64, status string, cancelReason *string) (int64, error)
+}
 
 type BookingRepository struct {
 	db *sqlx.DB
@@ -22,86 +30,58 @@ func NewBookingRepository(db *sqlx.DB) *BookingRepository {
 	}
 }
 
-// UpdateMyBookingModel represents the database model for booking updates
-type UpdateMyBookingModel struct {
-	ID            int64  `db:"id"`
-	StoreID       int64  `db:"store_id"`
-	CustomerID    int64  `db:"customer_id"`
-	StylistID     int64  `db:"stylist_id"`
-	TimeSlotID    int64  `db:"time_slot_id"`
-	IsChatEnabled bool   `db:"is_chat_enabled"`
-	Note          string `db:"note"`
-	Status        string `db:"status"`
+type UpdateBookingParams struct {
+	StoreID       *int64
+	StylistID     *int64
+	TimeSlotID    *int64
+	IsChatEnabled *bool
+	Note          *string
 }
 
-// UpdateMyBooking updates a booking dynamically based on provided fields
-func (r *BookingRepository) UpdateMyBooking(ctx context.Context, bookingID int64, customerID int64, req bookingModel.UpdateMyBookingRequest) (*UpdateMyBookingModel, error) {
+// UpdateBooking updates a booking dynamically based on provided fields
+func (r *BookingRepository) UpdateBookingTx(ctx context.Context, tx *sqlx.Tx, bookingID int64, params UpdateBookingParams) (int64, error) {
 	setParts := []string{"updated_at = NOW()"}
-	args := map[string]interface{}{
-		"booking_id":  bookingID,
-		"customer_id": customerID,
+	args := []interface{}{bookingID}
+
+	if params.StoreID != nil {
+		setParts = append(setParts, fmt.Sprintf("store_id = $%d", len(args)+1))
+		args = append(args, *params.StoreID)
 	}
 
-	// Dynamic field updates using type converters
-	if req.StoreId != nil {
-		storeID, err := utils.ParseID(*req.StoreId)
-		if err != nil {
-			return nil, fmt.Errorf("invalid store ID: %w", err)
-		}
-		setParts = append(setParts, "store_id = :store_id")
-		args["store_id"] = storeID
+	if params.StylistID != nil {
+		setParts = append(setParts, fmt.Sprintf("stylist_id = $%d", len(args)+1))
+		args = append(args, *params.StylistID)
 	}
 
-	if req.StylistId != nil {
-		stylistID, err := utils.ParseID(*req.StylistId)
-		if err != nil {
-			return nil, fmt.Errorf("invalid stylist ID: %w", err)
-		}
-		setParts = append(setParts, "stylist_id = :stylist_id")
-		args["stylist_id"] = stylistID
+	if params.TimeSlotID != nil {
+		setParts = append(setParts, fmt.Sprintf("time_slot_id = $%d", len(args)+1))
+		args = append(args, *params.TimeSlotID)
 	}
 
-	if req.TimeSlotId != nil {
-		timeSlotID, err := utils.ParseID(*req.TimeSlotId)
-		if err != nil {
-			return nil, fmt.Errorf("invalid time slot ID: %w", err)
-		}
-		setParts = append(setParts, "time_slot_id = :time_slot_id")
-		args["time_slot_id"] = timeSlotID
+	if params.IsChatEnabled != nil {
+		setParts = append(setParts, fmt.Sprintf("is_chat_enabled = $%d", len(args)+1))
+		args = append(args, *params.IsChatEnabled)
 	}
 
-	if req.IsChatEnabled != nil {
-		setParts = append(setParts, "is_chat_enabled = :is_chat_enabled")
-		args["is_chat_enabled"] = *req.IsChatEnabled
-	}
-
-	if req.Note != nil {
-		setParts = append(setParts, "note = :note")
-		args["note"] = utils.StringPtrToPgText(req.Note, true) // Empty as NULL
+	if params.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
+		args = append(args, *params.Note)
 	}
 
 	query := fmt.Sprintf(`
-		UPDATE bookings SET %s
-		WHERE id = :booking_id AND customer_id = :customer_id
-		RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, note, status
+		UPDATE bookings
+		SET %s
+		WHERE id = $1
+		RETURNING id
 	`, strings.Join(setParts, ", "))
 
-	var result UpdateMyBookingModel
-	rows, err := r.db.NamedQueryContext(ctx, query, args)
+	var result int64
+	err := tx.GetContext(ctx, &result, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("update failed: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, fmt.Errorf("no rows returned")
+		return 0, fmt.Errorf("update booking failed: %w", err)
 	}
 
-	if err := rows.StructScan(&result); err != nil {
-		return nil, fmt.Errorf("scan failed: %w", err)
-	}
-
-	return &result, nil
+	return result, nil
 }
 
 // GetMyBookingsModel represents the database model for booking list

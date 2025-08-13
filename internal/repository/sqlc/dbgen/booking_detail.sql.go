@@ -54,6 +54,70 @@ type CreateBookingDetailsParams struct {
 	ID        int64              `db:"id" json:"id"`
 	BookingID int64              `db:"booking_id" json:"booking_id"`
 	ServiceID int64              `db:"service_id" json:"service_id"`
+	Price     pgtype.Numeric     `db:"price" json:"price"`
 	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+const deleteBookingDetailsByBookingID = `-- name: DeleteBookingDetailsByBookingID :exec
+DELETE FROM booking_details
+WHERE booking_id = $1
+`
+
+func (q *Queries) DeleteBookingDetailsByBookingID(ctx context.Context, bookingID int64) error {
+	_, err := q.db.Exec(ctx, deleteBookingDetailsByBookingID, bookingID)
+	return err
+}
+
+const getBookingDetailsByBookingID = `-- name: GetBookingDetailsByBookingID :many
+SELECT
+    bd.id,
+    bd.booking_id,
+    bd.service_id,
+    srv.name as service_name,
+    bd.price,
+    bd.created_at,
+    srv.is_addon
+FROM booking_details bd
+JOIN services srv ON bd.service_id = srv.id
+WHERE bd.booking_id = $1
+ORDER BY srv.is_addon ASC, srv.name ASC
+`
+
+type GetBookingDetailsByBookingIDRow struct {
+	ID          int64              `db:"id" json:"id"`
+	BookingID   int64              `db:"booking_id" json:"booking_id"`
+	ServiceID   int64              `db:"service_id" json:"service_id"`
+	ServiceName string             `db:"service_name" json:"service_name"`
+	Price       pgtype.Numeric     `db:"price" json:"price"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	IsAddon     pgtype.Bool        `db:"is_addon" json:"is_addon"`
+}
+
+func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error) {
+	rows, err := q.db.Query(ctx, getBookingDetailsByBookingID, bookingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetBookingDetailsByBookingIDRow{}
+	for rows.Next() {
+		var i GetBookingDetailsByBookingIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.BookingID,
+			&i.ServiceID,
+			&i.ServiceName,
+			&i.Price,
+			&i.CreatedAt,
+			&i.IsAddon,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

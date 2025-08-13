@@ -105,17 +105,7 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 	return i, err
 }
 
-const deleteBookingDetailsByBookingID = `-- name: DeleteBookingDetailsByBookingID :exec
-DELETE FROM booking_details
-WHERE booking_id = $1
-`
-
-func (q *Queries) DeleteBookingDetailsByBookingID(ctx context.Context, bookingID int64) error {
-	_, err := q.db.Exec(ctx, deleteBookingDetailsByBookingID, bookingID)
-	return err
-}
-
-const getBookingByID = `-- name: GetBookingByID :one
+const getBookingDetailByID = `-- name: GetBookingDetailByID :one
 SELECT
     b.id,
     b.store_id,
@@ -140,7 +130,7 @@ JOIN schedules sch ON ts.schedule_id = sch.id
 WHERE b.id = $1
 `
 
-type GetBookingByIDRow struct {
+type GetBookingDetailByIDRow struct {
 	ID            int64              `db:"id" json:"id"`
 	StoreID       int64              `db:"store_id" json:"store_id"`
 	StoreName     string             `db:"store_name" json:"store_name"`
@@ -158,9 +148,9 @@ type GetBookingByIDRow struct {
 	UpdatedAt     pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
-func (q *Queries) GetBookingByID(ctx context.Context, id int64) (GetBookingByIDRow, error) {
-	row := q.db.QueryRow(ctx, getBookingByID, id)
-	var i GetBookingByIDRow
+func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookingDetailByIDRow, error) {
+	row := q.db.QueryRow(ctx, getBookingDetailByID, id)
+	var i GetBookingDetailByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.StoreID,
@@ -179,59 +169,6 @@ func (q *Queries) GetBookingByID(ctx context.Context, id int64) (GetBookingByIDR
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const getBookingDetailsByBookingID = `-- name: GetBookingDetailsByBookingID :many
-SELECT
-    bd.id,
-    bd.booking_id,
-    bd.service_id,
-    srv.name as service_name,
-    bd.price,
-    bd.created_at,
-    srv.is_addon
-FROM booking_details bd
-JOIN services srv ON bd.service_id = srv.id
-WHERE bd.booking_id = $1
-ORDER BY srv.is_addon ASC, srv.name ASC
-`
-
-type GetBookingDetailsByBookingIDRow struct {
-	ID          int64              `db:"id" json:"id"`
-	BookingID   int64              `db:"booking_id" json:"booking_id"`
-	ServiceID   int64              `db:"service_id" json:"service_id"`
-	ServiceName string             `db:"service_name" json:"service_name"`
-	Price       pgtype.Numeric     `db:"price" json:"price"`
-	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	IsAddon     pgtype.Bool        `db:"is_addon" json:"is_addon"`
-}
-
-func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error) {
-	rows, err := q.db.Query(ctx, getBookingDetailsByBookingID, bookingID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetBookingDetailsByBookingIDRow{}
-	for rows.Next() {
-		var i GetBookingDetailsByBookingIDRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.BookingID,
-			&i.ServiceID,
-			&i.ServiceName,
-			&i.Price,
-			&i.CreatedAt,
-			&i.IsAddon,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const updateBookingByStaff = `-- name: UpdateBookingByStaff :one

@@ -13,6 +13,7 @@ import (
 // TimeSlotRepositoryInterface defines the interface for time slot repository
 type TimeSlotRepositoryInterface interface {
 	UpdateTimeSlot(ctx context.Context, timeSlotID int64, params UpdateTimeSlotParams) (UpdateTimeSlotResponse, error)
+	UpdateTimeSlotAvailabilityTx(ctx context.Context, tx *sqlx.Tx, timeSlotID int64, isAvailable bool) error
 }
 
 type TimeSlotRepository struct {
@@ -129,6 +130,23 @@ func (r *TimeSlotRepository) UpdateTimeSlotAvailabilityTx(ctx context.Context, t
 	}
 
 	_, err := tx.NamedExecContext(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("failed to update time slot availability: %w", err)
+	}
+
+	return nil
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+func (r *TimeSlotRepository) UpdateTimeSlotAvailabilityByBookingIDTx(ctx context.Context, tx *sqlx.Tx, timeSlotID int64, isAvailable bool) error {
+	query := `
+		UPDATE time_slots
+		SET is_available = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+
+	_, err := tx.ExecContext(ctx, query, isAvailable, timeSlotID)
 	if err != nil {
 		return fmt.Errorf("failed to update time slot availability: %w", err)
 	}

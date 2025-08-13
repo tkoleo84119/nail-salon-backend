@@ -49,7 +49,7 @@ func (s *UpdateBookingByStaffService) UpdateBookingByStaff(ctx context.Context, 
 	}
 
 	// Get existing booking to verify it exists and is in SCHEDULED status
-	existingBooking, err := s.queries.GetBookingByID(ctx, bookingIDInt)
+	existingBooking, err := s.queries.GetBookingDetailByID(ctx, bookingIDInt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingNotFound)

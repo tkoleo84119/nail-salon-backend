@@ -48,10 +48,10 @@
 
 | 欄位          | 必填 | 其他規則      | 說明          |
 | ------------- | ---- | ------------- | ------------- |
-| storeId       | 是   | <li>必填      | 預約門市      |
-| stylistId     | 是   | <li>必填      | 美甲師ID      |
-| timeSlotId    | 是   | <li>必填      | 時段ID        |
-| mainServiceId | 是   | <li>必填      | 主服務項目ID  |
+| storeId       | 是   |               | 預約門市      |
+| stylistId     | 是   |               | 美甲師ID      |
+| timeSlotId    | 是   |               | 時段ID        |
+| mainServiceId | 是   |               | 主服務項目ID  |
 | subServiceIds | 否   | <li>最多5項   | 副服務項目IDs |
 | isChatEnabled | 否   | <li>布林值    | 是否要聊天    |
 | note          | 否   | <li>最長255字 | 備註說明      |
@@ -119,7 +119,6 @@
 | 400    | E2024    | ValFieldStringMaxLength    | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2025    | ValFieldArrayMaxLength     | {field} 最多只能有 {param} 個項目     |
 | 400    | E2029    | ValFieldBoolean            | {field} 必須是布林值                  |
-| 400    | E2030    | ValFieldOneof              | {field} 必須是 {param} 其中一個值     |
 | 400    | E3STO001 | StoreNotActive             | 門市未啟用                            |
 | 400    | E3SER001 | ServiceNotActive           | 服務未啟用                            |
 | 400    | E3SER002 | ServiceNotMainService      | 服務不是主服務                        |

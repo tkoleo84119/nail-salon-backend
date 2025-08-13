@@ -39,7 +39,7 @@ type PublicServices struct {
 
 	// Booking services
 	BookingCreate      bookingService.CreateInterface
-	BookingUpdateMy    *bookingService.UpdateMyBookingService
+	BookingUpdate      bookingService.UpdateInterface
 	BookingCancelMy    bookingService.CancelMyBookingServiceInterface
 	BookingGetMy       bookingService.GetMyBookingsServiceInterface
 	BookingGetMySingle bookingService.GetMyBookingServiceInterface
@@ -73,7 +73,7 @@ type PublicHandlers struct {
 
 	// Booking handlers
 	BookingCreate      *bookingHandler.Create
-	BookingUpdateMy    *bookingHandler.UpdateMyBookingHandler
+	BookingUpdate      *bookingHandler.Update
 	BookingCancelMy    *bookingHandler.CancelMyBookingHandler
 	BookingGetMy       *bookingHandler.GetMyBookingsHandler
 	BookingGetMySingle *bookingHandler.GetMyBookingHandler
@@ -108,7 +108,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 
 		// Booking services
 		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool),
-		BookingUpdateMy:    bookingService.NewUpdateMyBookingService(queries, repositories.SQLX, database.PgxPool),
+		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
 		BookingCancelMy:    bookingService.NewCancelMyBookingService(queries),
 		BookingGetMy:       bookingService.NewGetMyBookingsService(repositories.SQLX),
 		BookingGetMySingle: bookingService.NewGetMyBookingService(queries),
@@ -144,7 +144,7 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 
 		// Booking handlers
 		BookingCreate:      bookingHandler.NewCreate(services.BookingCreate),
-		BookingUpdateMy:    bookingHandler.NewUpdateMyBookingHandler(services.BookingUpdateMy),
+		BookingUpdate:      bookingHandler.NewUpdate(services.BookingUpdate),
 		BookingCancelMy:    bookingHandler.NewCancelMyBookingHandler(services.BookingCancelMy),
 		BookingGetMy:       bookingHandler.NewGetMyBookingsHandler(services.BookingGetMy),
 		BookingGetMySingle: bookingHandler.NewGetMyBookingHandler(services.BookingGetMySingle),

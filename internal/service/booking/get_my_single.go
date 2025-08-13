@@ -31,7 +31,7 @@ func (s *GetMyBookingService) GetMyBooking(ctx context.Context, bookingIDStr str
 	}
 
 	// Get booking basic information with ownership validation
-	booking, err := s.queries.GetBookingByID(ctx, bookingID)
+	booking, err := s.queries.GetBookingDetailByID(ctx, bookingID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			// Return 404 for both non-existent and unauthorized access
