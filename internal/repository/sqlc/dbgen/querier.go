@@ -15,7 +15,7 @@ type Querier interface {
 	BatchCreateStaffUserStoreAccess(ctx context.Context, arg []BatchCreateStaffUserStoreAccessParams) (int64, error)
 	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
-	CancelBooking(ctx context.Context, arg CancelBookingParams) (CancelBookingRow, error)
+	CancelBooking(ctx context.Context, arg CancelBookingParams) (int64, error)
 	CheckCustomerExistsByLineUid(ctx context.Context, lineUid string) (bool, error)
 	CheckScheduleExists(ctx context.Context, arg CheckScheduleExistsParams) (bool, error)
 	CheckScheduleExistsByID(ctx context.Context, id int64) (bool, error)

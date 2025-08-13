@@ -12,16 +12,15 @@
 
 ## 說明
 
-- 僅支援已登入顧客（access token 驗證）。
-- 僅允許本人取消自己的預約。
-- 可傳入取消原因（文字），供後台記錄與分析。
+- 提供顧客取消自己的預約。
+- 可傳入取消原因（文字），供後台記錄。
 - 預約狀態將變更為 CANCELLED。
 
 ---
 
 ## 權限
 
-- 僅顧客本人可操作（JWT 驗證）。
+- 需要登入才可使用。
 
 ---
 
@@ -29,10 +28,8 @@
 
 ### Header
 
-```http
-Content-Type: application/json
-Authorization: Bearer <access_token>
-```
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameter
 
@@ -40,7 +37,7 @@ Authorization: Bearer <access_token>
 | --------- | ------ |
 | bookingId | 預約ID |
 
-### Body
+### Body 範例
 
 ```json
 {
@@ -50,9 +47,9 @@ Authorization: Bearer <access_token>
 
 ### 驗證規則
 
-| 欄位         | 規則                  | 說明     |
-| ------------ | --------------------- | -------- |
-| cancelReason | <li>選填<li>最長100字 | 取消原因 |
+| 欄位         | 必填 | 其他規則      | 說明     |
+| ------------ | ---- | ------------- | -------- |
+| cancelReason | 否   | <li>最長255字 | 取消原因 |
 
 ---
 
@@ -64,61 +61,65 @@ Authorization: Bearer <access_token>
 {
   "data": {
     "id": "5000000001",
+    "storeId": "8000000001",
+    "storeName": "門市名稱",
+    "stylistId": "2000000001",
+    "stylistName": "美甲師名稱",
+    "date": "2025-08-02",
+    "timeSlotId": "3000000001",
+    "startTime": "10:00",
+    "endTime": "11:00",
     "status": "CANCELLED",
-    "cancelReason": "臨時有事無法前往，抱歉！"
+    "createdAt": "2025-07-24T10:00:00Z",
+    "updatedAt": "2025-07-24T10:00:00Z"
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
 
-#### 400 Bad Request - 驗證錯誤
-
-```json
-{
-  "message": "輸入驗證失敗"
-}
-```
-
-#### 401 Unauthorized - 未登入/Token失效
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "message": "無效的 accessToken"
+  "errors": [
+    {
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
+    }
+  ]
 }
 ```
 
-#### 403 Forbidden - 權限不足
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "message": "權限不足，僅限本人操作"
-}
-```
-
-#### 404 Not Found - 預約不存在
-
-```json
-{
-  "message": "預約不存在或已被刪除"
-}
-```
-
-#### 409 Conflict - 已取消或不可取消狀態
-
-```json
-{
-  "message": "預約已取消或不可再取消"
-}
-```
-
-#### 500 Internal Server Error
-
-```json
-{
-  "message": "系統發生錯誤，請稍後再試"
-}
-```
+| 狀態碼 | 錯誤碼   | 常數名稱                   | 說明                                  |
+| ------ | -------- | -------------------------- | ------------------------------------- |
+| 401    | E1002    | AuthInvalidCredentials     | 無效的 accessToken，請重新登入        |
+| 401    | E1003    | AuthTokenMissing           | accessToken 缺失，請重新登入          |
+| 401    | E1004    | AuthTokenFormatError       | accessToken 格式錯誤，請重新登入      |
+| 401    | E1006    | AuthContextMissing         | 未找到使用者認證資訊，請重新登入      |
+| 401    | E1011    | AuthCustomerFailed         | 未找到有效的顧客資訊，請重新登入      |
+| 403    | E1010    | AuthPermissionDenied       | 權限不足，無法執行此操作              |
+| 400    | E2001    | ValJSONFormatError         | JSON 格式錯誤，請檢查                 |
+| 400    | E2024    | ValFieldStringMaxLength    | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E3STO001 | StoreNotActive             | 門市未啟用                            |
+| 400    | E3SER001 | ServiceNotActive           | 服務未啟用                            |
+| 400    | E3SER002 | ServiceNotMainService      | 服務不是主服務                        |
+| 400    | E3SER003 | ServiceNotAddon            | 服務不是附屬服務                      |
+| 400    | E3TMS006 | TimeSlotNotEnoughTime      | 時段時間不足                          |
+| 404    | E3STO002 | StoreNotFound              | 門市不存在或已被刪除                  |
+| 404    | E3TMS005 | TimeSlotNotFound           | 時段不存在或已被刪除                  |
+| 404    | E3SER004 | ServiceNotFound            | 服務不存在或已被刪除                  |
+| 404    | E3STY001 | StylistNotFound            | 美甲師資料不存在                      |
+| 409    | E3BK006  | BookingTimeSlotUnavailable | 該時段已被預約，請重新選擇            |
+| 500    | E9001    | SysInternalError           | 系統發生錯誤，請稍後再試              |
+| 500    | E9002    | SysDatabaseError           | 資料庫操作失敗                        |
 
 ---
 

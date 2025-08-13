@@ -13,31 +13,38 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CancelMyBookingHandler struct {
-	service bookingService.CancelMyBookingServiceInterface
+type Cancel struct {
+	service bookingService.CancelInterface
 }
 
-func NewCancelMyBookingHandler(service bookingService.CancelMyBookingServiceInterface) *CancelMyBookingHandler {
-	return &CancelMyBookingHandler{
+func NewCancel(service bookingService.CancelInterface) *Cancel {
+	return &Cancel{
 		service: service,
 	}
 }
 
-func (h *CancelMyBookingHandler) CancelMyBooking(c *gin.Context) {
-	// Input JSON validation
-	var req bookingModel.CancelMyBookingRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors := utils.ExtractValidationErrors(err)
-		errorCodes.RespondWithValidationErrors(c, validationErrors)
-		return
-	}
-
+func (h *Cancel) Cancel(c *gin.Context) {
 	// Path parameter validation
 	bookingID := c.Param("bookingId")
 	if bookingID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
-			"bookingId": "bookingId為必填項目",
+			"bookingId": "bookingId 為必填項目",
 		})
+		return
+	}
+	parsedBookingID, err := utils.ParseID(bookingID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"bookingId": "bookingId 類型轉換失敗",
+		})
+		return
+	}
+
+	// Input JSON validation
+	var req bookingModel.CancelRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ExtractValidationErrors(err)
+		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
 
@@ -49,7 +56,7 @@ func (h *CancelMyBookingHandler) CancelMyBooking(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.CancelMyBooking(c.Request.Context(), bookingID, req, *customerContext)
+	response, err := h.service.Cancel(c.Request.Context(), parsedBookingID, req, customerContext.CustomerID)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

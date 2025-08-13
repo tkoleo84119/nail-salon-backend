@@ -4,7 +4,6 @@ import (
 	"context"
 
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 )
 
 type CreateInterface interface {
@@ -23,6 +22,6 @@ type GetInterface interface {
 	Get(ctx context.Context, bookingID int64, customerID int64) (*bookingModel.GetResponse, error)
 }
 
-type CancelMyBookingServiceInterface interface {
-	CancelMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.CancelMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CancelMyBookingResponse, error)
+type CancelInterface interface {
+	Cancel(ctx context.Context, bookingID int64, req bookingModel.CancelRequest, customerID int64) (*bookingModel.CancelResponse, error)
 }

@@ -8,28 +8,21 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CancelMyBookingService struct {
+type Cancel struct {
 	queries dbgen.Querier
 }
 
-func NewCancelMyBookingService(queries dbgen.Querier) CancelMyBookingServiceInterface {
-	return &CancelMyBookingService{
+func NewCancel(queries dbgen.Querier) CancelInterface {
+	return &Cancel{
 		queries: queries,
 	}
 }
 
-func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDStr string, req bookingModel.CancelMyBookingRequest, customerContext common.CustomerContext) (*bookingModel.CancelMyBookingResponse, error) {
-	// Parse booking ID
-	bookingID, err := utils.ParseID(bookingIDStr)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "invalid booking ID", err)
-	}
-
+func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.CancelRequest, customerID int64) (*bookingModel.CancelResponse, error) {
 	// Verify booking exists and belongs to customer
 	bookingInfo, err := s.queries.GetBookingDetailByID(ctx, bookingID)
 	if err != nil {
@@ -40,7 +33,7 @@ func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDS
 	}
 
 	// Check if booking belongs to the customer
-	if bookingInfo.CustomerID != customerContext.CustomerID {
+	if bookingInfo.CustomerID != customerID {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
@@ -50,25 +43,33 @@ func (s *CancelMyBookingService) CancelMyBooking(ctx context.Context, bookingIDS
 	}
 
 	// Cancel booking with optional cancel reason
-	cancelledBooking, err := s.queries.CancelBooking(ctx, dbgen.CancelBookingParams{
+	_, err = s.queries.CancelBooking(ctx, dbgen.CancelBookingParams{
 		ID:           bookingID,
 		Status:       bookingModel.BookingStatusCancelled,
-		CancelReason: utils.StringPtrToPgText(req.CancelReason, true), // Empty as NULL
-		CustomerID:   customerContext.CustomerID,
+		CancelReason: utils.StringPtrToPgText(req.CancelReason, true),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to cancel booking", err)
 	}
 
-	// Build response
-	var cancelReason *string
-	if cancelledBooking.CancelReason.Valid {
-		cancelReason = &cancelledBooking.CancelReason.String
+	newBooking, err := s.queries.GetBookingDetailByID(ctx, bookingID)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get booking", err)
 	}
 
-	return &bookingModel.CancelMyBookingResponse{
-		ID:           utils.FormatID(cancelledBooking.ID),
-		Status:       cancelledBooking.Status,
-		CancelReason: cancelReason,
+	// Build response
+	return &bookingModel.CancelResponse{
+		ID:          utils.FormatID(newBooking.ID),
+		StoreId:     utils.FormatID(newBooking.StoreID),
+		StoreName:   newBooking.StoreName,
+		StylistId:   utils.FormatID(newBooking.StylistID),
+		StylistName: utils.PgTextToString(newBooking.StylistName),
+		Date:        utils.PgDateToDateString(newBooking.WorkDate),
+		TimeSlotId:  utils.FormatID(newBooking.TimeSlotID),
+		StartTime:   utils.PgTimeToTimeString(newBooking.StartTime),
+		EndTime:     utils.PgTimeToTimeString(newBooking.EndTime),
+		Status:      newBooking.Status,
+		CreatedAt:   utils.PgTimestamptzToTimeString(newBooking.CreatedAt),
+		UpdatedAt:   utils.PgTimestamptzToTimeString(newBooking.UpdatedAt),
 	}, nil
 }

@@ -39,8 +39,8 @@ WHERE b.id = $1;
 -- name: CancelBooking :one
 UPDATE bookings
 SET status = $2, cancel_reason = $3, updated_at = NOW()
-WHERE id = $1 AND customer_id = $4
-RETURNING id, status, cancel_reason, updated_at;
+WHERE id = $1
+RETURNING id;
 
 -- name: UpdateBookingByStaff :one
 UPDATE bookings

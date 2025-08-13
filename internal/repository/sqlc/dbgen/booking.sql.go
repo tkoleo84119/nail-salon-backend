@@ -14,39 +14,21 @@ import (
 const cancelBooking = `-- name: CancelBooking :one
 UPDATE bookings
 SET status = $2, cancel_reason = $3, updated_at = NOW()
-WHERE id = $1 AND customer_id = $4
-RETURNING id, status, cancel_reason, updated_at
+WHERE id = $1
+RETURNING id
 `
 
 type CancelBookingParams struct {
 	ID           int64       `db:"id" json:"id"`
 	Status       string      `db:"status" json:"status"`
 	CancelReason pgtype.Text `db:"cancel_reason" json:"cancel_reason"`
-	CustomerID   int64       `db:"customer_id" json:"customer_id"`
 }
 
-type CancelBookingRow struct {
-	ID           int64              `db:"id" json:"id"`
-	Status       string             `db:"status" json:"status"`
-	CancelReason pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-}
-
-func (q *Queries) CancelBooking(ctx context.Context, arg CancelBookingParams) (CancelBookingRow, error) {
-	row := q.db.QueryRow(ctx, cancelBooking,
-		arg.ID,
-		arg.Status,
-		arg.CancelReason,
-		arg.CustomerID,
-	)
-	var i CancelBookingRow
-	err := row.Scan(
-		&i.ID,
-		&i.Status,
-		&i.CancelReason,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) CancelBooking(ctx context.Context, arg CancelBookingParams) (int64, error) {
+	row := q.db.QueryRow(ctx, cancelBooking, arg.ID, arg.Status, arg.CancelReason)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createBooking = `-- name: CreateBooking :one
