@@ -42,9 +42,9 @@
 
 ### 驗證規則
 
-| 欄位    | 必填 | 其他規則            | 說明         |
-| ------- | ---- | ------------------- | ------------ |
-| idToken | 是   | <li>最大長度500字元 | LINE idToken |
+| 欄位    | 必填 | 其他規則             | 說明         |
+| ------- | ---- | -------------------- | ------------ |
+| idToken | 是   | <li>最大長度2000字元 | LINE idToken |
 
 ---
 
@@ -67,11 +67,13 @@
 
 ```json
 {
-  "needRegister": true,
-  "lineProfile": {
-    "providerUid": "U12345678",
-    "name": "Mei",
-    "email": "mei@example.com" // 可能為空
+  "data": {
+    "needRegister": true,
+    "lineProfile": {
+      "providerUid": "U12345678",
+      "name": "Mei",
+      "email": "mei@example.com" // 可能為空
+    }
   }
 }
 ```

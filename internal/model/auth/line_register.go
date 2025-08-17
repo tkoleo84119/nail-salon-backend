@@ -3,7 +3,7 @@ package auth
 import "time"
 
 type LineRegisterRequest struct {
-	IdToken        string    `json:"idToken" binding:"required,max=500"`
+	IdToken        string    `json:"idToken" binding:"required,max=2000"`
 	Name           string    `json:"name" binding:"required,max=100"`
 	Phone          string    `json:"phone" binding:"required,taiwanmobile"`
 	Birthday       string    `json:"birthday" binding:"required"`

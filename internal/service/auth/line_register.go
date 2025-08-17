@@ -111,6 +111,10 @@ func (s *LineRegister) LineRegister(ctx context.Context, req auth.LineRegisterRe
 		return nil, err
 	}
 
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to commit transaction", err)
+	}
+
 	// Build response
 	response := &auth.LineRegisterResponse{
 		AccessToken:  accessToken,
