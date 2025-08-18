@@ -23,15 +23,16 @@ func (q *Queries) CheckCustomerExistsByLineUid(ctx context.Context, lineUid stri
 }
 
 const createCustomer = `-- name: CreateCustomer :exec
-INSERT INTO customers (id, line_uid, line_name, name, phone, birthday, city, favorite_shapes, favorite_colors,
+INSERT INTO customers (id, line_uid, line_name, email, name, phone, birthday, city, favorite_shapes, favorite_colors,
       favorite_styles, is_introvert, referral_source, referrer, customer_note, level)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 `
 
 type CreateCustomerParams struct {
 	ID             int64       `db:"id" json:"id"`
 	LineUid        string      `db:"line_uid" json:"line_uid"`
 	LineName       pgtype.Text `db:"line_name" json:"line_name"`
+	Email          pgtype.Text `db:"email" json:"email"`
 	Name           string      `db:"name" json:"name"`
 	Phone          string      `db:"phone" json:"phone"`
 	Birthday       pgtype.Date `db:"birthday" json:"birthday"`
@@ -51,6 +52,7 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 		arg.ID,
 		arg.LineUid,
 		arg.LineName,
+		arg.Email,
 		arg.Name,
 		arg.Phone,
 		arg.Birthday,

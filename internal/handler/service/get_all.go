@@ -35,9 +35,10 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	sort := utils.TransformSort(queryParams.Sort)
 
 	parsedQueryParams := serviceModel.GetAllParsedRequest{
-		Limit:  limit,
-		Offset: offset,
-		Sort:   sort,
+		IsAddon: queryParams.IsAddon,
+		Limit:   limit,
+		Offset:  offset,
+		Sort:    sort,
 	}
 
 	// Service layer call (no authentication required per spec)

@@ -7,6 +7,7 @@ type LineRegisterRequest struct {
 	Name           string    `json:"name" binding:"required,max=100"`
 	Phone          string    `json:"phone" binding:"required,taiwanmobile"`
 	Birthday       string    `json:"birthday" binding:"required"`
+	Email          *string   `json:"email" binding:"omitempty,email"`
 	City           *string   `json:"city" binding:"omitempty,max=100"`
 	FavoriteShapes *[]string `json:"favoriteShapes" binding:"omitempty,max=20"`
 	FavoriteColors *[]string `json:"favoriteColors" binding:"omitempty,max=20"`

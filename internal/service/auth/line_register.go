@@ -82,6 +82,9 @@ func (s *LineRegister) LineRegister(ctx context.Context, req auth.LineRegisterRe
 
 	err = qtx.CreateCustomer(ctx, dbgen.CreateCustomerParams{
 		ID:             customerID,
+		LineUid:        profile.ProviderUid,
+		LineName:       utils.StringPtrToPgText(&profile.Name, true),
+		Email:          utils.StringPtrToPgText(req.Email, true),
 		Name:           req.Name,
 		Phone:          req.Phone,
 		Birthday:       birthday,
