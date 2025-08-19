@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
@@ -14,11 +15,13 @@ import (
 
 type Cancel struct {
 	queries dbgen.Querier
+	db      *pgxpool.Pool
 }
 
-func NewCancel(queries dbgen.Querier) CancelInterface {
+func NewCancel(queries dbgen.Querier, db *pgxpool.Pool) CancelInterface {
 	return &Cancel{
 		queries: queries,
+		db:      db,
 	}
 }
 
@@ -42,14 +45,36 @@ func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.C
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingStatusNotAllowedToCancel)
 	}
 
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := dbgen.New(tx)
+
 	// Cancel booking with optional cancel reason
-	_, err = s.queries.CancelBooking(ctx, dbgen.CancelBookingParams{
+	_, err = qtx.CancelBooking(ctx, dbgen.CancelBookingParams{
 		ID:           bookingID,
 		Status:       bookingModel.BookingStatusCancelled,
 		CancelReason: utils.StringPtrToPgText(req.CancelReason, true),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to cancel booking", err)
+	}
+
+	// update time slot status to available
+	isAvailable := true
+	_, err = qtx.UpdateTimeSlotIsAvailable(ctx, dbgen.UpdateTimeSlotIsAvailableParams{
+		ID:          bookingInfo.TimeSlotID,
+		IsAvailable: utils.BoolPtrToPgBool(&isAvailable),
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update time slot status", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "transaction commit failed", err)
 	}
 
 	newBooking, err := s.queries.GetBookingDetailByID(ctx, bookingID)

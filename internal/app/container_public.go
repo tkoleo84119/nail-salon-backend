@@ -109,7 +109,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		// Booking services
 		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool),
 		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
-		BookingCancel:      bookingService.NewCancel(queries),
+		BookingCancel:      bookingService.NewCancel(queries, database.PgxPool),
 		BookingGetAll:      bookingService.NewGetAll(repositories.SQLX),
 		BookingGetMySingle: bookingService.NewGet(queries),
 
