@@ -17,7 +17,6 @@ type GetAllResponse struct {
 }
 
 type GetAllItem struct {
-	ID             string `json:"id"`
-	Date           string `json:"date"`
-	AvailableSlots int    `json:"availableSlots"`
+	ID   string `json:"id"`
+	Date string `json:"date"`
 }

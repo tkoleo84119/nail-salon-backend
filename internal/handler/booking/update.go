@@ -1,6 +1,7 @@
 package booking
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -129,6 +130,8 @@ func (h *Update) Update(c *gin.Context) {
 		errorCodes.RespondWithServiceError(c, err)
 		return
 	}
+
+	fmt.Println("response", response)
 
 	// Success response
 	c.JSON(http.StatusOK, common.SuccessResponse(response))

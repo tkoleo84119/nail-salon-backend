@@ -66,14 +66,14 @@
 {
   "data": {
     "schedules": [
-      {"id": "1", "date": "2025-08-01", "availableSlots": 3},
-      {"id": "2", "date": "2025-08-02", "availableSlots": 3},
-      {"id": "3", "date": "2025-08-03", "availableSlots": 2},
-      {"id": "5", "date": "2025-08-05", "availableSlots": 1},
-      {"id": "6", "date": "2025-08-06", "availableSlots": 3},
-      {"id": "7", "date": "2025-08-07", "availableSlots": 2},
-      {"id": "9", "date": "2025-08-09", "availableSlots": 3},
-      {"id": "10", "date": "2025-08-10", "availableSlots": 3},
+      {"id": "1", "date": "2025-08-01"},
+      {"id": "2", "date": "2025-08-02"},
+      {"id": "3", "date": "2025-08-03"},
+      {"id": "5", "date": "2025-08-05"},
+      {"id": "6", "date": "2025-08-06"},
+      {"id": "7", "date": "2025-08-07"},
+      {"id": "9", "date": "2025-08-09"},
+      {"id": "10", "date": "2025-08-10"},
     ]
   }
 }
