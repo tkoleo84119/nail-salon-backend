@@ -13,28 +13,70 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CreateBookingHandler struct {
-	service adminBookingService.CreateBookingServiceInterface
+type Create struct {
+	service adminBookingService.CreateInterface
 }
 
-func NewCreateBookingHandler(service adminBookingService.CreateBookingServiceInterface) *CreateBookingHandler {
-	return &CreateBookingHandler{service: service}
+func NewCreate(service adminBookingService.CreateInterface) *Create {
+	return &Create{service: service}
 }
 
-func (h *CreateBookingHandler) CreateBooking(c *gin.Context) {
+func (h *Create) Create(c *gin.Context) {
 	// Get path parameter
 	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
 		return
 	}
+	parsedStoreID, err := utils.ParseID(storeID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+		return
+	}
 
 	// Parse request body
-	var req adminBookingModel.CreateBookingRequest
+	var req adminBookingModel.CreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	parsedCustomerID, err := utils.ParseID(req.CustomerID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"customerId": "customerId 類型轉換失敗"})
+		return
+	}
+
+	parsedTimeSlotID, err := utils.ParseID(req.TimeSlotID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"timeSlotId": "timeSlotId 類型轉換失敗"})
+		return
+	}
+
+	parsedMainServiceID, err := utils.ParseID(req.MainServiceID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"mainServiceId": "mainServiceId 類型轉換失敗"})
+		return
+	}
+
+	parsedSubServiceIDs := []int64{}
+	for _, subServiceID := range *req.SubServiceIDs {
+		parsedSubServiceID, err := utils.ParseID(subServiceID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"subServiceIds": "subServiceIds 類型轉換失敗"})
+			return
+		}
+		parsedSubServiceIDs = append(parsedSubServiceIDs, parsedSubServiceID)
+	}
+
+	parsedRequest := adminBookingModel.CreateParsedRequest{
+		CustomerID:    parsedCustomerID,
+		TimeSlotID:    parsedTimeSlotID,
+		MainServiceID: parsedMainServiceID,
+		SubServiceIDs: parsedSubServiceIDs,
+		IsChatEnabled: req.IsChatEnabled,
+		Note:          req.Note,
 	}
 
 	// Get staff context from JWT middleware
@@ -44,8 +86,13 @@ func (h *CreateBookingHandler) CreateBooking(c *gin.Context) {
 		return
 	}
 
+	storeIds := make([]int64, len(staffContext.StoreList))
+	for i, store := range staffContext.StoreList {
+		storeIds[i] = store.ID
+	}
+
 	// Call service
-	booking, err := h.service.CreateBooking(c.Request.Context(), storeID, req, *staffContext)
+	booking, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedRequest, staffContext.Role, storeIds)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

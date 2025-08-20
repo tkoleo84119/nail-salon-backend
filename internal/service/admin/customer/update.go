@@ -28,7 +28,7 @@ func (s *Update) Update(ctx context.Context, customerID int64, req adminCustomer
 	}
 
 	// verify customer exists
-	exists, err := s.queries.ExistsCustomerByID(ctx, customerID)
+	exists, err := s.queries.CheckCustomerExistsByID(ctx, customerID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check customer exists", err)
 	}

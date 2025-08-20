@@ -16,6 +16,7 @@ type Querier interface {
 	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
 	CancelBooking(ctx context.Context, arg CancelBookingParams) (int64, error)
+	CheckCustomerExistsByID(ctx context.Context, id int64) (bool, error)
 	CheckCustomerExistsByLineUid(ctx context.Context, lineUid string) (bool, error)
 	CheckScheduleExists(ctx context.Context, arg CheckScheduleExistsParams) (bool, error)
 	CheckScheduleExistsByID(ctx context.Context, id int64) (bool, error)
@@ -53,7 +54,6 @@ type Querier interface {
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplate(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
-	ExistsCustomerByID(ctx context.Context, id int64) (bool, error)
 	GetActiveStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetActiveStylistNameByID(ctx context.Context, id int64) (pgtype.Text, error)
 	GetAllActiveStoreAccessByStaffId(ctx context.Context, staffUserID int64) ([]GetAllActiveStoreAccessByStaffIdRow, error)

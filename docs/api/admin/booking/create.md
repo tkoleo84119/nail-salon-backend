@@ -12,15 +12,15 @@
 
 ## 說明
 
-- 所有登入員工皆可使用。
-- 由員工操作後台幫客戶新增預約。
+- 提供後台管理員新增預約功能。
 - 須指定美甲師、時段、服務項目等必要資訊。
 
 ---
 
 ## 權限
 
-- 任一已登入員工皆可使用（JWT 驗證）。
+- 需要登入才可使用。
+- 所有角色皆可使用。
 
 ---
 
@@ -28,7 +28,8 @@
 
 ### Header
 
-Authorization: Bearer <access_token>
+- Content-Type: application/json
+- Authorization: Bearer <access_token>
 
 ### Path Parameter
 
@@ -36,7 +37,7 @@ Authorization: Bearer <access_token>
 | ------- | ------- |
 | storeId | 門市 ID |
 
-### Body
+### Body 範例
 
 ```json
 {
@@ -50,6 +51,18 @@ Authorization: Bearer <access_token>
 }
 ```
 
+## 驗證規則
+
+| 欄位          | 必填 | 其他規則        | 說明         |
+| ------------- | ---- | --------------- | ------------ |
+| customerId    | 是   |                 | 顧客 ID      |
+| stylistId     | 是   |                 | 美甲師 ID    |
+| timeSlotId    | 是   |                 | 時段 ID      |
+| mainServiceId | 是   |                 | 主服務 ID    |
+| subServiceIds | 是   | <li>最大10筆    | 子服務 IDs   |
+| isChatEnabled | 是   | <li>布林值      | 是否開啟聊天 |
+| note          | 選填 | <li>最大長度255 | 備註         |
+
 ---
 
 ## Response
@@ -59,59 +72,57 @@ Authorization: Bearer <access_token>
 ```json
 {
   "data": {
-    "id": "5000000001",
-    "storeId": "8000000001",
-    "storeName": "門市名稱",
-    "stylistId": "2000000001",
-    "stylistName": "美甲師名稱",
-    "date": "2025-08-02",
-    "timeSlotId": "3000000001",
-    "startTime": "10:00",
-    "endTime": "11:00",
-    "mainServiceName": "主服務項目名稱",
-    "subServiceNames": ["副服務項目名稱1", "副服務項目名稱2"],
-    "isChatEnabled": true,
-    "note": "這次想做奶茶色",
-    "status": "SCHEDULED",
-    "createdAt": "2025-07-24T10:00:00Z",
-    "updatedAt": "2025-07-24T10:00:00Z"
+    "id": "5000000001"
   }
 }
 ```
 
-### 失敗
+### 錯誤處理
 
-#### 400 Bad Request - 資料錯誤或時間衝突
-
-```json
-{
-  "message": "該時段已被預約，請選擇其他時間"
-}
-```
-
-#### 404 Not Found - 門市/客戶/美甲師/時段不存在
+全部 API 皆回傳如下結構，請參考錯誤總覽。
 
 ```json
 {
-  "message": "門市不存在或已被刪除"
+  "errors": [
+    {
+      "code": "EXXXX",
+      "message": "錯誤訊息",
+      "field": "錯誤欄位名稱"
+    }
+  ]
 }
 ```
 
-#### 409 Conflict - 預約重複
+- 欄位說明：
+  - errors: 錯誤陣列（支援多筆同時回報）
+  - code: 錯誤代碼，唯一對應每種錯誤
+  - message: 中文錯誤訊息（可參照錯誤總覽）
+  - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-```json
-{
-  "message": "該時段已被預約，請重新選擇"
-}
-```
-
-#### 500 Internal Server Error
-
-```json
-{
-  "message": "系統發生錯誤，請稍後再試"
-}
-```
+| 狀態碼 | 錯誤碼   | 常數名稱                   | 說明                                  |
+| ------ | -------- | -------------------------- | ------------------------------------- |
+| 401    | E1002    | AuthTokenInvalid           | 無效的 accessToken，請重新登入        |
+| 401    | E1003    | AuthTokenMissing           | accessToken 缺失，請重新登入          |
+| 401    | E1004    | AuthTokenFormatError       | accessToken 格式錯誤，請重新登入      |
+| 401    | E1006    | AuthContextMissing         | 未找到使用者認證資訊，請重新登入      |
+| 401    | E1011    | AuthCustomerFailed         | 未找到有效的顧客資訊，請重新登入      |
+| 400    | E2001    | ValJSONFormatError         | JSON 格式錯誤，請檢查                 |
+| 400    | E2020    | ValFieldRequired           | {field} 為必填項目                    |
+| 400    | E2024    | ValFieldStringMaxLength    | {field} 長度最多只能有 {param} 個字元 |
+| 400    | E2025    | ValFieldArrayMaxLength     | {field} 最多只能有 {param} 個項目     |
+| 400    | E2029    | ValFieldBoolean            | {field} 必須是布林值                  |
+| 400    | E3STO001 | StoreNotActive             | 門市未啟用                            |
+| 400    | E3SER001 | ServiceNotActive           | 服務未啟用                            |
+| 400    | E3SER002 | ServiceNotMainService      | 服務不是主服務                        |
+| 400    | E3SER003 | ServiceNotAddon            | 服務不是附屬服務                      |
+| 400    | E3TMS006 | TimeSlotNotEnoughTime      | 時段時間不足                          |
+| 404    | E3STO002 | StoreNotFound              | 門市不存在或已被刪除                  |
+| 404    | E3TMS005 | TimeSlotNotFound           | 時段不存在或已被刪除                  |
+| 404    | E3SER004 | ServiceNotFound            | 服務不存在或已被刪除                  |
+| 404    | E3STY001 | StylistNotFound            | 美甲師資料不存在                      |
+| 409    | E3BK006  | BookingTimeSlotUnavailable | 該時段已被預約，請重新選擇            |
+| 500    | E9001    | SysInternalError           | 系統發生錯誤，請稍後再試              |
+| 500    | E9002    | SysDatabaseError           | 資料庫操作失敗                        |
 
 ---
 
@@ -123,6 +134,7 @@ Authorization: Bearer <access_token>
 - `stylists`
 - `time_slots`
 - `services`
+- `stores`
 
 ---
 
@@ -133,7 +145,7 @@ Authorization: Bearer <access_token>
 3. 驗證美甲師、時段、服務是否存在，且該時段可預約，同時服務時數加起來不能超過時段時數。
 4. 建立 `bookings` 主檔與對應的 `booking_details`。
 5. 標記 `time_slots.is_available = false`。
-6. 回傳新建預約資料。
+6. 回傳資料。
 
 ---
 

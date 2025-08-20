@@ -15,7 +15,7 @@ SELECT id
 FROM customers
 WHERE line_uid = $1;
 
--- name: ExistsCustomerByID :one
+-- name: CheckCustomerExistsByID :one
 SELECT EXISTS (SELECT 1 FROM customers WHERE id = $1);
 
 -- name: CheckCustomerExistsByLineUid :one

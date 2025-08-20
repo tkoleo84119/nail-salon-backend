@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkCustomerExistsByID = `-- name: CheckCustomerExistsByID :one
+SELECT EXISTS (SELECT 1 FROM customers WHERE id = $1)
+`
+
+func (q *Queries) CheckCustomerExistsByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCustomerExistsByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkCustomerExistsByLineUid = `-- name: CheckCustomerExistsByLineUid :one
 SELECT EXISTS (SELECT 1 FROM customers WHERE line_uid = $1)
 `
@@ -67,17 +78,6 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 		arg.Level,
 	)
 	return err
-}
-
-const existsCustomerByID = `-- name: ExistsCustomerByID :one
-SELECT EXISTS (SELECT 1 FROM customers WHERE id = $1)
-`
-
-func (q *Queries) ExistsCustomerByID(ctx context.Context, id int64) (bool, error) {
-	row := q.db.QueryRow(ctx, existsCustomerByID, id)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
 }
 
 const getCustomerByID = `-- name: GetCustomerByID :one

@@ -77,7 +77,7 @@ type AdminServices struct {
 	CustomerUpdate adminCustomerService.UpdateInterface
 
 	// Booking management services
-	BookingCreate        adminBookingService.CreateBookingServiceInterface
+	BookingCreate        adminBookingService.CreateInterface
 	BookingGetAll        adminBookingService.GetAllInterface
 	BookingUpdateByStaff adminBookingService.UpdateBookingByStaffServiceInterface
 	BookingCancel        adminBookingService.CancelBookingServiceInterface
@@ -148,7 +148,7 @@ type AdminHandlers struct {
 	CustomerUpdate *adminCustomerHandler.Update
 
 	// Booking management handlers
-	BookingCreate        *adminBookingHandler.CreateBookingHandler
+	BookingCreate        *adminBookingHandler.Create
 	BookingGetAll        *adminBookingHandler.GetAll
 	BookingUpdateByStaff *adminBookingHandler.UpdateBookingByStaffHandler
 	BookingCancel        *adminBookingHandler.CancelBookingHandler
@@ -217,7 +217,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CustomerGet:    adminCustomerService.NewGet(queries),
 		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX),
 		// Booking management services
-		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
+		BookingCreate:        adminBookingService.NewCreate(queries, database.PgxPool),
 		BookingGetAll:        adminBookingService.NewGetAll(queries, repositories.SQLX),
 		BookingUpdateByStaff: adminBookingService.NewUpdateBookingByStaffService(queries, database.PgxPool, repositories.SQLX),
 		BookingCancel:        adminBookingService.NewCancelBookingService(database.Sqlx, repositories.SQLX),
@@ -288,7 +288,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		CustomerUpdate: adminCustomerHandler.NewUpdate(services.CustomerUpdate),
 
 		// Booking management handlers
-		BookingCreate:        adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
+		BookingCreate:        adminBookingHandler.NewCreate(services.BookingCreate),
 		BookingGetAll:        adminBookingHandler.NewGetAll(services.BookingGetAll),
 		BookingUpdateByStaff: adminBookingHandler.NewUpdateBookingByStaffHandler(services.BookingUpdateByStaff),
 		BookingCancel:        adminBookingHandler.NewCancelBookingHandler(services.BookingCancel),
