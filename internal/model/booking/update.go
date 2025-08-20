@@ -48,6 +48,22 @@ type UpdateBookingServiceInfo struct {
 	Price         pgtype.Numeric
 }
 
+func (r UpdateRequest) HasUpdates() bool {
+	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil ||
+		r.MainServiceId != nil || r.SubServiceIds != nil || r.IsChatEnabled != nil || r.Note != nil
+}
+
+func (r UpdateRequest) HasTimeSlotUpdate() bool {
+	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil || r.MainServiceId != nil || r.SubServiceIds != nil
+}
+
+func (r UpdateRequest) IsTimeSlotUpdateComplete() bool {
+	if !r.HasTimeSlotUpdate() {
+		return true
+	}
+	return r.StoreId != nil && r.StylistId != nil && r.TimeSlotId != nil && r.MainServiceId != nil && r.SubServiceIds != nil
+}
+
 func (r UpdateParsedRequest) HasUpdates() bool {
 	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil ||
 		r.MainServiceId != nil || r.SubServiceIds != nil || r.IsChatEnabled != nil || r.Note != nil

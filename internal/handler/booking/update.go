@@ -49,48 +49,68 @@ func (h *Update) Update(c *gin.Context) {
 		return
 	}
 
-	storeId, err := utils.ParseID(*req.StoreId)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"storeId": "storeId 類型轉換失敗",
-		})
+	if !req.HasUpdates() {
+		errorCodes.RespondWithEmptyFieldError(c)
 		return
 	}
 
-	stylistId, err := utils.ParseID(*req.StylistId)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"stylistId": "stylistId 類型轉換失敗",
+	// Business logic validation - Time slot update completeness
+	var storeId int64
+	var stylistId int64
+	var timeSlotId int64
+	var mainServiceId int64
+	var subServiceIds []int64
+
+	if !req.IsTimeSlotUpdateComplete() {
+		fmt.Println("req.IsTimeSlotUpdateComplete()", "error")
+		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+			"request": "storeId、stylistId、timeSlotId、mainServiceId、subServiceIds 必須一起傳入",
 		})
 		return
-	}
-
-	timeSlotId, err := utils.ParseID(*req.TimeSlotId)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"timeSlotId": "timeSlotId 類型轉換失敗",
-		})
-		return
-	}
-
-	mainServiceId, err := utils.ParseID(*req.MainServiceId)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"mainServiceId": "mainServiceId 類型轉換失敗",
-		})
-		return
-	}
-
-	subServiceIds := make([]int64, len(*req.SubServiceIds))
-	for i, subServiceId := range *req.SubServiceIds {
-		subServiceId, err := utils.ParseID(subServiceId)
+	} else {
+		storeId, err = utils.ParseID(*req.StoreId)
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-				"subServiceId": "subServiceId 類型轉換失敗",
+				"storeId": "storeId 類型轉換失敗",
 			})
 			return
 		}
-		subServiceIds[i] = subServiceId
+
+		stylistId, err = utils.ParseID(*req.StylistId)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"stylistId": "stylistId 類型轉換失敗",
+			})
+			return
+		}
+
+		timeSlotId, err = utils.ParseID(*req.TimeSlotId)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"timeSlotId": "timeSlotId 類型轉換失敗",
+			})
+			return
+		}
+
+		mainServiceId, err = utils.ParseID(*req.MainServiceId)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"mainServiceId": "mainServiceId 類型轉換失敗",
+			})
+			return
+		}
+
+		subServiceIds = make([]int64, len(*req.SubServiceIds))
+		for i, subServiceId := range *req.SubServiceIds {
+			subServiceId, err := utils.ParseID(subServiceId)
+			if err != nil {
+				errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+					"subServiceId": "subServiceId 類型轉換失敗",
+				})
+				return
+			}
+			subServiceIds[i] = subServiceId
+		}
 	}
 
 	parsedRequest := bookingModel.UpdateParsedRequest{
@@ -101,20 +121,6 @@ func (h *Update) Update(c *gin.Context) {
 		SubServiceIds: &subServiceIds,
 		Note:          req.Note,
 		IsChatEnabled: req.IsChatEnabled,
-	}
-
-	// Business logic validation - HasUpdates check
-	if !parsedRequest.HasUpdates() {
-		errorCodes.RespondWithEmptyFieldError(c)
-		return
-	}
-
-	// Business logic validation - Time slot update completeness
-	if !parsedRequest.IsTimeSlotUpdateComplete() {
-		errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
-			"request": "storeId、stylistId、timeSlotId、mainServiceId、subServiceIds 必須一起傳入",
-		})
-		return
 	}
 
 	// Authentication context validation
