@@ -9,7 +9,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -75,7 +74,7 @@ func (s *CreateBookingService) CreateBooking(ctx context.Context, storeID string
 	}
 
 	// Check store access for staff (except SUPER_ADMIN)
-	if staffContext.Role != adminStaffModel.RoleSuperAdmin {
+	if staffContext.Role != common.RoleSuperAdmin {
 		hasAccess, err := utils.CheckOneStoreAccess(storeIDInt, staffContext)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to check store access", err)

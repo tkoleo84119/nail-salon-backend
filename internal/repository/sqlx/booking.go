@@ -14,7 +14,7 @@ import (
 type BookingRepositoryInterface interface {
 	UpdateBookingTx(ctx context.Context, tx *sqlx.Tx, bookingID int64, params UpdateBookingParams) (int64, error)
 	GetCustomerBookingByFilter(ctx context.Context, customerID int64, params GetCustomerBookingByFilterParams) ([]GetCustomerBookingByFilterItem, int, error)
-	GetStoreBookingList(ctx context.Context, storeID int64, params GetStoreBookingListParams) ([]GetStoreBookingListModel, int, error)
+	GetStoreBookingByFilter(ctx context.Context, storeID int64, params GetStoreBookingByFilterParams) ([]GetStoreBookingByFilterItem, int, error)
 	UpdateBookingByStaff(ctx context.Context, bookingID int64, storeID int64, timeSlotID *int64, isChatEnabled *bool, note *string) (*UpdateBookingByStaffModel, error)
 	GetByID(ctx context.Context, bookingID int64) (*GetByIDRow, error)
 	CancelBooking(ctx context.Context, tx *sqlx.Tx, bookingID int64, status string, cancelReason *string) (int64, error)
@@ -199,17 +199,17 @@ func (r *BookingRepository) GetCustomerBookingByFilter(ctx context.Context, cust
 
 // ------------------------------------------------------------------------------------------------
 
-// GetStoreBookingListParams represents the parameters for getting store booking list
-type GetStoreBookingListParams struct {
+type GetStoreBookingByFilterParams struct {
 	StylistID *int64
 	StartDate *time.Time
 	EndDate   *time.Time
+	Status    *string
 	Limit     *int
 	Offset    *int
+	Sort      *[]string
 }
 
-// GetStoreBookingListModel represents the database model for admin booking list queries
-type GetStoreBookingListModel struct {
+type GetStoreBookingByFilterItem struct {
 	ID           int64       `db:"id"`
 	StoreID      int64       `db:"store_id"`
 	CustomerID   int64       `db:"customer_id"`
@@ -224,45 +224,35 @@ type GetStoreBookingListModel struct {
 }
 
 // GetStoreBookingList retrieves bookings for a specific store with dynamic filtering and pagination
-func (r *BookingRepository) GetStoreBookingList(ctx context.Context, storeID int64, params GetStoreBookingListParams) ([]GetStoreBookingListModel, int, error) {
-	// Set default pagination values
-	limit := 20
-	offset := 0
-	if params.Limit != nil && *params.Limit > 0 {
-		limit = *params.Limit
-	}
-	if params.Offset != nil && *params.Offset >= 0 {
-		offset = *params.Offset
-	}
-
-	// Build WHERE clause parts
-	whereParts := []string{"b.store_id = :store_id"}
-	args := map[string]interface{}{
-		"store_id": storeID,
-		"limit":    limit,
-		"offset":   offset,
-	}
+func (r *BookingRepository) GetStoreBookingByFilter(ctx context.Context, storeID int64, params GetStoreBookingByFilterParams) (int, []GetStoreBookingByFilterItem, error) {
+	whereConditions := []string{"b.store_id = $1"}
+	args := []interface{}{storeID}
 
 	// Add stylist filter
 	if params.StylistID != nil {
-		whereParts = append(whereParts, "b.stylist_id = :stylist_id")
-		args["stylist_id"] = *params.StylistID
+		whereConditions = append(whereConditions, fmt.Sprintf("b.stylist_id = $%d", len(args)+1))
+		args = append(args, *params.StylistID)
 	}
 
 	// Add start date filter
 	if params.StartDate != nil {
-		whereParts = append(whereParts, "sch.work_date >= :start_date")
-		args["start_date"] = *params.StartDate
+		whereConditions = append(whereConditions, fmt.Sprintf("sch.work_date >= $%d", len(args)+1))
+		args = append(args, *params.StartDate)
 	}
 
 	// Add end date filter
 	if params.EndDate != nil {
-		whereParts = append(whereParts, "sch.work_date <= :end_date")
-		args["end_date"] = *params.EndDate
+		whereConditions = append(whereConditions, fmt.Sprintf("sch.work_date <= $%d", len(args)+1))
+		args = append(args, *params.EndDate)
+	}
+
+	if params.Status != nil {
+		whereConditions = append(whereConditions, fmt.Sprintf("b.status = $%d", len(args)+1))
+		args = append(args, *params.Status)
 	}
 
 	// Build WHERE clause
-	whereClause := strings.Join(whereParts, " AND ")
+	whereClause := strings.Join(whereConditions, " AND ")
 
 	// Count query for total records
 	countQuery := fmt.Sprintf(`
@@ -274,17 +264,22 @@ func (r *BookingRepository) GetStoreBookingList(ctx context.Context, storeID int
 	`, whereClause)
 
 	var total int
-	rows, err := r.db.NamedQueryContext(ctx, countQuery, args)
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to execute count query: %w", err)
+	row := r.db.QueryRowContext(ctx, countQuery, args...)
+	if err := row.Scan(&total); err != nil {
+		return 0, nil, fmt.Errorf("count bookings failed: %w", err)
 	}
-	defer rows.Close()
 
-	if rows.Next() {
-		if err := rows.Scan(&total); err != nil {
-			return nil, 0, fmt.Errorf("failed to scan count: %w", err)
-		}
-	}
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
+	sort := utils.HandleSortByMap(map[string]string{
+		"date":     "sch.work_date",
+		"status":   "b.status",
+		"customer": "c.name",
+		"stylist":  "st.name",
+	}, "sch.work_date", "DESC", params.Sort)
+
+	limitIndex := len(args) + 1
+	offsetIndex := limitIndex + 1
+	args = append(args, limit, offset)
 
 	// Main query with pagination
 	query := fmt.Sprintf(`
@@ -306,30 +301,42 @@ func (r *BookingRepository) GetStoreBookingList(ctx context.Context, storeID int
 		JOIN time_slots ts ON b.time_slot_id = ts.id
 		JOIN schedules sch ON ts.schedule_id = sch.id
 		WHERE %s
-		ORDER BY sch.work_date ASC, ts.start_time ASC
-		LIMIT :limit OFFSET :offset
-	`, whereClause)
+		ORDER BY %s
+		LIMIT $%d OFFSET $%d
+	`, whereClause, sort, limitIndex, offsetIndex)
 
-	var results []GetStoreBookingListModel
-	rows, err = r.db.NamedQueryContext(ctx, query, args)
+	var results []GetStoreBookingByFilterItem
+	rows, err := r.db.QueryxContext(ctx, query, args...)
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to execute query: %w", err)
+		return 0, nil, fmt.Errorf("query bookings failed: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var item GetStoreBookingListModel
-		if err := rows.StructScan(&item); err != nil {
-			return nil, 0, fmt.Errorf("failed to scan row: %w", err)
+		var item GetStoreBookingByFilterItem
+		if err := rows.Scan(
+			&item.ID,
+			&item.StoreID,
+			&item.CustomerID,
+			&item.CustomerName,
+			&item.StylistID,
+			&item.StylistName,
+			&item.TimeSlotID,
+			&item.StartTime,
+			&item.EndTime,
+			&item.WorkDate,
+			&item.Status,
+		); err != nil {
+			return 0, nil, fmt.Errorf("scan booking failed: %w", err)
 		}
 		results = append(results, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, 0, fmt.Errorf("rows iteration error: %w", err)
+		return 0, nil, fmt.Errorf("rows iteration error: %w", err)
 	}
 
-	return results, total, nil
+	return total, results, nil
 }
 
 // UpdateBookingByStaffModel represents the database model for booking updates by staff

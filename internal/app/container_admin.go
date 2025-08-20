@@ -78,7 +78,7 @@ type AdminServices struct {
 
 	// Booking management services
 	BookingCreate        adminBookingService.CreateBookingServiceInterface
-	BookingGetList       adminBookingService.GetBookingListServiceInterface
+	BookingGetAll        adminBookingService.GetAllInterface
 	BookingUpdateByStaff adminBookingService.UpdateBookingByStaffServiceInterface
 	BookingCancel        adminBookingService.CancelBookingServiceInterface
 
@@ -149,7 +149,7 @@ type AdminHandlers struct {
 
 	// Booking management handlers
 	BookingCreate        *adminBookingHandler.CreateBookingHandler
-	BookingGetList       *adminBookingHandler.GetBookingListHandler
+	BookingGetAll        *adminBookingHandler.GetAll
 	BookingUpdateByStaff *adminBookingHandler.UpdateBookingByStaffHandler
 	BookingCancel        *adminBookingHandler.CancelBookingHandler
 
@@ -218,7 +218,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX),
 		// Booking management services
 		BookingCreate:        adminBookingService.NewCreateBookingService(queries, database.PgxPool),
-		BookingGetList:       adminBookingService.NewGetBookingListService(queries, repositories.SQLX),
+		BookingGetAll:        adminBookingService.NewGetAll(queries, repositories.SQLX),
 		BookingUpdateByStaff: adminBookingService.NewUpdateBookingByStaffService(queries, database.PgxPool, repositories.SQLX),
 		BookingCancel:        adminBookingService.NewCancelBookingService(database.Sqlx, repositories.SQLX),
 
@@ -289,7 +289,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Booking management handlers
 		BookingCreate:        adminBookingHandler.NewCreateBookingHandler(services.BookingCreate),
-		BookingGetList:       adminBookingHandler.NewGetBookingListHandler(services.BookingGetList),
+		BookingGetAll:        adminBookingHandler.NewGetAll(services.BookingGetAll),
 		BookingUpdateByStaff: adminBookingHandler.NewUpdateBookingByStaffHandler(services.BookingUpdateByStaff),
 		BookingCancel:        adminBookingHandler.NewCancelBookingHandler(services.BookingCancel),
 

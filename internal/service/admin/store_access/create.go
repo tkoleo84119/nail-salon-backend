@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -41,7 +40,7 @@ func (s *Create) Create(ctx context.Context, staffID int64, storeID int64, creat
 	}
 
 	// Cannot modify SUPER_ADMIN
-	if targetStaff.Role == adminStaffModel.RoleSuperAdmin {
+	if targetStaff.Role == common.RoleSuperAdmin {
 		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 

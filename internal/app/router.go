@@ -5,7 +5,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/handler"
 	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 )
 
@@ -153,7 +153,7 @@ func setupAdminStylistRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	stylists := admin.Group("/stylists")
 	{
 		// Self-service stylist operations
-		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(adminStaffModel.RoleAdmin, adminStaffModel.RoleManager, adminStaffModel.RoleStylist), handlers.Admin.StylistUpdateMe.UpdateMe)
+		stylists.PATCH("/me", middleware.JWTAuth(*cfg, queries), middleware.RequireRoles(common.RoleAdmin, common.RoleManager, common.RoleStylist), handlers.Admin.StylistUpdateMe.UpdateMe)
 	}
 }
 
@@ -176,7 +176,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.DELETE("/:storeId/schedules/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ScheduleDeleteBulk.DeleteBulk)
 
 		// Store bookings routes
-		stores.GET("/:storeId/bookings", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingGetList.GetBookingList)
+		stores.GET("/:storeId/bookings", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingGetAll.GetAll)
 		stores.POST("/:storeId/bookings", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingCreate.CreateBooking)
 		stores.PATCH("/:storeId/bookings/:bookingId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingUpdateByStaff.UpdateBookingByStaff)
 		stores.PATCH("/:storeId/bookings/:bookingId/cancel", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingCancel.CancelBooking)

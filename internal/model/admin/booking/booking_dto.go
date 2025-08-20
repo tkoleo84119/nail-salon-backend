@@ -1,7 +1,5 @@
 package adminBooking
 
-import "github.com/tkoleo84119/nail-salon-backend/internal/model/common"
-
 // CreateBookingRequest represents the request to create a booking for admin
 type CreateBookingRequest struct {
 	CustomerID    string   `json:"customerId" binding:"required"`
@@ -30,61 +28,6 @@ type CreateBookingResponse struct {
 	Status          string   `json:"status"`
 	CreatedAt       string   `json:"createdAt"`
 	UpdatedAt       string   `json:"updatedAt"`
-}
-
-// GetBookingListRequest represents the request for getting booking list
-type GetBookingListRequest struct {
-	StylistID *string `form:"stylistId" binding:"omitempty"`
-	StartDate *string `form:"startDate" binding:"omitempty"`
-	EndDate   *string `form:"endDate" binding:"omitempty"`
-	Limit     *int    `form:"limit" binding:"omitempty,min=1,max=100"`
-	Offset    *int    `form:"offset" binding:"omitempty,min=0"`
-}
-
-// GetBookingListResponse represents the response for booking list
-type GetBookingListResponse common.ListResponse[BookingListItemDTO]
-
-// BookingListItemDTO represents a booking item in the list
-type BookingListItemDTO struct {
-	ID          string                 `json:"id"`
-	Customer    BookingCustomerDTO     `json:"customer"`
-	Stylist     BookingStylistDTO      `json:"stylist"`
-	TimeSlot    BookingTimeSlotDTO     `json:"timeSlot"`
-	MainService BookingMainServiceDTO  `json:"mainService"`
-	SubServices []BookingSubServiceDTO `json:"subServices"`
-	Status      string                 `json:"status"`
-}
-
-// BookingCustomerDTO represents customer information in booking
-type BookingCustomerDTO struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// BookingStylistDTO represents stylist information in booking
-type BookingStylistDTO struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// BookingTimeSlotDTO represents time slot information in booking
-type BookingTimeSlotDTO struct {
-	ID        string `json:"id"`
-	WorkDate  string `json:"workDate"`
-	StartTime string `json:"startTime"`
-	EndTime   string `json:"endTime"`
-}
-
-// BookingMainServiceDTO represents main service information in booking
-type BookingMainServiceDTO struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// BookingSubServiceDTO represents sub service information in booking
-type BookingSubServiceDTO struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
 }
 
 // UpdateBookingByStaffRequest represents the request to update a booking by staff

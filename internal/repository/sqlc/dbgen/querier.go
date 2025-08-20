@@ -62,6 +62,7 @@ type Querier interface {
 	GetAvailableTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
 	GetBookingDetailByID(ctx context.Context, id int64) (GetBookingDetailByIDRow, error)
 	GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error)
+	GetBookingDetailsByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailsByBookingIDsRow, error)
 	GetCustomerByID(ctx context.Context, id int64) (GetCustomerByIDRow, error)
 	GetCustomerByLineUid(ctx context.Context, lineUid string) (int64, error)
 	GetScheduleByID(ctx context.Context, id int64) (Schedule, error)

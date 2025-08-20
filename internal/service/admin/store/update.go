@@ -4,8 +4,8 @@ import (
 	"context"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
-	adminStaffModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/staff"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -25,7 +25,7 @@ func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories) *Update {
 
 func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.UpdateRequest, role string, storeIDs []int64) (*adminStoreModel.UpdateResponse, error) {
 	// Validate role permissions (only SUPER_ADMIN and ADMIN can update stores)
-	if role != adminStaffModel.RoleSuperAdmin && role != adminStaffModel.RoleAdmin {
+	if role != common.RoleSuperAdmin && role != common.RoleAdmin {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
@@ -35,7 +35,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 	}
 
 	// For ADMIN role, check store access permission
-	if role == adminStaffModel.RoleAdmin {
+	if role == common.RoleAdmin {
 		hasAccess, err := utils.CheckStoreAccess(storeID, storeIDs)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)

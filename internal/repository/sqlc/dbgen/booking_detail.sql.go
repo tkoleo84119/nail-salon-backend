@@ -121,3 +121,47 @@ func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID in
 	}
 	return items, nil
 }
+
+const getBookingDetailsByBookingIDs = `-- name: GetBookingDetailsByBookingIDs :many
+SELECT
+    bd.booking_id,
+    bd.service_id,
+    srv.name AS service_name,
+    srv.is_addon
+FROM booking_details bd
+JOIN services srv ON bd.service_id = srv.id
+WHERE bd.booking_id = ANY($1::bigint[])
+ORDER BY bd.booking_id ASC, srv.is_addon ASC, srv.name
+`
+
+type GetBookingDetailsByBookingIDsRow struct {
+	BookingID   int64       `db:"booking_id" json:"booking_id"`
+	ServiceID   int64       `db:"service_id" json:"service_id"`
+	ServiceName string      `db:"service_name" json:"service_name"`
+	IsAddon     pgtype.Bool `db:"is_addon" json:"is_addon"`
+}
+
+func (q *Queries) GetBookingDetailsByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailsByBookingIDsRow, error) {
+	rows, err := q.db.Query(ctx, getBookingDetailsByBookingIDs, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetBookingDetailsByBookingIDsRow{}
+	for rows.Next() {
+		var i GetBookingDetailsByBookingIDsRow
+		if err := rows.Scan(
+			&i.BookingID,
+			&i.ServiceID,
+			&i.ServiceName,
+			&i.IsAddon,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
