@@ -73,6 +73,7 @@ const (
 
 	// STAFF - Staff operation errors
 	StaffInvalidRole   = "STAFF_INVALID_ROLE"
+	StaffInactive      = "STAFF_INACTIVE"
 	StaffNotUpdateSelf = "STAFF_NOT_UPDATE_SELF"
 	StaffNotFound      = "STAFF_NOT_FOUND"
 	StaffAlreadyExists = "STAFF_ALREADY_EXISTS"

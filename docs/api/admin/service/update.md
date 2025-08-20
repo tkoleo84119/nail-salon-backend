@@ -112,7 +112,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                  |
 | ------ | -------- | ----------------------- | ------------------------------------- |
-| 401    | E1002    | AuthInvalidCredentials  | 無效的 accessToken，請重新登入        |
+| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入        |
 | 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入          |
 | 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入      |
 | 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入      |

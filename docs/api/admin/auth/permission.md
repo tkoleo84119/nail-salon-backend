@@ -73,15 +73,15 @@
   - message: 中文錯誤訊息（可參照錯誤總覽）
   - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-| 狀態碼 | 錯誤碼 | 常數名稱               | 說明                             |
-| ------ | ------ | ---------------------- | -------------------------------- |
-| 401    | E1002  | AuthInvalidCredentials | 無效的 accessToken，請重新登入   |
-| 401    | E1003  | AuthTokenMissing       | accessToken 缺失，請重新登入     |
-| 401    | E1004  | AuthTokenFormatError   | accessToken 格式錯誤，請重新登入 |
-| 401    | E1005  | AuthStaffFailed        | 未找到有效的員工資訊，請重新登入 |
-| 401    | E1006  | AuthContextMissing     | 未找到使用者認證資訊，請重新登入 |
-| 500    | E9001  | SysInternalError       | 系統發生錯誤，請稍後再試         |
-| 500    | E9002  | SysDatabaseError       | 資料庫操作失敗                   |
+| 狀態碼 | 錯誤碼 | 常數名稱             | 說明                             |
+| ------ | ------ | -------------------- | -------------------------------- |
+| 401    | E1002  | AuthTokenInvalid     | 無效的 accessToken，請重新登入   |
+| 401    | E1003  | AuthTokenMissing     | accessToken 缺失，請重新登入     |
+| 401    | E1004  | AuthTokenFormatError | accessToken 格式錯誤，請重新登入 |
+| 401    | E1005  | AuthStaffFailed      | 未找到有效的員工資訊，請重新登入 |
+| 401    | E1006  | AuthContextMissing   | 未找到使用者認證資訊，請重新登入 |
+| 500    | E9001  | SysInternalError     | 系統發生錯誤，請稍後再試         |
+| 500    | E9002  | SysDatabaseError     | 資料庫操作失敗                   |
 
 ---
 
