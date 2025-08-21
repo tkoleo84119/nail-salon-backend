@@ -21,11 +21,11 @@ func NewGetAll(repo *sqlxRepo.Repositories) GetAllInterface {
 
 func (s *GetAll) GetAll(ctx context.Context, queryParams bookingModel.GetAllParsedRequest, customerID int64) (*bookingModel.GetAllResponse, error) {
 	// Get bookings from repository
-	total, bookings, err := s.repo.Booking.GetCustomerBookingByFilter(ctx, customerID, sqlxRepo.GetCustomerBookingByFilterParams{
-		Limit:    &queryParams.Limit,
-		Offset:   &queryParams.Offset,
-		Sort:     &queryParams.Sort,
-		Statuses: *queryParams.Status,
+	total, bookings, err := s.repo.Booking.GetAllCustomerBookingsByFilter(ctx, customerID, sqlxRepo.GetAllCustomerBookingsByFilterParams{
+		Limit:  &queryParams.Limit,
+		Offset: &queryParams.Offset,
+		Sort:   &queryParams.Sort,
+		Status: *queryParams.Status,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get bookings", err)

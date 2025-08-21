@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
-	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -25,6 +25,7 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB)
 	return &Update{
 		queries: queries,
 		repo:    repo,
+		db:      db,
 	}
 }
 
@@ -50,7 +51,7 @@ func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req admin
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingNotFound)
 	}
 	// Verify booking is in SCHEDULED status
-	if existingBooking.Status != bookingModel.BookingStatusScheduled {
+	if existingBooking.Status != common.BookingStatusScheduled {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingStatusNotAllowedToUpdate)
 	}
 
@@ -72,7 +73,7 @@ func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req admin
 	defer tx.Rollback()
 
 	// Update booking record
-	_, err = s.repo.Booking.UpdateBookingTx(ctx, tx, bookingID, sqlxRepo.UpdateBookingParams{
+	_, err = s.repo.Booking.UpdateBookingTx(ctx, tx, bookingID, sqlxRepo.UpdateBookingTxParams{
 		StylistID:     req.StylistID,
 		TimeSlotID:    req.TimeSlotID,
 		IsChatEnabled: req.IsChatEnabled,
@@ -91,11 +92,11 @@ func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req admin
 
 	// Update time slot availability if changing time slot
 	if req.TimeSlotID != nil && *req.TimeSlotID != oldTimeSlotID {
-		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityByBookingIDTx(ctx, tx, oldTimeSlotID, true); err != nil {
+		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityTx(ctx, tx, oldTimeSlotID, true); err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to release old time slot", err)
 		}
 
-		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityByBookingIDTx(ctx, tx, *req.TimeSlotID, false); err != nil {
+		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityTx(ctx, tx, *req.TimeSlotID, false); err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to reserve new time slot", err)
 		}
 	}

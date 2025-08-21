@@ -33,7 +33,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminStylistMode
 	}
 
 	// Get stylists from repository with dynamic filtering
-	total, stylists, err := s.repo.Stylist.GetStoreAllStylistByFilter(ctx, storeID, sqlxRepo.GetStoreAllStylistByFilterParams{
+	total, stylists, err := s.repo.Stylist.GetAllStoreStylistsByFilter(ctx, storeID, sqlxRepo.GetAllStoreStylistsByFilterParams{
 		Name:        req.Name,
 		IsIntrovert: req.IsIntrovert,
 		IsActive:    req.IsActive,

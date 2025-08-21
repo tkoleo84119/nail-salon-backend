@@ -160,7 +160,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 		TimeSlotID:    req.TimeSlotID,
 		IsChatEnabled: utils.BoolToPgBool(req.IsChatEnabled),
 		Note:          utils.StringPtrToPgText(req.Note, true),
-		Status:        bookingModel.BookingStatusScheduled,
+		Status:        common.BookingStatusScheduled,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to create booking", err)

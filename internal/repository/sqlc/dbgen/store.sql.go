@@ -222,38 +222,3 @@ func (q *Queries) GetStoreDetailByID(ctx context.Context, id int64) (Store, erro
 	)
 	return i, err
 }
-
-const getStoresByIDs = `-- name: GetStoresByIDs :many
-SELECT
-    id,
-    name,
-    is_active
-FROM stores
-WHERE id = ANY($1::bigint[])
-`
-
-type GetStoresByIDsRow struct {
-	ID       int64       `db:"id" json:"id"`
-	Name     string      `db:"name" json:"name"`
-	IsActive pgtype.Bool `db:"is_active" json:"is_active"`
-}
-
-func (q *Queries) GetStoresByIDs(ctx context.Context, dollar_1 []int64) ([]GetStoresByIDsRow, error) {
-	rows, err := q.db.Query(ctx, getStoresByIDs, dollar_1)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetStoresByIDsRow{}
-	for rows.Next() {
-		var i GetStoresByIDsRow
-		if err := rows.Scan(&i.ID, &i.Name, &i.IsActive); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}

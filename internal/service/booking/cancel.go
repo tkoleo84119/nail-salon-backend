@@ -9,6 +9,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -41,7 +42,7 @@ func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.C
 	}
 
 	// Check if booking is in a cancelable state (only SCHEDULED bookings can be canceled)
-	if bookingInfo.Status != bookingModel.BookingStatusScheduled {
+	if bookingInfo.Status != common.BookingStatusScheduled {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingStatusNotAllowedToCancel)
 	}
 
@@ -56,7 +57,7 @@ func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.C
 	// Cancel booking with optional cancel reason
 	_, err = qtx.CancelBooking(ctx, dbgen.CancelBookingParams{
 		ID:           bookingID,
-		Status:       bookingModel.BookingStatusCancelled,
+		Status:       common.BookingStatusCancelled,
 		CancelReason: utils.StringPtrToPgText(req.CancelReason, true),
 	})
 	if err != nil {

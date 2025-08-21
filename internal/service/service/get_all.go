@@ -23,7 +23,7 @@ func (s *GetAll) GetAll(ctx context.Context, queryParams serviceModel.GetAllPars
 	trueCondition := true
 	visibleCondition := true
 	// Get services from repository with flexible filtering
-	total, services, err := s.repo.Service.GetAllServiceByFilter(ctx, sqlxRepo.GetAllServiceByFilterParams{
+	total, services, err := s.repo.Service.GetAllServicesByFilter(ctx, sqlxRepo.GetAllServicesByFilterParams{
 		IsActive:  &trueCondition,
 		IsVisible: &visibleCondition,
 		IsAddon:   queryParams.IsAddon,

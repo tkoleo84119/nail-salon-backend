@@ -55,7 +55,7 @@ func (s *GetAllService) GetAll(ctx context.Context, storeID int64, req adminSche
 	}
 
 	// Get schedules from repository with dynamic filtering
-	rows, err := s.repo.Schedule.GetStoreScheduleByDateRange(ctx, storeID, req.StartDate, req.EndDate, sqlxRepo.GetStoreScheduleByDateRangeParams{
+	rows, err := s.repo.Schedule.GetStoreSchedulesByDateRange(ctx, storeID, req.StartDate, req.EndDate, sqlxRepo.GetStoreSchedulesByDateRangeParams{
 		StylistID:   req.StylistID,
 		IsAvailable: req.IsAvailable,
 	})

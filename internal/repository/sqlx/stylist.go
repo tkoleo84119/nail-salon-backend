@@ -10,21 +10,19 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-// StylistRepositoryInterface defines the interface for stylist repository
-type StylistRepositoryInterface interface {
-	GetStoreAllStylistByFilter(ctx context.Context, storeID int64, params GetStoreAllStylistByFilterParams) (int, []GetStoreAllStylistByFilterItem, error)
-	UpdateStylist(ctx context.Context, staffUserID int64, params UpdateStylistParams) (UpdateStylistResponse, error)
-}
-
 type StylistRepository struct {
 	db *sqlx.DB
 }
 
 func NewStylistRepository(db *sqlx.DB) *StylistRepository {
-	return &StylistRepository{db: db}
+	return &StylistRepository{
+		db: db,
+	}
 }
 
-type GetStoreAllStylistByFilterParams struct {
+// ---------------------------------------------------------------------------------------------------------------------
+
+type GetAllStoreStylistsByFilterParams struct {
 	Name        *string
 	IsIntrovert *bool
 	IsActive    *bool
@@ -33,7 +31,7 @@ type GetStoreAllStylistByFilterParams struct {
 	Sort        *[]string
 }
 
-type GetStoreAllStylistByFilterItem struct {
+type GetAllStoreStylistsByFilterItem struct {
 	ID           int64       `db:"id"`
 	StaffUserID  int64       `db:"staff_user_id"`
 	Name         pgtype.Text `db:"name"`
@@ -44,37 +42,22 @@ type GetStoreAllStylistByFilterItem struct {
 	IsActive     pgtype.Bool `db:"is_active"`
 }
 
-// GetStoreStylistList retrieves stylists for a specific store with dynamic filtering
-func (r *StylistRepository) GetStoreAllStylistByFilter(ctx context.Context, storeID int64, params GetStoreAllStylistByFilterParams) (int, []GetStoreAllStylistByFilterItem, error) {
-	// Set default values
-	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-
-	// Set default sort values
-	sort := utils.HandleSortByMap(map[string]string{
-		"createdAt":   "s.created_at",
-		"updatedAt":   "s.updated_at",
-		"isIntrovert": "s.is_introvert",
-		"name":        "s.name",
-		"isActive":    "sf.is_active",
-	}, "s.created_at", "ASC", params.Sort)
-
-	// Build WHERE conditions
+// GetAllStoreStylistsByFilter retrieves stylists for a specific store with dynamic filtering
+func (r *StylistRepository) GetAllStoreStylistsByFilter(ctx context.Context, storeID int64, params GetAllStoreStylistsByFilterParams) (int, []GetAllStoreStylistsByFilterItem, error) {
+	// where conditions
 	whereParts := []string{"sfsa.store_id = $1"}
 	args := []interface{}{storeID}
 
-	// Add name filter (case-insensitive partial match)
 	if params.Name != nil && *params.Name != "" {
 		whereParts = append(whereParts, fmt.Sprintf("s.name ILIKE $%d", len(args)+1))
 		args = append(args, "%"+*params.Name+"%")
 	}
 
-	// Add is_introvert filter
 	if params.IsIntrovert != nil {
 		whereParts = append(whereParts, fmt.Sprintf("s.is_introvert = $%d", len(args)+1))
 		args = append(args, *params.IsIntrovert)
 	}
 
-	// Add is_active filter
 	if params.IsActive != nil {
 		whereParts = append(whereParts, fmt.Sprintf("sf.is_active = $%d", len(args)+1))
 		args = append(args, *params.IsActive)
@@ -85,7 +68,7 @@ func (r *StylistRepository) GetStoreAllStylistByFilter(ctx context.Context, stor
 		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
 	}
 
-	// Count total records with same filtering conditions
+	// Count query
 	countQuery := fmt.Sprintf(`
 		SELECT COUNT(DISTINCT s.id)
 		FROM stylists s
@@ -95,15 +78,28 @@ func (r *StylistRepository) GetStoreAllStylistByFilter(ctx context.Context, stor
 	`, whereClause)
 
 	var total int
-	row := r.db.QueryRowContext(ctx, countQuery, args...)
-	if err := row.Scan(&total); err != nil {
+	if err := r.db.GetContext(ctx, &total, countQuery, args...); err != nil {
 		return 0, nil, fmt.Errorf("count stylists failed: %w", err)
 	}
+	if total == 0 {
+		return 0, []GetAllStoreStylistsByFilterItem{}, nil
+	}
 
-	limitIdx := len(args) + 1
-	offsetIdx := limitIdx + 1
+	// Pagination + Sorting
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
+	defaultSortArr := []string{"s.created_at ASC"}
+	sort := utils.HandleSortByMap(map[string]string{
+		"createdAt":   "s.created_at",
+		"updatedAt":   "s.updated_at",
+		"isIntrovert": "s.is_introvert",
+		"name":        "s.name",
+	}, defaultSortArr, params.Sort)
 
-	// Query for stylists with filtering
+	args = append(args, limit, offset)
+	limitIndex := len(args) - 1
+	offsetIndex := len(args)
+
+	// Data query
 	query := fmt.Sprintf(`
 		SELECT
 			s.id,
@@ -120,20 +116,18 @@ func (r *StylistRepository) GetStoreAllStylistByFilter(ctx context.Context, stor
 		%s
 		ORDER BY %s
 		LIMIT $%d OFFSET $%d
-	`, whereClause, sort, limitIdx, offsetIdx)
+	`, whereClause, sort, limitIndex, offsetIndex)
 
-	argsWithLimit := append(args, limit, offset)
-
-	rows, err := r.db.QueryContext(ctx, query, argsWithLimit...)
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return 0, nil, fmt.Errorf("query stylists failed: %w", err)
 	}
 	defer rows.Close()
 
 	m := pgtype.NewMap()
-	var stylists []GetStoreAllStylistByFilterItem
+	var stylists []GetAllStoreStylistsByFilterItem
 	for rows.Next() {
-		var stylist GetStoreAllStylistByFilterItem
+		var stylist GetAllStoreStylistsByFilterItem
 		if err := rows.Scan(
 			&stylist.ID,
 			&stylist.StaffUserID,
@@ -152,14 +146,14 @@ func (r *StylistRepository) GetStoreAllStylistByFilter(ctx context.Context, stor
 	return total, stylists, nil
 }
 
-// ------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateStylistParams struct {
-	Name         *string   `db:"name"`
-	GoodAtShapes *[]string `db:"good_at_shapes"`
-	GoodAtColors *[]string `db:"good_at_colors"`
-	GoodAtStyles *[]string `db:"good_at_styles"`
-	IsIntrovert  *bool     `db:"is_introvert"`
+	Name         *string
+	GoodAtShapes *[]string
+	GoodAtColors *[]string
+	GoodAtStyles *[]string
+	IsIntrovert  *bool
 }
 
 type UpdateStylistResponse struct {
@@ -176,44 +170,47 @@ type UpdateStylistResponse struct {
 
 // UpdateStylist updates stylist with dynamic fields
 func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64, params UpdateStylistParams) (UpdateStylistResponse, error) {
+	// Set conditions
 	setParts := []string{"updated_at = NOW()"}
-	args := []interface{}{staffUserID}
-	argIndex := 2
+	args := []interface{}{}
 
-	if params.Name != nil {
-		setParts = append(setParts, fmt.Sprintf("name = $%d", argIndex))
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
 		args = append(args, *params.Name)
-		argIndex++
 	}
 
 	if params.GoodAtShapes != nil {
-		setParts = append(setParts, fmt.Sprintf("good_at_shapes = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("good_at_shapes = $%d", len(args)+1))
 		args = append(args, *params.GoodAtShapes)
-		argIndex++
 	}
 
 	if params.GoodAtColors != nil {
-		setParts = append(setParts, fmt.Sprintf("good_at_colors = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("good_at_colors = $%d", len(args)+1))
 		args = append(args, *params.GoodAtColors)
-		argIndex++
 	}
 
 	if params.GoodAtStyles != nil {
-		setParts = append(setParts, fmt.Sprintf("good_at_styles = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("good_at_styles = $%d", len(args)+1))
 		args = append(args, *params.GoodAtStyles)
-		argIndex++
 	}
 
 	if params.IsIntrovert != nil {
-		setParts = append(setParts, fmt.Sprintf("is_introvert = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("is_introvert = $%d", len(args)+1))
 		args = append(args, *params.IsIntrovert)
-		argIndex++
 	}
 
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return UpdateStylistResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, staffUserID)
+
+	// Data query
 	query := fmt.Sprintf(`
 		UPDATE stylists
 		SET %s
-		WHERE staff_user_id = $1
+		WHERE staff_user_id = $%d
 		RETURNING
 			id,
 			staff_user_id,
@@ -224,7 +221,7 @@ func (r *StylistRepository) UpdateStylist(ctx context.Context, staffUserID int64
 			is_introvert,
 			created_at,
 			updated_at
-	`, strings.Join(setParts, ", "))
+	`, strings.Join(setParts, ", "), len(args))
 
 	row := r.db.QueryRowxContext(ctx, query, args...)
 	m := pgtype.NewMap()

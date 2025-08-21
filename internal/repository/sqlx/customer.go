@@ -11,12 +11,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-// CustomerRepositoryInterface defines the interface for customer repository
-type CustomerRepositoryInterface interface {
-	GetAllCustomersByFilter(ctx context.Context, params GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error)
-	UpdateCustomer(ctx context.Context, customerID int64, params UpdateCustomerParams) (UpdateCustomerResponse, error)
-}
-
 type CustomerRepository struct {
 	db *sqlx.DB
 }
@@ -24,6 +18,8 @@ type CustomerRepository struct {
 func NewCustomerRepository(db *sqlx.DB) *CustomerRepository {
 	return &CustomerRepository{db: db}
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 type GetAllCustomersByFilterParams struct {
 	Name          *string
@@ -50,14 +46,9 @@ type GetAllCustomersByFilterItem struct {
 	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
 }
 
-// GetAllCustomers retrieves all customers with filtering, pagination and sorting
+// GetAllCustomersByFilter retrieves all customers with filtering, pagination and sorting
 func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params GetAllCustomersByFilterParams) (int, []GetAllCustomersByFilterItem, error) {
-	// Set default values
-	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-
-	// set default value for sort
-	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_blacklisted", "last_visit_at"}, "last_visit_at", "DESC", params.Sort)
-
+	// where conditions
 	whereConditions := []string{}
 	args := []interface{}{}
 
@@ -76,7 +67,7 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 		args = append(args, "%"+*params.Phone+"%")
 	}
 
-	if params.Level != nil && *params.Level != "" {
+	if params.Level != nil {
 		whereConditions = append(whereConditions, fmt.Sprintf("level = $%d", len(args)+1))
 		args = append(args, *params.Level)
 	}
@@ -87,10 +78,10 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 	}
 
 	if params.MinPastDays != nil && *params.MinPastDays > 0 {
-		whereConditions = append(whereConditions, fmt.Sprintf("(last_visit_at IS NOT NULL AND last_visit_at < NOW() - INTERVAL '%d days')", *params.MinPastDays))
+		whereConditions = append(whereConditions, fmt.Sprintf("(last_visit_at IS NOT NULL AND last_visit_at < NOW() - ($%d || ' days')::interval)", len(args)+1))
+		args = append(args, *params.MinPastDays)
 	}
 
-	// Build WHERE clause
 	whereClause := ""
 	if len(whereConditions) > 0 {
 		whereClause = "WHERE " + strings.Join(whereConditions, " AND ")
@@ -105,12 +96,26 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 	var total int
 	err := r.db.GetContext(ctx, &total, countQuery, args...)
 	if err != nil {
-		return 0, nil, err
+		return 0, nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+	if total == 0 {
+		return 0, []GetAllCustomersByFilterItem{}, nil
 	}
 
-	dataArgs := append(args, limit, offset)
-	limitArgIndex := len(args) + 1
-	offsetArgIndex := limitArgIndex + 1
+	// Pagination + Sorting
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
+	defaultSortArr := []string{"last_visit_at DESC"}
+	sort := utils.HandleSortByMap(map[string]string{
+		"level":         "level",
+		"isBlacklisted": "is_blacklisted",
+		"lastVisitAt":   "last_visit_at",
+		"createdAt":     "created_at",
+		"updatedAt":     "updated_at",
+	}, defaultSortArr, params.Sort)
+
+	args = append(args, limit, offset)
+	limitIndex := len(args) - 1
+	offsetIndex := len(args)
 
 	// Data query
 	dataQuery := fmt.Sprintf(`
@@ -121,39 +126,17 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 		%s
 		ORDER BY %s
 		LIMIT $%d OFFSET $%d`,
-		whereClause, sort, limitArgIndex, offsetArgIndex)
-
-	rows, err := r.db.QueryContext(ctx, dataQuery, dataArgs...)
-	if err != nil {
-		return 0, nil, err
-	}
-	defer rows.Close()
+		whereClause, sort, limitIndex, offsetIndex)
 
 	var results []GetAllCustomersByFilterItem
-	for rows.Next() {
-		var item GetAllCustomersByFilterItem
-		err := rows.Scan(
-			&item.ID,
-			&item.Name,
-			&item.LineName,
-			&item.Phone,
-			&item.Birthday,
-			&item.City,
-			&item.Level,
-			&item.IsBlacklisted,
-			&item.LastVisitAt,
-			&item.UpdatedAt,
-		)
-		if err != nil {
-			return 0, nil, err
-		}
-		results = append(results, item)
+	if err := r.db.SelectContext(ctx, &results, dataQuery, args...); err != nil {
+		return 0, nil, fmt.Errorf("failed to execute data query: %w", err)
 	}
 
 	return total, results, nil
 }
 
-// ------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateCustomerParams struct {
 	Name           *string
@@ -191,6 +174,7 @@ type UpdateCustomerResponse struct {
 }
 
 func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int64, params UpdateCustomerParams) (UpdateCustomerResponse, error) {
+	// set conditions
 	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
 
@@ -259,20 +243,42 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 		args = append(args, *params.IsBlacklisted)
 	}
 
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return UpdateCustomerResponse{}, fmt.Errorf("no fields to update")
+	}
+
 	args = append(args, customerID)
 
+	// Data query
 	query := fmt.Sprintf(`
 		UPDATE customers
 		SET %s
 		WHERE id = $%d
-		RETURNING id, name, phone, birthday, email, city, favorite_shapes, favorite_colors, favorite_styles, is_introvert, customer_note, store_note, level, is_blacklisted, last_visit_at, updated_at`,
+		RETURNING
+			id,
+			name,
+			phone,
+			birthday,
+			email,
+			city,
+			COALESCE(favorite_shapes, '{}'::text[]) AS favorite_shapes,
+			COALESCE(favorite_colors, '{}'::text[]) AS favorite_colors,
+			COALESCE(favorite_styles, '{}'::text[]) AS favorite_styles,
+			is_introvert,
+			customer_note,
+			store_note,
+			level,
+			is_blacklisted,
+			last_visit_at,
+			updated_at
+		`,
 		strings.Join(setParts, ", "), len(args))
 
 	row := r.db.QueryRowxContext(ctx, query, args...)
 	m := pgtype.NewMap()
 
 	var result UpdateCustomerResponse
-
 	err := row.Scan(
 		&result.ID,
 		&result.Name,

@@ -193,7 +193,7 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 		SubServiceNames: subServiceNames,
 		IsChatEnabled:   isChatEnabled,
 		Note:            utils.PgTextToString(bookingInfo.Note),
-		Status:          bookingModel.BookingStatusScheduled,
+		Status:          common.BookingStatusScheduled,
 		CreatedAt:       utils.PgTimestamptzToTimeString(bookingInfo.CreatedAt),
 		UpdatedAt:       utils.PgTimestamptzToTimeString(bookingInfo.UpdatedAt),
 	}

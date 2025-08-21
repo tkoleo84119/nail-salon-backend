@@ -21,7 +21,7 @@ func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
 
 func (s *GetAll) GetAll(ctx context.Context, req adminServiceModel.GetAllParsedRequest) (*adminServiceModel.GetAllResponse, error) {
 	// Get service list from repository
-	total, results, err := s.repo.Service.GetAllServiceByFilter(ctx, sqlxRepo.GetAllServiceByFilterParams{
+	total, results, err := s.repo.Service.GetAllServicesByFilter(ctx, sqlxRepo.GetAllServicesByFilterParams{
 		Name:      req.Name,
 		IsAddon:   req.IsAddon,
 		IsActive:  req.IsActive,

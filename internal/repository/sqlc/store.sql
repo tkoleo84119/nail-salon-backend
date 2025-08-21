@@ -31,14 +31,6 @@ SELECT
 FROM stores
 WHERE id = $1;
 
--- name: GetStoresByIDs :many
-SELECT
-    id,
-    name,
-    is_active
-FROM stores
-WHERE id = ANY($1::bigint[]);
-
 -- name: GetStoreDetailByID :one
 SELECT
     id,

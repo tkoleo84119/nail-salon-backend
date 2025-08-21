@@ -48,7 +48,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingMode
 	}
 
 	// Get booking list from repository
-	total, bookings, err := s.repo.Booking.GetStoreBookingByFilter(ctx, storeID, sqlx.GetStoreBookingByFilterParams{
+	total, bookings, err := s.repo.Booking.GetAllStoreBookingsByFilter(ctx, storeID, sqlx.GetAllStoreBookingsByFilterParams{
 		StylistID: req.StylistID,
 		StartDate: req.StartDate,
 		EndDate:   req.EndDate,

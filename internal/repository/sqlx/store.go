@@ -11,11 +11,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type StoreRepositoryInterface interface {
-	GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error)
-	UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error)
-}
-
 type StoreRepository struct {
 	db *sqlx.DB
 }
@@ -26,7 +21,9 @@ func NewStoreRepository(db *sqlx.DB) *StoreRepository {
 	}
 }
 
-type GetAllStoreByFilterParams struct {
+// ---------------------------------------------------------------------------------------------------------------------
+
+type GetAllStoresByFilterParams struct {
 	Name     *string
 	IsActive *bool
 	Limit    *int
@@ -34,7 +31,7 @@ type GetAllStoreByFilterParams struct {
 	Sort     *[]string
 }
 
-type GetAllStoreByFilterItem struct {
+type GetAllStoresByFilterItem struct {
 	ID        int64              `db:"id"`
 	Name      string             `db:"name"`
 	Address   pgtype.Text        `db:"address"`
@@ -44,43 +41,27 @@ type GetAllStoreByFilterItem struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
 
-// GetAllByFilter retrieves all stores, can filter by name and is_active
-func (r *StoreRepository) GetAllStoreByFilter(ctx context.Context, params GetAllStoreByFilterParams) (int, []GetAllStoreByFilterItem, error) {
-	// Set default pagination values
-	limit := 20
-	offset := 0
-	if params.Limit != nil && *params.Limit > 0 {
-		limit = *params.Limit
-	}
-	if params.Offset != nil && *params.Offset >= 0 {
-		offset = *params.Offset
-	}
-
-	// Set default sort values
-	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_active"}, "created_at", "ASC", params.Sort)
-
-	whereParts := []string{}
-	args := map[string]interface{}{
-		"limit":  limit,
-		"offset": offset,
-	}
+func (r *StoreRepository) GetAllStoresByFilter(ctx context.Context, params GetAllStoresByFilterParams) (int, []GetAllStoresByFilterItem, error) {
+	// where conditions
+	whereConditions := []string{}
+	args := []interface{}{}
 
 	if params.Name != nil && *params.Name != "" {
-		whereParts = append(whereParts, "name ILIKE :name")
-		args["name"] = "%" + *params.Name + "%"
+		whereConditions = append(whereConditions, fmt.Sprintf("name ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*params.Name+"%")
 	}
 
 	if params.IsActive != nil {
-		whereParts = append(whereParts, "is_active = :is_active")
-		args["is_active"] = *params.IsActive
+		whereConditions = append(whereConditions, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
 	}
 
 	whereClause := ""
-	if len(whereParts) > 0 {
-		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
+	if len(whereConditions) > 0 {
+		whereClause = "WHERE " + strings.Join(whereConditions, " AND ")
 	}
 
-	// Count query for total records
+	// Count query
 	countQuery := fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM stores
@@ -88,39 +69,35 @@ func (r *StoreRepository) GetAllStoreByFilter(ctx context.Context, params GetAll
 	`, whereClause)
 
 	var total int
-	rows, err := r.db.NamedQueryContext(ctx, countQuery, args)
-	if err != nil {
+	if err := r.db.GetContext(ctx, &total, countQuery, args...); err != nil {
 		return 0, nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
-	defer rows.Close()
 
-	if rows.Next() {
-		if err := rows.Scan(&total); err != nil {
-			return 0, nil, fmt.Errorf("failed to scan count: %w", err)
-		}
-	}
+	// Pagination + Sorting
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
+	defaultSortArr := []string{"created_at ASC"}
+	sort := utils.HandleSortByMap(map[string]string{
+		"isActive":  "is_active",
+		"createdAt": "created_at",
+		"updatedAt": "updated_at",
+	}, defaultSortArr, params.Sort)
 
+	args = append(args, limit, offset)
+	limitIndex := len(args) - 1
+	offsetIndex := len(args)
+
+	// Data query
 	query := fmt.Sprintf(`
 		SELECT id, name, address, phone, is_active, created_at, updated_at
 		FROM stores
 		%s
 		ORDER BY %s
-		LIMIT :limit OFFSET :offset
-	`, whereClause, sort)
+		LIMIT $%d OFFSET $%d
+	`, whereClause, sort, limitIndex, offsetIndex)
 
-	var results []GetAllStoreByFilterItem
-	rows, err = r.db.NamedQueryContext(ctx, query, args)
-	if err != nil {
+	var results []GetAllStoresByFilterItem
+	if err := r.db.SelectContext(ctx, &results, query, args...); err != nil {
 		return 0, nil, fmt.Errorf("failed to execute query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var item GetAllStoreByFilterItem
-		if err := rows.StructScan(&item); err != nil {
-			return 0, nil, fmt.Errorf("failed to scan row: %w", err)
-		}
-		results = append(results, item)
 	}
 
 	return total, results, nil
@@ -146,35 +123,41 @@ type UpdateStoreResponse struct {
 }
 
 func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error) {
+	// set conditions
 	setParts := []string{"updated_at = NOW()"}
-	args := map[string]interface{}{
-		"id": storeID,
-	}
+	args := []interface{}{}
 
 	if req.Name != nil && *req.Name != "" {
-		setParts = append(setParts, "name = :name")
-		args["name"] = *req.Name
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *req.Name)
 	}
 
 	if req.Address != nil {
-		setParts = append(setParts, "address = :address")
-		args["address"] = utils.StringPtrToPgText(req.Address, false)
+		setParts = append(setParts, fmt.Sprintf("address = $%d", len(args)+1))
+		args = append(args, utils.StringPtrToPgText(req.Address, false))
 	}
 
 	if req.Phone != nil {
-		setParts = append(setParts, "phone = :phone")
-		args["phone"] = utils.StringPtrToPgText(req.Phone, false)
+		setParts = append(setParts, fmt.Sprintf("phone = $%d", len(args)+1))
+		args = append(args, utils.StringPtrToPgText(req.Phone, false))
 	}
 
 	if req.IsActive != nil {
-		setParts = append(setParts, "is_active = :is_active")
-		args["is_active"] = utils.BoolPtrToPgBool(req.IsActive)
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, utils.BoolPtrToPgBool(req.IsActive))
 	}
+
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return nil, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, storeID)
 
 	query := fmt.Sprintf(`
 		UPDATE stores
 		SET %s
-		WHERE id = :id
+		WHERE id = $%d
 		RETURNING
 			id,
 			name,
@@ -183,21 +166,11 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req Up
 			is_active,
 			created_at,
 			updated_at
-	`, strings.Join(setParts, ", "))
-
-	rows, err := r.db.NamedQuery(query, args)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute update query: %w", err)
-	}
-	defer rows.Close()
+	`, strings.Join(setParts, ", "), len(args))
 
 	var result UpdateStoreResponse
-	if !rows.Next() {
-		return nil, fmt.Errorf("no rows returned from update")
-	}
-
-	if err := rows.StructScan(&result); err != nil {
-		return nil, fmt.Errorf("failed to scan result: %w", err)
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return nil, fmt.Errorf("failed to execute update query: %w", err)
 	}
 
 	return &result, nil

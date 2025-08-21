@@ -20,7 +20,7 @@ func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
 }
 
 func (s *GetAll) GetAll(ctx context.Context, req adminTimeSlotTemplateModel.GetAllParsedRequest) (*adminTimeSlotTemplateModel.GetAllResponse, error) {
-	total, timeSlotTemplates, err := s.repo.Template.GetAllTimeSlotTemplateByFilter(ctx, sqlxRepo.GetAllTimeSlotTemplateByFilterParams{
+	total, timeSlotTemplates, err := s.repo.Template.GetAllTimeSlotTemplatesByFilter(ctx, sqlxRepo.GetAllTimeSlotTemplatesByFilterParams{
 		Name:   req.Name,
 		Limit:  &req.Limit,
 		Offset: &req.Offset,

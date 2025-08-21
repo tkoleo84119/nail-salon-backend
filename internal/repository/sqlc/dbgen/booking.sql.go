@@ -152,33 +152,3 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 	)
 	return i, err
 }
-
-const updateBookingByStaff = `-- name: UpdateBookingByStaff :one
-UPDATE bookings
-SET
-    time_slot_id = COALESCE($2, time_slot_id),
-    is_chat_enabled = COALESCE($3, is_chat_enabled),
-    note = COALESCE($4, note),
-    updated_at = NOW()
-WHERE id = $1
-RETURNING id
-`
-
-type UpdateBookingByStaffParams struct {
-	ID            int64       `db:"id" json:"id"`
-	TimeSlotID    int64       `db:"time_slot_id" json:"time_slot_id"`
-	IsChatEnabled pgtype.Bool `db:"is_chat_enabled" json:"is_chat_enabled"`
-	Note          pgtype.Text `db:"note" json:"note"`
-}
-
-func (q *Queries) UpdateBookingByStaff(ctx context.Context, arg UpdateBookingByStaffParams) (int64, error) {
-	row := q.db.QueryRow(ctx, updateBookingByStaff,
-		arg.ID,
-		arg.TimeSlotID,
-		arg.IsChatEnabled,
-		arg.Note,
-	)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
-}

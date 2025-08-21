@@ -31,7 +31,7 @@ func HandleSort(allowedFields []string, defaultSort string, defaultSortDirection
 }
 
 // HandleSortByMap handles the sort parameter by map => for join table sort
-func HandleSortByMap(allowedFields map[string]string, defaultSort string, defaultSortDirection string, sort *[]string) string {
+func HandleSortByMap(allowedFields map[string]string, defaultSortArr []string, sort *[]string) string {
 	var sortParts []string
 
 	if sort != nil && len(*sort) > 0 {
@@ -52,7 +52,7 @@ func HandleSortByMap(allowedFields map[string]string, defaultSort string, defaul
 	}
 
 	if len(sortParts) == 0 {
-		sortParts = append(sortParts, defaultSort+" "+defaultSortDirection)
+		sortParts = append(sortParts, defaultSortArr...)
 	}
 
 	return strings.Join(sortParts, ", ")

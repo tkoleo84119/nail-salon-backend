@@ -7,14 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
-
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
-
-type ServiceRepositoryInterface interface {
-	GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error)
-	UpdateService(ctx context.Context, serviceID int64, params UpdateServiceParams) (UpdateServiceResponse, error)
-}
 
 type ServiceRepository struct {
 	db *sqlx.DB
@@ -26,8 +20,19 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 	}
 }
 
-// GetStoreServiceListModel represents the database model for admin service list queries
-type GetAllServiceByFilterItem struct {
+// ---------------------------------------------------------------------------------------------------------------------
+
+type GetAllServicesByFilterParams struct {
+	Name      *string
+	IsAddon   *bool
+	IsActive  *bool
+	IsVisible *bool
+	Limit     *int
+	Offset    *int
+	Sort      *[]string
+}
+
+type GetAllServicesByFilterItem struct {
 	ID              int64              `db:"id"`
 	Name            string             `db:"name"`
 	Price           pgtype.Numeric     `db:"price"`
@@ -40,56 +45,38 @@ type GetAllServiceByFilterItem struct {
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 }
 
-type GetAllServiceByFilterParams struct {
-	Name      *string
-	IsAddon   *bool
-	IsActive  *bool
-	IsVisible *bool
-	Limit     *int
-	Offset    *int
-	Sort      *[]string
-}
-
-// GetStoreServiceList retrieves services for a specific store with admin filtering and pagination
-func (r *ServiceRepository) GetAllServiceByFilter(ctx context.Context, params GetAllServiceByFilterParams) (int, []GetAllServiceByFilterItem, error) {
-	// Set default values
-	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-
-	// Set default sort values
-	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_active", "is_visible", "is_addon"}, "created_at", "ASC", params.Sort)
-
-	// Build WHERE clause parts
-	whereParts := []string{}
-	args := map[string]interface{}{
-		"limit":  limit,
-		"offset": offset,
-	}
+// GetAllServicesByFilter retrieves services with filtering, pagination and sorting
+func (r *ServiceRepository) GetAllServicesByFilter(ctx context.Context, params GetAllServicesByFilterParams) (int, []GetAllServicesByFilterItem, error) {
+	// where conditions
+	whereConditions := []string{}
+	args := []interface{}{}
 
 	if params.Name != nil && *params.Name != "" {
-		whereParts = append(whereParts, "name ILIKE :name")
-		args["name"] = "%" + *params.Name + "%"
+		whereConditions = append(whereConditions, fmt.Sprintf("name ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*params.Name+"%")
 	}
 
 	if params.IsAddon != nil {
-		whereParts = append(whereParts, "is_addon = :is_addon")
-		args["is_addon"] = *params.IsAddon
+		whereConditions = append(whereConditions, fmt.Sprintf("is_addon = $%d", len(args)+1))
+		args = append(args, *params.IsAddon)
 	}
 
 	if params.IsActive != nil {
-		whereParts = append(whereParts, "is_active = :is_active")
-		args["is_active"] = *params.IsActive
+		whereConditions = append(whereConditions, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
 	}
 
 	if params.IsVisible != nil {
-		whereParts = append(whereParts, "is_visible = :is_visible")
-		args["is_visible"] = *params.IsVisible
+		whereConditions = append(whereConditions, fmt.Sprintf("is_visible = $%d", len(args)+1))
+		args = append(args, *params.IsVisible)
 	}
 
 	whereClause := ""
-	if len(whereParts) > 0 {
-		whereClause = fmt.Sprintf("WHERE %s", strings.Join(whereParts, " AND "))
+	if len(whereConditions) > 0 {
+		whereClause = "WHERE " + strings.Join(whereConditions, " AND ")
 	}
 
+	// Count query
 	countQuery := fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM services
@@ -97,19 +84,27 @@ func (r *ServiceRepository) GetAllServiceByFilter(ctx context.Context, params Ge
 	`, whereClause)
 
 	var total int
-	rows, err := r.db.NamedQueryContext(ctx, countQuery, args)
+	err := r.db.GetContext(ctx, &total, countQuery, args...)
 	if err != nil {
 		return 0, nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err := rows.Scan(&total); err != nil {
-			return 0, nil, fmt.Errorf("failed to scan count: %w", err)
-		}
+	if total == 0 {
+		return 0, []GetAllServicesByFilterItem{}, nil
 	}
 
-	// Main query with pagination
+	// Pagination + Sorting
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
+	defaultSortArr := []string{"created_at ASC"}
+	sort := utils.HandleSortByMap(map[string]string{
+		"createdAt": "created_at",
+		"updatedAt": "updated_at",
+	}, defaultSortArr, params.Sort)
+
+	args = append(args, limit, offset)
+	limitIndex := len(args) - 1
+	offsetIndex := len(args)
+
+	// Data query
 	query := fmt.Sprintf(`
 		SELECT
 			id,
@@ -125,28 +120,18 @@ func (r *ServiceRepository) GetAllServiceByFilter(ctx context.Context, params Ge
 		FROM services
 		%s
 		ORDER BY %s
-		LIMIT :limit OFFSET :offset
-	`, whereClause, sort)
+		LIMIT $%d OFFSET $%d
+	`, whereClause, sort, limitIndex, offsetIndex)
 
-	var results []GetAllServiceByFilterItem
-	rows, err = r.db.NamedQueryContext(ctx, query, args)
-	if err != nil {
-		return 0, nil, fmt.Errorf("failed to execute query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var item GetAllServiceByFilterItem
-		if err := rows.StructScan(&item); err != nil {
-			return 0, nil, fmt.Errorf("failed to scan row: %w", err)
-		}
-		results = append(results, item)
+	var results []GetAllServicesByFilterItem
+	if err := r.db.SelectContext(ctx, &results, query, args...); err != nil {
+		return 0, nil, fmt.Errorf("failed to execute data query: %w", err)
 	}
 
 	return total, results, nil
 }
 
-// ------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateServiceParams struct {
 	Name            *string
@@ -172,67 +157,63 @@ type UpdateServiceResponse struct {
 }
 
 func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, params UpdateServiceParams) (UpdateServiceResponse, error) {
+	// set conditions
 	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
-	argIndex := 1
 
-	if params.Name != nil {
-		setParts = append(setParts, fmt.Sprintf("name = $%d", argIndex))
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
 		args = append(args, *params.Name)
-		argIndex++
 	}
 
 	if params.Price != nil {
-		setParts = append(setParts, fmt.Sprintf("price = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("price = $%d", len(args)+1))
 		args = append(args, *params.Price)
-		argIndex++
 	}
 
 	if params.DurationMinutes != nil {
-		setParts = append(setParts, fmt.Sprintf("duration_minutes = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("duration_minutes = $%d", len(args)+1))
 		args = append(args, *params.DurationMinutes)
-		argIndex++
 	}
 
 	if params.IsAddon != nil {
-		setParts = append(setParts, fmt.Sprintf("is_addon = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("is_addon = $%d", len(args)+1))
 		args = append(args, *params.IsAddon)
-		argIndex++
 	}
 
 	if params.IsVisible != nil {
-		setParts = append(setParts, fmt.Sprintf("is_visible = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("is_visible = $%d", len(args)+1))
 		args = append(args, *params.IsVisible)
-		argIndex++
 	}
 
 	if params.IsActive != nil {
-		setParts = append(setParts, fmt.Sprintf("is_active = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
 		args = append(args, *params.IsActive)
-		argIndex++
 	}
 
 	if params.Note != nil {
-		setParts = append(setParts, fmt.Sprintf("note = $%d", argIndex))
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
 		args = append(args, *params.Note)
-		argIndex++
+	}
+
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return UpdateServiceResponse{}, fmt.Errorf("no fields to update")
 	}
 
 	// Add WHERE clause
 	args = append(args, serviceID)
-	whereClause := fmt.Sprintf("WHERE id = $%d", argIndex)
 
 	query := fmt.Sprintf(`
 		UPDATE services
 		SET %s
-		%s
+		WHERE id = $%d
 		RETURNING id, name, price, duration_minutes, is_addon, is_visible, is_active, note, created_at, updated_at
-	`, strings.Join(setParts, ", "), whereClause)
+	`, strings.Join(setParts, ", "), len(args))
 
 	var result UpdateServiceResponse
-	err := r.db.GetContext(ctx, &result, query, args...)
-	if err != nil {
-		return UpdateServiceResponse{}, err
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return UpdateServiceResponse{}, fmt.Errorf("failed to update service: %w", err)
 	}
 
 	return result, nil

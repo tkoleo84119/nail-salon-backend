@@ -34,7 +34,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, queryParams stylistM
 
 	activeCondition := true
 	// Get stylists from repository
-	total, stylists, err := s.repo.Stylist.GetStoreAllStylistByFilter(ctx, storeID, sqlxRepo.GetStoreAllStylistByFilterParams{
+	total, stylists, err := s.repo.Stylist.GetAllStoreStylistsByFilter(ctx, storeID, sqlxRepo.GetAllStoreStylistsByFilterParams{
 		IsActive: &activeCondition,
 		Limit:    &queryParams.Limit,
 		Offset:   &queryParams.Offset,

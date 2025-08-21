@@ -10,12 +10,6 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-// StaffUserRepositoryInterface defines the interface for staff user repository
-type StaffUserRepositoryInterface interface {
-	GetAllStaffByFilter(ctx context.Context, params GetAllStaffByFilterParams) (int, []GetAllStaffByFilterResponse, error)
-	UpdateStaffUser(ctx context.Context, id int64, params UpdateStaffUserParams) (*UpdateStaffUserResponse, error)
-}
-
 type StaffUserRepository struct {
 	db *sqlx.DB
 }
@@ -25,6 +19,8 @@ func NewStaffUserRepository(db *sqlx.DB) *StaffUserRepository {
 		db: db,
 	}
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 type GetAllStaffByFilterParams struct {
 	Username *string
@@ -46,46 +42,38 @@ type GetAllStaffByFilterResponse struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
 
-// GetStaffList retrieves staff list with dynamic filtering and pagination
+// GetAllStaffByFilter retrieves staff list with dynamic filtering and pagination
 func (r *StaffUserRepository) GetAllStaffByFilter(ctx context.Context, params GetAllStaffByFilterParams) (int, []GetAllStaffByFilterResponse, error) {
-	// Set default values
-	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-
-	// Set default sort values
-	sort := utils.HandleSort([]string{"created_at", "updated_at", "is_active", "role"}, "created_at", "ASC", params.Sort)
-
-	whereParts := []string{}
-	args := map[string]interface{}{
-		"limit":  limit,
-		"offset": offset,
-	}
+	// where conditions
+	whereConditions := []string{}
+	args := []interface{}{}
 
 	if params.Username != nil && *params.Username != "" {
-		whereParts = append(whereParts, "username ILIKE :username")
-		args["username"] = "%" + *params.Username + "%"
+		whereConditions = append(whereConditions, fmt.Sprintf("username ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*params.Username+"%")
 	}
 
 	if params.Email != nil && *params.Email != "" {
-		whereParts = append(whereParts, "email ILIKE :email")
-		args["email"] = "%" + *params.Email + "%"
+		whereConditions = append(whereConditions, fmt.Sprintf("email ILIKE $%d", len(args)+1))
+		args = append(args, "%"+*params.Email+"%")
 	}
 
 	if params.IsActive != nil {
-		whereParts = append(whereParts, "is_active = :is_active")
-		args["is_active"] = *params.IsActive
+		whereConditions = append(whereConditions, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
 	}
 
 	if params.Role != nil {
-		whereParts = append(whereParts, "role = :role")
-		args["role"] = *params.Role
+		whereConditions = append(whereConditions, fmt.Sprintf("role = $%d", len(args)+1))
+		args = append(args, *params.Role)
 	}
 
 	whereClause := ""
-	if len(whereParts) > 0 {
-		whereClause = "WHERE " + strings.Join(whereParts, " AND ")
+	if len(whereConditions) > 0 {
+		whereClause = "WHERE " + strings.Join(whereConditions, " AND ")
 	}
 
-	// Count query for total records
+	// Count query
 	countQuery := fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM staff_users
@@ -93,20 +81,29 @@ func (r *StaffUserRepository) GetAllStaffByFilter(ctx context.Context, params Ge
 	`, whereClause)
 
 	var total int
-	rows, err := r.db.NamedQueryContext(ctx, countQuery, args)
-	if err != nil {
+	if err := r.db.GetContext(ctx, &total, countQuery, args...); err != nil {
 		return 0, nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err := rows.Scan(&total); err != nil {
-			return 0, nil, fmt.Errorf("failed to scan count result: %w", err)
-		}
+	if total == 0 {
+		return 0, []GetAllStaffByFilterResponse{}, nil
 	}
 
-	// Get staff list
-	listQuery := fmt.Sprintf(`
+	// Pagination + Sorting
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
+	defaultSortArr := []string{"created_at ASC"}
+	sort := utils.HandleSortByMap(map[string]string{
+		"isActive":  "is_active",
+		"role":      "role",
+		"createdAt": "created_at",
+		"updatedAt": "updated_at",
+	}, defaultSortArr, params.Sort)
+
+	args = append(args, limit, offset)
+	limitIndex := len(args) - 1
+	offsetIndex := len(args)
+
+	// Data query
+	query := fmt.Sprintf(`
 		SELECT
 			id,
 			username,
@@ -118,28 +115,18 @@ func (r *StaffUserRepository) GetAllStaffByFilter(ctx context.Context, params Ge
 		FROM staff_users
 		%s
 		ORDER BY %s
-		LIMIT :limit OFFSET :offset
-	`, whereClause, sort)
+		LIMIT $%d OFFSET $%d
+	`, whereClause, sort, limitIndex, offsetIndex)
 
 	var result []GetAllStaffByFilterResponse
-	rows, err = r.db.NamedQueryContext(ctx, listQuery, args)
-	if err != nil {
-		return 0, nil, fmt.Errorf("failed to execute list query: %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var item GetAllStaffByFilterResponse
-		if err := rows.StructScan(&item); err != nil {
-			return 0, nil, fmt.Errorf("failed to scan result: %w", err)
-		}
-		result = append(result, item)
+	if err := r.db.SelectContext(ctx, &result, query, args...); err != nil {
+		return 0, nil, fmt.Errorf("failed to execute data query: %w", err)
 	}
 
 	return total, result, nil
 }
 
-// ------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateStaffUserParams struct {
 	Email    *string
@@ -158,55 +145,44 @@ type UpdateStaffUserResponse struct {
 }
 
 // UpdateStaffUser updates staff user with dynamic fields
-func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, params UpdateStaffUserParams) (*UpdateStaffUserResponse, error) {
+func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, params UpdateStaffUserParams) (UpdateStaffUserResponse, error) {
+	// set conditions
 	setParts := []string{"updated_at = NOW()"}
-	args := map[string]interface{}{
-		"id": id,
-	}
+	args := []interface{}{}
 
 	if params.Email != nil && *params.Email != "" {
-		setParts = append(setParts, "email = :email")
-		args["email"] = *params.Email
+		setParts = append(setParts, fmt.Sprintf("email = $%d", len(args)+1))
+		args = append(args, *params.Email)
 	}
 
 	if params.Role != nil {
-		setParts = append(setParts, "role = :role")
-		args["role"] = *params.Role
+		setParts = append(setParts, fmt.Sprintf("role = $%d", len(args)+1))
+		args = append(args, *params.Role)
 	}
 
 	if params.IsActive != nil {
-		setParts = append(setParts, "is_active = :is_active")
-		args["is_active"] = *params.IsActive
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
 	}
+
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return UpdateStaffUserResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, id)
 
 	query := fmt.Sprintf(`
 		UPDATE staff_users
 		SET %s
-		WHERE id = :id
-		RETURNING
-			id,
-			username,
-			email,
-			role,
-			is_active,
-			created_at,
-			updated_at
-	`, strings.Join(setParts, ", "))
+		WHERE id = $%d
+		RETURNING id, username, email, role, is_active, created_at, updated_at
+	`, strings.Join(setParts, ", "), len(args))
 
 	var result UpdateStaffUserResponse
-	rows, err := r.db.NamedQuery(query, args)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute update query: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return nil, fmt.Errorf("no rows returned from update")
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return UpdateStaffUserResponse{}, fmt.Errorf("failed to execute update query: %w", err)
 	}
 
-	if err := rows.StructScan(&result); err != nil {
-		return nil, fmt.Errorf("failed to scan result: %w", err)
-	}
-
-	return &result, nil
+	return result, nil
 }

@@ -20,7 +20,7 @@ func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
 }
 
 func (s *GetAll) GetAll(ctx context.Context, req adminStoreModel.GetAllParsedRequest) (*adminStoreModel.GetAllResponse, error) {
-	total, items, err := s.repo.Store.GetAllStoreByFilter(ctx, sqlxRepo.GetAllStoreByFilterParams{
+	total, items, err := s.repo.Store.GetAllStoresByFilter(ctx, sqlxRepo.GetAllStoresByFilterParams{
 		Name:     req.Name,
 		IsActive: req.IsActive,
 		Limit:    &req.Limit,

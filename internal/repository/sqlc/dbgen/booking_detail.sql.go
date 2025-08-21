@@ -11,45 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createBookingDetail = `-- name: CreateBookingDetail :one
-INSERT INTO booking_details (
-    id,
-    booking_id,
-    service_id,
-    price
-) VALUES (
-    $1, $2, $3, $4
-) RETURNING id, booking_id, service_id, price, discount_rate, discount_amount, created_at, updated_at
-`
-
-type CreateBookingDetailParams struct {
-	ID        int64          `db:"id" json:"id"`
-	BookingID int64          `db:"booking_id" json:"booking_id"`
-	ServiceID int64          `db:"service_id" json:"service_id"`
-	Price     pgtype.Numeric `db:"price" json:"price"`
-}
-
-func (q *Queries) CreateBookingDetail(ctx context.Context, arg CreateBookingDetailParams) (BookingDetail, error) {
-	row := q.db.QueryRow(ctx, createBookingDetail,
-		arg.ID,
-		arg.BookingID,
-		arg.ServiceID,
-		arg.Price,
-	)
-	var i BookingDetail
-	err := row.Scan(
-		&i.ID,
-		&i.BookingID,
-		&i.ServiceID,
-		&i.Price,
-		&i.DiscountRate,
-		&i.DiscountAmount,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 type CreateBookingDetailsParams struct {
 	ID        int64              `db:"id" json:"id"`
 	BookingID int64              `db:"booking_id" json:"booking_id"`
@@ -57,16 +18,6 @@ type CreateBookingDetailsParams struct {
 	Price     pgtype.Numeric     `db:"price" json:"price"`
 	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-}
-
-const deleteBookingDetailsByBookingID = `-- name: DeleteBookingDetailsByBookingID :exec
-DELETE FROM booking_details
-WHERE booking_id = $1
-`
-
-func (q *Queries) DeleteBookingDetailsByBookingID(ctx context.Context, bookingID int64) error {
-	_, err := q.db.Exec(ctx, deleteBookingDetailsByBookingID, bookingID)
-	return err
 }
 
 const getBookingDetailsByBookingID = `-- name: GetBookingDetailsByBookingID :many

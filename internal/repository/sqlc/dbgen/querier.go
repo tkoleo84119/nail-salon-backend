@@ -35,7 +35,6 @@ type Querier interface {
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
 	CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.Context, arg CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams) (bool, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
-	CreateBookingDetail(ctx context.Context, arg CreateBookingDetailParams) (BookingDetail, error)
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
@@ -48,7 +47,6 @@ type Querier interface {
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
 	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)
 	CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (CreateTimeSlotTemplateItemRow, error)
-	DeleteBookingDetailsByBookingID(ctx context.Context, bookingID int64) error
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
@@ -73,7 +71,6 @@ type Querier interface {
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error)
 	GetStoreDetailByID(ctx context.Context, id int64) (Store, error)
-	GetStoresByIDs(ctx context.Context, dollar_1 []int64) ([]GetStoresByIDsRow, error)
 	GetStylistByID(ctx context.Context, id int64) (Stylist, error)
 	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (Stylist, error)
 	GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error)
@@ -84,7 +81,6 @@ type Querier interface {
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (GetValidCustomerTokenRow, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error)
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
-	UpdateBookingByStaff(ctx context.Context, arg UpdateBookingByStaffParams) (int64, error)
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
 	UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (UpdateTimeSlotTemplateItemRow, error)

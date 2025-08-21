@@ -10,6 +10,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -52,7 +53,7 @@ func (s *Update) Update(ctx context.Context, bookingID int64, req bookingModel.U
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 	// only allow update booking in BookingStatusScheduled status
-	if bookingInfo.Status != bookingModel.BookingStatusScheduled {
+	if bookingInfo.Status != common.BookingStatusScheduled {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingStatusNotAllowedToUpdate)
 	}
 
@@ -72,7 +73,7 @@ func (s *Update) Update(ctx context.Context, bookingID int64, req bookingModel.U
 	defer tx.Rollback()
 
 	// Update booking
-	bookingID, err = s.repo.Booking.UpdateBookingTx(ctx, tx, bookingID, sqlxRepo.UpdateBookingParams{
+	bookingID, err = s.repo.Booking.UpdateBookingTx(ctx, tx, bookingID, sqlxRepo.UpdateBookingTxParams{
 		StoreID:       req.StoreId,
 		StylistID:     req.StylistId,
 		TimeSlotID:    req.TimeSlotId,
@@ -92,10 +93,10 @@ func (s *Update) Update(ctx context.Context, bookingID int64, req bookingModel.U
 
 	// when time slot is different, update old time slot to available and new time slot to unavailable
 	if req.TimeSlotId != nil && bookingInfo.TimeSlotID != *req.TimeSlotId {
-		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityByBookingIDTx(ctx, tx, bookingInfo.TimeSlotID, true); err != nil {
+		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityTx(ctx, tx, bookingInfo.TimeSlotID, true); err != nil {
 			return nil, err
 		}
-		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityByBookingIDTx(ctx, tx, *req.TimeSlotId, false); err != nil {
+		if err := s.repo.TimeSlot.UpdateTimeSlotAvailabilityTx(ctx, tx, *req.TimeSlotId, false); err != nil {
 			return nil, err
 		}
 	}

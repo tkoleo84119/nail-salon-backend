@@ -21,7 +21,7 @@ func NewGetAll(repo *sqlxRepo.Repositories) GetAllInterface {
 
 func (s *GetAll) GetAll(ctx context.Context, queryParams storeModel.GetAllParsedRequest) (*storeModel.GetAllResponse, error) {
 	activeCondition := true
-	total, stores, err := s.repo.Store.GetAllStoreByFilter(ctx, sqlxRepo.GetAllStoreByFilterParams{
+	total, stores, err := s.repo.Store.GetAllStoresByFilter(ctx, sqlxRepo.GetAllStoresByFilterParams{
 		IsActive: &activeCondition,
 		Limit:    &queryParams.Limit,
 		Offset:   &queryParams.Offset,

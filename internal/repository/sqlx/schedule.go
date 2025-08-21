@@ -10,12 +10,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// ScheduleRepositoryInterface defines the interface for schedule repository
-type ScheduleRepositoryInterface interface {
-	GetStoreScheduleByDateRange(ctx context.Context, storeID int64, startDate time.Time, endDate time.Time, params GetStoreScheduleByDateRangeParams) ([]GetStoreScheduleByDateRangeItem, error)
-	UpdateSchedule(ctx context.Context, scheduleID int64, params UpdateScheduleParams) (UpdateScheduleResponse, error)
-}
-
 type ScheduleRepository struct {
 	db *sqlx.DB
 }
@@ -26,12 +20,14 @@ func NewScheduleRepository(db *sqlx.DB) *ScheduleRepository {
 	}
 }
 
-type GetStoreScheduleByDateRangeParams struct {
+// ---------------------------------------------------------------------------------------------------------------------
+
+type GetStoreSchedulesByDateRangeParams struct {
 	StylistID   *[]int64
 	IsAvailable *bool
 }
 
-type GetStoreScheduleByDateRangeItem struct {
+type GetStoreSchedulesByDateRangeItem struct {
 	ID          int64       `db:"id"`
 	StylistID   int64       `db:"stylist_id"`
 	WorkDate    pgtype.Date `db:"work_date"`
@@ -43,21 +39,26 @@ type GetStoreScheduleByDateRangeItem struct {
 	IsAvailable pgtype.Bool `db:"is_available"`
 }
 
-// GetStoreScheduleList retrieves schedules for a specific store using step-by-step queries
-func (r *ScheduleRepository) GetStoreScheduleByDateRange(ctx context.Context, storeID int64, startDate time.Time, endDate time.Time, params GetStoreScheduleByDateRangeParams) ([]GetStoreScheduleByDateRangeItem, error) {
-	scheduleWhereParts := []string{
+// GetStoreSchedulesByDateRange retrieves schedules for a specific store using step-by-step queries
+func (r *ScheduleRepository) GetStoreSchedulesByDateRange(ctx context.Context, storeID int64, startDate time.Time, endDate time.Time, params GetStoreSchedulesByDateRangeParams) ([]GetStoreSchedulesByDateRangeItem, error) {
+	whereParts := []string{
 		"s.store_id = $1",
 		"s.work_date BETWEEN $2 AND $3",
 	}
-	scheduleArgs := []interface{}{storeID, startDate, endDate}
+	args := []interface{}{storeID, startDate, endDate}
 
 	// Add stylist filter if provided
 	if params.StylistID != nil && len(*params.StylistID) > 0 {
-		scheduleWhereParts = append(scheduleWhereParts, "s.stylist_id = ANY($4)")
-		scheduleArgs = append(scheduleArgs, *params.StylistID)
+		whereParts = append(whereParts, fmt.Sprintf("s.stylist_id = ANY($%d)", len(args)+1))
+		args = append(args, *params.StylistID)
 	}
 
-	whereClause := strings.Join(scheduleWhereParts, " AND ")
+	if params.IsAvailable != nil {
+		whereParts = append(whereParts, fmt.Sprintf("ts.is_available = $%d", len(args)+1))
+		args = append(args, *params.IsAvailable)
+	}
+
+	whereClause := strings.Join(whereParts, " AND ")
 
 	scheduleQuery := fmt.Sprintf(`
 		SELECT
@@ -77,35 +78,16 @@ func (r *ScheduleRepository) GetStoreScheduleByDateRange(ctx context.Context, st
 		ORDER BY s.work_date ASC, ts.start_time ASC
 	`, whereClause)
 
-	rows, err := r.db.QueryContext(ctx, scheduleQuery, scheduleArgs...)
+	var results []GetStoreSchedulesByDateRangeItem
+	err := r.db.SelectContext(ctx, &results, scheduleQuery, args...)
 	if err != nil {
-		return []GetStoreScheduleByDateRangeItem{}, err
+		return []GetStoreSchedulesByDateRangeItem{}, fmt.Errorf("failed to execute data query: %w", err)
 	}
-	defer rows.Close()
 
-	response := []GetStoreScheduleByDateRangeItem{}
-	for rows.Next() {
-		var item GetStoreScheduleByDateRangeItem
-		err := rows.Scan(
-			&item.ID,
-			&item.StylistID,
-			&item.WorkDate,
-			&item.Note,
-			&item.StylistName,
-			&item.TimeSlotID,
-			&item.StartTime,
-			&item.EndTime,
-			&item.IsAvailable,
-		)
-		if err != nil {
-			return []GetStoreScheduleByDateRangeItem{}, err
-		}
-		response = append(response, item)
-	}
-	return response, nil
+	return results, nil
 }
 
-// ------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateScheduleParams struct {
 	WorkDate *string
@@ -113,16 +95,17 @@ type UpdateScheduleParams struct {
 }
 
 type UpdateScheduleResponse struct {
-	ID        int64
-	StoreID   int64
-	StylistID int64
-	WorkDate  pgtype.Date
-	Note      pgtype.Text
+	ID        int64       `db:"id"`
+	StoreID   int64       `db:"store_id"`
+	StylistID int64       `db:"stylist_id"`
+	WorkDate  pgtype.Date `db:"work_date"`
+	Note      pgtype.Text `db:"note"`
 }
 
 func (r *ScheduleRepository) UpdateSchedule(ctx context.Context, scheduleID int64, params UpdateScheduleParams) (UpdateScheduleResponse, error) {
+	// set conditions
 	setParts := []string{"updated_at = NOW()"}
-	args := []interface{}{scheduleID}
+	args := []interface{}{}
 
 	if params.WorkDate != nil {
 		setParts = append(setParts, fmt.Sprintf("work_date = $%d", len(args)+1))
@@ -134,24 +117,23 @@ func (r *ScheduleRepository) UpdateSchedule(ctx context.Context, scheduleID int6
 		args = append(args, *params.Note)
 	}
 
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return UpdateScheduleResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, scheduleID)
+
 	query := fmt.Sprintf(`
 		UPDATE schedules
 		SET %s
-		WHERE id = $1
+		WHERE id = $%d
 		RETURNING id, store_id, stylist_id, work_date, note
-	`, strings.Join(setParts, ","))
+	`, strings.Join(setParts, ","), len(args))
 
-	row := r.db.QueryRowxContext(ctx, query, args...)
 	var response UpdateScheduleResponse
-	err := row.Scan(
-		&response.ID,
-		&response.StoreID,
-		&response.StylistID,
-		&response.WorkDate,
-		&response.Note,
-	)
-	if err != nil {
-		return UpdateScheduleResponse{}, err
+	if err := r.db.GetContext(ctx, &response, query, args...); err != nil {
+		return UpdateScheduleResponse{}, fmt.Errorf("failed to update schedule: %w", err)
 	}
 
 	return response, nil
