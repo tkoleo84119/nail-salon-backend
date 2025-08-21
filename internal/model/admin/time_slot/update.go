@@ -3,7 +3,7 @@ package adminTimeSlot
 type UpdateRequest struct {
 	StartTime   *string `json:"startTime,omitempty" binding:"omitempty"`
 	EndTime     *string `json:"endTime,omitempty" binding:"omitempty"`
-	IsAvailable *bool   `json:"isAvailable,omitempty" binding:"omitempty,boolean"`
+	IsAvailable *bool   `json:"isAvailable,omitempty" binding:"omitempty"`
 }
 
 type UpdateResponse struct {

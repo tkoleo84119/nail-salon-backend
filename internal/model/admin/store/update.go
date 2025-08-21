@@ -4,7 +4,7 @@ type UpdateRequest struct {
 	Name     *string `json:"name" binding:"omitempty,min=1,max=100"`
 	Address  *string `json:"address" binding:"omitempty,max=255"`
 	Phone    *string `json:"phone" binding:"omitempty,max=20,taiwanlandline"`
-	IsActive *bool   `json:"isActive" binding:"omitempty,boolean"`
+	IsActive *bool   `json:"isActive" binding:"omitempty"`
 }
 
 type UpdateResponse struct {

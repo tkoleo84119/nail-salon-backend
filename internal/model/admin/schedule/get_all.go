@@ -6,7 +6,7 @@ type GetAllRequest struct {
 	StylistID   *string `form:"stylistId"`
 	StartDate   string  `form:"startDate" binding:"required"`
 	EndDate     string  `form:"endDate" binding:"required"`
-	IsAvailable *bool   `form:"isAvailable" binding:"omitempty,boolean"`
+	IsAvailable *bool   `form:"isAvailable" binding:"omitempty"`
 }
 
 type GetAllParsedRequest struct {

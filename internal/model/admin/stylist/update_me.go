@@ -5,7 +5,7 @@ type UpdateMeRequest struct {
 	GoodAtShapes *[]string `json:"goodAtShapes" binding:"omitempty,max=20"`
 	GoodAtColors *[]string `json:"goodAtColors" binding:"omitempty,max=20"`
 	GoodAtStyles *[]string `json:"goodAtStyles" binding:"omitempty,max=20"`
-	IsIntrovert  *bool     `json:"isIntrovert" binding:"omitempty,boolean"`
+	IsIntrovert  *bool     `json:"isIntrovert" binding:"omitempty"`
 }
 
 type UpdateMeResponse struct {

@@ -7,7 +7,7 @@ type UpdateRequest struct {
 	TimeSlotID    *string   `json:"timeSlotId"`
 	MainServiceID *string   `json:"mainServiceId"`
 	SubServiceIDs *[]string `json:"subServiceIds" binding:"omitempty,max=10"`
-	IsChatEnabled *bool     `json:"isChatEnabled" binding:"omitempty,boolean"`
+	IsChatEnabled *bool     `json:"isChatEnabled" binding:"omitempty"`
 	Note          *string   `json:"note" binding:"omitempty,max=255"`
 }
 

@@ -8,7 +8,7 @@ type CreateRequest struct {
 	TimeSlotId    string   `json:"timeSlotId" binding:"required"`
 	MainServiceId string   `json:"mainServiceId" binding:"required"`
 	SubServiceIds []string `json:"subServiceIds" binding:"omitempty,max=5"`
-	IsChatEnabled *bool    `json:"isChatEnabled" binding:"omitempty,boolean"`
+	IsChatEnabled *bool    `json:"isChatEnabled" binding:"omitempty"`
 	Note          *string  `json:"note" binding:"omitempty,max=500"`
 }
 

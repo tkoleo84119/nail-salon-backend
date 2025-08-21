@@ -50,8 +50,8 @@ func (s *Create) Create(ctx context.Context, req adminServiceModel.CreateRequest
 		Name:            req.Name,
 		Price:           priceNumeric,
 		DurationMinutes: *req.DurationMinutes,
-		IsAddon:         utils.BoolPtrToPgBool(&req.IsAddon),
-		IsVisible:       utils.BoolPtrToPgBool(&req.IsVisible),
+		IsAddon:         utils.BoolPtrToPgBool(req.IsAddon),
+		IsVisible:       utils.BoolPtrToPgBool(req.IsVisible),
 		Note:            utils.StringPtrToPgText(req.Note, true),
 	})
 	if err != nil {

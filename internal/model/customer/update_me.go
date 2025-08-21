@@ -9,7 +9,7 @@ type UpdateMeRequest struct {
 	FavoriteShapes *[]string `json:"favoriteShapes" binding:"omitempty,max=20"`
 	FavoriteColors *[]string `json:"favoriteColors" binding:"omitempty,max=20"`
 	FavoriteStyles *[]string `json:"favoriteStyles" binding:"omitempty,max=20"`
-	IsIntrovert    *bool     `json:"isIntrovert" binding:"omitempty,boolean"`
+	IsIntrovert    *bool     `json:"isIntrovert" binding:"omitempty"`
 	CustomerNote   *string   `json:"customerNote" binding:"omitempty,max=255"`
 }
 

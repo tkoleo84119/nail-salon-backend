@@ -5,7 +5,7 @@ type GetAllRequest struct {
 	LineName      *string `form:"lineName" binding:"omitempty,max=100"`
 	Phone         *string `form:"phone" binding:"omitempty,max=20"`
 	Level         *string `form:"level" binding:"omitempty,oneof=NORMAL VIP VVIP"`
-	IsBlacklisted *bool   `form:"isBlacklisted" binding:"omitempty,boolean"`
+	IsBlacklisted *bool   `form:"isBlacklisted" binding:"omitempty"`
 	MinPastDays   *int    `form:"minPastDays" binding:"omitempty,min=0,max=365"`
 	Limit         *int    `form:"limit" binding:"omitempty,min=1,max=100"`
 	Offset        *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`

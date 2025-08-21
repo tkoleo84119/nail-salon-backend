@@ -3,7 +3,7 @@ package adminCustomer
 type UpdateRequest struct {
 	StoreNote     *string `json:"storeNote" binding:"omitempty,max=255"`
 	Level         *string `json:"level" binding:"omitempty,oneof=NORMAL VIP VVIP"`
-	IsBlacklisted *bool   `json:"isBlacklisted" binding:"omitempty,boolean"`
+	IsBlacklisted *bool   `json:"isBlacklisted" binding:"omitempty"`
 }
 
 type UpdateResponse struct {

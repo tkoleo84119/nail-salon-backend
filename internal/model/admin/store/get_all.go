@@ -2,7 +2,7 @@ package adminStore
 
 type GetAllRequest struct {
 	Name     *string `form:"name" binding:"omitempty,max=100"`
-	IsActive *bool   `form:"isActive" binding:"omitempty,boolean"`
+	IsActive *bool   `form:"isActive" binding:"omitempty"`
 	Limit    *int    `form:"limit" binding:"omitempty,min=1,max=100"`
 	Offset   *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
 	Sort     *string `form:"sort" binding:"omitempty"`

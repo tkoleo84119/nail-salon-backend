@@ -70,12 +70,17 @@ func (h *Create) Create(c *gin.Context) {
 		parsedSubServiceIDs = append(parsedSubServiceIDs, parsedSubServiceID)
 	}
 
+	isChatEnabled := false
+	if req.IsChatEnabled != nil {
+		isChatEnabled = *req.IsChatEnabled
+	}
+
 	parsedRequest := adminBookingModel.CreateParsedRequest{
 		CustomerID:    parsedCustomerID,
 		TimeSlotID:    parsedTimeSlotID,
 		MainServiceID: parsedMainServiceID,
 		SubServiceIDs: parsedSubServiceIDs,
-		IsChatEnabled: req.IsChatEnabled,
+		IsChatEnabled: isChatEnabled,
 		Note:          req.Note,
 	}
 
