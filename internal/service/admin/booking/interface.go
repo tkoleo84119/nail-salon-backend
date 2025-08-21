@@ -14,8 +14,8 @@ type GetAllInterface interface {
 	GetAll(ctx context.Context, storeID int64, req adminBookingModel.GetAllParsedRequest, role string, storeIds []int64) (*adminBookingModel.GetAllResponse, error)
 }
 
-type UpdateBookingByStaffServiceInterface interface {
-	UpdateBookingByStaff(ctx context.Context, storeID, bookingID string, req adminBookingModel.UpdateBookingByStaffRequest) (*adminBookingModel.UpdateBookingByStaffResponse, error)
+type UpdateInterface interface {
+	Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest) (*adminBookingModel.UpdateResponse, error)
 }
 
 type CancelBookingServiceInterface interface {
