@@ -18,6 +18,6 @@ type UpdateInterface interface {
 	Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest) (*adminBookingModel.UpdateResponse, error)
 }
 
-type CancelBookingServiceInterface interface {
-	CancelBooking(ctx context.Context, storeID, bookingID string, req adminBookingModel.CancelBookingRequest) (*adminBookingModel.CancelBookingResponse, error)
+type CancelInterface interface {
+	Cancel(ctx context.Context, storeID, bookingID int64, req adminBookingModel.CancelRequest) (*adminBookingModel.CancelResponse, error)
 }

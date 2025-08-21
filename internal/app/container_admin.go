@@ -80,7 +80,7 @@ type AdminServices struct {
 	BookingCreate adminBookingService.CreateInterface
 	BookingGetAll adminBookingService.GetAllInterface
 	BookingUpdate adminBookingService.UpdateInterface
-	BookingCancel adminBookingService.CancelBookingServiceInterface
+	BookingCancel adminBookingService.CancelInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateBulkInterface
@@ -151,7 +151,7 @@ type AdminHandlers struct {
 	BookingCreate *adminBookingHandler.Create
 	BookingGetAll *adminBookingHandler.GetAll
 	BookingUpdate *adminBookingHandler.Update
-	BookingCancel *adminBookingHandler.CancelBookingHandler
+	BookingCancel *adminBookingHandler.Cancel
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateBulk
@@ -220,7 +220,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BookingCreate: adminBookingService.NewCreate(queries, database.PgxPool),
 		BookingGetAll: adminBookingService.NewGetAll(queries, repositories.SQLX),
 		BookingUpdate: adminBookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
-		BookingCancel: adminBookingService.NewCancelBookingService(database.Sqlx, repositories.SQLX),
+		BookingCancel: adminBookingService.NewCancel(database.Sqlx, repositories.SQLX),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateBulk(queries, database.PgxPool),
@@ -291,7 +291,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		BookingCreate: adminBookingHandler.NewCreate(services.BookingCreate),
 		BookingGetAll: adminBookingHandler.NewGetAll(services.BookingGetAll),
 		BookingUpdate: adminBookingHandler.NewUpdate(services.BookingUpdate),
-		BookingCancel: adminBookingHandler.NewCancelBookingHandler(services.BookingCancel),
+		BookingCancel: adminBookingHandler.NewCancel(services.BookingCancel),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateBulk(services.ScheduleCreateBulk),

@@ -11,21 +11,26 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type CancelBookingHandler struct {
-	service adminBookingService.CancelBookingServiceInterface
+type Cancel struct {
+	service adminBookingService.CancelInterface
 }
 
-func NewCancelBookingHandler(service adminBookingService.CancelBookingServiceInterface) *CancelBookingHandler {
-	return &CancelBookingHandler{
+func NewCancel(service adminBookingService.CancelInterface) *Cancel {
+	return &Cancel{
 		service: service,
 	}
 }
 
-func (h *CancelBookingHandler) CancelBooking(c *gin.Context) {
+func (h *Cancel) Cancel(c *gin.Context) {
 	// Get path parameters
 	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
+		return
+	}
+	parsedStoreID, err := utils.ParseID(storeID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
 		return
 	}
 
@@ -34,9 +39,14 @@ func (h *CancelBookingHandler) CancelBooking(c *gin.Context) {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"bookingId": "bookingId 為必填項目"})
 		return
 	}
+	parsedBookingID, err := utils.ParseID(bookingID)
+	if err != nil {
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"bookingId": "bookingId 類型轉換失敗"})
+		return
+	}
 
 	// Parse request body
-	var req adminBookingModel.CancelBookingRequest
+	var req adminBookingModel.CancelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -44,7 +54,7 @@ func (h *CancelBookingHandler) CancelBooking(c *gin.Context) {
 	}
 
 	// Call service
-	result, err := h.service.CancelBooking(c.Request.Context(), storeID, bookingID, req)
+	result, err := h.service.Cancel(c.Request.Context(), parsedStoreID, parsedBookingID, req)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
