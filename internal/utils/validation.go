@@ -27,6 +27,8 @@ func ExtractValidationErrors(err error) []ownErrors.ErrorItem {
 			switch fieldError.Tag() {
 			case "required":
 				constantName = ownErrors.ValFieldRequired
+			case "noBlank":
+				constantName = ownErrors.ValFieldRequired
 			case "min":
 				if fieldError.Kind().String() == "string" {
 					constantName = ownErrors.ValFieldStringMinLength
@@ -62,6 +64,8 @@ func ExtractValidationErrors(err error) []ownErrors.ErrorItem {
 				constantName = ownErrors.ValFieldTaiwanLandline
 			case "taiwanmobile":
 				constantName = ownErrors.ValFieldTaiwanMobile
+			case "taiwanphone":
+				constantName = ownErrors.ValFieldTaiwanPhone
 			default:
 				constantName = ownErrors.ValInputValidationFailed
 			}
@@ -140,4 +144,25 @@ func ValidateTaiwanMobile(fl validator.FieldLevel) bool {
 	pattern := `^09\d{8}$`
 	matched, _ := regexp.MatchString(pattern, phone)
 	return matched
+}
+
+// ValidateTaiwanPhone validates Taiwan phone (landline or mobile)
+// Format: 0X-XXXXXXXX or 09XXXXXXXX where X is area code (2-8) and phone number
+func ValidateTaiwanPhone(fl validator.FieldLevel) bool {
+	phone := fl.Field().String()
+
+	// Allow empty string (use omitempty in binding tag if optional)
+	if phone == "" {
+		return true
+	}
+
+	// Taiwan phone format: 0X-XXXXXXXX or 09XXXXXXXX
+	pattern := `^0[2-8]-\d{7,8}$|^09\d{8}$`
+	matched, _ := regexp.MatchString(pattern, phone)
+	return matched
+}
+
+// NoBlank validates that the field is not empty (trimmed)
+func NoBlank(fl validator.FieldLevel) bool {
+	return strings.TrimSpace(fl.Field().String()) != ""
 }

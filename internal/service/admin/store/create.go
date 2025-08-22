@@ -2,6 +2,7 @@ package adminStore
 
 import (
 	"context"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -25,13 +26,9 @@ func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
 }
 
 func (s *Create) Create(ctx context.Context, req adminStoreModel.CreateRequest, staffId int64, role string) (*adminStoreModel.CreateResponse, error) {
-	// Validate role permissions (only SUPER_ADMIN and ADMIN can create stores)
-	if role != common.RoleSuperAdmin && role != common.RoleAdmin {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-	}
-
 	// Check if store name already exists
-	nameExists, err := s.queries.CheckStoreNameExists(ctx, req.Name)
+	name := strings.TrimSpace(req.Name)
+	nameExists, err := s.queries.CheckStoreNameExists(ctx, name)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name existence", err)
 	}
@@ -49,10 +46,12 @@ func (s *Create) Create(ctx context.Context, req adminStoreModel.CreateRequest, 
 	}
 	defer tx.Rollback(ctx)
 
+	qtx := s.queries.WithTx(tx)
+
 	// Create store
-	newStore, err := s.queries.CreateStore(ctx, dbgen.CreateStoreParams{
+	err = qtx.CreateStore(ctx, dbgen.CreateStoreParams{
 		ID:      storeID,
-		Name:    req.Name,
+		Name:    name,
 		Address: utils.StringPtrToPgText(req.Address, true),
 		Phone:   utils.StringPtrToPgText(req.Phone, true),
 	})
@@ -62,7 +61,7 @@ func (s *Create) Create(ctx context.Context, req adminStoreModel.CreateRequest, 
 
 	// If creator is ADMIN, automatically grant store access
 	if role == common.RoleAdmin {
-		err = s.queries.CreateStaffUserStoreAccess(ctx, dbgen.CreateStaffUserStoreAccessParams{
+		err = qtx.CreateStaffUserStoreAccess(ctx, dbgen.CreateStaffUserStoreAccessParams{
 			StoreID:     storeID,
 			StaffUserID: staffId,
 		})
@@ -77,10 +76,6 @@ func (s *Create) Create(ctx context.Context, req adminStoreModel.CreateRequest, 
 	}
 
 	return &adminStoreModel.CreateResponse{
-		ID:       utils.FormatID(storeID),
-		Name:     newStore.Name,
-		Address:  utils.PgTextToString(newStore.Address),
-		Phone:    utils.PgTextToString(newStore.Phone),
-		IsActive: utils.PgBoolToBool(newStore.IsActive),
+		ID: utils.FormatID(storeID),
 	}, nil
 }

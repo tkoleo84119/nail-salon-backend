@@ -42,8 +42,10 @@ func main() {
 	}
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("noBlank", utils.NoBlank)
 		v.RegisterValidation("taiwanlandline", utils.ValidateTaiwanLandline)
 		v.RegisterValidation("taiwanmobile", utils.ValidateTaiwanMobile)
+		v.RegisterValidation("taiwanphone", utils.ValidateTaiwanPhone)
 	}
 
 	container := app.NewContainer(cfg, database)

@@ -88,7 +88,7 @@ func (q *Queries) CheckStoresExistAndActive(ctx context.Context, dollar_1 []int6
 	return i, err
 }
 
-const createStore = `-- name: CreateStore :one
+const createStore = `-- name: CreateStore :exec
 INSERT INTO stores (
     id,
     name,
@@ -98,12 +98,7 @@ INSERT INTO stores (
     updated_at
 ) VALUES (
     $1, $2, $3, $4, NOW(), NOW()
-) RETURNING
-    id,
-    name,
-    address,
-    phone,
-    is_active
+)
 `
 
 type CreateStoreParams struct {
@@ -113,30 +108,14 @@ type CreateStoreParams struct {
 	Phone   pgtype.Text `db:"phone" json:"phone"`
 }
 
-type CreateStoreRow struct {
-	ID       int64       `db:"id" json:"id"`
-	Name     string      `db:"name" json:"name"`
-	Address  pgtype.Text `db:"address" json:"address"`
-	Phone    pgtype.Text `db:"phone" json:"phone"`
-	IsActive pgtype.Bool `db:"is_active" json:"is_active"`
-}
-
-func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (CreateStoreRow, error) {
-	row := q.db.QueryRow(ctx, createStore,
+func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) error {
+	_, err := q.db.Exec(ctx, createStore,
 		arg.ID,
 		arg.Name,
 		arg.Address,
 		arg.Phone,
 	)
-	var i CreateStoreRow
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Address,
-		&i.Phone,
-		&i.IsActive,
-	)
-	return i, err
+	return err
 }
 
 const getAllActiveStoresName = `-- name: GetAllActiveStoresName :many

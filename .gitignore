@@ -33,3 +33,6 @@ coverage.out
 # claude local files
 **/.claude/settings.local.json
 CLAUDE.local.md
+
+# air temp files
+tmp/

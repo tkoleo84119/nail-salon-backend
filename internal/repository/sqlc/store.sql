@@ -1,4 +1,4 @@
--- name: CreateStore :one
+-- name: CreateStore :exec
 INSERT INTO stores (
     id,
     name,
@@ -8,12 +8,7 @@ INSERT INTO stores (
     updated_at
 ) VALUES (
     $1, $2, $3, $4, NOW(), NOW()
-) RETURNING
-    id,
-    name,
-    address,
-    phone,
-    is_active;
+);
 
 -- name: GetAllActiveStoresName :many
 SELECT
