@@ -1,20 +1,20 @@
 package errors
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/yaml.v3"
 )
 
 // ErrorDefinition represents a single error definition
 type ErrorDefinition struct {
-	Code    string `yaml:"code"`
-	Message string `yaml:"message"`
-	Status  int    `yaml:"status"`
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Status  int    `json:"status"`
 }
 
 type ErrorItem struct {
@@ -53,7 +53,7 @@ func GetManager() *ErrorManager {
 	return manager
 }
 
-// LoadFromFile loads error definitions from YAML file
+// LoadFromFile loads error definitions from JSON file
 func (em *ErrorManager) LoadFromFile(filepath string) error {
 	em.mu.Lock()
 	defer em.mu.Unlock()
@@ -64,8 +64,8 @@ func (em *ErrorManager) LoadFromFile(filepath string) error {
 	}
 
 	var categories map[string]map[string]ErrorDefinition
-	if err := yaml.Unmarshal(data, &categories); err != nil {
-		return fmt.Errorf("failed to parse YAML: %w", err)
+	if err := json.Unmarshal(data, &categories); err != nil {
+		return fmt.Errorf("failed to parse JSON: %w", err)
 	}
 
 	// initialize reverse mapping

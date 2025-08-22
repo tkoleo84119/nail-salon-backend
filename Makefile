@@ -4,6 +4,9 @@ run:
 test:
 	go test ./...
 
+generate:
+	go generate ./...
+
 seed-test:
 	@echo "Seeding test data..."
 	go run scripts/seed/test_seed.go

@@ -1,0 +1,419 @@
+{
+  "AUTH": {
+    "AuthInvalidCredentials": {
+      "code": "E1001",
+      "message": "帳號或密碼錯誤",
+      "status": 401
+    },
+    "AuthTokenInvalid": {
+      "code": "E1002",
+      "message": "無效的 accessToken，請重新登入",
+      "status": 401
+    },
+    "AuthTokenMissing": {
+      "code": "E1003",
+      "message": "accessToken 缺失，請重新登入",
+      "status": 401
+    },
+    "AuthTokenFormatError": {
+      "code": "E1004",
+      "message": "accessToken 格式錯誤，請重新登入",
+      "status": 401
+    },
+    "AuthStaffFailed": {
+      "code": "E1005",
+      "message": "未找到有效的員工資訊，請重新登入",
+      "status": 401
+    },
+    "AuthContextMissing": {
+      "code": "E1006",
+      "message": "未找到使用者認證資訊，請重新登入",
+      "status": 401
+    },
+    "AuthLineTokenInvalid": {
+      "code": "E1007",
+      "message": "Line idToken 驗證失敗，請重新登入",
+      "status": 401
+    },
+    "AuthLineTokenExpired": {
+      "code": "E1008",
+      "message": "Line idToken 已過期，請重新登入",
+      "status": 401
+    },
+    "AuthRefreshTokenInvalid": {
+      "code": "E1009",
+      "message": "Refresh token 無效或已過期，請重新登入",
+      "status": 401
+    },
+    "AuthPermissionDenied": {
+      "code": "E1010",
+      "message": "權限不足，無法執行此操作",
+      "status": 403
+    },
+    "AuthCustomerFailed": {
+      "code": "E1011",
+      "message": "未找到有效的顧客資訊，請重新登入",
+      "status": 401
+    }
+  },
+  "VAL": {
+    "ValJsonFormat": {
+      "code": "E2001",
+      "message": "JSON 格式錯誤，請檢查",
+      "status": 400
+    },
+    "ValPathParamMissing": {
+      "code": "E2002",
+      "message": "路徑參數缺失，請檢查",
+      "status": 400
+    },
+    "ValAllFieldsEmpty": {
+      "code": "E2003",
+      "message": "至少需要提供一個欄位進行更新",
+      "status": 400
+    },
+    "ValTypeConversionFailed": {
+      "code": "E2004",
+      "message": "參數類型轉換失敗",
+      "status": 400
+    },
+    "ValInputValidationFailed": {
+      "code": "E2005",
+      "message": "輸入驗證失敗",
+      "status": 400
+    },
+    "ValFieldRequired": {
+      "code": "E2020",
+      "message": "{field} 為必填項目",
+      "status": 400
+    },
+    "ValFieldStringMinLength": {
+      "code": "E2021",
+      "message": "{field} 長度至少需要 {param} 個字元",
+      "status": 400
+    },
+    "ValFieldArrayMinLength": {
+      "code": "E2022",
+      "message": "{field} 至少需要 {param} 個項目",
+      "status": 400
+    },
+    "ValFieldMinNumber": {
+      "code": "E2023",
+      "message": "{field} 最小值為 {param}",
+      "status": 400
+    },
+    "ValFieldStringMaxLength": {
+      "code": "E2024",
+      "message": "{field} 長度最多只能有 {param} 個字元",
+      "status": 400
+    },
+    "ValFieldArrayMaxLength": {
+      "code": "E2025",
+      "message": "{field} 最多只能有 {param} 個項目",
+      "status": 400
+    },
+    "ValFieldMaxNumber": {
+      "code": "E2026",
+      "message": "{field} 最大值為 {param}",
+      "status": 400
+    },
+    "ValFieldInvalidEmail": {
+      "code": "E2027",
+      "message": "{field} 格式錯誤，請使用正確的電子郵件格式",
+      "status": 400
+    },
+    "ValFieldNumeric": {
+      "code": "E2028",
+      "message": "{field} 必須是數字字串",
+      "status": 400
+    },
+    "ValFieldBoolean": {
+      "code": "E2029",
+      "message": "{field} 必須是布林值",
+      "status": 400
+    },
+    "ValFieldOneof": {
+      "code": "E2030",
+      "message": "{field} 必須是 {param} 其中一個值",
+      "status": 400
+    },
+    "ValFieldTaiwanLandline": {
+      "code": "E2031",
+      "message": "{field} 格式錯誤，請使用正確的台灣電話號碼格式 (02-12345678)",
+      "status": 400
+    },
+    "ValFieldTaiwanMobile": {
+      "code": "E2032",
+      "message": "{field} 格式錯誤，請使用正確的台灣手機號碼格式 (0912345678)",
+      "status": 400
+    },
+    "ValFieldDateFormat": {
+      "code": "E2033",
+      "message": "{field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD)",
+      "status": 400
+    },
+    "ValFieldTimeFormat": {
+      "code": "E2034",
+      "message": "{field} 格式錯誤，請使用正確的時間格式 (HH:mm)",
+      "status": 400
+    },
+    "ValFieldTaiwanPhone": {
+      "code": "E2035",
+      "message": "{field} 格式錯誤，請使用正確的台灣電話號碼格式 (02-12345678 或 0912345678)",
+      "status": 400
+    }
+  },
+  "BOOKING": {
+    "BookingStatusNotAllowedToUpdate": {
+      "code": "E3BK002",
+      "message": "預約狀態不允許更新",
+      "status": 400
+    },
+    "BookingStatusNotAllowedToCancel": {
+      "code": "E3BK003",
+      "message": "預約狀態不允許取消",
+      "status": 400
+    },
+    "BookingNotBelongToStore": {
+      "code": "E3BK004",
+      "message": "預約不屬於指定的門市",
+      "status": 400
+    },
+    "BookingNotFound": {
+      "code": "E3BK001",
+      "message": "預約不存在或已被取消",
+      "status": 404
+    },
+    "BookingTimeSlotNotFound": {
+      "code": "E3BK005",
+      "message": "指定時段不存在",
+      "status": 404
+    },
+    "BookingTimeSlotUnavailable": {
+      "code": "E3BK006",
+      "message": "該時段已被預約，請重新選擇",
+      "status": 409
+    },
+    "BookingUpdateIncomplete": {
+      "code": "E3BK007",
+      "message": "預約更新資訊不完整，所有必要資訊必須一起傳入",
+      "status": 400
+    }
+  },
+  "CUSTOMER": {
+    "CustomerNotFound": {
+      "code": "E3C001",
+      "message": "客戶不存在",
+      "status": 404
+    },
+    "CustomerAuthNotFound": {
+      "code": "E3C002",
+      "message": "客戶登入資訊不存在",
+      "status": 404
+    },
+    "CustomerAlreadyExists": {
+      "code": "E3C003",
+      "message": "客戶已存在",
+      "status": 409
+    }
+  },
+  "SCHEDULE": {
+    "ScheduleAlreadyBookedDoNotUpdate": {
+      "code": "E3SCH001",
+      "message": "部分時段已被預約，無法更新",
+      "status": 400
+    },
+    "ScheduleAlreadyBookedDoNotDelete": {
+      "code": "E3SCH002",
+      "message": "部分班表已被預約，無法刪除",
+      "status": 400
+    },
+    "ScheduleNotBelongToStore": {
+      "code": "E3SCH003",
+      "message": "部分班表不屬於指定的門市",
+      "status": 400
+    },
+    "ScheduleNotBelongToStylist": {
+      "code": "E3SCH004",
+      "message": "部分班表不屬於指定的美甲師",
+      "status": 400
+    },
+    "ScheduleNotFound": {
+      "code": "E3SCH005",
+      "message": "排班不存在或已被刪除",
+      "status": 404
+    },
+    "ScheduleAlreadyExists": {
+      "code": "E3SCH006",
+      "message": "美甲師班表已存在",
+      "status": 409
+    },
+    "ScheduleEndBeforeStart": {
+      "code": "E3SCH007",
+      "message": "結束日期必須在開始日期之後",
+      "status": 400
+    },
+    "ScheduleDateRangeExceed31Days": {
+      "code": "E3SCH008",
+      "message": "日期範圍不能超過 31 天",
+      "status": 400
+    },
+    "ScheduleDuplicateWorkDateInput": {
+      "code": "E3SCH009",
+      "message": "輸入的工作日期重複",
+      "status": 400
+    },
+    "ScheduleCannotCreateBeforeToday": {
+      "code": "E3SCH010",
+      "message": "不能創建過去的班表",
+      "status": 400
+    }
+  },
+  "SERVICE": {
+    "ServiceNotActive": {
+      "code": "E3SER001",
+      "message": "服務未啟用",
+      "status": 400
+    },
+    "ServiceNotMainService": {
+      "code": "E3SER002",
+      "message": "服務不是主服務",
+      "status": 400
+    },
+    "ServiceNotAddon": {
+      "code": "E3SER003",
+      "message": "服務不是附屬服務",
+      "status": 400
+    },
+    "ServiceNotFound": {
+      "code": "E3SER004",
+      "message": "服務不存在或已被刪除",
+      "status": 404
+    },
+    "ServiceAlreadyExists": {
+      "code": "E3SER005",
+      "message": "服務已存在",
+      "status": 409
+    }
+  },
+  "STAFF": {
+    "StaffInvalidRole": {
+      "code": "E3STA001",
+      "message": "無效的角色",
+      "status": 400
+    },
+    "StaffInactive": {
+      "code": "E3STA002",
+      "message": "帳號已停用",
+      "status": 401
+    },
+    "StaffNotUpdateSelf": {
+      "code": "E3STA003",
+      "message": "不可更新自己的帳號",
+      "status": 403
+    },
+    "StaffNotFound": {
+      "code": "E3STA004",
+      "message": "員工帳號不存在",
+      "status": 404
+    },
+    "StaffAlreadyExists": {
+      "code": "E3STA005",
+      "message": "帳號已存在",
+      "status": 409
+    }
+  },
+  "STORE": {
+    "StoreNotActive": {
+      "code": "E3STO001",
+      "message": "門市未啟用",
+      "status": 400
+    },
+    "StoreNotFound": {
+      "code": "E3STO002",
+      "message": "門市不存在或已被刪除",
+      "status": 404
+    },
+    "StoreAlreadyExists": {
+      "code": "E3STO003",
+      "message": "門市已存在，請創建其他門市",
+      "status": 409
+    }
+  },
+  "STYLIST": {
+    "StylistNotFound": {
+      "code": "E3STY001",
+      "message": "美甲師資料不存在",
+      "status": 404
+    }
+  },
+  "TIME_SLOT": {
+    "TimeSlotCannotUpdateSeparately": {
+      "code": "E3TMS001",
+      "message": "時段起始時間和結束時間必須同時傳入",
+      "status": 400
+    },
+    "TimeSlotNotBelongToSchedule": {
+      "code": "E3TMS002",
+      "message": "時段不屬於指定的班表",
+      "status": 400
+    },
+    "TimeSlotAlreadyBookedDoNotUpdate": {
+      "code": "E3TMS003",
+      "message": "時段已被預約，無法更新",
+      "status": 400
+    },
+    "TimeSlotAlreadyBookedDoNotDelete": {
+      "code": "E3TMS004",
+      "message": "該時段已被預約，無法刪除",
+      "status": 400
+    },
+    "TimeSlotNotFound": {
+      "code": "E3TMS005",
+      "message": "時段不存在或已被刪除",
+      "status": 404
+    },
+    "TimeSlotNotEnoughTime": {
+      "code": "E3TMS006",
+      "message": "時段時間不足",
+      "status": 400
+    },
+    "TimeSlotTemplateNotFound": {
+      "code": "E3TMS007",
+      "message": "範本不存在或已被刪除",
+      "status": 404
+    },
+    "TimeSlotTemplateItemNotFound": {
+      "code": "E3TMS008",
+      "message": "範本項目不存在或已被刪除",
+      "status": 404
+    },
+    "TimeSlotConflict": {
+      "code": "E3TMS009",
+      "message": "時段時間區段重疊",
+      "status": 409
+    },
+    "TimeSlotEndBeforeStart": {
+      "code": "E3TMS010",
+      "message": "結束時間必須在開始時間之後",
+      "status": 400
+    }
+  },
+  "SYS": {
+    "SysInternalError": {
+      "code": "E9001",
+      "message": "系統發生錯誤，請稍後再試",
+      "status": 500
+    },
+    "SysDatabaseError": {
+      "code": "E9002",
+      "message": "資料庫操作失敗",
+      "status": 500
+    },
+    "SysTimeout": {
+      "code": "E9003",
+      "message": "請求超時，請稍後再試",
+      "status": 504
+    }
+  }
+}

@@ -37,7 +37,7 @@ func main() {
 	}
 
 	errorManager := errorCodes.GetManager()
-	if err := errorManager.LoadFromFile("internal/errors/errors.yaml"); err != nil {
+	if err := errorManager.LoadFromFile("internal/errors/errors.json"); err != nil {
 		log.Fatalf("Failed to load error definitions: %v", err)
 	}
 
