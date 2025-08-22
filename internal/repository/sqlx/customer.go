@@ -78,7 +78,7 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 	}
 
 	if params.MinPastDays != nil && *params.MinPastDays > 0 {
-		whereConditions = append(whereConditions, fmt.Sprintf("(last_visit_at IS NOT NULL AND last_visit_at < NOW() - ($%d || ' days')::interval)", len(args)+1))
+		whereConditions = append(whereConditions, fmt.Sprintf("(last_visit_at IS NOT NULL AND last_visit_at < NOW() - ($%d * INTERVAL '1 day'))", len(args)+1))
 		args = append(args, *params.MinPastDays)
 	}
 

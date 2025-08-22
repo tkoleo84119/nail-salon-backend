@@ -54,7 +54,7 @@
 | lineName      | 否   | <li>最大長度100字元                                                             |
 | phone         | 否   | <li>最大長度20字元                                                              |
 | level         | 否   | <li>只能為 NORMAL, VIP, VVIP                                                    |
-| isBlacklisted | 否   | <li>是否是布林值                                                                |
+| isBlacklisted | 否   |                                                                                 |
 | minPastDays   | 否   | <li>最小值0<li>最大值365                                                        |
 | limit         | 否   | <li>最小值1<li>最大值100                                                        |
 | offset        | 否   | <li>最小值0<li>最大值1000000                                                    |
