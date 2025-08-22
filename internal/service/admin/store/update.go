@@ -27,12 +27,8 @@ func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories) *Update {
 func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.UpdateRequest, role string, storeIDs []int64) (*adminStoreModel.UpdateResponse, error) {
 	// For ADMIN role, check store access permission
 	if role == common.RoleAdmin {
-		hasAccess, err := utils.CheckStoreAccess(storeID, storeIDs)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
-		}
-		if !hasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+		if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
+			return nil, err
 		}
 	}
 

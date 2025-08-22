@@ -38,12 +38,8 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingMode
 
 	// Check store access for staff (except SUPER_ADMIN)
 	if role != common.RoleSuperAdmin {
-		hasAccess, err := utils.CheckStoreAccess(storeID, storeIds)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to check store access", err)
-		}
-		if !hasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+		if err := utils.CheckStoreAccess(storeID, storeIds); err != nil {
+			return nil, err
 		}
 	}
 

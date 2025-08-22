@@ -69,23 +69,7 @@
 ```json
 {
   "data": {
-    "id": "5000000001",
-    "workDate": "2025-08-01",
-    "note": "上班全天",
-    "timeSlots": [
-      {
-        "id": "9000000001",
-        "startTime": "10:00",
-        "endTime": "11:00",
-        "isAvailable": true
-      },
-      {
-        "id": "9000000002",
-        "startTime": "11:00",
-        "endTime": "12:00",
-        "isAvailable": false
-      }
-    ]
+    "id": "5000000001"
   }
 }
 ```
@@ -112,32 +96,31 @@
   - message: 中文錯誤訊息（可參照錯誤總覽）
   - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-| 狀態碼 | 錯誤碼   | 常數名稱                         | 說明                                                |
-| ------ | -------- | -------------------------------- | --------------------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入                      |
-| 401    | E1003    | AuthTokenMissing                 | accessToken 缺失，請重新登入                        |
-| 401    | E1004    | AuthTokenFormatError             | accessToken 格式錯誤，請重新登入                    |
-| 401    | E1005    | AuthStaffFailed                  | 未找到有效的員工資訊，請重新登入                    |
-| 401    | E1006    | AuthContextMissing               | 未找到使用者認證資訊，請重新登入                    |
-| 403    | E1010    | AuthPermissionDenied             | 權限不足，無法執行此操作                            |
-| 400    | E2002    | ValPathParamMissing              | 路徑參數缺失，請檢查                                |
-| 400    | E2003    | ValAllFieldsEmpty                | 至少需要提供一個欄位進行更新                        |
-| 400    | E2004    | ValTypeConversionFailed          | 參數類型轉換失敗                                    |
-| 400    | E2001    | ValJsonFormat                    | JSON 格式錯誤，請檢查                               |
-| 400    | E2020    | ValFieldRequired                 | {field} 為必填欄位                                  |
-| 400    | E2024    | ValFieldStringMaxLength          | {field} 長度最多只能有 {param} 個字元               |
-| 400    | E2033    | ValFieldDateFormat               | {field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD) |
-| 400    | E3SCH001 | ScheduleAlreadyBookedDoNotUpdate | 班表已被預約，無法更新                              |
-| 400    | E3SCH003 | ScheduleNotBelongToStore         | 部分班表不屬於指定的門市                            |
-| 400    | E3SCH004 | ScheduleNotBelongToStylist       | 部分班表不屬於指定的美甲師                          |
-| 400    | E3SCH006 | ScheduleAlreadyExists            | 美甲師班表已存在                                    |
-| 400    | E3SCH009 | ScheduleDuplicateWorkDateInput   | 輸入的工作日期重複                                  |
-| 400    | E3SCH010 | ScheduleCannotCreateBeforeToday  | 不能創建過去的班表                                  |
-| 400    | E3SCH011 | ScheduleAlreadyBookedDoNotUpdate | 部分時段已被預約，無法更新                          |
-| 404    | E3SCH005 | ScheduleNotFound                 | 排班不存在或已被刪除                                |
-| 404    | E3STY001 | StylistNotFound                  | 美甲師資料不存在                                    |
-| 500    | E9001    | SysInternalError                 | 系統發生錯誤，請稍後再試                            |
-| 500    | E9002    | SysDatabaseError                 | 資料庫操作失敗                                      |
+| 狀態碼 | 錯誤碼   | 常數名稱                             | 說明                                       |
+| ------ | -------- | ------------------------------------ | ------------------------------------------ |
+| 401    | E1002    | AuthTokenInvalid                     | 無效的 accessToken，請重新登入             |
+| 401    | E1003    | AuthTokenMissing                     | accessToken 缺失，請重新登入               |
+| 401    | E1004    | AuthTokenFormatError                 | accessToken 格式錯誤，請重新登入           |
+| 401    | E1005    | AuthStaffFailed                      | 未找到有效的員工資訊，請重新登入           |
+| 401    | E1006    | AuthContextMissing                   | 未找到使用者認證資訊，請重新登入           |
+| 403    | E1010    | AuthPermissionDenied                 | 權限不足，無法執行此操作                   |
+| 400    | E2002    | ValPathParamMissing                  | 路徑參數缺失，請檢查                       |
+| 400    | E2003    | ValAllFieldsEmpty                    | 至少需要提供一個欄位進行更新               |
+| 400    | E2004    | ValTypeConversionFailed              | 參數類型轉換失敗                           |
+| 400    | E2001    | ValJsonFormat                        | JSON 格式錯誤，請檢查                      |
+| 400    | E2020    | ValFieldRequired                     | {field} 為必填欄位                         |
+| 400    | E2024    | ValFieldStringMaxLength              | {field} 長度最多只能有 {param} 個字元      |
+| 400    | E3SCH001 | ScheduleAlreadyBookedDoNotUpdateDate | 部分時段已被預約或取消，更新日期會造成問題 |
+| 400    | E3SCH003 | ScheduleNotBelongToStore             | 部分班表不屬於指定的門市                   |
+| 400    | E3SCH004 | ScheduleNotBelongToStylist           | 部分班表不屬於指定的美甲師                 |
+| 400    | E3SCH006 | ScheduleAlreadyExists                | 美甲師班表已存在                           |
+| 400    | E3SCH009 | ScheduleDuplicateWorkDateInput       | 輸入的工作日期重複                         |
+| 400    | E3SCH010 | ScheduleCannotCreateBeforeToday      | 不能創建過去的班表                         |
+| 400    | E3SCH011 | ScheduleAlreadyBookedDoNotUpdate     | 部分時段已被預約，無法更新                 |
+| 404    | E3SCH005 | ScheduleNotFound                     | 排班不存在或已被刪除                       |
+| 404    | E3STY001 | StylistNotFound                      | 美甲師資料不存在                           |
+| 500    | E9001    | SysInternalError                     | 系統發生錯誤，請稍後再試                   |
+| 500    | E9002    | SysDatabaseError                     | 資料庫操作失敗                             |
 
 ---
 
@@ -146,21 +129,24 @@
 - `schedules`
 - `stylists`
 - `stores`
+- `time_slots`
+- `bookings`
 
 ---
 
 ## Service 邏輯
 
-1. 檢查是否有至少一個欄位有值。
-2. 檢查 `stylistId` 是否存在。
-3. 判斷身分是否可操作指定 stylistId (員工只能更新自己的班表，管理員可更新任一美甲師班表)。
-4. 判斷使用者是否有權限操作指定 `storeId`。
-5. 驗證 `workDate` 格式是否正確。
-6. 檢查新的 `workDate` 是否與已有的班表重複。
-7. 檢查 `schedule` 是否存在。
-8. 檢查隸屬於 `schedule` 的 `time slot` 是否皆為 `available` (有被預約的時段不能更新)。
-9. 更新 `schedules` 資料。
-10. 回傳更新結果。
+1. 判斷使用者是否有權限操作指定 `storeId`。
+2. 判斷 `stylistId` 是否存在。
+3. 檢查 `schedule` 是否存在。
+4. 判斷身分是否可操作指定 `stylistId` (員工只能更新自己的班表，管理員可更新任一美甲師班表)。
+5. 如果更新日期，檢查該 `schedule` 是否可以更新 (出現底下情況就不能更新)
+   - 所屬 `time slot` 有 `is_available` 為 `false` 的時段。
+   - 所屬 `time slot` 有 `is_available` 為 `true` 的時段，但有 `bookings` 後被取消的時段。
+   - 該日期是過去的日期。
+   - 欲更新日期已經有其他 `schedule`。
+6. 更新 `schedules` 資料。
+7. 回傳更新結果。
 
 ---
 

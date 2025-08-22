@@ -28,29 +28,20 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
 }
 
 func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, req adminScheduleModel.UpdateParsedRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminScheduleModel.UpdateResponse, error) {
-	// Check at least one field is provided
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
+	// Check store access for the updater (except SUPER_ADMIN)
+	if updaterRole != common.RoleSuperAdmin {
+		if err := utils.CheckStoreAccess(storeID, updaterStoreIDs); err != nil {
+			return nil, err
+		}
 	}
 
 	// Verify stylist exists
-	_, err := s.queries.GetStylistByID(ctx, req.StylistID)
+	exist, err := s.queries.CheckStylistExistAndActive(ctx, req.StylistID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
-		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get stylist", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check stylist existence", err)
 	}
-
-	// Check store access for the updater (except SUPER_ADMIN)
-	if updaterRole != common.RoleSuperAdmin {
-		hasAccess, err := utils.CheckStoreAccess(storeID, updaterStoreIDs)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to check store access", err)
-		}
-		if !hasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-		}
+	if !exist {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
 	}
 
 	// Get current schedule to verify ownership and existence
@@ -70,46 +61,37 @@ func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, re
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotBelongToStylist)
 	}
 
-	// Get updated schedule with time slots
-	rows, err := s.queries.GetScheduleWithTimeSlotsByID(ctx, scheduleID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get updated schedule with time slots", err)
-	}
-
-	// check all time slots are available
-	for _, row := range rows {
-		if !row.IsAvailable.Bool {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleAlreadyBookedDoNotUpdate)
-		}
-	}
-
-	// Authorization: Check if user can update this schedule
+	// Check if user can update this schedule
 	if updaterRole == common.RoleStylist {
 		if currentSchedule.StylistID != updaterID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 	}
 
-	// Prepare update parameters
+	// if update date, check if schedule can be updated
+	var workDate time.Time
 	if req.WorkDate != nil {
-		// Parse and validate date format
-		parsedDate, err := time.Parse("2006-01-02", *req.WorkDate)
+		canUpdate, err := s.queries.CheckScheduleCanUpdateDate(ctx, scheduleID)
 		if err != nil {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValFieldDateFormat)
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check schedule can update date", err)
+		}
+		if !canUpdate {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleAlreadyBookedDoNotUpdateDate)
 		}
 
+		workDate = *req.WorkDate
 		// Check if the new date is not in the past
 		today := time.Now().Truncate(24 * time.Hour)
-		if parsedDate.Before(today) {
+		if workDate.Before(today) {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotCreateBeforeToday)
 		}
 
 		// Check if schedule with new date already exists (if date is being changed)
-		if parsedDate != currentSchedule.WorkDate.Time {
-			exists, err := s.queries.CheckScheduleExists(ctx, dbgen.CheckScheduleExistsParams{
+		if workDate != currentSchedule.WorkDate.Time {
+			exists, err := s.queries.CheckScheduleDateExists(ctx, dbgen.CheckScheduleDateExistsParams{
 				StoreID:   storeID,
 				StylistID: req.StylistID,
-				WorkDate:  utils.TimeToPgDate(parsedDate),
+				WorkDate:  utils.TimeToPgDate(workDate),
 			})
 			if err != nil {
 				return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check schedule existence", err)
@@ -122,7 +104,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, re
 
 	// Update schedule
 	updatedSchedule, err := s.repo.Schedule.UpdateSchedule(ctx, scheduleID, sqlxRepo.UpdateScheduleParams{
-		WorkDate: req.WorkDate,
+		WorkDate: utils.TimeToPgDate(workDate),
 		Note:     req.Note,
 	})
 	if err != nil {
@@ -131,22 +113,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, re
 
 	// Build response
 	response := &adminScheduleModel.UpdateResponse{
-		ID:        utils.FormatID(updatedSchedule.ID),
-		WorkDate:  utils.PgDateToDateString(updatedSchedule.WorkDate),
-		Note:      utils.PgTextToString(updatedSchedule.Note),
-		TimeSlots: make([]adminScheduleModel.UpdateTimeSlotInfo, len(rows)),
-	}
-
-	for i, row := range rows {
-		if row.TimeSlotID.Valid {
-			timeSlot := adminScheduleModel.UpdateTimeSlotInfo{
-				ID:          utils.FormatID(row.TimeSlotID.Int64),
-				StartTime:   utils.PgTimeToTimeString(row.StartTime),
-				EndTime:     utils.PgTimeToTimeString(row.EndTime),
-				IsAvailable: utils.PgBoolToBool(row.IsAvailable),
-			}
-			response.TimeSlots[i] = timeSlot
-		}
+		ID: utils.FormatID(updatedSchedule.ID),
 	}
 
 	return response, nil

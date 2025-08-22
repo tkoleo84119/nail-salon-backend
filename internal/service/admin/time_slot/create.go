@@ -71,12 +71,8 @@ func (s *Create) Create(ctx context.Context, scheduleID int64, req adminTimeSlot
 	}
 
 	// Check if staff has access to this store
-	hasAccess, err := utils.CheckStoreAccess(store.ID, creatorStoreIDs)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
-	}
-	if !hasAccess {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+	if err := utils.CheckStoreAccess(store.ID, creatorStoreIDs); err != nil {
+		return nil, err
 	}
 
 	// Check for time slot overlap

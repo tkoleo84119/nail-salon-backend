@@ -26,12 +26,8 @@ func NewGet(queries *dbgen.Queries) *Get {
 func (s *Get) Get(ctx context.Context, storeID int64, scheduleID int64, role string, storeIDs []int64) (*adminScheduleModel.GetResponse, error) {
 	// Check store access for the staff member (except SUPER_ADMIN)
 	if role != common.RoleSuperAdmin {
-		hasAccess, err := utils.CheckStoreAccess(storeID, storeIDs)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to check store access", err)
-		}
-		if !hasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+		if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
+			return nil, err
 		}
 	}
 

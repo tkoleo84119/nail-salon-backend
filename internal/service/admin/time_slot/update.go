@@ -69,12 +69,8 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 	}
 
 	// Check if staff has access to this store
-	hasAccess, err := utils.CheckStoreAccess(scheduleInfo.StoreID, updaterStoreIDs)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
-	}
-	if !hasAccess {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+	if err := utils.CheckStoreAccess(scheduleInfo.StoreID, updaterStoreIDs); err != nil {
+		return nil, err
 	}
 
 	if req.StartTime != nil && req.EndTime != nil {

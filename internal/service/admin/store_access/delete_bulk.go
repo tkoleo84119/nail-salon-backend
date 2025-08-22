@@ -46,12 +46,8 @@ func (s *DeleteBulk) DeleteBulk(ctx context.Context, targetID int64, storeIDs []
 	// For non-SUPER_ADMIN creators, validate they have access to the stores being removed
 	if creatorRole != common.RoleSuperAdmin {
 		for _, storeID := range storeIDs {
-			hasAccess, err := utils.CheckStoreAccess(storeID, creatorStoreIDs)
-			if err != nil {
-				return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
-			}
-			if !hasAccess {
-				return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+			if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+				return nil, err
 			}
 		}
 	}

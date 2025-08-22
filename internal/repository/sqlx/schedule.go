@@ -90,7 +90,7 @@ func (r *ScheduleRepository) GetStoreSchedulesByDateRange(ctx context.Context, s
 // ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateScheduleParams struct {
-	WorkDate *string
+	WorkDate pgtype.Date
 	Note     *string
 }
 
@@ -107,9 +107,9 @@ func (r *ScheduleRepository) UpdateSchedule(ctx context.Context, scheduleID int6
 	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
 
-	if params.WorkDate != nil {
+	if params.WorkDate.Valid {
 		setParts = append(setParts, fmt.Sprintf("work_date = $%d", len(args)+1))
-		args = append(args, *params.WorkDate)
+		args = append(args, params.WorkDate)
 	}
 
 	if params.Note != nil {

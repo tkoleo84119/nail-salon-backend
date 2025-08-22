@@ -58,7 +58,7 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	if !req.HasUpdates() {
-		errorCodes.RespondWithEmptyFieldError(c)
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
 	}
 

@@ -46,12 +46,8 @@ func (s *Create) Create(ctx context.Context, staffID int64, storeID int64, creat
 
 	// Check if creator has access to this store (except SUPER_ADMIN)
 	if creatorRole != common.RoleSuperAdmin {
-		hasAccess, err := utils.CheckStoreAccess(storeID, creatorStoreIDs)
-		if err != nil {
-			return nil, false, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
-		}
-		if !hasAccess {
-			return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+		if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+			return nil, false, err
 		}
 	}
 

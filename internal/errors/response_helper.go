@@ -84,8 +84,3 @@ func AbortWithError(c *gin.Context, constantName string, fieldErrors map[string]
 	RespondWithError(c, errors)
 	c.Abort()
 }
-
-// RespondWithEmptyFieldError sends a JSON error response with empty field error
-func RespondWithEmptyFieldError(c *gin.Context) {
-	AbortWithError(c, ValAllFieldsEmpty, nil)
-}

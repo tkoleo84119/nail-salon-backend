@@ -2,6 +2,7 @@ package adminSchedule
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -27,23 +28,31 @@ func (h *Update) Update(c *gin.Context) {
 	// Validate path parameters
 	storeIDStr := c.Param("storeId")
 	if storeIDStr == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"storeId": "storeId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
+			"storeId": "storeId 為必填項目",
+		})
 		return
 	}
 	storeID, err := utils.ParseID(storeIDStr)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"storeId": "storeId 類型轉換失敗",
+		})
 		return
 	}
 
 	scheduleIDStr := c.Param("scheduleId")
 	if scheduleIDStr == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{"scheduleId": "scheduleId 為必填項目"})
+		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
+			"scheduleId": "scheduleId 為必填項目",
+		})
 		return
 	}
 	scheduleID, err := utils.ParseID(scheduleIDStr)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"scheduleId": "scheduleId 類型轉換失敗"})
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"scheduleId": "scheduleId 類型轉換失敗",
+		})
 		return
 	}
 
@@ -54,15 +63,34 @@ func (h *Update) Update(c *gin.Context) {
 		return
 	}
 
+	if !req.HasUpdates() {
+		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
+		return
+	}
+
 	parsedStylistID, err := utils.ParseID(req.StylistID)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"stylistId": "stylistId 類型轉換失敗"})
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"stylistId": "stylistId 類型轉換失敗",
+		})
 		return
+	}
+
+	var workDate *time.Time
+	if req.WorkDate != nil {
+		parsedWorkDate, err := utils.DateStringToTime(*req.WorkDate)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"workDate": "workDate 類型轉換失敗",
+			})
+			return
+		}
+		workDate = &parsedWorkDate
 	}
 
 	parsedRequest := adminScheduleModel.UpdateParsedRequest{
 		StylistID: parsedStylistID,
-		WorkDate:  req.WorkDate,
+		WorkDate:  workDate,
 		Note:      req.Note,
 	}
 

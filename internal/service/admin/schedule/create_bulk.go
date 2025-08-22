@@ -46,12 +46,8 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminSch
 	}
 
 	// Check if staff has access to this store
-	hasAccess, err := utils.CheckStoreAccess(storeID, creatorStoreIDs)
-	if err != nil {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
-	}
-	if !hasAccess {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	// Validate time slots and check for conflicts
@@ -66,7 +62,7 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminSch
 			return nil, errorCodes.NewServiceError(errorCodes.ValFieldDateFormat, "invalid work date format", err)
 		}
 
-		exists, err := s.queries.CheckScheduleExists(ctx, dbgen.CheckScheduleExistsParams{
+		exists, err := s.queries.CheckScheduleDateExists(ctx, dbgen.CheckScheduleDateExistsParams{
 			StoreID:   storeID,
 			StylistID: parsedStylistID,
 			WorkDate:  utils.TimeToPgDate(workDate),

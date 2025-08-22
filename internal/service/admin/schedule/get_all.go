@@ -45,12 +45,8 @@ func (s *GetAllService) GetAll(ctx context.Context, storeID int64, req adminSche
 
 	// Check store access for the staff member (except SUPER_ADMIN)
 	if role != common.RoleSuperAdmin {
-		hasAccess, err := utils.CheckStoreAccess(storeID, storeIDs)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "Failed to check store access", err)
-		}
-		if !hasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+		if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
+			return nil, err
 		}
 	}
 

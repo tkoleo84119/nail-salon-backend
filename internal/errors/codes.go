@@ -57,7 +57,7 @@ const (
 
 	// SCHEDULE - schedule related errors
 	ScheduleAlreadyBookedDoNotDelete = "ScheduleAlreadyBookedDoNotDelete"
-	ScheduleAlreadyBookedDoNotUpdate = "ScheduleAlreadyBookedDoNotUpdate"
+	ScheduleAlreadyBookedDoNotUpdateDate = "ScheduleAlreadyBookedDoNotUpdateDate"
 	ScheduleAlreadyExists = "ScheduleAlreadyExists"
 	ScheduleCannotCreateBeforeToday = "ScheduleCannotCreateBeforeToday"
 	ScheduleDateRangeExceed31Days = "ScheduleDateRangeExceed31Days"

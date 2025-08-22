@@ -21,21 +21,48 @@ type BatchCreateSchedulesParams struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
-const checkScheduleExists = `-- name: CheckScheduleExists :one
+const checkScheduleCanUpdateDate = `-- name: CheckScheduleCanUpdateDate :one
+SELECT NOT EXISTS(
+    SELECT 1
+    FROM time_slots ts
+    WHERE ts.schedule_id = $1
+    AND (
+        ts.is_available = false
+        OR (
+            ts.is_available = true
+            AND EXISTS (
+                SELECT 1
+                FROM bookings b
+                WHERE b.time_slot_id = ts.id
+                AND b.status IN ('CANCELLED', 'NO_SHOW')
+            )
+        )
+    )
+) as can_update
+`
+
+func (q *Queries) CheckScheduleCanUpdateDate(ctx context.Context, scheduleID int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkScheduleCanUpdateDate, scheduleID)
+	var can_update bool
+	err := row.Scan(&can_update)
+	return can_update, err
+}
+
+const checkScheduleDateExists = `-- name: CheckScheduleDateExists :one
 SELECT EXISTS(
     SELECT 1 FROM schedules
     WHERE store_id = $1 AND stylist_id = $2 AND work_date = $3
 ) as exists
 `
 
-type CheckScheduleExistsParams struct {
+type CheckScheduleDateExistsParams struct {
 	StoreID   int64       `db:"store_id" json:"store_id"`
 	StylistID int64       `db:"stylist_id" json:"stylist_id"`
 	WorkDate  pgtype.Date `db:"work_date" json:"work_date"`
 }
 
-func (q *Queries) CheckScheduleExists(ctx context.Context, arg CheckScheduleExistsParams) (bool, error) {
-	row := q.db.QueryRow(ctx, checkScheduleExists, arg.StoreID, arg.StylistID, arg.WorkDate)
+func (q *Queries) CheckScheduleDateExists(ctx context.Context, arg CheckScheduleDateExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkScheduleDateExists, arg.StoreID, arg.StylistID, arg.WorkDate)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -119,25 +146,26 @@ SELECT
     id,
     store_id,
     stylist_id,
-    work_date,
-    note,
-    created_at,
-    updated_at
+    work_date
 FROM schedules
 WHERE id = $1
 `
 
-func (q *Queries) GetScheduleByID(ctx context.Context, id int64) (Schedule, error) {
+type GetScheduleByIDRow struct {
+	ID        int64       `db:"id" json:"id"`
+	StoreID   int64       `db:"store_id" json:"store_id"`
+	StylistID int64       `db:"stylist_id" json:"stylist_id"`
+	WorkDate  pgtype.Date `db:"work_date" json:"work_date"`
+}
+
+func (q *Queries) GetScheduleByID(ctx context.Context, id int64) (GetScheduleByIDRow, error) {
 	row := q.db.QueryRow(ctx, getScheduleByID, id)
-	var i Schedule
+	var i GetScheduleByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.StoreID,
 		&i.StylistID,
 		&i.WorkDate,
-		&i.Note,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -145,12 +173,8 @@ func (q *Queries) GetScheduleByID(ctx context.Context, id int64) (Schedule, erro
 const getScheduleWithTimeSlotsByID = `-- name: GetScheduleWithTimeSlotsByID :many
 SELECT
     s.id,
-    s.store_id,
-    s.stylist_id,
     s.work_date,
     s.note,
-    s.created_at,
-    s.updated_at,
     t.id as time_slot_id,
     t.start_time,
     t.end_time,
@@ -162,17 +186,13 @@ ORDER BY t.start_time
 `
 
 type GetScheduleWithTimeSlotsByIDRow struct {
-	ID          int64              `db:"id" json:"id"`
-	StoreID     int64              `db:"store_id" json:"store_id"`
-	StylistID   int64              `db:"stylist_id" json:"stylist_id"`
-	WorkDate    pgtype.Date        `db:"work_date" json:"work_date"`
-	Note        pgtype.Text        `db:"note" json:"note"`
-	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-	TimeSlotID  pgtype.Int8        `db:"time_slot_id" json:"time_slot_id"`
-	StartTime   pgtype.Time        `db:"start_time" json:"start_time"`
-	EndTime     pgtype.Time        `db:"end_time" json:"end_time"`
-	IsAvailable pgtype.Bool        `db:"is_available" json:"is_available"`
+	ID          int64       `db:"id" json:"id"`
+	WorkDate    pgtype.Date `db:"work_date" json:"work_date"`
+	Note        pgtype.Text `db:"note" json:"note"`
+	TimeSlotID  pgtype.Int8 `db:"time_slot_id" json:"time_slot_id"`
+	StartTime   pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime     pgtype.Time `db:"end_time" json:"end_time"`
+	IsAvailable pgtype.Bool `db:"is_available" json:"is_available"`
 }
 
 func (q *Queries) GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error) {
@@ -186,12 +206,8 @@ func (q *Queries) GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([
 		var i GetScheduleWithTimeSlotsByIDRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.StoreID,
-			&i.StylistID,
 			&i.WorkDate,
 			&i.Note,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 			&i.TimeSlotID,
 			&i.StartTime,
 			&i.EndTime,

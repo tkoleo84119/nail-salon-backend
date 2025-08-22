@@ -35,12 +35,8 @@ func (s *DeleteBulk) DeleteBulk(ctx context.Context, storeID int64, req adminSch
 	}
 
 	// Check if staff has access to this store
-	hasAccess, err := utils.CheckStoreAccess(storeID, updaterStoreIDs)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
-	}
-	if !hasAccess {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
+	if err := utils.CheckStoreAccess(storeID, updaterStoreIDs); err != nil {
+		return nil, err
 	}
 
 	// Get schedules with time slots

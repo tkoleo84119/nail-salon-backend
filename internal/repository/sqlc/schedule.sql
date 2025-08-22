@@ -16,10 +16,7 @@ SELECT
     id,
     store_id,
     stylist_id,
-    work_date,
-    note,
-    created_at,
-    updated_at
+    work_date
 FROM schedules
 WHERE id = $1;
 
@@ -44,12 +41,8 @@ ORDER BY s.work_date;
 -- name: GetScheduleWithTimeSlotsByID :many
 SELECT
     s.id,
-    s.store_id,
-    s.stylist_id,
     s.work_date,
     s.note,
-    s.created_at,
-    s.updated_at,
     t.id as time_slot_id,
     t.start_time,
     t.end_time,
@@ -74,7 +67,7 @@ ORDER BY s.work_date ASC;
 DELETE FROM schedules
 WHERE id = ANY($1::bigint[]);
 
--- name: CheckScheduleExists :one
+-- name: CheckScheduleDateExists :one
 SELECT EXISTS(
     SELECT 1 FROM schedules
     WHERE store_id = $1 AND stylist_id = $2 AND work_date = $3
@@ -85,3 +78,22 @@ SELECT EXISTS(
     SELECT 1 FROM schedules
     WHERE id = $1
 ) as exists;
+
+-- name: CheckScheduleCanUpdateDate :one
+SELECT NOT EXISTS(
+    SELECT 1
+    FROM time_slots ts
+    WHERE ts.schedule_id = $1
+    AND (
+        ts.is_available = false
+        OR (
+            ts.is_available = true
+            AND EXISTS (
+                SELECT 1
+                FROM bookings b
+                WHERE b.time_slot_id = ts.id
+                AND b.status IN ('CANCELLED', 'NO_SHOW')
+            )
+        )
+    )
+) as can_update;
