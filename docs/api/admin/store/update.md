@@ -51,12 +51,12 @@
 
 ### 驗證規則
 
-| 欄位     | 規則                                                               | 說明     |
-| -------- | ------------------------------------------------------------------ | -------- |
-| name     | <li>選填<li>長度大於1<li>長度小於100                               | 門市名稱 |
-| address  | <li>選填<li>長度小於255                                            | 門市地址 |
-| phone    | <li>選填<li>長度小於20<li>格式必須為台灣市話號碼 (例: 02-12345678) | 電話     |
-| isActive | <li>選填<li>必須為布林值                                           | 是否啟用 |
+| 欄位     | 必填 | 其他規則                              |
+| -------- | ---- | ------------------------------------- |
+| name     | 否   | <li>最大長度100字元                   |
+| address  | 否   | <li>最大長度255字元                   |
+| phone    | 否   | <li>支援台灣市話格式 <li>支援手機格式 |
+| isActive | 否   | <li>必須為布林值                      |
 
 - 欄位皆為選填，但至少需有一項。
 
@@ -102,25 +102,24 @@
   - message: 中文錯誤訊息（可參照錯誤總覽）
   - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-| 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                  |
-| ------ | -------- | ----------------------- | ------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入        |
-| 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入          |
-| 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入      |
-| 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入      |
-| 401    | E1006    | AuthContextMissing      | 未找到使用者認證資訊，請重新登入      |
-| 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作              |
-| 400    | E2001    | ValJsonFormat           | JSON 格式錯誤，請檢查                 |
-| 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查                  |
-| 400    | E2003    | ValAllFieldsEmpty       | 至少需要提供一個欄位進行更新          |
-| 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                      |
-| 400    | E2023    | ValFieldMinNumber       | {field} 最小值為 {param}              |
-| 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
-| 400    | E2026    | ValFieldMaxNumber       | {field} 最大值為 {param}              |
-| 400    | E2029    | ValFieldBoolean         | {field} 必須是布林值                  |
-| 409    | E3STO003 | StoreAlreadyExists      | 門市已存在，請創建其他門市            |
-| 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試              |
-| 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                        |
+| 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                                                       |
+| ------ | -------- | ----------------------- | -------------------------------------------------------------------------- |
+| 401    | E1002    | AuthTokenInvalid        | 無效的 accessToken，請重新登入                                             |
+| 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入                                               |
+| 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入                                           |
+| 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入                                           |
+| 401    | E1006    | AuthContextMissing      | 未找到使用者認證資訊，請重新登入                                           |
+| 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作                                                   |
+| 400    | E2001    | ValJsonFormat           | JSON 格式錯誤，請檢查                                                      |
+| 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查                                                       |
+| 400    | E2003    | ValAllFieldsEmpty       | 至少需要提供一個欄位進行更新                                               |
+| 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                                                           |
+| 400    | E2021    | ValFieldStringMinLength | {field} 長度至少需要 {param} 個字元                                        |
+| 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元                                      |
+| 400    | E2031    | ValFieldTaiwanPhone     | {field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX 或 09XXXXXXXX) |
+| 409    | E3STO003 | StoreAlreadyExists      | 門市已存在，請創建其他門市                                                 |
+| 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試                                                   |
+| 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                                                             |
 
 ---
 
@@ -133,12 +132,9 @@
 
 ## Service 邏輯
 
-1. 再次驗證 `role` 是否為 `SUPER_ADMIN` 或 `ADMIN`。
-2. 驗證至少一個欄位有更新。
-3. 若 `role` 為 `ADMIN`，則驗證 `store` 是否為自己有權限的門市。
-4. 若 `name` 有更新，則驗證 `name` 是否唯一（不包含自己）。
-5. 更新 `stores` 資料。
-7. 回傳更新結果。
+1. 若 `name` 有更新，則驗證 `name` 是否唯一（不包含自己）。
+2. 更新 `stores` 資料。
+3. 回傳更新結果。
 
 ---
 

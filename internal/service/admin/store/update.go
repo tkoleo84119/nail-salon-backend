@@ -2,6 +2,7 @@ package adminStore
 
 import (
 	"context"
+	"strings"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
@@ -24,16 +25,6 @@ func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories) *Update {
 }
 
 func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.UpdateRequest, role string, storeIDs []int64) (*adminStoreModel.UpdateResponse, error) {
-	// Validate role permissions (only SUPER_ADMIN and ADMIN can update stores)
-	if role != common.RoleSuperAdmin && role != common.RoleAdmin {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-	}
-
-	// Validate that at least one field has updates
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
-	}
-
 	// For ADMIN role, check store access permission
 	if role == common.RoleAdmin {
 		hasAccess, err := utils.CheckStoreAccess(storeID, storeIDs)
@@ -46,10 +37,12 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 	}
 
 	// Check if name is unique (excluding current store)
+	var name string
 	if req.Name != nil {
+		name = strings.TrimSpace(*req.Name)
 		nameExists, err := s.queries.CheckStoreNameExistsExcluding(ctx, dbgen.CheckStoreNameExistsExcludingParams{
 			ID:   storeID,
-			Name: *req.Name,
+			Name: name,
 		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name uniqueness", err)
@@ -60,8 +53,8 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 	}
 
 	// Update store using sqlx repository
-	updatedStore, err := s.repo.Store.UpdateStore(ctx, storeID, sqlxRepo.UpdateStoreParams{
-		Name:     req.Name,
+	err := s.repo.Store.UpdateStore(ctx, storeID, sqlxRepo.UpdateStoreParams{
+		Name:     &name,
 		Address:  req.Address,
 		Phone:    req.Phone,
 		IsActive: req.IsActive,
@@ -71,13 +64,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 	}
 
 	response := &adminStoreModel.UpdateResponse{
-		ID:        utils.FormatID(updatedStore.ID),
-		Name:      updatedStore.Name,
-		Address:   utils.PgTextToString(updatedStore.Address),
-		Phone:     utils.PgTextToString(updatedStore.Phone),
-		IsActive:  utils.PgBoolToBool(updatedStore.IsActive),
-		CreatedAt: utils.PgTimestamptzToTimeString(updatedStore.CreatedAt),
-		UpdatedAt: utils.PgTimestamptzToTimeString(updatedStore.UpdatedAt),
+		ID: utils.FormatID(storeID),
 	}
 
 	return response, nil

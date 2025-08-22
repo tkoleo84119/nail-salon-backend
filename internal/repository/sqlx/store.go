@@ -112,17 +112,7 @@ type UpdateStoreParams struct {
 	IsActive *bool
 }
 
-type UpdateStoreResponse struct {
-	ID        int64              `db:"id"`
-	Name      string             `db:"name"`
-	Address   pgtype.Text        `db:"address"`
-	Phone     pgtype.Text        `db:"phone"`
-	IsActive  pgtype.Bool        `db:"is_active"`
-	CreatedAt pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
-}
-
-func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) (*UpdateStoreResponse, error) {
+func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req UpdateStoreParams) error {
 	// set conditions
 	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
@@ -149,7 +139,7 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req Up
 
 	// Check if there are any fields to update
 	if len(setParts) == 1 {
-		return nil, fmt.Errorf("no fields to update")
+		return fmt.Errorf("no fields to update")
 	}
 
 	args = append(args, storeID)
@@ -158,20 +148,11 @@ func (r *StoreRepository) UpdateStore(ctx context.Context, storeID int64, req Up
 		UPDATE stores
 		SET %s
 		WHERE id = $%d
-		RETURNING
-			id,
-			name,
-			address,
-			phone,
-			is_active,
-			created_at,
-			updated_at
 	`, strings.Join(setParts, ", "), len(args))
 
-	var result UpdateStoreResponse
-	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
-		return nil, fmt.Errorf("failed to execute update query: %w", err)
+	if _, err := r.db.ExecContext(ctx, query, args...); err != nil {
+		return fmt.Errorf("failed to execute update query: %w", err)
 	}
 
-	return &result, nil
+	return nil
 }

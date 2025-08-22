@@ -28,13 +28,15 @@ func (h *Update) Update(c *gin.Context) {
 	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
-			"storeId": "storeId為必填項目",
+			"storeId": "storeId 為必填項目",
 		})
 		return
 	}
 	parsedStoreID, err := utils.ParseID(storeID)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"storeId": "storeId 類型轉換失敗"})
+		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+			"storeId": "storeId 類型轉換失敗",
+		})
 		return
 	}
 
