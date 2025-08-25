@@ -140,7 +140,6 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 
 type UpdateCustomerParams struct {
 	Name           *string
-	LineName       *string
 	Phone          *string
 	Birthday       *string
 	Email          *string
@@ -186,11 +185,6 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 	if params.Name != nil && *params.Name != "" {
 		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
 		args = append(args, *params.Name)
-	}
-
-	if params.LineName != nil && *params.LineName != "" {
-		setParts = append(setParts, fmt.Sprintf("line_name = $%d", len(args)+1))
-		args = append(args, *params.LineName)
 	}
 
 	if params.Phone != nil && *params.Phone != "" {

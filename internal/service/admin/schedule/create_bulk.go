@@ -90,13 +90,15 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminSch
 	}
 	defer tx.Rollback(ctx)
 
+	qtx := dbgen.New(tx)
+
 	// Batch insert schedules
-	if _, err := s.queries.BatchCreateSchedules(ctx, scheduleRows); err != nil {
+	if _, err := qtx.BatchCreateSchedules(ctx, scheduleRows); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to batch create schedules", err)
 	}
 
 	// Batch insert time slots
-	if _, err := s.queries.BatchCreateTimeSlots(ctx, timeSlotRows); err != nil {
+	if _, err := qtx.BatchCreateTimeSlots(ctx, timeSlotRows); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to batch create time slots", err)
 	}
 

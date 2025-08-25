@@ -126,7 +126,8 @@
 2. 根據 `providerUid` 查詢 `customers` 資料。
    - 未註冊：回傳需註冊及 LINE profile 及 `needRegister` 為 `true`。
 3. 產生發 `access token`、`refresh token`。
-4. 回傳 `access token`、`refresh token`。
+4. 檢查客戶是否有更新 `line_name`，若有則更新 (避免 LINE 名稱更新但資料庫未更新)。
+5. 回傳 `access token`、`refresh token`。
 
 ---
 

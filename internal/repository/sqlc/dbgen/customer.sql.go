@@ -142,14 +142,35 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByI
 }
 
 const getCustomerByLineUid = `-- name: GetCustomerByLineUid :one
-SELECT id
+SELECT id, line_name
 FROM customers
 WHERE line_uid = $1
 `
 
-func (q *Queries) GetCustomerByLineUid(ctx context.Context, lineUid string) (int64, error) {
+type GetCustomerByLineUidRow struct {
+	ID       int64       `db:"id" json:"id"`
+	LineName pgtype.Text `db:"line_name" json:"line_name"`
+}
+
+func (q *Queries) GetCustomerByLineUid(ctx context.Context, lineUid string) (GetCustomerByLineUidRow, error) {
 	row := q.db.QueryRow(ctx, getCustomerByLineUid, lineUid)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
+	var i GetCustomerByLineUidRow
+	err := row.Scan(&i.ID, &i.LineName)
+	return i, err
+}
+
+const updateCustomerLineName = `-- name: UpdateCustomerLineName :exec
+UPDATE customers
+SET line_name = $2
+WHERE id = $1
+`
+
+type UpdateCustomerLineNameParams struct {
+	ID       int64       `db:"id" json:"id"`
+	LineName pgtype.Text `db:"line_name" json:"line_name"`
+}
+
+func (q *Queries) UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error {
+	_, err := q.db.Exec(ctx, updateCustomerLineName, arg.ID, arg.LineName)
+	return err
 }

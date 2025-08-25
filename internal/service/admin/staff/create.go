@@ -85,7 +85,9 @@ func (s *Create) Create(ctx context.Context, req adminStaffModel.CreateParsedReq
 	}
 	defer tx.Rollback(ctx)
 
-	createdStaff, err := s.queries.CreateStaffUser(ctx, dbgen.CreateStaffUserParams{
+	qtx := dbgen.New(tx)
+
+	createdStaff, err := qtx.CreateStaffUser(ctx, dbgen.CreateStaffUserParams{
 		ID:           staffID,
 		Username:     req.Username,
 		Email:        req.Email,
@@ -97,12 +99,12 @@ func (s *Create) Create(ctx context.Context, req adminStaffModel.CreateParsedReq
 	}
 
 	// batch create store access records
-	_, err = s.queries.BatchCreateStaffUserStoreAccess(ctx, storeAccessParams)
+	_, err = qtx.BatchCreateStaffUserStoreAccess(ctx, storeAccessParams)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create store access", err)
 	}
 
-	_, err = s.queries.CreateStylist(ctx, dbgen.CreateStylistParams{
+	_, err = qtx.CreateStylist(ctx, dbgen.CreateStylistParams{
 		ID:          staffID,
 		StaffUserID: staffID,
 		Name:        utils.StringPtrToPgText(&req.Username, false),

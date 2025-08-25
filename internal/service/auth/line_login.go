@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
@@ -17,14 +18,16 @@ import (
 
 type LineLogin struct {
 	queries       dbgen.Querier
+	db            *pgxpool.Pool
 	lineValidator *utils.LineValidator
 	jwtConfig     config.JWTConfig
 }
 
-func NewLineLogin(queries dbgen.Querier, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineLogin {
+func NewLineLogin(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineLogin {
 	lineValidator := utils.NewLineValidator(lineConfig.ChannelID)
 	return &LineLogin{
 		queries:       queries,
+		db:            db,
 		lineValidator: lineValidator,
 		jwtConfig:     jwtConfig,
 	}
@@ -38,7 +41,7 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 	}
 
 	// Check if customer already exists
-	customerID, err := s.queries.GetCustomerByLineUid(ctx, profile.ProviderUid)
+	customer, err := s.queries.GetCustomerByLineUid(ctx, profile.ProviderUid)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			response := &auth.LineLoginResponse{
@@ -54,15 +57,38 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check customer exists", err)
 	}
 
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := dbgen.New(tx)
+
 	// Customer exists, generate tokens
-	accessToken, expiresIn, err := s.generateAccessToken(customerID)
+	accessToken, expiresIn, err := s.generateAccessToken(customer.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := s.generateRefreshToken(ctx, customerID, loginCtx)
+	refreshToken, err := s.generateRefreshToken(ctx, qtx, customer.ID, loginCtx)
 	if err != nil {
 		return nil, err
+	}
+
+	// check if customer line_name is different from profile.Name
+	if profile.Name != "" && utils.PgTextToString(customer.LineName) != profile.Name {
+		err = qtx.UpdateCustomerLineName(ctx, dbgen.UpdateCustomerLineNameParams{
+			ID:       customer.ID,
+			LineName: utils.StringPtrToPgText(&profile.Name, true),
+		})
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update customer line name", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
 	// Build response
@@ -89,7 +115,7 @@ func (s *LineLogin) generateAccessToken(customerID int64) (string, int, error) {
 }
 
 // generateRefreshToken generates and stores a refresh token for the customer
-func (s *LineLogin) generateRefreshToken(ctx context.Context, customerID int64, loginCtx auth.LoginContext) (string, error) {
+func (s *LineLogin) generateRefreshToken(ctx context.Context, qtx dbgen.Querier, customerID int64, loginCtx auth.LoginContext) (string, error) {
 	// Generate refresh token
 	refreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
@@ -110,7 +136,7 @@ func (s *LineLogin) generateRefreshToken(ctx context.Context, customerID int64, 
 		}
 	}
 
-	_, err = s.queries.CreateCustomerToken(ctx, dbgen.CreateCustomerTokenParams{
+	_, err = qtx.CreateCustomerToken(ctx, dbgen.CreateCustomerTokenParams{
 		ID:           tokenID,
 		CustomerID:   customerID,
 		RefreshToken: refreshToken,

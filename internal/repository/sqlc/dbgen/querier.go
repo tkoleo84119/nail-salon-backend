@@ -64,7 +64,7 @@ type Querier interface {
 	GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error)
 	GetBookingDetailsByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailsByBookingIDsRow, error)
 	GetCustomerByID(ctx context.Context, id int64) (GetCustomerByIDRow, error)
-	GetCustomerByLineUid(ctx context.Context, lineUid string) (int64, error)
+	GetCustomerByLineUid(ctx context.Context, lineUid string) (GetCustomerByLineUidRow, error)
 	GetScheduleByID(ctx context.Context, id int64) (GetScheduleByIDRow, error)
 	GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error)
 	GetServiceByID(ctx context.Context, id int64) (Service, error)
@@ -82,6 +82,7 @@ type Querier interface {
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (GetValidCustomerTokenRow, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error)
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
+	UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
 	UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (UpdateTimeSlotTemplateItemRow, error)
