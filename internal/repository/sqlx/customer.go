@@ -140,6 +140,7 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 
 type UpdateCustomerParams struct {
 	Name           *string
+	LineName       *string
 	Phone          *string
 	Birthday       *string
 	Email          *string
@@ -157,6 +158,7 @@ type UpdateCustomerParams struct {
 type UpdateCustomerResponse struct {
 	ID             int64              `db:"id"`
 	Name           string             `db:"name"`
+	LineName       pgtype.Text        `db:"line_name"`
 	Phone          string             `db:"phone"`
 	Birthday       pgtype.Date        `db:"birthday"`
 	Email          pgtype.Text        `db:"email"`
@@ -165,11 +167,14 @@ type UpdateCustomerResponse struct {
 	FavoriteColors []string           `db:"favorite_colors"`
 	FavoriteStyles []string           `db:"favorite_styles"`
 	IsIntrovert    pgtype.Bool        `db:"is_introvert"`
+	ReferralSource []string           `db:"referral_source"`
+	Referrer       pgtype.Text        `db:"referrer"`
 	CustomerNote   pgtype.Text        `db:"customer_note"`
 	StoreNote      pgtype.Text        `db:"store_note"`
 	Level          pgtype.Text        `db:"level"`
 	IsBlacklisted  pgtype.Bool        `db:"is_blacklisted"`
 	LastVisitAt    pgtype.Timestamptz `db:"last_visit_at"`
+	CreatedAt      pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
 }
 
@@ -181,6 +186,11 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 	if params.Name != nil && *params.Name != "" {
 		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
 		args = append(args, *params.Name)
+	}
+
+	if params.LineName != nil && *params.LineName != "" {
+		setParts = append(setParts, fmt.Sprintf("line_name = $%d", len(args)+1))
+		args = append(args, *params.LineName)
 	}
 
 	if params.Phone != nil && *params.Phone != "" {
@@ -258,6 +268,7 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 		RETURNING
 			id,
 			name,
+			line_name,
 			phone,
 			birthday,
 			email,
@@ -266,11 +277,14 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 			COALESCE(favorite_colors, '{}'::text[]) AS favorite_colors,
 			COALESCE(favorite_styles, '{}'::text[]) AS favorite_styles,
 			is_introvert,
+			COALESCE(referral_source, '{}'::text[]) AS referral_source,
+			referrer,
 			customer_note,
 			store_note,
 			level,
 			is_blacklisted,
 			last_visit_at,
+			created_at,
 			updated_at
 		`,
 		strings.Join(setParts, ", "), len(args))
@@ -282,6 +296,7 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 	err := row.Scan(
 		&result.ID,
 		&result.Name,
+		&result.LineName,
 		&result.Phone,
 		&result.Birthday,
 		&result.Email,
@@ -290,11 +305,14 @@ func (r *CustomerRepository) UpdateCustomer(ctx context.Context, customerID int6
 		m.SQLScanner(&result.FavoriteColors),
 		m.SQLScanner(&result.FavoriteStyles),
 		&result.IsIntrovert,
+		m.SQLScanner(&result.ReferralSource),
+		&result.Referrer,
 		&result.CustomerNote,
 		&result.StoreNote,
 		&result.Level,
 		&result.IsBlacklisted,
 		&result.LastVisitAt,
+		&result.CreatedAt,
 		&result.UpdatedAt,
 	)
 	if err != nil {

@@ -23,10 +23,6 @@ func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories) *Update {
 }
 
 func (s *Update) Update(ctx context.Context, customerID int64, req adminCustomerModel.UpdateRequest) (*adminCustomerModel.UpdateResponse, error) {
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
-	}
-
 	// verify customer exists
 	exists, err := s.queries.CheckCustomerExistsByID(ctx, customerID)
 	if err != nil {
@@ -47,14 +43,25 @@ func (s *Update) Update(ctx context.Context, customerID int64, req adminCustomer
 	}
 
 	return &adminCustomerModel.UpdateResponse{
-		ID:            utils.FormatID(customer.ID),
-		Name:          customer.Name,
-		Phone:         customer.Phone,
-		Birthday:      utils.PgDateToDateString(customer.Birthday),
-		City:          utils.PgTextToString(customer.City),
-		Level:         utils.PgTextToString(customer.Level),
-		IsBlacklisted: utils.PgBoolToBool(customer.IsBlacklisted),
-		LastVisitAt:   utils.PgTimestamptzToTimeString(customer.LastVisitAt),
-		UpdatedAt:     utils.PgTimestamptzToTimeString(customer.UpdatedAt),
+		ID:             utils.FormatID(customer.ID),
+		Name:           customer.Name,
+		LineName:       utils.PgTextToString(customer.LineName),
+		Phone:          customer.Phone,
+		Birthday:       utils.PgDateToDateString(customer.Birthday),
+		Email:          utils.PgTextToString(customer.Email),
+		City:           utils.PgTextToString(customer.City),
+		FavoriteShapes: customer.FavoriteShapes,
+		FavoriteColors: customer.FavoriteColors,
+		FavoriteStyles: customer.FavoriteStyles,
+		IsIntrovert:    utils.PgBoolToBool(customer.IsIntrovert),
+		ReferralSource: customer.ReferralSource,
+		Referrer:       utils.PgTextToString(customer.Referrer),
+		CustomerNote:   utils.PgTextToString(customer.CustomerNote),
+		StoreNote:      utils.PgTextToString(customer.StoreNote),
+		Level:          utils.PgTextToString(customer.Level),
+		IsBlacklisted:  utils.PgBoolToBool(customer.IsBlacklisted),
+		LastVisitAt:    utils.PgTimestamptzToTimeString(customer.LastVisitAt),
+		CreatedAt:      utils.PgTimestamptzToTimeString(customer.CreatedAt),
+		UpdatedAt:      utils.PgTimestamptzToTimeString(customer.UpdatedAt),
 	}, nil
 }

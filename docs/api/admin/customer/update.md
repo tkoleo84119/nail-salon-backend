@@ -53,7 +53,7 @@
 | ------------- | ---- | -------------------------------- | -------------- |
 | storeNote     | 否   | <li>長度小於255                  | 門市備註       |
 | level         | 否   | <li>格式必須為 NORMAL, VIP, VVIP | 顧客等級       |
-| isBlacklisted | 否   | <li>必須為布林值                 | 是否列入黑名單 |
+| isBlacklisted | 否   |                                  | 是否列入黑名單 |
 
 - 欄位皆為選填，但至少需有一項。
 
@@ -68,12 +68,23 @@
   "data": {
     "id": "8000000001",
     "name": "王小明",
+    "lineName": "王小明",
     "phone": "0912345678",
     "birthday": "2000-01-01",
+    "email": "test@test.com",
     "city": "台北市",
+    "favoriteShapes": ["圓形", "方形"],
+    "favoriteColors": ["黑色", "白色"],
+    "favoriteStyles": ["自然", "韓式"],
+    "isIntrovert": false,
+    "referralSource": ["朋友介紹", "網路搜尋"],
+    "referrer": "王小明",
+    "customerNote": "使用者自己的備註",
+    "storeNote": "門市備註",
     "level": "NORMAL",
     "isBlacklisted": false,
     "lastVisitAt": "2025-01-01T00:00:00+08:00",
+    "createdAt": "2025-01-01T00:00:00+08:00",
     "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
@@ -103,7 +114,7 @@
 
 | 狀態碼 | 錯誤碼 | 常數名稱                | 說明                                  |
 | ------ | ------ | ----------------------- | ------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入        |
+| 401    | E1002  | AuthTokenInvalid        | 無效的 accessToken，請重新登入        |
 | 401    | E1003  | AuthTokenMissing        | accessToken 缺失，請重新登入          |
 | 401    | E1004  | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入      |
 | 401    | E1005  | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入      |
@@ -114,7 +125,6 @@
 | 400    | E2003  | ValAllFieldsEmpty       | 至少需要提供一個欄位進行更新          |
 | 400    | E2004  | ValTypeConversionFailed | 參數類型轉換失敗                      |
 | 400    | E2024  | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
-| 400    | E2029  | ValFieldBoolean         | {field} 必須是布林值                  |
 | 400    | E2030  | ValFieldOneof           | {field} 必須是 {param} 其中一個值     |
 | 404    | E3C001 | CustomerNotFound        | 客戶不存在                            |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試              |
@@ -130,9 +140,8 @@
 
 ## Service 邏輯
 
-1. 驗證至少一個欄位有更新。
-2. 驗證客戶是否存在。
-3. 更新 `customers` 資料。
+1. 驗證客戶是否存在。
+2. 更新 `customers` 資料。
 3. 回傳更新結果。
 
 ---
