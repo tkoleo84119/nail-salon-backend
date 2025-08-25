@@ -9,3 +9,7 @@ import (
 type CreateInterface interface {
 	Create(ctx context.Context, req adminCouponModel.CreateRequest) (*adminCouponModel.CreateResponse, error)
 }
+
+type GetAllInterface interface {
+	GetAll(ctx context.Context, req adminCouponModel.GetAllParsedRequest) (*adminCouponModel.GetAllResponse, error)
+}

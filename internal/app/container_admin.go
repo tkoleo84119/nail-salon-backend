@@ -107,7 +107,8 @@ type AdminServices struct {
 	TimeSlotTemplateDeleteItem adminTimeSlotTemplateItemService.DeleteInterface
 
 	// Coupon management services
-	CreateCoupon adminCouponService.CreateInterface
+	CouponCreate adminCouponService.CreateInterface
+	CouponGetAll adminCouponService.GetAllInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -181,7 +182,8 @@ type AdminHandlers struct {
 	TimeSlotTemplateDeleteItem *adminTimeSlotTemplateItemHandler.Delete
 
 	// Coupon management handlers
-	CreateCoupon *adminCouponHandler.Create
+	CouponCreate *adminCouponHandler.Create
+	CouponGetAll *adminCouponHandler.GetAll
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -253,7 +255,8 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateItemService.NewDelete(queries),
 
 		// Coupon management services
-		CreateCoupon: adminCouponService.NewCreate(queries, repositories.SQLX),
+		CouponCreate: adminCouponService.NewCreate(queries, repositories.SQLX),
+		CouponGetAll: adminCouponService.NewGetAll(repositories.SQLX),
 	}
 }
 
@@ -327,6 +330,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateItemHandler.NewDelete(services.TimeSlotTemplateDeleteItem),
 
 		// Coupon management handlers
-		CreateCoupon: adminCouponHandler.NewCreate(services.CreateCoupon),
+		CouponCreate: adminCouponHandler.NewCreate(services.CouponCreate),
+		CouponGetAll: adminCouponHandler.NewGetAll(services.CouponGetAll),
 	}
 }
