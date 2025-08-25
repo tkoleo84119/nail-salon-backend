@@ -28,7 +28,7 @@ func ExtractValidationErrors(err error) []ownErrors.ErrorItem {
 			case "required":
 				constantName = ownErrors.ValFieldRequired
 			case "noBlank":
-				constantName = ownErrors.ValFieldRequired
+				constantName = ownErrors.ValFieldNoBlank
 			case "min":
 				if fieldError.Kind().String() == "string" {
 					constantName = ownErrors.ValFieldStringMinLength

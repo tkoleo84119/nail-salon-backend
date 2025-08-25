@@ -161,6 +161,11 @@
       "code": "E2035",
       "message": "{field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX 或 09XXXXXXXX)",
       "status": 400
+    },
+    "ValFieldNoBlank": {
+      "code": "E2036",
+      "message": "{field} 不能為空字串",
+      "status": 400
     }
   },
   "BOOKING": {

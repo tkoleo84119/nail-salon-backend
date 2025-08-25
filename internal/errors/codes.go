@@ -27,6 +27,7 @@ const (
 	ValFieldInvalidEmail = "ValFieldInvalidEmail"
 	ValFieldMaxNumber = "ValFieldMaxNumber"
 	ValFieldMinNumber = "ValFieldMinNumber"
+	ValFieldNoBlank = "ValFieldNoBlank"
 	ValFieldNumeric = "ValFieldNumeric"
 	ValFieldOneof = "ValFieldOneof"
 	ValFieldRequired = "ValFieldRequired"

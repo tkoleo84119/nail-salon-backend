@@ -110,7 +110,7 @@ func (r *CouponRepository) GetAllCouponsByFilter(ctx context.Context, params Get
 		%s
 		ORDER BY %s
 		LIMIT $%d OFFSET $%d
-    `, whereClause, sort, limitIndex, offsetIndex)
+	  `, whereClause, sort, limitIndex, offsetIndex)
 
 	var results []GetAllCouponsByFilterItem
 	if err := r.db.SelectContext(ctx, &results, query, args...); err != nil {
@@ -118,4 +118,50 @@ func (r *CouponRepository) GetAllCouponsByFilter(ctx context.Context, params Get
 	}
 
 	return total, results, nil
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateCouponParams struct {
+	Name     *string
+	IsActive *bool
+	Note     *string
+}
+
+// UpdateCoupon updates coupon fields that are provided
+func (r *CouponRepository) UpdateCoupon(ctx context.Context, couponID int64, params UpdateCouponParams) error {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *params.Name)
+	}
+
+	if params.IsActive != nil {
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, utils.BoolPtrToPgBool(params.IsActive))
+	}
+
+	if params.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
+		args = append(args, utils.StringPtrToPgText(params.Note, false))
+	}
+
+	if len(setParts) == 1 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, couponID)
+	query := fmt.Sprintf(`
+		UPDATE coupons
+		SET %s
+		WHERE id = $%d
+	`, strings.Join(setParts, ", "), len(args))
+
+	if _, err := r.db.ExecContext(ctx, query, args...); err != nil {
+		return fmt.Errorf("failed to execute coupon update: %w", err)
+	}
+
+	return nil
 }

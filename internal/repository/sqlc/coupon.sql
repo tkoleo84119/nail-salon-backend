@@ -12,10 +12,22 @@ INSERT INTO coupons (
   $1, $2, $3, $4, $5, $6, $7, $8
 );
 
+-- name: CheckCouponExists :one
+SELECT EXISTS(
+  SELECT 1 FROM coupons
+  WHERE id = $1
+);
+
 -- name: CheckCouponNameExists :one
 SELECT EXISTS(
   SELECT 1 FROM coupons
   WHERE name = $1
+);
+
+-- name: CheckCouponNameExistsExcluding :one
+SELECT EXISTS(
+  SELECT 1 FROM coupons
+  WHERE name = $1 AND id != $2
 );
 
 -- name: CheckCouponCodeExists :one

@@ -236,5 +236,6 @@ func setupAdminCouponRoutes(admin *gin.RouterGroup, cfg *config.Config, queries 
 	{
 		coupons.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.CouponGetAll.GetAll)
 		coupons.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.CouponCreate.Create)
+		coupons.PATCH("/:couponId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.CouponUpdate.Update)
 	}
 }

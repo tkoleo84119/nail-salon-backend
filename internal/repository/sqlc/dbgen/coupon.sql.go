@@ -25,6 +25,20 @@ func (q *Queries) CheckCouponCodeExists(ctx context.Context, code string) (bool,
 	return exists, err
 }
 
+const checkCouponExists = `-- name: CheckCouponExists :one
+SELECT EXISTS(
+  SELECT 1 FROM coupons
+  WHERE id = $1
+)
+`
+
+func (q *Queries) CheckCouponExists(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCouponExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkCouponNameExists = `-- name: CheckCouponNameExists :one
 SELECT EXISTS(
   SELECT 1 FROM coupons
@@ -34,6 +48,25 @@ SELECT EXISTS(
 
 func (q *Queries) CheckCouponNameExists(ctx context.Context, name string) (bool, error) {
 	row := q.db.QueryRow(ctx, checkCouponNameExists, name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const checkCouponNameExistsExcluding = `-- name: CheckCouponNameExistsExcluding :one
+SELECT EXISTS(
+  SELECT 1 FROM coupons
+  WHERE name = $1 AND id != $2
+)
+`
+
+type CheckCouponNameExistsExcludingParams struct {
+	Name string `db:"name" json:"name"`
+	ID   int64  `db:"id" json:"id"`
+}
+
+func (q *Queries) CheckCouponNameExistsExcluding(ctx context.Context, arg CheckCouponNameExistsExcludingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCouponNameExistsExcluding, arg.Name, arg.ID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err

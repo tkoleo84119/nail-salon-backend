@@ -13,3 +13,7 @@ type CreateInterface interface {
 type GetAllInterface interface {
 	GetAll(ctx context.Context, req adminCouponModel.GetAllParsedRequest) (*adminCouponModel.GetAllResponse, error)
 }
+
+type UpdateInterface interface {
+	Update(ctx context.Context, couponID int64, req adminCouponModel.UpdateRequest) (*adminCouponModel.UpdateResponse, error)
+}
