@@ -40,15 +40,16 @@ func (s *DeleteBulk) DeleteBulk(ctx context.Context, storeID int64, req adminSch
 	}
 
 	// Get schedules with time slots
-	schedules, err := s.queries.GetSchedulesWithTimeSlotsByIDs(ctx, req.ScheduleIDs)
+	schedules, err := s.queries.CheckSchedulesCanDelete(ctx, req.ScheduleIDs)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get schedules with time slots", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check schedules", err)
 	}
 
 	// Check if all schedules exist and belong to the stylist/store
-	if uniqueSchedulesCounts(schedules) != len(req.ScheduleIDs) {
-		return nil, errorCodes.NewServiceError(errorCodes.ScheduleNotFound, "some schedules not found", nil)
+	if len(schedules) != len(req.ScheduleIDs) {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotFound)
 	}
+
 	for _, schedule := range schedules {
 		if schedule.StoreID != storeID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotBelongToStore)
@@ -59,7 +60,7 @@ func (s *DeleteBulk) DeleteBulk(ctx context.Context, storeID int64, req adminSch
 		}
 
 		// Check if time slots are not available => mean this schedule is already booked
-		if !schedule.IsAvailable.Bool {
+		if !schedule.CanDelete {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleAlreadyBookedDoNotDelete)
 		}
 	}
@@ -79,15 +80,4 @@ func (s *DeleteBulk) DeleteBulk(ctx context.Context, storeID int64, req adminSch
 	}
 
 	return response, nil
-}
-
-// schedules include many time slots, so we need to count unique schedules
-func uniqueSchedulesCounts(schedules []dbgen.GetSchedulesWithTimeSlotsByIDsRow) int {
-	uniqueMap := make(map[int64]int)
-
-	for _, schedule := range schedules {
-		uniqueMap[schedule.ID]++
-	}
-
-	return len(uniqueMap)
 }

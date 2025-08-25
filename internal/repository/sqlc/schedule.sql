@@ -20,24 +20,6 @@ SELECT
 FROM schedules
 WHERE id = $1;
 
--- name: GetSchedulesWithTimeSlotsByIDs :many
-SELECT
-    s.id,
-    s.store_id,
-    s.stylist_id,
-    s.work_date,
-    s.note,
-    s.created_at,
-    s.updated_at,
-    t.id as time_slot_id,
-    t.start_time,
-    t.end_time,
-    t.is_available
-FROM schedules s
-LEFT JOIN time_slots t ON s.id = t.schedule_id
-WHERE s.id = ANY($1::bigint[])
-ORDER BY s.work_date;
-
 -- name: GetScheduleWithTimeSlotsByID :many
 SELECT
     s.id,
@@ -97,3 +79,29 @@ SELECT NOT EXISTS(
         )
     )
 ) as can_update;
+
+-- name: CheckSchedulesCanDelete :many
+SELECT
+    s.id,
+    s.store_id,
+    s.stylist_id,
+    s.work_date,
+    NOT EXISTS(
+        SELECT 1
+        FROM time_slots ts
+        WHERE ts.schedule_id = s.id
+        AND (
+            ts.is_available = false
+            OR (
+                ts.is_available = true
+                AND EXISTS (
+                    SELECT 1
+                    FROM bookings b
+                    WHERE b.time_slot_id = ts.id
+                    AND b.status IN ('CANCELLED', 'NO_SHOW')
+                )
+            )
+        )
+    ) as can_delete
+FROM schedules s
+WHERE s.id = ANY($1::bigint[]);

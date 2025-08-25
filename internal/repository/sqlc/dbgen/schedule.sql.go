@@ -82,6 +82,67 @@ func (q *Queries) CheckScheduleExistsByID(ctx context.Context, id int64) (bool, 
 	return exists, err
 }
 
+const checkSchedulesCanDelete = `-- name: CheckSchedulesCanDelete :many
+SELECT
+    s.id,
+    s.store_id,
+    s.stylist_id,
+    s.work_date,
+    NOT EXISTS(
+        SELECT 1
+        FROM time_slots ts
+        WHERE ts.schedule_id = s.id
+        AND (
+            ts.is_available = false
+            OR (
+                ts.is_available = true
+                AND EXISTS (
+                    SELECT 1
+                    FROM bookings b
+                    WHERE b.time_slot_id = ts.id
+                    AND b.status IN ('CANCELLED', 'NO_SHOW')
+                )
+            )
+        )
+    ) as can_delete
+FROM schedules s
+WHERE s.id = ANY($1::bigint[])
+`
+
+type CheckSchedulesCanDeleteRow struct {
+	ID        int64       `db:"id" json:"id"`
+	StoreID   int64       `db:"store_id" json:"store_id"`
+	StylistID int64       `db:"stylist_id" json:"stylist_id"`
+	WorkDate  pgtype.Date `db:"work_date" json:"work_date"`
+	CanDelete bool        `db:"can_delete" json:"can_delete"`
+}
+
+func (q *Queries) CheckSchedulesCanDelete(ctx context.Context, dollar_1 []int64) ([]CheckSchedulesCanDeleteRow, error) {
+	rows, err := q.db.Query(ctx, checkSchedulesCanDelete, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CheckSchedulesCanDeleteRow{}
+	for rows.Next() {
+		var i CheckSchedulesCanDeleteRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.StoreID,
+			&i.StylistID,
+			&i.WorkDate,
+			&i.CanDelete,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const deleteSchedulesByIDs = `-- name: DeleteSchedulesByIDs :exec
 DELETE FROM schedules
 WHERE id = ANY($1::bigint[])
@@ -208,71 +269,6 @@ func (q *Queries) GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([
 			&i.ID,
 			&i.WorkDate,
 			&i.Note,
-			&i.TimeSlotID,
-			&i.StartTime,
-			&i.EndTime,
-			&i.IsAvailable,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getSchedulesWithTimeSlotsByIDs = `-- name: GetSchedulesWithTimeSlotsByIDs :many
-SELECT
-    s.id,
-    s.store_id,
-    s.stylist_id,
-    s.work_date,
-    s.note,
-    s.created_at,
-    s.updated_at,
-    t.id as time_slot_id,
-    t.start_time,
-    t.end_time,
-    t.is_available
-FROM schedules s
-LEFT JOIN time_slots t ON s.id = t.schedule_id
-WHERE s.id = ANY($1::bigint[])
-ORDER BY s.work_date
-`
-
-type GetSchedulesWithTimeSlotsByIDsRow struct {
-	ID          int64              `db:"id" json:"id"`
-	StoreID     int64              `db:"store_id" json:"store_id"`
-	StylistID   int64              `db:"stylist_id" json:"stylist_id"`
-	WorkDate    pgtype.Date        `db:"work_date" json:"work_date"`
-	Note        pgtype.Text        `db:"note" json:"note"`
-	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-	TimeSlotID  pgtype.Int8        `db:"time_slot_id" json:"time_slot_id"`
-	StartTime   pgtype.Time        `db:"start_time" json:"start_time"`
-	EndTime     pgtype.Time        `db:"end_time" json:"end_time"`
-	IsAvailable pgtype.Bool        `db:"is_available" json:"is_available"`
-}
-
-func (q *Queries) GetSchedulesWithTimeSlotsByIDs(ctx context.Context, dollar_1 []int64) ([]GetSchedulesWithTimeSlotsByIDsRow, error) {
-	rows, err := q.db.Query(ctx, getSchedulesWithTimeSlotsByIDs, dollar_1)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetSchedulesWithTimeSlotsByIDsRow{}
-	for rows.Next() {
-		var i GetSchedulesWithTimeSlotsByIDsRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.StoreID,
-			&i.StylistID,
-			&i.WorkDate,
-			&i.Note,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 			&i.TimeSlotID,
 			&i.StartTime,
 			&i.EndTime,

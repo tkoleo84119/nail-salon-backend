@@ -2,7 +2,7 @@ package adminSchedule
 
 type DeleteBulkRequest struct {
 	StylistID   string   `json:"stylistId" binding:"required"`
-	ScheduleIDs []string `json:"scheduleIds" binding:"required,min=1,max=50"`
+	ScheduleIDs []string `json:"scheduleIds" binding:"required,min=1,max=31"`
 }
 
 type DeleteBulkParsedRequest struct {

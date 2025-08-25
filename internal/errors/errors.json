@@ -225,7 +225,7 @@
     },
     "ScheduleAlreadyBookedDoNotDelete": {
       "code": "E3SCH002",
-      "message": "部分班表已被預約，無法刪除",
+      "message": "部分班表已被預約或取消，刪除會造成問題",
       "status": 400
     },
     "ScheduleNotBelongToStore": {

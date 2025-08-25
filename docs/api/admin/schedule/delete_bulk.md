@@ -87,27 +87,27 @@
   - message: 中文錯誤訊息（可參照錯誤總覽）
   - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-| 狀態碼 | 錯誤碼   | 常數名稱                         | 說明                              |
-| ------ | -------- | -------------------------------- | --------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入    |
-| 401    | E1003    | AuthTokenMissing                 | accessToken 缺失，請重新登入      |
-| 401    | E1004    | AuthTokenFormatError             | accessToken 格式錯誤，請重新登入  |
-| 401    | E1005    | AuthStaffFailed                  | 未找到有效的員工資訊，請重新登入  |
-| 401    | E1006    | AuthContextMissing               | 未找到使用者認證資訊，請重新登入  |
-| 403    | E1010    | AuthPermissionDenied             | 權限不足，無法執行此操作          |
-| 400    | E2002    | ValPathParamMissing              | 路徑參數缺失，請檢查              |
-| 400    | E2004    | ValTypeConversionFailed          | 參數類型轉換失敗                  |
-| 400    | E2020    | ValFieldRequired                 | {field} 為必填項目                |
-| 400    | E2022    | ValFieldMinItems                 | {field} 至少需要 {param} 個項目   |
-| 400    | E2025    | ValFieldMaxItems                 | {field} 最多只能有 {param} 個項目 |
-| 404    | E3SCH005 | ScheduleNotFound                 | 排班不存在或已被刪除              |
-| 400    | E3SCH001 | ScheduleAlreadyBookedDoNotDelete | 部分班表已被預約，無法刪除        |
-| 400    | E3SCH003 | ScheduleNotBelongToStore         | 部分班表不屬於指定的門市          |
-| 400    | E3SCH004 | ScheduleNotBelongToStylist       | 部分班表不屬於指定的美甲師        |
-| 404    | E3STY001 | StylistNotFound                  | 美甲師資料不存在                  |
-| 500    | E9001    | SysInternalError                 | 系統發生錯誤，請稍後再試          |
-| 500    | E9002    | SysDatabaseError                 | 資料庫操作失敗                    |
-
+| 狀態碼 | 錯誤碼   | 常數名稱                         | 說明                                   |
+| ------ | -------- | -------------------------------- | -------------------------------------- |
+| 401    | E1002    | AuthTokenInvalid                 | 無效的 accessToken，請重新登入         |
+| 401    | E1003    | AuthTokenMissing                 | accessToken 缺失，請重新登入           |
+| 401    | E1004    | AuthTokenFormatError             | accessToken 格式錯誤，請重新登入       |
+| 401    | E1005    | AuthStaffFailed                  | 未找到有效的員工資訊，請重新登入       |
+| 401    | E1006    | AuthContextMissing               | 未找到使用者認證資訊，請重新登入       |
+| 403    | E1010    | AuthPermissionDenied             | 權限不足，無法執行此操作               |
+| 400    | E2001    | ValJsonFormat                    | JSON 格式錯誤，請檢查                  |
+| 400    | E2002    | ValPathParamMissing              | 路徑參數缺失，請檢查                   |
+| 400    | E2004    | ValTypeConversionFailed          | 參數類型轉換失敗                       |
+| 400    | E2020    | ValFieldRequired                 | {field} 為必填項目                     |
+| 400    | E2022    | ValFieldMinItems                 | {field} 至少需要 {param} 個項目        |
+| 400    | E2025    | ValFieldMaxItems                 | {field} 最多只能有 {param} 個項目      |
+| 404    | E3SCH005 | ScheduleNotFound                 | 排班不存在或已被刪除                   |
+| 400    | E3SCH001 | ScheduleAlreadyBookedDoNotDelete | 部分班表已被預約或取消，刪除會造成問題 |
+| 400    | E3SCH003 | ScheduleNotBelongToStore         | 部分班表不屬於指定的門市               |
+| 400    | E3SCH004 | ScheduleNotBelongToStylist       | 部分班表不屬於指定的美甲師             |
+| 404    | E3STY001 | StylistNotFound                  | 美甲師資料不存在                       |
+| 500    | E9001    | SysInternalError                 | 系統發生錯誤，請稍後再試               |
+| 500    | E9002    | SysDatabaseError                 | 資料庫操作失敗                         |
 
 ---
 
@@ -116,7 +116,6 @@
 - `schedules`
 - `time_slots`
 - `stylists`
-- `stores`
 
 ---
 
@@ -125,9 +124,9 @@
 1. 檢查 `stylistId` 是否存在。
 2. 判斷身分是否可操作指定 `stylistId` (員工只能刪除自己的班表，管理員可刪除任一美甲師班表)。
 3. 判斷是否有權限操作指定 `storeId`。
-4. 取得 `scheduleIds` 的班表資料（含底下所有 `time_slots`）。
+4. 取得 `scheduleIds` 的班表資料。
 5. 驗證 `scheduleIds` 是否屬於 `stylistId`/`storeId`。
-6. 驗證 `scheduleIds` 的班表是否已被預約。
+6. 驗證 `scheduleIds` 的班表是否已被預約或取消。
 7. 執行刪除。
 8. 回傳已刪除班表 id 陣列。
 
