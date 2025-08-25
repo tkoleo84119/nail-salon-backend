@@ -89,6 +89,8 @@ type Coupon struct {
 	IsActive       pgtype.Bool        `db:"is_active" json:"is_active"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	Note           pgtype.Text        `db:"note" json:"note"`
+	DisplayName    string             `db:"display_name" json:"display_name"`
 }
 
 type Customer struct {

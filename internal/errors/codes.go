@@ -106,4 +106,12 @@ const (
 	SysInternalError = "SysInternalError"
 	SysTimeout = "SysTimeout"
 
+	// COUPON - coupon related errors
+	CouponCodeAlreadyExists = "CouponCodeAlreadyExists"
+	CouponDiscountExclusive = "CouponDiscountExclusive"
+	CouponDiscountRequired = "CouponDiscountRequired"
+	CouponNameAlreadyExists = "CouponNameAlreadyExists"
+	CouponNotActive = "CouponNotActive"
+	CouponNotFound = "CouponNotFound"
+
 )

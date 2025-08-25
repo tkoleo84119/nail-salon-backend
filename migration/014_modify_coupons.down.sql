@@ -1,0 +1,5 @@
+ALTER TABLE coupons
+DROP COLUMN IF EXISTS note;
+
+ALTER TABLE coupons
+DROP COLUMN IF EXISTS display_name;

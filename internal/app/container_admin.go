@@ -8,6 +8,7 @@ import (
 	// Admin handlers
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
+	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
 	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
 	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
@@ -22,6 +23,7 @@ import (
 	// Admin services
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
+	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
@@ -103,6 +105,9 @@ type AdminServices struct {
 	TimeSlotTemplateItemCreate adminTimeSlotTemplateItemService.CreateInterface
 	TimeSlotTemplateUpdateItem adminTimeSlotTemplateItemService.UpdateInterface
 	TimeSlotTemplateDeleteItem adminTimeSlotTemplateItemService.DeleteInterface
+
+	// Coupon management services
+	CreateCoupon adminCouponService.CreateInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -174,6 +179,9 @@ type AdminHandlers struct {
 	TimeSlotTemplateItemCreate *adminTimeSlotTemplateItemHandler.Create
 	TimeSlotTemplateUpdateItem *adminTimeSlotTemplateItemHandler.Update
 	TimeSlotTemplateDeleteItem *adminTimeSlotTemplateItemHandler.Delete
+
+	// Coupon management handlers
+	CreateCoupon *adminCouponHandler.Create
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -243,6 +251,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		TimeSlotTemplateItemCreate: adminTimeSlotTemplateItemService.NewCreate(queries),
 		TimeSlotTemplateUpdateItem: adminTimeSlotTemplateItemService.NewUpdate(queries),
 		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateItemService.NewDelete(queries),
+
+		// Coupon management services
+		CreateCoupon: adminCouponService.NewCreate(queries, repositories.SQLX),
 	}
 }
 
@@ -314,5 +325,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		TimeSlotTemplateItemCreate: adminTimeSlotTemplateItemHandler.NewCreate(services.TimeSlotTemplateItemCreate),
 		TimeSlotTemplateUpdateItem: adminTimeSlotTemplateItemHandler.NewUpdate(services.TimeSlotTemplateUpdateItem),
 		TimeSlotTemplateDeleteItem: adminTimeSlotTemplateItemHandler.NewDelete(services.TimeSlotTemplateDeleteItem),
+
+		// Coupon management handlers
+		CreateCoupon: adminCouponHandler.NewCreate(services.CreateCoupon),
 	}
 }

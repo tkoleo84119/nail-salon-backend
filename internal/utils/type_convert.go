@@ -237,6 +237,80 @@ func BoolPtrToPgBool(b *bool) pgtype.Bool {
 	return pgtype.Bool{Bool: *b, Valid: true}
 }
 
+// Float64PtrToPgNumeric converts a float64 pointer to pgtype.Numeric for nullable float fields.
+// This is used for optional float fields in database operations where NULL values are allowed.
+//
+// Parameters:
+//   - f: Pointer to float64 (can be nil for NULL values)
+//
+// Returns:
+//   - pgtype.Numeric with Valid=false if f is nil, otherwise Valid=true with the converted value
+//
+// Example:
+//
+//	var discountRate *float64 = nil
+//	pgNumeric := utils.Float64PtrToPgNumeric(discountRate)  // Returns {Valid: false}
+//
+//	rate := 0.8
+//	pgNumeric = utils.Float64PtrToPgNumeric(&rate)          // Returns {Valid: true, value: 0.8}
+//
+// Usage in SQLC queries:
+//
+//	params := CreateCouponParams{
+//	    Name:          req.Name,
+//	    DiscountRate:  utils.Float64PtrToPgNumeric(req.DiscountRate),   // Optional field
+//	    DiscountAmount: utils.Int64PtrToPgNumeric(req.DiscountAmount),  // Optional field
+//	}
+func Float64PtrToPgNumeric(f *float64) (pgtype.Numeric, error) {
+	if f == nil {
+		return pgtype.Numeric{Valid: false}, nil
+	}
+
+	var n pgtype.Numeric
+	err := n.Scan(fmt.Sprintf("%f", *f))
+	if err != nil {
+		return pgtype.Numeric{Valid: false}, err
+	}
+	return n, nil
+}
+
+// Int64PtrToPgNumeric converts an int64 pointer to pgtype.Numeric for nullable int fields.
+// This is used for optional int fields in database operations where NULL values are allowed.
+//
+// Parameters:
+//   - i: Pointer to int64 (can be nil for NULL values)
+//
+// Returns:
+//   - pgtype.Numeric with Valid=false if i is nil, otherwise Valid=true with the converted value
+//
+// Example:
+//
+//	var discountAmount *int64 = nil
+//	pgNumeric := utils.Int64PtrToPgNumeric(discountAmount)  // Returns {Valid: false}
+//
+//	amount := int64(100)
+//	pgNumeric = utils.Int64PtrToPgNumeric(&amount)          // Returns {Valid: true, value: 100}
+//
+// Usage in SQLC queries:
+//
+//	params := CreateCouponParams{
+//	    Name:          req.Name,
+//	    DiscountRate:  utils.Float64PtrToPgNumeric(req.DiscountRate),   // Optional field
+//	    DiscountAmount: utils.Int64PtrToPgNumeric(req.DiscountAmount),  // Optional field
+//	}
+func Int64PtrToPgNumeric(i *int64) (pgtype.Numeric, error) {
+	if i == nil {
+		return pgtype.Numeric{Valid: false}, nil
+	}
+
+	var n pgtype.Numeric
+	err := n.Scan(fmt.Sprintf("%d", *i))
+	if err != nil {
+		return pgtype.Numeric{Valid: false}, err
+	}
+	return n, nil
+}
+
 // TimeToPgTimestamptz converts time.Time to pgtype.Timestamptz for timestamp fields.
 // This is used for created_at, updated_at, and other timestamp fields in database operations.
 //

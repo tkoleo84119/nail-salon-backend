@@ -197,7 +197,7 @@ Table booking_details {
   booking_id bigint [not null]
   service_id bigint [not null]
   price numeric(10,2)
-  discount_rate numeric(3,2) // 折數 (9.5 => 95折)
+  discount_rate numeric(3,2) // 折數 (0.8 => 8折)
   discount_amount numeric(10,2) // 實際折扣金額 (200元 => 200.00)
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
@@ -225,11 +225,13 @@ Ref: checkouts.checkout_user > staff_users.id [delete: cascade]
 
 Table coupons {
   id bigint [pk]
-  name varchar(100) [not null]
+  name varchar(100) [not null] // 優惠券名稱
+  display_name varchar(100) [not null] // 優惠券顯示名稱 (顯示給顧客)
   code varchar(50) [not null, unique]
-  discount_rate numeric(3,2) // 折數 (9.5 => 95折)
+  discount_rate numeric(3,2) // 折數 (0.8 => 8折)
   discount_amount numeric(10,2) // 實際折扣金額 (200元 => 200.00)
   is_active boolean [default: true]
+  note text
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
