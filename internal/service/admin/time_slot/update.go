@@ -24,11 +24,6 @@ func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
 }
 
 func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64, req adminTimeSlotModel.UpdateRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminTimeSlotModel.UpdateResponse, error) {
-	// Validate at least one field is provided
-	if !req.HasUpdate() {
-		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
-	}
-
 	// Validate that both start time and end time are provided together
 	if (req.StartTime != nil && req.EndTime == nil) || (req.StartTime == nil && req.EndTime != nil) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotCannotUpdateSeparately)

@@ -1,7 +1,7 @@
 package adminService
 
 type UpdateRequest struct {
-	Name            *string `json:"name" binding:"omitempty,min=1,max=100"`
+	Name            *string `json:"name" binding:"omitempty,noBlank,max=100"`
 	Price           *int64  `json:"price" binding:"omitempty,min=0,max=1000000"`
 	DurationMinutes *int32  `json:"durationMinutes" binding:"omitempty,min=0,max=1440"`
 	IsAddon         *bool   `json:"isAddon" binding:"omitempty"`

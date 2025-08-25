@@ -1,8 +1,8 @@
 package adminStore
 
 type UpdateRequest struct {
-	Name     *string `json:"name" binding:"omitempty,min=1,max=100"`
-	Address  *string `json:"address" binding:"omitempty,max=255"`
+	Name     *string `json:"name" binding:"omitempty,noBlank,max=100"`
+	Address  *string `json:"address" binding:"omitempty,noBlank,max=255"`
 	Phone    *string `json:"phone" binding:"omitempty,taiwanphone"`
 	IsActive *bool   `json:"isActive" binding:"omitempty"`
 }

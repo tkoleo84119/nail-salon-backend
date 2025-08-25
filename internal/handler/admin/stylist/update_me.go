@@ -2,6 +2,7 @@ package adminStylist
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -47,6 +48,11 @@ func (h *UpdateMe) UpdateMe(c *gin.Context) {
 	if !req.HasUpdate() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
+	}
+
+	// trim name
+	if req.Name != nil {
+		*req.Name = strings.TrimSpace(*req.Name)
 	}
 
 	if req.GoodAtShapes != nil {

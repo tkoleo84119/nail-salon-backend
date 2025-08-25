@@ -40,9 +40,9 @@
 
 ### 驗證規則
 
-| 欄位         | 必填 | 其他規則 | 說明         |
-| ------------ | ---- | -------- | ------------ |
-| refreshToken | 是   |          | refreshToken |
+| 欄位         | 必填 | 其他規則                            | 說明         |
+| ------------ | ---- | ----------------------------------- | ------------ |
+| refreshToken | 是   | <li>不能為空字串<li>最大長度500字元 | refreshToken |
 
 ---
 
@@ -84,6 +84,8 @@
 | 401    | E1009  | AuthRefreshTokenInvalid | Refresh token 無效或已過期，請重新登入 |
 | 400    | E2001  | ValJsonFormat           | JSON 格式錯誤，請檢查                  |
 | 400    | E2020  | ValFieldRequired        | {field} 為必填項目                     |
+| 400    | E2024  | ValFieldMaxLength       | {field} 長度最多只能有 {param} 個字元  |
+| 400    | E2036  | ValFieldNoBlank         | {field} 不能為空字串                   |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試               |
 | 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                         |
 

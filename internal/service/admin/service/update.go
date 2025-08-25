@@ -8,7 +8,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminServiceModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/service"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -27,16 +26,6 @@ func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
 }
 
 func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceModel.UpdateRequest, updaterRole string) (*adminServiceModel.UpdateResponse, error) {
-	// Validate permissions
-	if err := s.validatePermissions(updaterRole); err != nil {
-		return nil, err
-	}
-
-	// Validate request has at least one field to update
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
-	}
-
 	// Check if service exists
 	_, err := s.queries.GetServiceByID(ctx, serviceID)
 	if err != nil {
@@ -87,14 +76,4 @@ func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceMo
 	}
 
 	return &response, nil
-}
-
-// validatePermissions checks if the updater has permission to update services
-func (s *Update) validatePermissions(updaterRole string) error {
-	switch updaterRole {
-	case common.RoleSuperAdmin, common.RoleAdmin:
-		return nil
-	default:
-		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
-	}
 }

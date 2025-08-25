@@ -70,8 +70,8 @@
     "startTime": "10:00",
     "endTime": "11:00",
     "status": "CANCELLED",
-    "createdAt": "2025-07-24T10:00:00Z",
-    "updatedAt": "2025-07-24T10:00:00Z"
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```
@@ -100,7 +100,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                   | 說明                                  |
 | ------ | -------- | -------------------------- | ------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入        |
+| 401    | E1002    | AuthTokenInvalid           | 無效的 accessToken，請重新登入        |
 | 401    | E1003    | AuthTokenMissing           | accessToken 缺失，請重新登入          |
 | 401    | E1004    | AuthTokenFormatError       | accessToken 格式錯誤，請重新登入      |
 | 401    | E1006    | AuthContextMissing         | 未找到使用者認證資訊，請重新登入      |

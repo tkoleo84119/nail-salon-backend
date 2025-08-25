@@ -2,6 +2,7 @@ package booking
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -46,6 +47,11 @@ func (h *Cancel) Cancel(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim cancelReason
+	if req.CancelReason != nil {
+		*req.CancelReason = strings.TrimSpace(*req.CancelReason)
 	}
 
 	// Authentication context validation

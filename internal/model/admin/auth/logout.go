@@ -1,7 +1,7 @@
 package adminAuth
 
 type LogoutRequest struct {
-	RefreshToken string `json:"refreshToken" binding:"required,max=500"`
+	RefreshToken string `json:"refreshToken" binding:"required,noBlank,max=500"`
 }
 
 type LogoutResponse struct {

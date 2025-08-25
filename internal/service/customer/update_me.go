@@ -23,10 +23,6 @@ func NewUpdateMe(db dbgen.Querier, repo *sqlx.Repositories) *UpdateMe {
 }
 
 func (s *UpdateMe) UpdateMe(ctx context.Context, customerID int64, req customerModel.UpdateMeRequest) (*customerModel.UpdateMeResponse, error) {
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "need at least one field to update", nil)
-	}
-
 	// Validation: Parse and validate birthday format if provided
 	if req.Birthday != nil {
 		_, err := utils.DateStringToTime(*req.Birthday)

@@ -2,7 +2,7 @@ package adminService
 
 // GetServiceListRequest represents the request to get service list with filtering
 type GetAllRequest struct {
-	Name      *string `form:"name" binding:"omitempty,max=100"`
+	Name      *string `form:"name" binding:"omitempty,noBlank,max=100"`
 	IsAddon   *bool   `form:"isAddon" binding:"omitempty"`
 	IsActive  *bool   `form:"isActive" binding:"omitempty"`
 	IsVisible *bool   `form:"isVisible" binding:"omitempty"`

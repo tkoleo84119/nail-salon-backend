@@ -1,9 +1,9 @@
 package adminStaff
 
 type CreateRequest struct {
-	Username string   `json:"username" binding:"required,max=50"`
+	Username string   `json:"username" binding:"required,noBlank,max=50"`
 	Email    string   `json:"email" binding:"required,email"`
-	Password string   `json:"password" binding:"required,max=50"`
+	Password string   `json:"password" binding:"required,noBlank,max=50"`
 	Role     string   `json:"role" binding:"required,oneof=ADMIN MANAGER STYLIST"`
 	StoreIDs []string `json:"storeIds" binding:"required,min=1,max=10"`
 }

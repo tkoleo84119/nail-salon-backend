@@ -2,6 +2,7 @@ package adminCustomer
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -47,6 +48,11 @@ func (h *Update) Update(c *gin.Context) {
 	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
+	}
+
+	// trim storeNote
+	if req.StoreNote != nil {
+		*req.StoreNote = strings.TrimSpace(*req.StoreNote)
 	}
 
 	response, err := h.service.Update(c.Request.Context(), parsedCustomerID, req)

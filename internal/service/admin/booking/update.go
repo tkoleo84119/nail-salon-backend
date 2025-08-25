@@ -30,14 +30,6 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB)
 }
 
 func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest) (*adminBookingModel.UpdateResponse, error) {
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "need at least one field to update", nil)
-	}
-
-	if !req.IsTimeSlotUpdateComplete() {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingUpdateIncomplete)
-	}
-
 	// Get existing booking to verify it exists and is in SCHEDULED status
 	existingBooking, err := s.queries.GetBookingDetailByID(ctx, bookingID)
 	if err != nil {

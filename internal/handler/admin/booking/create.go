@@ -2,6 +2,7 @@ package adminBooking
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -40,6 +41,11 @@ func (h *Create) Create(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim note
+	if req.Note != nil {
+		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
 	parsedCustomerID, err := utils.ParseID(req.CustomerID)

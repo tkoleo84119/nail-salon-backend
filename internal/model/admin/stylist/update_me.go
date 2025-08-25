@@ -1,7 +1,7 @@
 package adminStylist
 
 type UpdateMeRequest struct {
-	Name         *string   `json:"name" binding:"omitempty,max=50"`
+	Name         *string   `json:"name" binding:"omitempty,noBlank,max=50"`
 	GoodAtShapes *[]string `json:"goodAtShapes" binding:"omitempty,max=20"`
 	GoodAtColors *[]string `json:"goodAtColors" binding:"omitempty,max=20"`
 	GoodAtStyles *[]string `json:"goodAtStyles" binding:"omitempty,max=20"`

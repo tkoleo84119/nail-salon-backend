@@ -3,7 +3,7 @@ package adminTimeSlotTemplate
 import "github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 
 type GetAllRequest struct {
-	Name   *string `form:"name" binding:"omitempty,max=100"`
+	Name   *string `form:"name" binding:"omitempty,noBlank,max=100"`
 	Limit  *int    `form:"limit" binding:"omitempty,min=1,max=100"`
 	Offset *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
 	Sort   *string `form:"sort" binding:"omitempty"`

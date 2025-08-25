@@ -2,6 +2,7 @@ package adminService
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -29,6 +30,12 @@ func (h *Create) Create(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim name, note
+	req.Name = strings.TrimSpace(req.Name)
+	if req.Note != nil {
+		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
 	staffContext, exists := middleware.GetStaffFromContext(c)

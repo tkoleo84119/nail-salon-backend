@@ -1,7 +1,7 @@
 package booking
 
 type CancelRequest struct {
-	CancelReason *string `json:"cancelReason,omitempty" binding:"omitempty,max=100"`
+	CancelReason *string `json:"cancelReason,omitempty" binding:"omitempty,max=255"`
 }
 
 type CancelResponse struct {

@@ -23,11 +23,6 @@ func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
 }
 
 func (s *Update) Update(ctx context.Context, templateID int64, req adminTimeSlotTemplateModel.UpdateRequest) (*adminTimeSlotTemplateModel.UpdateResponse, error) {
-	// Validate at least one field is provided
-	if !req.HasUpdate() {
-		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "at least one field must be provided for update", nil)
-	}
-
 	// Check if template exists
 	exist, err := s.queries.CheckTimeSlotTemplateExists(ctx, templateID)
 	if err != nil {

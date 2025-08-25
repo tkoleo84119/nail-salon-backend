@@ -3,6 +3,7 @@ package booking
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -52,6 +53,11 @@ func (h *Update) Update(c *gin.Context) {
 	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
+	}
+
+	// trim note
+	if req.Note != nil {
+		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
 	// Business logic validation - Time slot update completeness

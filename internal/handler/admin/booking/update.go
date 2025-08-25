@@ -2,6 +2,7 @@ package adminBooking
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -67,6 +68,11 @@ func (h *Update) Update(c *gin.Context) {
 			"request": "stylistId、timeSlotId、mainServiceId、subServiceIds 必須一起傳入",
 		})
 		return
+	}
+
+	// trim note
+	if req.Note != nil {
+		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
 	var stylistId int64

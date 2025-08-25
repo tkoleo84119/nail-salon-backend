@@ -1,7 +1,7 @@
 package auth
 
 type RefreshTokenRequest struct {
-	RefreshToken string `json:"refreshToken" binding:"required"`
+	RefreshToken string `json:"refreshToken" binding:"required,noBlank,max=500"`
 }
 
 type RefreshTokenResponse struct {

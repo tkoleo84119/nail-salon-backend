@@ -2,6 +2,7 @@ package adminStore
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -30,6 +31,12 @@ func (h *Create) Create(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim name, address
+	req.Name = strings.TrimSpace(req.Name)
+	if req.Address != nil {
+		*req.Address = strings.TrimSpace(*req.Address)
 	}
 
 	// Get staff context from middleware

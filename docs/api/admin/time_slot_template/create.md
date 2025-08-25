@@ -46,13 +46,13 @@
 
 ### 驗證規則
 
-| 欄位                | 必填 | 其他規則                        | 說明     |
-| ------------------- | ---- | ------------------------------- | -------- |
-| name                | 是   | <li>最大長度50字元              | 範本名稱 |
-| note                | 否   | <li>最大長度100字元             | 備註     |
-| timeSlots           | 是   | <li>陣列<li>最少1筆<li>最多50筆 | 多個時段 |
-| timeSlots.startTime | 是   | <li>HH:mm 格式                  | 起始時間 |
-| timeSlots.endTime   | 是   | <li>HH:mm 格式                  | 結束時間 |
+| 欄位                | 必填 | 其他規則                           | 說明     |
+| ------------------- | ---- | ---------------------------------- | -------- |
+| name                | 是   | <li>不能為空字串<li>最大長度50字元 | 範本名稱 |
+| note                | 否   | <li>最大長度100字元                | 備註     |
+| timeSlots           | 是   | <li>陣列<li>最少1筆<li>最多50筆    | 多個時段 |
+| timeSlots.startTime | 是   | <li>HH:mm 格式                     | 起始時間 |
+| timeSlots.endTime   | 是   | <li>HH:mm 格式                     | 結束時間 |
 
 ---
 
@@ -98,7 +98,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                           |
 | ------ | -------- | ----------------------- | ---------------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入                 |
+| 401    | E1002    | AuthTokenInvalid        | 無效的 accessToken，請重新登入                 |
 | 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入                   |
 | 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入               |
 | 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入               |
@@ -112,6 +112,7 @@
 | 400    | E2024    | ValFieldMaxLength       | {field} 長度最多只能有 {param} 個字元          |
 | 400    | E2025    | ValFieldMaxItems        | {field} 最多只能有 {param} 個項目              |
 | 400    | E2034    | ValFieldTimeFormat      | {field} 格式錯誤，請使用正確的時間格式 (HH:mm) |
+| 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                           |
 | 400    | E3TMS011 | TimeSlotConflict        | 時段時間區段重疊                               |
 | 400    | E3TMS012 | TimeSlotEndBeforeStart  | 結束時間必須在開始時間之後                     |
 | 400    | E3TMS013 | TimeSlotNotAvailable    | 時段時間區段不可用                             |

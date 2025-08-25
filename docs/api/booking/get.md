@@ -70,8 +70,8 @@
     "isChatEnabled": true,
     "note": "這次想做奶茶色",
     "status": "SCHEDULED",
-    "createdAt": "2025-07-24T10:00:00Z",
-    "updatedAt": "2025-07-24T10:00:00Z"
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```

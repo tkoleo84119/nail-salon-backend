@@ -50,9 +50,9 @@
 
 | 欄位          | 必填 | 其他規則                                                                        |
 | ------------- | ---- | ------------------------------------------------------------------------------- |
-| name          | 否   | <li>最大長度100字元                                                             |
-| lineName      | 否   | <li>最大長度100字元                                                             |
-| phone         | 否   | <li>最大長度20字元                                                              |
+| name          | 否   | <li>不能為空字串<li>最大長度100字元                                             |
+| lineName      | 否   | <li>不能為空字串<li>最大長度100字元                                             |
+| phone         | 否   | <li>不能為空字串<li>最大長度20字元                                              |
 | level         | 否   | <li>只能為 NORMAL, VIP, VVIP                                                    |
 | isBlacklisted | 否   |                                                                                 |
 | minPastDays   | 否   | <li>最小值0<li>最大值365                                                        |
@@ -134,6 +134,7 @@
 | 400    | E2026  | ValFieldMaxNumber       | {field} 最大值為 {param}              |
 | 400    | E2029  | ValFieldBoolean         | {field} 必須是布林值                  |
 | 400    | E2030  | ValFieldOneof           | {field} 必須是 {param} 其中一個值     |
+| 400    | E2036  | ValFieldNoBlank         | {field} 不能為空字串                  |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試              |
 | 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                        |
 

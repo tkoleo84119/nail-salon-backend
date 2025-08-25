@@ -2,6 +2,7 @@ package adminAuth
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,10 @@ func (h *Login) Login(c *gin.Context) {
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
+
+	// trim username and password
+	req.Username = strings.TrimSpace(req.Username)
+	req.Password = strings.TrimSpace(req.Password)
 
 	// Extract login context
 	loginCtx := adminAuthModel.LoginContext{

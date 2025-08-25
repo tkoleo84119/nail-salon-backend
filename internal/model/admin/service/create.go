@@ -1,7 +1,7 @@
 package adminService
 
 type CreateRequest struct {
-	Name            string  `json:"name" binding:"required,max=100"`
+	Name            string  `json:"name" binding:"required,noBlank,max=100"`
 	Price           *int64  `json:"price" binding:"required,min=0,max=1000000"`
 	DurationMinutes *int32  `json:"durationMinutes" binding:"required,min=0,max=1440"`
 	IsAddon         *bool   `json:"isAddon" binding:"omitempty"`

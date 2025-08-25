@@ -8,7 +8,7 @@ type CreateTimeSlotItem struct {
 
 // CreateTimeSlotTemplateRequest represents the request to create a time slot template
 type CreateRequest struct {
-	Name      string               `json:"name" binding:"required,max=50"`
+	Name      string               `json:"name" binding:"required,noBlank,max=50"`
 	Note      *string              `json:"note" binding:"max=100"`
 	TimeSlots []CreateTimeSlotItem `json:"timeSlots" binding:"required,min=1,max=50"`
 }

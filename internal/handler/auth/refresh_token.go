@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -30,6 +31,9 @@ func (h *RefreshToken) RefreshToken(c *gin.Context) {
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
+
+	// trim refreshToken
+	req.RefreshToken = strings.TrimSpace(req.RefreshToken)
 
 	// Service layer call
 	response, err := h.service.RefreshToken(c.Request.Context(), req)

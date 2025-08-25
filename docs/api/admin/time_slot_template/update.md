@@ -47,10 +47,10 @@
 
 ### 驗證規則
 
-| 欄位 | 必填 | 其他規則                            | 說明     |
-| ---- | ---- | ----------------------------------- | -------- |
-| name | 否   | <li>最短長度1字元<li>最大長度50字元 | 範本名稱 |
-| note | 否   | <li>最大長度100字元                 | 備註     |
+| 欄位 | 必填 | 其他規則                           | 說明     |
+| ---- | ---- | ---------------------------------- | -------- |
+| name | 否   | <li>不能為空字串<li>最大長度50字元 | 範本名稱 |
+| note | 否   | <li>最大長度100字元                | 備註     |
 
 - 兩者皆為選填，但至少要有一項。
 
@@ -97,7 +97,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                 | 說明                             |
 | ------ | -------- | ------------------------ | -------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入   |
+| 401    | E1002    | AuthTokenInvalid         | 無效的 accessToken，請重新登入   |
 | 401    | E1003    | AuthTokenMissing         | accessToken 缺失，請重新登入     |
 | 401    | E1004    | AuthTokenFormatError     | accessToken 格式錯誤，請重新登入 |
 | 401    | E1005    | AuthStaffFailed          | 未找到有效的員工資訊，請重新登入 |
@@ -109,6 +109,7 @@
 | 400    | E2003    | ValAllFieldsEmpty        | 至少需要提供一個欄位進行更新     |
 | 400    | E2020    | ValFieldRequired         | {field} 為必填項目               |
 | 400    | E2024    | ValFieldMaxLength        | {field} 長度最多只能有 {param}   |
+| 400    | E2036    | ValFieldNoBlank          | {field} 不能為空字串             |
 | 404    | E3TMS010 | TimeSlotTemplateNotFound | 範本項目不存在或已被刪除         |
 | 500    | E9001    | SysInternalError         | 系統發生錯誤，請稍後再試         |
 | 500    | E9002    | SysDatabaseError         | 資料庫操作失敗                   |
@@ -123,10 +124,9 @@
 
 ## Service 邏輯
 
-1. 驗證至少一個欄位有更新。
-2. 驗證 `templateId` 是否存在。
-3. 更新 `time_slot_templates` 資料。
-4. 回傳更新結果。
+1. 驗證 `templateId` 是否存在。
+2. 更新 `time_slot_templates` 資料。
+3. 回傳更新結果。
 
 ---
 

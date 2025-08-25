@@ -2,7 +2,6 @@ package adminStore
 
 import (
 	"context"
-	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -27,8 +26,7 @@ func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
 
 func (s *Create) Create(ctx context.Context, req adminStoreModel.CreateRequest, staffId int64, role string) (*adminStoreModel.CreateResponse, error) {
 	// Check if store name already exists
-	name := strings.TrimSpace(req.Name)
-	nameExists, err := s.queries.CheckStoreNameExists(ctx, name)
+	nameExists, err := s.queries.CheckStoreNameExists(ctx, req.Name)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name existence", err)
 	}
@@ -51,7 +49,7 @@ func (s *Create) Create(ctx context.Context, req adminStoreModel.CreateRequest, 
 	// Create store
 	err = qtx.CreateStore(ctx, dbgen.CreateStoreParams{
 		ID:      storeID,
-		Name:    name,
+		Name:    req.Name,
 		Address: utils.StringPtrToPgText(req.Address, true),
 		Phone:   utils.StringPtrToPgText(req.Phone, true),
 	})

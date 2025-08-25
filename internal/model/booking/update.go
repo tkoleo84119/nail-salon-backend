@@ -9,7 +9,7 @@ type UpdateRequest struct {
 	MainServiceId *string   `json:"mainServiceId,omitempty"`
 	SubServiceIds *[]string `json:"subServiceIds" binding:"omitempty,max=5"`
 	IsChatEnabled *bool     `json:"isChatEnabled,omitempty"`
-	Note          *string   `json:"note" binding:"omitempty,max=500"`
+	Note          *string   `json:"note" binding:"omitempty,max=255"`
 }
 
 type UpdateParsedRequest struct {
@@ -62,11 +62,6 @@ func (r UpdateRequest) IsTimeSlotUpdateComplete() bool {
 		return true
 	}
 	return r.StoreId != nil && r.StylistId != nil && r.TimeSlotId != nil && r.MainServiceId != nil && r.SubServiceIds != nil
-}
-
-func (r UpdateParsedRequest) HasUpdates() bool {
-	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil ||
-		r.MainServiceId != nil || r.SubServiceIds != nil || r.IsChatEnabled != nil || r.Note != nil
 }
 
 func (r UpdateParsedRequest) HasTimeSlotUpdate() bool {

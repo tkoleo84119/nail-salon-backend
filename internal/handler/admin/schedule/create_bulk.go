@@ -2,6 +2,7 @@ package adminSchedule
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -41,6 +42,13 @@ func (h *CreateBulk) CreateBulk(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim note
+	for _, schedule := range req.Schedules {
+		if schedule.Note != nil {
+			*schedule.Note = strings.TrimSpace(*schedule.Note)
+		}
 	}
 
 	// Get staff context from middleware

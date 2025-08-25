@@ -6,8 +6,8 @@ import (
 
 // StaffLoginRequest represents the staff login request payload
 type LoginRequest struct {
-	Username string `json:"username" binding:"required,max=100"`
-	Password string `json:"password" binding:"required,max=100"`
+	Username string `json:"username" binding:"required,noBlank,max=100"`
+	Password string `json:"password" binding:"required,noBlank,max=100"`
 }
 
 // StaffLoginResponse represents the successful login response

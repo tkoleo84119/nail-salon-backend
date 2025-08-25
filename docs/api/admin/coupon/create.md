@@ -49,14 +49,14 @@
 
 ### 驗證規則
 
-| 欄位           | 必填 | 其他規則                     | 說明           |
-| -------------- | ---- | ---------------------------- | -------------- |
-| name           | 是   | <li>最大長度100字元          | 優惠券名稱     |
-| displayName    | 是   | <li>最大長度100字元          | 優惠券顯示名稱 |
-| code           | 是   | <li>最大長度100字元          | 優惠券代碼     |
-| discountRate   | 否   | <li>最小值0.1<li>最大值0.99  | 折扣率         |
-| discountAmount | 否   | <li>最小值1<li>最大值1000000 | 折扣金額       |
-| note           | 否   | <li>最大長度255              | 備註           |
+| 欄位           | 必填 | 其他規則                            | 說明           |
+| -------------- | ---- | ----------------------------------- | -------------- |
+| name           | 是   | <li>不能為空字串<li>最大長度100字元 | 優惠券名稱     |
+| displayName    | 是   | <li>不能為空字串<li>最大長度100字元 | 優惠券顯示名稱 |
+| code           | 是   | <li>不能為空字串<li>最大長度100字元 | 優惠券代碼     |
+| discountRate   | 否   | <li>最小值0.1<li>最大值0.99         | 折扣率         |
+| discountAmount | 否   | <li>最小值1<li>最大值1000000        | 折扣金額       |
+| note           | 否   | <li>最大長度255                     | 備註           |
 
 ---
 
@@ -108,6 +108,7 @@
 | 400    | E2023    | ValFieldMinNumber       | {field} 最小值為 {param}              |
 | 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2026    | ValFieldMaxNumber       | {field} 最大值為 {param}              |
+| 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                  |
 | 400    | E3COU002 | CouponDiscountRequired  | 折數或折扣金額至少需要提供一個        |
 | 400    | E3COU003 | CouponDiscountExclusive | 折數和折扣金額不能同時填寫            |
 | 409    | E3COU005 | CouponNameAlreadyExists | 優惠券名稱已存在，請使用其他名稱      |

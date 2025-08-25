@@ -2,7 +2,7 @@ package adminTimeSlotTemplate
 
 // UpdateRequest represents the request to update a time slot template
 type UpdateRequest struct {
-	Name *string `json:"name,omitempty" binding:"omitempty,min=1,max=50"`
+	Name *string `json:"name,omitempty" binding:"omitempty,noBlank,max=50"`
 	Note *string `json:"note,omitempty" binding:"omitempty,max=100"`
 }
 

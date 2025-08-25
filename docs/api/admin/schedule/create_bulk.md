@@ -67,15 +67,15 @@
 
 ### 驗證規則
 
-| 欄位                          | 必填 | 其他規則                | 說明         |
-| ----------------------------- | ---- | ----------------------- | ------------ |
-| stylistId                     | 是   |                         | 美甲師id     |
-| schedules                     | 是   | <li>最小1筆<li>最大31筆 | 多日班表     |
-| schedules.workDate            | 是   | <li>YYYY-MM-DD 格式     | 班表日期     |
-| schedules.note                | 否   | <li>最長100字元         | 備註         |
-| schedules.timeSlots           | 是   | <li>最小1筆<li>最大20筆 | 當日多個時段 |
-| schedules.timeSlots.startTime | 是   | <li>HH:mm 格式          | 起始時間     |
-| schedules.timeSlots.endTime   | 是   | <li>HH:mm 格式          | 結束時間     |
+| 欄位                          | 必填 | 其他規則                        | 說明         |
+| ----------------------------- | ---- | ------------------------------- | ------------ |
+| stylistId                     | 是   |                                 | 美甲師id     |
+| schedules                     | 是   | <li>最小1筆<li>最大31筆         | 多日班表     |
+| schedules.workDate            | 是   | <li>YYYY-MM-DD 格式             | 班表日期     |
+| schedules.note                | 否   | <li>不能為空字串<li>最長255字元 | 備註         |
+| schedules.timeSlots           | 是   | <li>最小1筆<li>最大20筆         | 當日多個時段 |
+| schedules.timeSlots.startTime | 是   | <li>HH:mm 格式                  | 起始時間     |
+| schedules.timeSlots.endTime   | 是   | <li>HH:mm 格式                  | 結束時間     |
 
 ---
 
@@ -135,7 +135,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                        | 說明                                                |
 | ------ | -------- | ------------------------------- | --------------------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入                      |
+| 401    | E1002    | AuthTokenInvalid                | 無效的 accessToken，請重新登入                      |
 | 401    | E1003    | AuthTokenMissing                | accessToken 缺失，請重新登入                        |
 | 401    | E1004    | AuthTokenFormatError            | accessToken 格式錯誤，請重新登入                    |
 | 401    | E1005    | AuthStaffFailed                 | 未找到有效的員工資訊，請重新登入                    |
@@ -144,6 +144,7 @@
 | 400    | E2001    | ValJsonFormat                   | JSON 格式錯誤，請檢查                               |
 | 400    | E2002    | ValPathParamMissing             | 路徑參數缺失，請檢查                                |
 | 400    | E2004    | ValTypeConversionFailed         | 參數類型轉換失敗                                    |
+| 400    | E2036    | ValFieldNoBlank                 | {field} 不能為空字串                                |
 | 400    | E2034    | ValFieldTimeFormat              | {field} 格式錯誤，請使用正確的時間格式 (HH:mm)      |
 | 400    | E2033    | ValFieldDateFormat              | {field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD) |
 | 400    | E3SCH006 | ScheduleAlreadyExists           | 美甲師班表已存在                                    |

@@ -51,10 +51,6 @@ func (r UpdateRequest) IsTimeSlotUpdateComplete() bool {
 	return true
 }
 
-func (r UpdateParsedRequest) HasUpdates() bool {
-	return r.StylistID != nil || r.TimeSlotID != nil || r.MainServiceID != nil || r.SubServiceIDs != nil || r.IsChatEnabled != nil || r.Note != nil
-}
-
 func (r UpdateParsedRequest) HasTimeSlotUpdate() bool {
 	return r.StylistID != nil || r.TimeSlotID != nil || r.MainServiceID != nil || r.SubServiceIDs != nil
 }

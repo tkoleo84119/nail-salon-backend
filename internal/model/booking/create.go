@@ -9,7 +9,7 @@ type CreateRequest struct {
 	MainServiceId string   `json:"mainServiceId" binding:"required"`
 	SubServiceIds []string `json:"subServiceIds" binding:"omitempty,max=5"`
 	IsChatEnabled *bool    `json:"isChatEnabled" binding:"omitempty"`
-	Note          *string  `json:"note" binding:"omitempty,max=500"`
+	Note          *string  `json:"note" binding:"omitempty,max=255"`
 }
 
 type CreateParsedRequest struct {

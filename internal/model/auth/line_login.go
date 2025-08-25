@@ -3,7 +3,7 @@ package auth
 import "github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 
 type LineLoginRequest struct {
-	IdToken string `json:"idToken" binding:"required,max=2000"`
+	IdToken string `json:"idToken" binding:"required,noBlank,max=2000"`
 }
 
 type LineLoginResponse struct {

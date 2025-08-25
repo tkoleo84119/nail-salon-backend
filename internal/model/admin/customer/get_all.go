@@ -1,9 +1,9 @@
 package adminCustomer
 
 type GetAllRequest struct {
-	Name          *string `form:"name" binding:"omitempty,max=100"`
-	LineName      *string `form:"lineName" binding:"omitempty,max=100"`
-	Phone         *string `form:"phone" binding:"omitempty,max=20"`
+	Name          *string `form:"name" binding:"omitempty,noBlank,max=100"`
+	LineName      *string `form:"lineName" binding:"omitempty,noBlank,max=100"`
+	Phone         *string `form:"phone" binding:"omitempty,noBlank,max=20"`
 	Level         *string `form:"level" binding:"omitempty,oneof=NORMAL VIP VVIP"`
 	IsBlacklisted *bool   `form:"isBlacklisted" binding:"omitempty"`
 	MinPastDays   *int    `form:"minPastDays" binding:"omitempty,min=0,max=365"`

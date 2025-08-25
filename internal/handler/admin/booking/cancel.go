@@ -2,6 +2,7 @@ package adminBooking
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -51,6 +52,11 @@ func (h *Cancel) Cancel(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim cancel reason
+	if req.CancelReason != nil {
+		*req.CancelReason = strings.TrimSpace(*req.CancelReason)
 	}
 
 	// Call service

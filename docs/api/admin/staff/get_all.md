@@ -48,10 +48,10 @@
 
 | 欄位     | 必填 | 其他規則                                                     |
 | -------- | ---- | ------------------------------------------------------------ |
-| username | 否   | <li>最大長度100字元                                          |
-| email    | 否   | <li>最大長度100字元                                          |
+| username | 否   | <li>不能為空字串<li>最大長度100字元                          |
+| email    | 否   | <li>不能為空字串<li>最大長度100字元                          |
 | role     | 否   | <li>可以為 SUPER_ADMIN、ADMIN、MANAGER、STYLIST              |
-| isActive | 否   | <li>是否是布林值                                             |
+| isActive | 否   |                                                              |
 | limit    | 否   | <li>最小值1<li>最大值100                                     |
 | offset   | 否   | <li>最小值0<li>最大值1000000                                 |
 | sort     | 否   | <li>可以為 createdAt, updatedAt, isActive, role (其餘會忽略) |
@@ -114,7 +114,7 @@
 
 | 狀態碼 | 錯誤碼 | 常數名稱                | 說明                                  |
 | ------ | ------ | ----------------------- | ------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入        |
+| 401    | E1002  | AuthTokenInvalid        | 無效的 accessToken，請重新登入        |
 | 401    | E1003  | AuthTokenMissing        | accessToken 缺失，請重新登入          |
 | 401    | E1004  | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入      |
 | 401    | E1005  | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入      |
@@ -125,8 +125,8 @@
 | 400    | E2023  | ValFieldMinNumber       | {field} 最小值為 {param}              |
 | 400    | E2024  | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2026  | ValFieldMaxNumber       | {field} 最大值為 {param}              |
-| 400    | E2029  | ValFieldBoolean         | {field} 必須是布林值                  |
 | 400    | E2030  | ValFieldOneof           | {field} 必須是 {param} 其中一個值     |
+| 400    | E2036  | ValFieldNoBlank         | {field} 不能為空字串                  |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試              |
 | 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                        |
 

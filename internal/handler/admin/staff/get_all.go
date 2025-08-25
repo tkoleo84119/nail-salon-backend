@@ -2,6 +2,7 @@ package adminStaff
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -29,6 +30,14 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim username, email
+	if req.Username != nil {
+		*req.Username = strings.TrimSpace(*req.Username)
+	}
+	if req.Email != nil {
+		*req.Email = strings.TrimSpace(*req.Email)
 	}
 
 	// set default value

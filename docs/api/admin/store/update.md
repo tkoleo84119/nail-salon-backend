@@ -53,10 +53,10 @@
 
 | 欄位     | 必填 | 其他規則                              |
 | -------- | ---- | ------------------------------------- |
-| name     | 否   | <li>最大長度100字元                   |
-| address  | 否   | <li>最大長度255字元                   |
+| name     | 否   | <li>不能為空字串<li>最大長度100字元   |
+| address  | 否   | <li>不能為空字串<li>最大長度255字元   |
 | phone    | 否   | <li>支援台灣市話格式 <li>支援手機格式 |
-| isActive | 否   | <li>必須為布林值                      |
+| isActive | 否   |                                       |
 
 - 欄位皆為選填，但至少需有一項。
 
@@ -74,8 +74,8 @@
     "address": "台北市中山區松江路123號",
     "phone": "02-88889999",
     "isActive": true,
-    "createdAt": "2025-01-01T00:00:00.000Z",
-    "updatedAt": "2025-01-01T00:00:00.000Z"
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```
@@ -117,6 +117,7 @@
 | 400    | E2021    | ValFieldStringMinLength | {field} 長度至少需要 {param} 個字元                                        |
 | 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元                                      |
 | 400    | E2031    | ValFieldTaiwanPhone     | {field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX 或 09XXXXXXXX) |
+| 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                                                       |
 | 409    | E3STO003 | StoreAlreadyExists      | 門市已存在，請創建其他門市                                                 |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試                                                   |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                                                             |

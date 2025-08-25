@@ -48,8 +48,8 @@
 
 | 欄位     | 必填 | 其他規則                                               |
 | -------- | ---- | ------------------------------------------------------ |
-| name     | 否   | <li>最大長度100字元                                    |
-| code     | 否   | <li>最大長度100字元                                    |
+| name     | 否   | <li>不能為空字串<li>最大長度100字元                    |
+| code     | 否   | <li>不能為空字串<li>最大長度100字元                    |
 | isActive | 否   |                                                        |
 | limit    | 否   | <li>最小值1<li>最大值100                               |
 | offset   | 否   | <li>最小值0<li>最大值1000000                           |
@@ -117,6 +117,7 @@
 | 400    | E2023  | ValFieldMinNumber       | {field} 最小值為 {param}              |
 | 400    | E2024  | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2026  | ValFieldMaxNumber       | {field} 最大值為 {param}              |
+| 400    | E2036  | ValFieldNoBlank         | {field} 不能為空字串                  |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試              |
 | 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                        |
 

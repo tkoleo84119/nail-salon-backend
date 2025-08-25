@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -33,6 +34,9 @@ func (h *LineLogin) LineLogin(c *gin.Context) {
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
+
+	// trim idToken
+	req.IdToken = strings.TrimSpace(req.IdToken)
 
 	// Extract login context
 	loginCtx := authModel.LoginContext{

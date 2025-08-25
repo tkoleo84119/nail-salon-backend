@@ -53,15 +53,15 @@
 
 ## 驗證規則
 
-| 欄位          | 必填 | 其他規則        | 說明         |
-| ------------- | ---- | --------------- | ------------ |
-| customerId    | 是   |                 | 顧客 ID      |
-| stylistId     | 是   |                 | 美甲師 ID    |
-| timeSlotId    | 是   |                 | 時段 ID      |
-| mainServiceId | 是   |                 | 主服務 ID    |
-| subServiceIds | 是   | <li>最大10筆    | 子服務 IDs   |
-| isChatEnabled | 是   | <li>布林值      | 是否開啟聊天 |
-| note          | 選填 | <li>最大長度255 | 備註         |
+| 欄位          | 必填 | 其他規則        | 說明       |
+| ------------- | ---- | --------------- | ---------- |
+| customerId    | 是   |                 | 顧客 ID    |
+| stylistId     | 是   |                 | 美甲師 ID  |
+| timeSlotId    | 是   |                 | 時段 ID    |
+| mainServiceId | 是   |                 | 主服務 ID  |
+| subServiceIds | 是   | <li>最大10筆    | 子服務 IDs |
+| isChatEnabled | 是   |                 | 是否要聊天 |
+| note          | 選填 | <li>最大長度255 | 備註       |
 
 ---
 
@@ -110,7 +110,6 @@
 | 400    | E2020    | ValFieldRequired           | {field} 為必填項目                    |
 | 400    | E2024    | ValFieldStringMaxLength    | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2025    | ValFieldArrayMaxLength     | {field} 最多只能有 {param} 個項目     |
-| 400    | E2029    | ValFieldBoolean            | {field} 必須是布林值                  |
 | 400    | E3STO001 | StoreNotActive             | 門市未啟用                            |
 | 400    | E3SER001 | ServiceNotActive           | 服務未啟用                            |
 | 400    | E3SER002 | ServiceNotMainService      | 服務不是主服務                        |

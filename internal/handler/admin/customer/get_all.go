@@ -2,6 +2,7 @@ package adminCustomer
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -29,6 +30,17 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim name, lineName, phone
+	if req.Name != nil {
+		*req.Name = strings.TrimSpace(*req.Name)
+	}
+	if req.LineName != nil {
+		*req.LineName = strings.TrimSpace(*req.LineName)
+	}
+	if req.Phone != nil {
+		*req.Phone = strings.TrimSpace(*req.Phone)
 	}
 
 	// set limit and offset

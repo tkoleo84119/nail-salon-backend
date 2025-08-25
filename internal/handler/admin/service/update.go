@@ -2,6 +2,7 @@ package adminService
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -51,6 +52,14 @@ func (h *Update) Update(c *gin.Context) {
 	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
+	}
+
+	// trim name, note
+	if req.Name != nil {
+		*req.Name = strings.TrimSpace(*req.Name)
+	}
+	if req.Note != nil {
+		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
 	staffContext, exists := middleware.GetStaffFromContext(c)

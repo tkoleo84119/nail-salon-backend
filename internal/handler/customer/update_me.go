@@ -2,6 +2,7 @@ package customer
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -47,6 +48,20 @@ func (h *UpdateMe) UpdateMe(c *gin.Context) {
 	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
+	}
+
+	// trim name, email, city, customerNote
+	if req.Name != nil {
+		*req.Name = strings.TrimSpace(*req.Name)
+	}
+	if req.Email != nil {
+		*req.Email = strings.TrimSpace(*req.Email)
+	}
+	if req.City != nil {
+		*req.City = strings.TrimSpace(*req.City)
+	}
+	if req.CustomerNote != nil {
+		*req.CustomerNote = strings.TrimSpace(*req.CustomerNote)
 	}
 
 	if req.FavoriteShapes != nil {

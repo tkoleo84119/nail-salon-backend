@@ -5,7 +5,7 @@ import "time"
 type UpdateRequest struct {
 	StylistID string  `json:"stylistId" binding:"required"`
 	WorkDate  *string `json:"workDate"`
-	Note      *string `json:"note" binding:"omitempty,max=100"`
+	Note      *string `json:"note" binding:"omitempty,max=255"`
 }
 
 type UpdateParsedRequest struct {
@@ -15,7 +15,7 @@ type UpdateParsedRequest struct {
 }
 
 type UpdateResponse struct {
-	ID        string               `json:"id"`
+	ID string `json:"id"`
 }
 
 func (r *UpdateRequest) HasUpdates() bool {

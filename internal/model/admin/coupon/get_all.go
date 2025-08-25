@@ -1,8 +1,8 @@
 package adminCoupon
 
 type GetAllRequest struct {
-	Name     *string `form:"name" binding:"omitempty,max=100"`
-	Code     *string `form:"code" binding:"omitempty,max=100"`
+	Name     *string `form:"name" binding:"omitempty,noBlank,max=100"`
+	Code     *string `form:"code" binding:"omitempty,noBlank,max=100"`
 	IsActive *bool   `form:"isActive" binding:"omitempty"`
 	Limit    *int    `form:"limit" binding:"omitempty,min=1,max=100"`
 	Offset   *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`

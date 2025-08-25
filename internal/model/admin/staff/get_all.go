@@ -1,8 +1,8 @@
 package adminStaff
 
 type GetAllRequest struct {
-	Username *string `form:"username" binding:"omitempty,max=100"`
-	Email    *string `form:"email" binding:"omitempty,max=100"`
+	Username *string `form:"username" binding:"omitempty,noBlank,max=100"`
+	Email    *string `form:"email" binding:"omitempty,noBlank,max=100"`
 	Role     *string `form:"role," binding:"omitempty,oneof=SUPER_ADMIN ADMIN MANAGER STYLIST"`
 	IsActive *bool   `form:"isActive" binding:"omitempty"`
 	Limit    *int    `form:"limit" binding:"omitempty,min=1,max=100"`

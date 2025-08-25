@@ -2,6 +2,7 @@ package adminStaff
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -35,6 +36,11 @@ func (h *UpdateMe) UpdateMe(c *gin.Context) {
 	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
+	}
+
+	// trim email
+	if req.Email != nil {
+		*req.Email = strings.TrimSpace(*req.Email)
 	}
 
 	// Get staff user ID from JWT context

@@ -53,7 +53,7 @@
 | timeSlotId    | 是   |               | 時段ID        |
 | mainServiceId | 是   |               | 主服務項目ID  |
 | subServiceIds | 否   | <li>最多5項   | 副服務項目IDs |
-| isChatEnabled | 否   | <li>布林值    | 是否要聊天    |
+| isChatEnabled | 否   |               | 是否要聊天    |
 | note          | 否   | <li>最長255字 | 備註說明      |
 
 ---
@@ -109,7 +109,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                   | 說明                                  |
 | ------ | -------- | -------------------------- | ------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入        |
+| 401    | E1002    | AuthTokenInvalid           | 無效的 accessToken，請重新登入        |
 | 401    | E1003    | AuthTokenMissing           | accessToken 缺失，請重新登入          |
 | 401    | E1004    | AuthTokenFormatError       | accessToken 格式錯誤，請重新登入      |
 | 401    | E1006    | AuthContextMissing         | 未找到使用者認證資訊，請重新登入      |
@@ -118,7 +118,6 @@
 | 400    | E2020    | ValFieldRequired           | {field} 為必填項目                    |
 | 400    | E2024    | ValFieldStringMaxLength    | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2025    | ValFieldArrayMaxLength     | {field} 最多只能有 {param} 個項目     |
-| 400    | E2029    | ValFieldBoolean            | {field} 必須是布林值                  |
 | 400    | E3STO001 | StoreNotActive             | 門市未啟用                            |
 | 400    | E3SER001 | ServiceNotActive           | 服務未啟用                            |
 | 400    | E3SER002 | ServiceNotMainService      | 服務不是主服務                        |

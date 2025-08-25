@@ -51,7 +51,7 @@
 | 欄位     | 必填 | 其他規則                             | 說明               |
 | -------- | ---- | ------------------------------------ | ------------------ |
 | role     | 否   | <li>值只能為 ADMIN、MANAGER、STYLIST | 欲變更的角色       |
-| isActive | 否   | <li>布林值                           | 是否啟用該員工帳號 |
+| isActive | 否   |                                      | 是否啟用該員工帳號 |
 
 - 至少需要提供一個欄位進行更新
 
@@ -69,8 +69,8 @@
     "email": "amy@example.com",
     "role": "MANAGER",
     "isActive": false,
-    "createdAt": "2025-01-01T00:00:00.000Z",
-    "updatedAt": "2025-01-01T00:00:00.000Z"
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```
@@ -99,7 +99,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                | 說明                              |
 | ------ | -------- | ----------------------- | --------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入    |
+| 401    | E1002    | AuthTokenInvalid        | 無效的 accessToken，請重新登入    |
 | 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入      |
 | 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入  |
 | 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入  |
@@ -127,12 +127,11 @@
 
 ## Service 邏輯
 
-1. 驗證請求至少需要提供一個欄位進行更新
-2. 當 `role` 有傳入時，驗證 `role` 是否為合法值
-3. 確認目標員工是否存在
-4. 根據角色檢查是否可以更新
-5. 更新 `staff_users` 的 `role` 與 `is_active` 欄位
-6. 回傳更新後資訊
+1. 當 `role` 有傳入時，驗證 `role` 是否為合法值
+2. 確認目標員工是否存在
+3. 根據角色檢查是否可以更新
+4. 更新 `staff_users` 的 `role` 與 `is_active` 欄位
+5. 回傳更新後資訊
 
 ---
 

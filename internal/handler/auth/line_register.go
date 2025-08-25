@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,22 @@ func (h *LineRegister) LineRegister(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim line idToken, name, email, city, referrer, customerNote
+	req.IdToken = strings.TrimSpace(req.IdToken)
+	req.Name = strings.TrimSpace(req.Name)
+	if req.Email != nil {
+		*req.Email = strings.TrimSpace(*req.Email)
+	}
+	if req.City != nil {
+		*req.City = strings.TrimSpace(*req.City)
+	}
+	if req.Referrer != nil {
+		*req.Referrer = strings.TrimSpace(*req.Referrer)
+	}
+	if req.CustomerNote != nil {
+		*req.CustomerNote = strings.TrimSpace(*req.CustomerNote)
 	}
 
 	if req.FavoriteShapes != nil {

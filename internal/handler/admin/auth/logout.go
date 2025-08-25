@@ -2,6 +2,7 @@ package adminAuth
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -31,6 +32,9 @@ func (h *Logout) Logout(c *gin.Context) {
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
 	}
+
+	// trim refresh token
+	req.RefreshToken = strings.TrimSpace(req.RefreshToken)
 
 	// Call the logout service
 	response, err := h.service.Logout(c.Request.Context(), req)

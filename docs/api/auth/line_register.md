@@ -53,15 +53,15 @@
 
 | 欄位           | 必填 | 其他規則                                                                                                    | 說明             |
 | -------------- | ---- | ----------------------------------------------------------------------------------------------------------- | ---------------- |
-| idToken        | 是   | <li>最大長度2000字元                                                                                        | LINE idToken     |
-| name           | 是   | <li>最大長度100字元                                                                                         | 姓名             |
+| idToken        | 是   | <li>不能為空字串<li>最大長度2000字元                                                                        | LINE idToken     |
+| name           | 是   | <li>不能為空字串<li>最大長度100字元                                                                         | 姓名             |
 | phone          | 是   | <li>格式是09xxxxxxxx                                                                                        | 電話             |
 | birthday       | 是   | <li>格式是yyyy-MM-dd                                                                                        | 生日             |
 | city           | 否   | <li>最大長度100字元                                                                                         | 城市             |
 | favoriteShapes | 否   | <li>最多20項<li>值只能為 方形 方圓形 橢圓形 圓形 圓尖形 尖形 梯形 不一定                                    | 喜歡的指形       |
 | favoriteColors | 否   | <li>最多20項<li>值只能為 白色系 裸色系 粉色系 紅色系 橘色系 大地色系 綠色系 藍色系 紫色系 黑色系  不一定    | 喜歡的色系       |
 | favoriteStyles | 否   | <li>最多20項<li>值只能為 暈染 手繪 貓眼 鏡面 可愛 法式 漸層 氣質溫柔 個性 日系 簡約 優雅 典雅 小眾 沒有固定 | 喜歡的款式       |
-| isIntrovert    | 否   | <li>布林值                                                                                                  | 是否是I人        |
+| isIntrovert    | 否   |                                                                                                             | 是否是I人        |
 | referralSource | 否   | <li>最多20項<li>值只能為 Facebook Instagram Threads Dcard Google 親友介紹                                   | 推薦來源         |
 | referrer       | 否   | <li>最大長度100字元                                                                                         | 推薦人           |
 | customerNote   | 否   | <li>最大長度255字元                                                                                         | 使用者自己的備註 |
@@ -117,6 +117,7 @@
 | 400    | E2030  | ValFieldOneOf           | {field} 必須是 {param} 其中一個值                           |
 | 400    | E2032  | ValFieldTaiwanMobile    | {field} 格式錯誤，請使用正確的台灣手機號碼格式 (0912345678) |
 | 400    | E2033  | ValFieldDateFormat      | {field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD)         |
+| 400    | E2036  | ValFieldNoBlank         | {field} 不能為空字串                                        |
 | 409    | E3C003 | CustomerAlreadyExists   | 客戶已存在                                                  |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試                                    |
 | 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                                              |

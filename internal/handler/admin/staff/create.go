@@ -2,6 +2,7 @@ package adminStaff
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -42,6 +43,11 @@ func (h *Create) Create(c *gin.Context) {
 		}
 		storeIDs[i] = parsedStoreID
 	}
+
+	// trim username, password
+	req.Username = strings.TrimSpace(req.Username)
+	req.Password = strings.TrimSpace(req.Password)
+	req.Email = strings.TrimSpace(req.Email)
 
 	parsedReq := adminStaffModel.CreateParsedRequest{
 		Username: req.Username,

@@ -45,8 +45,8 @@
 
 | 欄位    | 必填 | 其他規則                              |
 | ------- | ---- | ------------------------------------- |
-| name    | 是   | <li>最大長度100字元                   |
-| address | 否   | <li>最大長度255字元                   |
+| name    | 是   | <li>不能為空字串<li>最大長度100字元   |
+| address | 否   | <li>不能為空字串<li>最大長度255字元   |
 | phone   | 否   | <li>支援台灣市話格式 <li>支援手機格式 |
 
 ---
@@ -102,6 +102,7 @@
 | 400    | E2020    | ValFieldRequired        | {field} 欄位為必填項目                                                     |
 | 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元                                      |
 | 400    | E2031    | ValFieldTaiwanPhone     | {field} 格式錯誤，請使用正確的台灣電話號碼格式 (0X-XXXXXXXX 或 09XXXXXXXX) |
+| 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                                                       |
 | 409    | E3STO003 | StoreAlreadyExists      | 門市已存在，請創建其他門市                                                 |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試                                                   |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                                                             |

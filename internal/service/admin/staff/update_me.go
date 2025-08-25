@@ -23,11 +23,6 @@ func NewUpdateMe(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *UpdateMe 
 }
 
 func (s *UpdateMe) UpdateMe(ctx context.Context, req adminStaffModel.UpdateMeRequest, staffUserID int64) (*adminStaffModel.UpdateMeResponse, error) {
-	// Check if request has any fields to update
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
-	}
-
 	// Check if staff user exists
 	_, err := s.queries.GetStaffUserByID(ctx, staffUserID)
 	if err != nil {

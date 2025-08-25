@@ -1,7 +1,7 @@
 package adminStylist
 
 type GetAllRequest struct {
-	Name        *string `form:"name" binding:"omitempty,max=100"`
+	Name        *string `form:"name" binding:"omitempty,noBlank,max=100"`
 	IsIntrovert *bool   `form:"isIntrovert" binding:"omitempty"`
 	IsActive    *bool   `form:"isActive" binding:"omitempty"`
 	Limit       *int    `form:"limit" binding:"omitempty,min=1,max=100"`

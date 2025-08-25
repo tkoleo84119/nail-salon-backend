@@ -46,8 +46,8 @@
 
 | 欄位     | 必填 | 其他規則                            | 說明                 |
 | -------- | ---- | ----------------------------------- | -------------------- |
-| username | 是   | <li>最大長度50字元                  | 帳號（唯一）         |
-| password | 是   | <li>最大長度50字元                  | 密碼明文             |
+| username | 是   | <li>不能為空字串<li>最大長度50字元  | 帳號（唯一）         |
+| password | 是   | <li>不能為空字串<li>最大長度50字元  | 密碼明文             |
 | email    | 是   | <li>email格式                       | 信箱                 |
 | role     | 是   | <li>值只能為ADMIN、MANAGER、STYLIST | 角色                 |
 | storeIds | 是   | <li>最少1筆<li>最多10筆             | 有權限的門市 ID 清單 |
@@ -66,8 +66,8 @@
     "email": "jane@example.com",
     "role": "STYLIST",
     "isActive": true,
-    "createdAt": "2025-01-01T00:00:00Z",
-    "updatedAt": "2025-01-01T00:00:00Z"
+    "createdAt": "2025-01-01T00:00:00+08:00",
+    "updatedAt": "2025-01-01T00:00:00+08:00"
   }
 }
 ```
@@ -97,7 +97,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                       |
 | ------ | -------- | ----------------------- | ------------------------------------------ |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入             |
+| 401    | E1002    | AuthTokenInvalid        | 無效的 accessToken，請重新登入             |
 | 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入               |
 | 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入           |
 | 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入           |
@@ -112,6 +112,7 @@
 | 400    | E2025    | ValFieldArrayMaxLength  | {field} 最多只能有 {param} 個項目          |
 | 400    | E2027    | ValFieldInvalidEmail    | {field} 格式錯誤，請使用正確的電子郵件格式 |
 | 400    | E2030    | ValFieldOneof           | {field} 必須是 {param} 其中一個值          |
+| 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                       |
 | 400    | E3STA001 | StaffInvalidRole        | 無效的角色                                 |
 | 409    | E3STA007 | StaffAlreadyExists      | 帳號或Email已存在                          |
 | 400    | E3STO001 | StoreNotActive          | 門市未啟用                                 |

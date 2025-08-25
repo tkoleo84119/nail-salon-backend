@@ -2,6 +2,7 @@ package booking
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -74,6 +75,11 @@ func (h *Create) Create(c *gin.Context) {
 			return
 		}
 		subServiceIds[i] = subServiceId
+	}
+
+	// trim note
+	if req.Note != nil {
+		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
 	parsedRequest := bookingModel.CreateParsedRequest{

@@ -55,15 +55,15 @@
 
 ### 驗證規則
 
-| 欄位            | 必填 | 其他規則                     | 說明     |
-| --------------- | ---- | ---------------------------- | -------- |
-| name            | 否   | <li>最大長度100字元          | 服務名稱 |
-| price           | 否   | <li>最小值0<li>最大值1000000 | 價格     |
-| durationMinutes | 否   | <li>最小值0<li>最大值1440    | 操作分鐘 |
-| isAddon         | 否   | <li>布林值                   | 附加服務 |
-| isVisible       | 否   | <li>布林值                   | 可見狀態 |
-| isActive        | 否   | <li>布林值                   | 啟用狀態 |
-| note            | 否   | <li>最大長度255              | 備註     |
+| 欄位            | 必填 | 其他規則                            | 說明     |
+| --------------- | ---- | ----------------------------------- | -------- |
+| name            | 否   | <li>不能為空字串<li>最大長度100字元 | 服務名稱 |
+| price           | 否   | <li>最小值0<li>最大值1000000        | 價格     |
+| durationMinutes | 否   | <li>最小值0<li>最大值1440           | 操作分鐘 |
+| isAddon         | 否   |                                     | 附加服務 |
+| isVisible       | 否   |                                     | 可見狀態 |
+| isActive        | 否   |                                     | 啟用狀態 |
+| note            | 否   | <li>最大長度255                     | 備註     |
 
 ---
 
@@ -112,7 +112,7 @@
 
 | 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                  |
 | ------ | -------- | ----------------------- | ------------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入        |
+| 401    | E1002    | AuthTokenInvalid        | 無效的 accessToken，請重新登入        |
 | 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入          |
 | 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入      |
 | 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入      |
@@ -125,7 +125,7 @@
 | 400    | E2023    | ValFieldMinNumber       | {field} 最小值為 {param}              |
 | 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2026    | ValFieldMaxNumber       | {field} 最大值為 {param}              |
-| 400    | E2029    | ValFieldBoolean         | {field} 必須是布林值                  |
+| 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                  |
 | 404    | E3SER004 | ServiceNotFound         | 服務不存在或已被刪除                  |
 | 409    | E3SER005 | ServiceAlreadyExists    | 服務已存在                            |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試              |
@@ -141,12 +141,10 @@
 
 ## Service 邏輯
 
-1. 驗證角色是否為 `SUPER_ADMIN` 或 `ADMIN`。
-2. 驗證請求是否至少有一個欄位需要更新。
-3. 驗證 `serviceId` 是否存在。
-4. 若有更新 `name`，則驗證名稱是否唯一（不包含自己）。
-5. 更新 `services` 資料。
-6. 回傳更新結果。
+1. 驗證 `serviceId` 是否存在。
+2. 若有更新 `name`，則驗證名稱是否唯一（不包含自己）。
+3. 更新 `services` 資料。
+4. 回傳更新結果。
 
 ---
 

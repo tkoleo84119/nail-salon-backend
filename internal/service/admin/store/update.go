@@ -2,7 +2,6 @@ package adminStore
 
 import (
 	"context"
-	"strings"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
@@ -33,12 +32,10 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 	}
 
 	// Check if name is unique (excluding current store)
-	var name string
 	if req.Name != nil {
-		name = strings.TrimSpace(*req.Name)
 		nameExists, err := s.queries.CheckStoreNameExistsExcluding(ctx, dbgen.CheckStoreNameExistsExcludingParams{
 			ID:   storeID,
-			Name: name,
+			Name: *req.Name,
 		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check store name uniqueness", err)
@@ -50,7 +47,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 
 	// Update store using sqlx repository
 	err := s.repo.Store.UpdateStore(ctx, storeID, sqlxRepo.UpdateStoreParams{
-		Name:     &name,
+		Name:     req.Name,
 		Address:  req.Address,
 		Phone:    req.Phone,
 		IsActive: req.IsActive,

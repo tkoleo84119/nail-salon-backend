@@ -42,9 +42,9 @@
 
 ### 驗證規則
 
-| 欄位    | 必填 | 其他規則             | 說明         |
-| ------- | ---- | -------------------- | ------------ |
-| idToken | 是   | <li>最大長度2000字元 | LINE idToken |
+| 欄位    | 必填 | 其他規則                             | 說明         |
+| ------- | ---- | ------------------------------------ | ------------ |
+| idToken | 是   | <li>不能為空字串<li>最大長度2000字元 | LINE idToken |
 
 ---
 
@@ -107,6 +107,7 @@
 | 400    | E2001  | ValJsonFormat           | JSON 格式錯誤，請檢查                 |
 | 400    | E2004  | ValTypeConversionFailed | 參數類型轉換失敗                      |
 | 400    | E2020  | ValFieldRequired        | {field} 為必填項目                    |
+| 400    | E2036  | ValFieldNoBlank         | {field} 不能為空字串                  |
 | 400    | E2024  | ValFieldMaxLength       | {field} 長度最多只能有 {param} 個字元 |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試              |
 | 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                        |

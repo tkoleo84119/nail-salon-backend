@@ -8,14 +8,14 @@ type CreateBulkTimeSlotRequest struct {
 
 // CreateBulkScheduleRequest represents a single schedule in the request
 type CreateBulkScheduleRequest struct {
-	WorkDate  string                    `json:"workDate" binding:"required"`
-	Note      *string                   `json:"note,omitempty" binding:"omitempty,max=100"`
+	WorkDate  string                      `json:"workDate" binding:"required"`
+	Note      *string                     `json:"note,omitempty" binding:"omitempty,max=255"`
 	TimeSlots []CreateBulkTimeSlotRequest `json:"timeSlots" binding:"required,min=1,max=20"`
 }
 
 // CreateBulkRequest represents the request to create multiple schedules
 type CreateBulkRequest struct {
-	StylistID string                    `json:"stylistId" binding:"required"`
+	StylistID string                      `json:"stylistId" binding:"required"`
 	Schedules []CreateBulkScheduleRequest `json:"schedules" binding:"required,min=1,max=31"`
 }
 
@@ -28,9 +28,9 @@ type CreateBulkTimeSlotResponse struct {
 
 // CreateBulkScheduleResponse represents a single schedule in the response
 type CreateBulkScheduleResponse struct {
-	ID        string                    `json:"id"`
-	WorkDate  string                    `json:"workDate"`
-	Note      string                    `json:"note"`
+	ID        string                       `json:"id"`
+	WorkDate  string                       `json:"workDate"`
+	Note      string                       `json:"note"`
 	TimeSlots []CreateBulkTimeSlotResponse `json:"timeSlots"`
 }
 

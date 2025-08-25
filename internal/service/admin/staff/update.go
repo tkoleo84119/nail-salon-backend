@@ -27,11 +27,6 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
 }
 
 func (s *Update) Update(ctx context.Context, staffID int64, req adminStaffModel.UpdateRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateResponse, error) {
-	// validate request has at least one field to update
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ValAllFieldsEmpty)
-	}
-
 	// Validate role if provided
 	if req.Role != nil && !common.IsValidRole(*req.Role) {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffInvalidRole)

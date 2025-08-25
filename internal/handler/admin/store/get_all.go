@@ -2,6 +2,7 @@ package adminStore
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -29,6 +30,11 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim name
+	if req.Name != nil {
+		*req.Name = strings.TrimSpace(*req.Name)
 	}
 
 	// set default value

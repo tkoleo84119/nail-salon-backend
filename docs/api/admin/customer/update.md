@@ -51,7 +51,7 @@
 
 | 欄位          | 必填 | 其他規則                         | 說明           |
 | ------------- | ---- | -------------------------------- | -------------- |
-| storeNote     | 否   | <li>長度小於255                  | 門市備註       |
+| storeNote     | 否   | <li>不能為空字串<li>長度小於255  | 門市備註       |
 | level         | 否   | <li>格式必須為 NORMAL, VIP, VVIP | 顧客等級       |
 | isBlacklisted | 否   |                                  | 是否列入黑名單 |
 
@@ -126,6 +126,7 @@
 | 400    | E2004  | ValTypeConversionFailed | 參數類型轉換失敗                      |
 | 400    | E2024  | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E2030  | ValFieldOneof           | {field} 必須是 {param} 其中一個值     |
+| 400    | E2036  | ValFieldNoBlank         | {field} 不能為空字串                  |
 | 404    | E3C001 | CustomerNotFound        | 客戶不存在                            |
 | 500    | E9001  | SysInternalError        | 系統發生錯誤，請稍後再試              |
 | 500    | E9002  | SysDatabaseError        | 資料庫操作失敗                        |

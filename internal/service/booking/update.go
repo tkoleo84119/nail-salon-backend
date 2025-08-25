@@ -31,11 +31,6 @@ func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories, db *sqlx.DB) 
 }
 
 func (s *Update) Update(ctx context.Context, bookingID int64, req bookingModel.UpdateParsedRequest, customerID int64) (*bookingModel.UpdateResponse, error) {
-	// Validate that at least one field is provided
-	if !req.HasUpdates() {
-		return nil, errorCodes.NewServiceError(errorCodes.ValAllFieldsEmpty, "need at least one field to update", nil)
-	}
-
 	// Validate time slot update completeness
 	if !req.IsTimeSlotUpdateComplete() {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingUpdateIncomplete)

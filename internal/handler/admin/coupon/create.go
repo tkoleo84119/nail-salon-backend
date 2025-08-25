@@ -2,6 +2,7 @@ package adminCoupon
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -28,6 +29,14 @@ func (h *Create) Create(c *gin.Context) {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
 		return
+	}
+
+	// trim name, displayName, code, note
+	req.Name = strings.TrimSpace(req.Name)
+	req.DisplayName = strings.TrimSpace(req.DisplayName)
+	req.Code = strings.TrimSpace(req.Code)
+	if req.Note != nil {
+		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
 	response, err := h.service.Create(c.Request.Context(), req)
