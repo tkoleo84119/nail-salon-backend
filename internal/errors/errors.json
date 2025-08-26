@@ -276,6 +276,11 @@
       "code": "E3CCOU002",
       "message": "客戶優惠券已使用",
       "status": 400
+    },
+    "CustomerCouponExpired": {
+      "code": "E3CCOU003",
+      "message": "客戶優惠券已過期",
+      "status": 400
     }
   },
   "SCHEDULE": {

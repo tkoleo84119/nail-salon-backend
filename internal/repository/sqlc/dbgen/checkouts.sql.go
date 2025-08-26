@@ -63,7 +63,7 @@ SELECT
   c.code as coupon_code,
   su.username as checkout_user
 FROM checkouts ck
-JOIN coupons c ON c.id = ck.coupon_id
+LEFT JOIN coupons c ON c.id = ck.coupon_id
 LEFT JOIN staff_users su ON su.id = ck.checkout_user
 WHERE ck.booking_id = $1
 `
@@ -75,8 +75,8 @@ type GetCheckoutByBookingIDRow struct {
 	PaidAmount    pgtype.Numeric `db:"paid_amount" json:"paid_amount"`
 	PaymentMethod string         `db:"payment_method" json:"payment_method"`
 	CouponID      pgtype.Int8    `db:"coupon_id" json:"coupon_id"`
-	CouponName    string         `db:"coupon_name" json:"coupon_name"`
-	CouponCode    string         `db:"coupon_code" json:"coupon_code"`
+	CouponName    pgtype.Text    `db:"coupon_name" json:"coupon_name"`
+	CouponCode    pgtype.Text    `db:"coupon_code" json:"coupon_code"`
 	CheckoutUser  pgtype.Text    `db:"checkout_user" json:"checkout_user"`
 }
 

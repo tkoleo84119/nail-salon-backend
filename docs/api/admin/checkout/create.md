@@ -123,6 +123,7 @@
 | 400    | E3BK008   | BookingStatusNotCheckout          | 預約狀態不允許結帳                |
 | 400    | E3CCOU001 | CustomerCouponNotBelongToCustomer | 客戶優惠券不屬於指定的顧客        |
 | 400    | E3CCOU002 | CustomerCouponAlreadyUsed         | 客戶優惠券已使用                  |
+| 400    | E3CCOU003 | CustomerCouponExpired             | 客戶優惠券已過期                  |
 | 400    | E3COU001  | CouponNotActive                   | 優惠券未啟用                      |
 | 404    | E3BKD001  | BookingDetailNotFound             | 預約明細不存在或已被刪除          |
 | 500    | E9001     | SysInternalError                  | 系統發生錯誤，請稍後再試          |
@@ -150,13 +151,15 @@
    - 確認 `customerCouponId` 是否跟 `bookings` 的 `customer_id` 相同。
    - 確認仍未被使用。
    - 確認優惠券是否啟用。
+   - 確認優惠券是否過期。
 6. 取出所有 `booking_details` 資料。
 7. 比對傳入的 `booking_details` 是否存在於 `booking_details` 中，並且根據有無使用優惠券，更新 `booking_details` 的 `price`、`discount_rate`、`discount_amount`。
 8. 準備 `checkouts` 資料。
 9. 建立 `checkouts` 資料。
 10. 更新 `booking_details` 資料。
 11. 更新 `bookings` 狀態為 `COMPLETED`。
-12. 回傳新增結果。
+12. 若有使用優惠券，則更新 `customer_coupons` 為已使用。
+13. 回傳新增結果。
 
 ---
 

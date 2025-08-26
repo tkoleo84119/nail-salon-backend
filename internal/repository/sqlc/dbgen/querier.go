@@ -98,6 +98,7 @@ type Querier interface {
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
 	UpdateBookingDetailPriceInfo(ctx context.Context, arg UpdateBookingDetailPriceInfoParams) error
 	UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error
+	UpdateCustomerCouponUsed(ctx context.Context, id int64) error
 	UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
 	UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error)

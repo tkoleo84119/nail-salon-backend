@@ -2,6 +2,7 @@ package adminCheckout
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -68,6 +69,9 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 		}
 		if !coupon.IsActive.Bool {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CouponNotActive)
+		}
+		if coupon.ValidTo.Valid && coupon.ValidTo.Time.Before(time.Now()) {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerCouponExpired)
 		}
 
 		if coupon.DiscountRate.Valid {
@@ -157,6 +161,13 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update booking status", err)
+	}
+
+	if req.CustomerCouponID != nil {
+		err = qtx.UpdateCustomerCouponUsed(ctx, *req.CustomerCouponID)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update customer coupon used", err)
+		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {

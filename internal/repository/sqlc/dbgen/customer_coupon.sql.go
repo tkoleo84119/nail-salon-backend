@@ -80,3 +80,15 @@ func (q *Queries) GetCustomerCouponPriceInfoByID(ctx context.Context, id int64) 
 	)
 	return i, err
 }
+
+const updateCustomerCouponUsed = `-- name: UpdateCustomerCouponUsed :exec
+UPDATE customer_coupons
+SET is_used = true,
+  used_at = now()
+WHERE id = $1
+`
+
+func (q *Queries) UpdateCustomerCouponUsed(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, updateCustomerCouponUsed, id)
+	return err
+}

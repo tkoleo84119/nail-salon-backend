@@ -121,6 +121,7 @@ const (
 
 	// CUSTOMER_COUPON - customer coupon related errors
 	CustomerCouponAlreadyUsed = "CustomerCouponAlreadyUsed"
+	CustomerCouponExpired = "CustomerCouponExpired"
 	CustomerCouponNotBelongToCustomer = "CustomerCouponNotBelongToCustomer"
 
 )

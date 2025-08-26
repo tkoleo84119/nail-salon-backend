@@ -21,3 +21,9 @@ SELECT
 FROM customer_coupons cc
 JOIN coupons c ON cc.coupon_id = c.id
 WHERE cc.id = $1;
+
+-- name: UpdateCustomerCouponUsed :exec
+UPDATE customer_coupons
+SET is_used = true,
+  used_at = now()
+WHERE id = $1;

@@ -112,8 +112,8 @@ func (s *Get) Get(ctx context.Context, storeID, bookingID int64, role string, st
 		if checkout.CouponID.Valid {
 			response.Checkout.Coupon = &adminBookingModel.GetCoupon{
 				ID:   utils.PgInt8ToIDString(checkout.CouponID),
-				Name: checkout.CouponName,
-				Code: checkout.CouponCode,
+				Name: utils.PgTextToString(checkout.CouponName),
+				Code: utils.PgTextToString(checkout.CouponCode),
 			}
 		}
 	}
