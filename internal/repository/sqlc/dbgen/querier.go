@@ -73,6 +73,7 @@ type Querier interface {
 	GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error)
 	GetBookingDetailsByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailsByBookingIDsRow, error)
 	GetBookingInfoByID(ctx context.Context, id int64) (GetBookingInfoByIDRow, error)
+	GetCheckoutByBookingID(ctx context.Context, bookingID int64) (GetCheckoutByBookingIDRow, error)
 	GetCouponByIDs(ctx context.Context, dollar_1 []int64) ([]GetCouponByIDsRow, error)
 	GetCustomerByID(ctx context.Context, id int64) (GetCustomerByIDRow, error)
 	GetCustomerByIDs(ctx context.Context, dollar_1 []int64) ([]GetCustomerByIDsRow, error)

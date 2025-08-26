@@ -26,6 +26,8 @@ SELECT
     bd.service_id,
     srv.name as service_name,
     bd.price,
+    bd.discount_rate,
+    bd.discount_amount,
     bd.created_at,
     srv.is_addon
 FROM booking_details bd

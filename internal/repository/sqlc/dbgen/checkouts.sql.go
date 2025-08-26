@@ -50,3 +50,49 @@ func (q *Queries) CreateCheckout(ctx context.Context, arg CreateCheckoutParams) 
 	)
 	return err
 }
+
+const getCheckoutByBookingID = `-- name: GetCheckoutByBookingID :one
+SELECT
+  ck.id,
+  ck.total_amount,
+  ck.final_amount,
+  ck.paid_amount,
+  ck.payment_method,
+  ck.coupon_id,
+  c.name as coupon_name,
+  c.code as coupon_code,
+  su.username as checkout_user
+FROM checkouts ck
+JOIN coupons c ON c.id = ck.coupon_id
+LEFT JOIN staff_users su ON su.id = ck.checkout_user
+WHERE ck.booking_id = $1
+`
+
+type GetCheckoutByBookingIDRow struct {
+	ID            int64          `db:"id" json:"id"`
+	TotalAmount   pgtype.Numeric `db:"total_amount" json:"total_amount"`
+	FinalAmount   pgtype.Numeric `db:"final_amount" json:"final_amount"`
+	PaidAmount    pgtype.Numeric `db:"paid_amount" json:"paid_amount"`
+	PaymentMethod string         `db:"payment_method" json:"payment_method"`
+	CouponID      pgtype.Int8    `db:"coupon_id" json:"coupon_id"`
+	CouponName    string         `db:"coupon_name" json:"coupon_name"`
+	CouponCode    string         `db:"coupon_code" json:"coupon_code"`
+	CheckoutUser  pgtype.Text    `db:"checkout_user" json:"checkout_user"`
+}
+
+func (q *Queries) GetCheckoutByBookingID(ctx context.Context, bookingID int64) (GetCheckoutByBookingIDRow, error) {
+	row := q.db.QueryRow(ctx, getCheckoutByBookingID, bookingID)
+	var i GetCheckoutByBookingIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.TotalAmount,
+		&i.FinalAmount,
+		&i.PaidAmount,
+		&i.PaymentMethod,
+		&i.CouponID,
+		&i.CouponName,
+		&i.CouponCode,
+		&i.CheckoutUser,
+	)
+	return i, err
+}

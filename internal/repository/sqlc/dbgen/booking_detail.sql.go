@@ -77,6 +77,8 @@ SELECT
     bd.service_id,
     srv.name as service_name,
     bd.price,
+    bd.discount_rate,
+    bd.discount_amount,
     bd.created_at,
     srv.is_addon
 FROM booking_details bd
@@ -86,13 +88,15 @@ ORDER BY srv.is_addon ASC, srv.name ASC
 `
 
 type GetBookingDetailsByBookingIDRow struct {
-	ID          int64              `db:"id" json:"id"`
-	BookingID   int64              `db:"booking_id" json:"booking_id"`
-	ServiceID   int64              `db:"service_id" json:"service_id"`
-	ServiceName string             `db:"service_name" json:"service_name"`
-	Price       pgtype.Numeric     `db:"price" json:"price"`
-	CreatedAt   pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	IsAddon     pgtype.Bool        `db:"is_addon" json:"is_addon"`
+	ID             int64              `db:"id" json:"id"`
+	BookingID      int64              `db:"booking_id" json:"booking_id"`
+	ServiceID      int64              `db:"service_id" json:"service_id"`
+	ServiceName    string             `db:"service_name" json:"service_name"`
+	Price          pgtype.Numeric     `db:"price" json:"price"`
+	DiscountRate   pgtype.Numeric     `db:"discount_rate" json:"discount_rate"`
+	DiscountAmount pgtype.Numeric     `db:"discount_amount" json:"discount_amount"`
+	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	IsAddon        pgtype.Bool        `db:"is_addon" json:"is_addon"`
 }
 
 func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error) {
@@ -110,6 +114,8 @@ func (q *Queries) GetBookingDetailsByBookingID(ctx context.Context, bookingID in
 			&i.ServiceID,
 			&i.ServiceName,
 			&i.Price,
+			&i.DiscountRate,
+			&i.DiscountAmount,
 			&i.CreatedAt,
 			&i.IsAddon,
 		); err != nil {

@@ -179,6 +179,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 
 		// Store bookings routes
 		stores.GET("/:storeId/bookings", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingGetAll.GetAll)
+		stores.GET("/:storeId/bookings/:bookingId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingGet.Get)
 		stores.POST("/:storeId/bookings", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingCreate.Create)
 		stores.PATCH("/:storeId/bookings/:bookingId", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingUpdate.Update)
 		stores.PATCH("/:storeId/bookings/:bookingId/cancel", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingCancel.Cancel)

@@ -18,6 +18,7 @@ SELECT
     b.store_id,
     s.name as store_name,
     b.customer_id,
+    c.name as customer_name,
     b.stylist_id,
     st.name as stylist_name,
     b.time_slot_id,
@@ -31,6 +32,7 @@ SELECT
     b.updated_at
 FROM bookings b
 JOIN stores s ON b.store_id = s.id
+JOIN customers c ON b.customer_id = c.id
 JOIN stylists st ON b.stylist_id = st.id
 JOIN time_slots ts ON b.time_slot_id = ts.id
 JOIN schedules sch ON ts.schedule_id = sch.id

@@ -93,6 +93,7 @@ SELECT
     b.store_id,
     s.name as store_name,
     b.customer_id,
+    c.name as customer_name,
     b.stylist_id,
     st.name as stylist_name,
     b.time_slot_id,
@@ -106,6 +107,7 @@ SELECT
     b.updated_at
 FROM bookings b
 JOIN stores s ON b.store_id = s.id
+JOIN customers c ON b.customer_id = c.id
 JOIN stylists st ON b.stylist_id = st.id
 JOIN time_slots ts ON b.time_slot_id = ts.id
 JOIN schedules sch ON ts.schedule_id = sch.id
@@ -117,6 +119,7 @@ type GetBookingDetailByIDRow struct {
 	StoreID       int64              `db:"store_id" json:"store_id"`
 	StoreName     string             `db:"store_name" json:"store_name"`
 	CustomerID    int64              `db:"customer_id" json:"customer_id"`
+	CustomerName  string             `db:"customer_name" json:"customer_name"`
 	StylistID     int64              `db:"stylist_id" json:"stylist_id"`
 	StylistName   pgtype.Text        `db:"stylist_name" json:"stylist_name"`
 	TimeSlotID    int64              `db:"time_slot_id" json:"time_slot_id"`
@@ -138,6 +141,7 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 		&i.StoreID,
 		&i.StoreName,
 		&i.CustomerID,
+		&i.CustomerName,
 		&i.StylistID,
 		&i.StylistName,
 		&i.TimeSlotID,

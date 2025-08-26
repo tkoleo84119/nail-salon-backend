@@ -14,6 +14,10 @@ type GetAllInterface interface {
 	GetAll(ctx context.Context, storeID int64, req adminBookingModel.GetAllParsedRequest, role string, storeIds []int64) (*adminBookingModel.GetAllResponse, error)
 }
 
+type GetInterface interface {
+	Get(ctx context.Context, storeID, bookingID int64, role string, storeIds []int64) (*adminBookingModel.GetResponse, error)
+}
+
 type UpdateInterface interface {
 	Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest) (*adminBookingModel.UpdateResponse, error)
 }
