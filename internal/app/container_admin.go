@@ -8,6 +8,7 @@ import (
 	// Admin handlers
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
+	adminCheckoutHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/checkout"
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
 	adminCustomerCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer_coupon"
@@ -24,6 +25,7 @@ import (
 	// Admin services
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
+	adminCheckoutService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/checkout"
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
 	adminCustomerCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer_coupon"
@@ -116,6 +118,9 @@ type AdminServices struct {
 	// Customer coupon services
 	CustomerCouponGetAll adminCustomerCouponService.GetAllInterface
 	CustomerCouponCreate adminCustomerCouponService.CreateInterface
+
+	// Checkout services
+	CheckoutCreate adminCheckoutService.CreateInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -196,6 +201,9 @@ type AdminHandlers struct {
 	// Customer coupon handlers
 	CustomerCouponGetAll *adminCustomerCouponHandler.GetAll
 	CustomerCouponCreate *adminCustomerCouponHandler.Create
+
+	// Checkout handlers
+	CheckoutCreate *adminCheckoutHandler.Create
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -274,6 +282,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Customer coupon services
 		CustomerCouponGetAll: adminCustomerCouponService.NewGetAll(queries, repositories.SQLX),
 		CustomerCouponCreate: adminCustomerCouponService.NewCreate(queries),
+
+		// Checkout services
+		CheckoutCreate: adminCheckoutService.NewCreate(queries, repositories.SQLX, database.PgxPool),
 	}
 }
 
@@ -354,5 +365,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Customer coupon handlers
 		CustomerCouponGetAll: adminCustomerCouponHandler.NewGetAll(services.CustomerCouponGetAll),
 		CustomerCouponCreate: adminCustomerCouponHandler.NewCreate(services.CustomerCouponCreate),
+
+		// Checkout handlers
+		CheckoutCreate: adminCheckoutHandler.NewCreate(services.CheckoutCreate),
 	}
 }

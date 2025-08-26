@@ -47,6 +47,7 @@ const (
 	BookingNotFound = "BookingNotFound"
 	BookingStatusNotAllowedToCancel = "BookingStatusNotAllowedToCancel"
 	BookingStatusNotAllowedToUpdate = "BookingStatusNotAllowedToUpdate"
+	BookingStatusNotCheckout = "BookingStatusNotCheckout"
 	BookingTimeSlotNotFound = "BookingTimeSlotNotFound"
 	BookingTimeSlotUnavailable = "BookingTimeSlotUnavailable"
 	BookingUpdateIncomplete = "BookingUpdateIncomplete"
@@ -107,6 +108,9 @@ const (
 	SysInternalError = "SysInternalError"
 	SysTimeout = "SysTimeout"
 
+	// BOOKING_DETAIL - booking detail related errors
+	BookingDetailNotFound = "BookingDetailNotFound"
+
 	// COUPON - coupon related errors
 	CouponCodeAlreadyExists = "CouponCodeAlreadyExists"
 	CouponDiscountExclusive = "CouponDiscountExclusive"
@@ -114,5 +118,9 @@ const (
 	CouponNameAlreadyExists = "CouponNameAlreadyExists"
 	CouponNotActive = "CouponNotActive"
 	CouponNotFound = "CouponNotFound"
+
+	// CUSTOMER_COUPON - customer coupon related errors
+	CustomerCouponAlreadyUsed = "CustomerCouponAlreadyUsed"
+	CustomerCouponNotBelongToCustomer = "CustomerCouponNotBelongToCustomer"
 
 )

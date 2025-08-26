@@ -41,3 +41,42 @@ func (q *Queries) CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCo
 	)
 	return err
 }
+
+const getCustomerCouponPriceInfoByID = `-- name: GetCustomerCouponPriceInfoByID :one
+SELECT
+  cc.coupon_id,
+  cc.customer_id,
+  c.discount_rate,
+  c.discount_amount,
+  c.is_active,
+  cc.valid_to,
+  cc.is_used
+FROM customer_coupons cc
+JOIN coupons c ON cc.coupon_id = c.id
+WHERE cc.id = $1
+`
+
+type GetCustomerCouponPriceInfoByIDRow struct {
+	CouponID       int64              `db:"coupon_id" json:"coupon_id"`
+	CustomerID     int64              `db:"customer_id" json:"customer_id"`
+	DiscountRate   pgtype.Numeric     `db:"discount_rate" json:"discount_rate"`
+	DiscountAmount pgtype.Numeric     `db:"discount_amount" json:"discount_amount"`
+	IsActive       pgtype.Bool        `db:"is_active" json:"is_active"`
+	ValidTo        pgtype.Timestamptz `db:"valid_to" json:"valid_to"`
+	IsUsed         pgtype.Bool        `db:"is_used" json:"is_used"`
+}
+
+func (q *Queries) GetCustomerCouponPriceInfoByID(ctx context.Context, id int64) (GetCustomerCouponPriceInfoByIDRow, error) {
+	row := q.db.QueryRow(ctx, getCustomerCouponPriceInfoByID, id)
+	var i GetCustomerCouponPriceInfoByIDRow
+	err := row.Scan(
+		&i.CouponID,
+		&i.CustomerID,
+		&i.DiscountRate,
+		&i.DiscountAmount,
+		&i.IsActive,
+		&i.ValidTo,
+		&i.IsUsed,
+	)
+	return i, err
+}

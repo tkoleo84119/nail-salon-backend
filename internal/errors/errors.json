@@ -203,6 +203,18 @@
       "code": "E3BK007",
       "message": "預約更新資訊不完整，所有必要資訊必須一起傳入",
       "status": 400
+    },
+    "BookingStatusNotCheckout": {
+      "code": "E3BK008",
+      "message": "預約狀態不允許結帳",
+      "status": 400
+    }
+  },
+  "BOOKING_DETAIL": {
+    "BookingDetailNotFound": {
+      "code": "E3BKD001",
+      "message": "預約明細不存在或已被刪除",
+      "status": 404
     }
   },
   "COUPON": {
@@ -252,6 +264,18 @@
       "code": "E3C003",
       "message": "客戶已存在",
       "status": 409
+    }
+  },
+  "CUSTOMER_COUPON": {
+    "CustomerCouponNotBelongToCustomer": {
+      "code": "E3CCOU001",
+      "message": "客戶優惠券不屬於指定的顧客",
+      "status": 400
+    },
+    "CustomerCouponAlreadyUsed": {
+      "code": "E3CCOU002",
+      "message": "客戶優惠券已使用",
+      "status": 400
     }
   },
   "SCHEDULE": {

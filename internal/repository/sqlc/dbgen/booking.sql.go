@@ -152,3 +152,36 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 	)
 	return i, err
 }
+
+const getBookingInfoByID = `-- name: GetBookingInfoByID :one
+SELECT status, customer_id, store_id FROM bookings WHERE id = $1
+`
+
+type GetBookingInfoByIDRow struct {
+	Status     string `db:"status" json:"status"`
+	CustomerID int64  `db:"customer_id" json:"customer_id"`
+	StoreID    int64  `db:"store_id" json:"store_id"`
+}
+
+func (q *Queries) GetBookingInfoByID(ctx context.Context, id int64) (GetBookingInfoByIDRow, error) {
+	row := q.db.QueryRow(ctx, getBookingInfoByID, id)
+	var i GetBookingInfoByIDRow
+	err := row.Scan(&i.Status, &i.CustomerID, &i.StoreID)
+	return i, err
+}
+
+const updateBookingStatus = `-- name: UpdateBookingStatus :exec
+UPDATE bookings
+SET status = $2, updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateBookingStatusParams struct {
+	ID     int64  `db:"id" json:"id"`
+	Status string `db:"status" json:"status"`
+}
+
+func (q *Queries) UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error {
+	_, err := q.db.Exec(ctx, updateBookingStatus, arg.ID, arg.Status)
+	return err
+}

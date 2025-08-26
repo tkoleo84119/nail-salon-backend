@@ -11,6 +11,22 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countBookingDetailsByIDsAndBookingID = `-- name: CountBookingDetailsByIDsAndBookingID :one
+SELECT COUNT(*) FROM booking_details WHERE id = ANY($1::bigint[]) AND booking_id = $2
+`
+
+type CountBookingDetailsByIDsAndBookingIDParams struct {
+	Column1   []int64 `db:"column_1" json:"column_1"`
+	BookingID int64   `db:"booking_id" json:"booking_id"`
+}
+
+func (q *Queries) CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countBookingDetailsByIDsAndBookingID, arg.Column1, arg.BookingID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 type CreateBookingDetailsParams struct {
 	ID        int64              `db:"id" json:"id"`
 	BookingID int64              `db:"booking_id" json:"booking_id"`
@@ -18,6 +34,40 @@ type CreateBookingDetailsParams struct {
 	Price     pgtype.Numeric     `db:"price" json:"price"`
 	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+const getBookingDetailPriceByBookingIDs = `-- name: GetBookingDetailPriceByBookingIDs :many
+SELECT
+    id,
+    price
+FROM booking_details
+WHERE booking_id = ANY($1::bigint[])
+ORDER BY id ASC
+`
+
+type GetBookingDetailPriceByBookingIDsRow struct {
+	ID    int64          `db:"id" json:"id"`
+	Price pgtype.Numeric `db:"price" json:"price"`
+}
+
+func (q *Queries) GetBookingDetailPriceByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailPriceByBookingIDsRow, error) {
+	rows, err := q.db.Query(ctx, getBookingDetailPriceByBookingIDs, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetBookingDetailPriceByBookingIDsRow{}
+	for rows.Next() {
+		var i GetBookingDetailPriceByBookingIDsRow
+		if err := rows.Scan(&i.ID, &i.Price); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getBookingDetailsByBookingID = `-- name: GetBookingDetailsByBookingID :many
@@ -115,4 +165,31 @@ func (q *Queries) GetBookingDetailsByBookingIDs(ctx context.Context, dollar_1 []
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateBookingDetailPriceInfo = `-- name: UpdateBookingDetailPriceInfo :exec
+UPDATE booking_details
+SET
+    price = $2,
+    discount_rate = $3,
+    discount_amount = $4,
+    updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateBookingDetailPriceInfoParams struct {
+	ID             int64          `db:"id" json:"id"`
+	Price          pgtype.Numeric `db:"price" json:"price"`
+	DiscountRate   pgtype.Numeric `db:"discount_rate" json:"discount_rate"`
+	DiscountAmount pgtype.Numeric `db:"discount_amount" json:"discount_amount"`
+}
+
+func (q *Queries) UpdateBookingDetailPriceInfo(ctx context.Context, arg UpdateBookingDetailPriceInfoParams) error {
+	_, err := q.db.Exec(ctx, updateBookingDetailPriceInfo,
+		arg.ID,
+		arg.Price,
+		arg.DiscountRate,
+		arg.DiscountAmount,
+	)
+	return err
 }
