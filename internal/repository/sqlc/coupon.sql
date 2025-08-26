@@ -12,6 +12,12 @@ INSERT INTO coupons (
   $1, $2, $3, $4, $5, $6, $7, $8
 );
 
+-- name: GetCouponByIDs :many
+SELECT id, display_name, code, discount_rate, discount_amount, is_active
+FROM coupons
+WHERE id = ANY($1::bigint[]);
+
+
 -- name: CheckCouponExists :one
 SELECT EXISTS(
   SELECT 1 FROM coupons

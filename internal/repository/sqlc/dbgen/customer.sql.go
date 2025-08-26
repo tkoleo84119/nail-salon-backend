@@ -141,6 +141,44 @@ func (q *Queries) GetCustomerByID(ctx context.Context, id int64) (GetCustomerByI
 	return i, err
 }
 
+const getCustomerByIDs = `-- name: GetCustomerByIDs :many
+SELECT id, name, line_name, phone
+FROM customers
+WHERE id = ANY($1::bigint[])
+`
+
+type GetCustomerByIDsRow struct {
+	ID       int64       `db:"id" json:"id"`
+	Name     string      `db:"name" json:"name"`
+	LineName pgtype.Text `db:"line_name" json:"line_name"`
+	Phone    string      `db:"phone" json:"phone"`
+}
+
+func (q *Queries) GetCustomerByIDs(ctx context.Context, dollar_1 []int64) ([]GetCustomerByIDsRow, error) {
+	rows, err := q.db.Query(ctx, getCustomerByIDs, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCustomerByIDsRow{}
+	for rows.Next() {
+		var i GetCustomerByIDsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LineName,
+			&i.Phone,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCustomerByLineUid = `-- name: GetCustomerByLineUid :one
 SELECT id, line_name
 FROM customers

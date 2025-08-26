@@ -10,6 +10,7 @@ import (
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
+	adminCustomerCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer_coupon"
 	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
 	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
 	adminStaffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/staff"
@@ -25,6 +26,7 @@ import (
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
+	adminCustomerCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer_coupon"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
@@ -110,6 +112,9 @@ type AdminServices struct {
 	CouponCreate adminCouponService.CreateInterface
 	CouponGetAll adminCouponService.GetAllInterface
 	CouponUpdate adminCouponService.UpdateInterface
+
+	// Customer coupon services
+	CustomerCouponGetAll adminCustomerCouponService.GetAllInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -186,6 +191,9 @@ type AdminHandlers struct {
 	CouponCreate *adminCouponHandler.Create
 	CouponGetAll *adminCouponHandler.GetAll
 	CouponUpdate *adminCouponHandler.Update
+
+	// Customer coupon handlers
+	CustomerCouponGetAll *adminCustomerCouponHandler.GetAll
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -260,6 +268,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CouponCreate: adminCouponService.NewCreate(queries, repositories.SQLX),
 		CouponGetAll: adminCouponService.NewGetAll(repositories.SQLX),
 		CouponUpdate: adminCouponService.NewUpdate(queries, repositories.SQLX),
+
+		// Customer coupon services
+		CustomerCouponGetAll: adminCustomerCouponService.NewGetAll(queries, repositories.SQLX),
 	}
 }
 
@@ -336,5 +347,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		CouponCreate: adminCouponHandler.NewCreate(services.CouponCreate),
 		CouponGetAll: adminCouponHandler.NewGetAll(services.CouponGetAll),
 		CouponUpdate: adminCouponHandler.NewUpdate(services.CouponUpdate),
+
+		// Customer coupon handlers
+		CustomerCouponGetAll: adminCustomerCouponHandler.NewGetAll(services.CustomerCouponGetAll),
 	}
 }

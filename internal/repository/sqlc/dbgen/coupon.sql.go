@@ -111,3 +111,45 @@ func (q *Queries) CreateCoupon(ctx context.Context, arg CreateCouponParams) erro
 	)
 	return err
 }
+
+const getCouponByIDs = `-- name: GetCouponByIDs :many
+SELECT id, display_name, code, discount_rate, discount_amount, is_active
+FROM coupons
+WHERE id = ANY($1::bigint[])
+`
+
+type GetCouponByIDsRow struct {
+	ID             int64          `db:"id" json:"id"`
+	DisplayName    string         `db:"display_name" json:"display_name"`
+	Code           string         `db:"code" json:"code"`
+	DiscountRate   pgtype.Numeric `db:"discount_rate" json:"discount_rate"`
+	DiscountAmount pgtype.Numeric `db:"discount_amount" json:"discount_amount"`
+	IsActive       pgtype.Bool    `db:"is_active" json:"is_active"`
+}
+
+func (q *Queries) GetCouponByIDs(ctx context.Context, dollar_1 []int64) ([]GetCouponByIDsRow, error) {
+	rows, err := q.db.Query(ctx, getCouponByIDs, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCouponByIDsRow{}
+	for rows.Next() {
+		var i GetCouponByIDsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.DisplayName,
+			&i.Code,
+			&i.DiscountRate,
+			&i.DiscountAmount,
+			&i.IsActive,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

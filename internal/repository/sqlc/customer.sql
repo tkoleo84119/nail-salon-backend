@@ -10,6 +10,11 @@ SELECT id, name, line_uid, line_name, phone, birthday, email, city, favorite_sha
 FROM customers
 WHERE id = $1;
 
+-- name: GetCustomerByIDs :many
+SELECT id, name, line_name, phone
+FROM customers
+WHERE id = ANY($1::bigint[]);
+
 -- name: GetCustomerByLineUid :one
 SELECT id, line_name
 FROM customers
