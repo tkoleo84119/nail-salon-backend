@@ -235,7 +235,7 @@ func setupAdminTimeSlotTemplateRoutes(admin *gin.RouterGroup, cfg *config.Config
 func setupAdminCouponRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	coupons := admin.Group("/coupons")
 	{
-		coupons.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.CouponGetAll.GetAll)
+		coupons.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CouponGetAll.GetAll)
 		coupons.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.CouponCreate.Create)
 		coupons.PATCH("/:couponId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.CouponUpdate.Update)
 	}
