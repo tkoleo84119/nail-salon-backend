@@ -166,6 +166,11 @@
       "code": "E2036",
       "message": "{field} 不能為空字串",
       "status": 400
+    },
+    "ValFieldISO8601Format": {
+      "code": "E2037",
+      "message": "{field} 格式錯誤，請使用正確的 ISO 8601 格式",
+      "status": 400
     }
   },
   "BOOKING": {
@@ -205,6 +210,38 @@
       "status": 400
     }
   },
+  "COUPON": {
+    "CouponNotActive": {
+      "code": "E3COU001",
+      "message": "優惠券未啟用",
+      "status": 400
+    },
+    "CouponDiscountRequired": {
+      "code": "E3COU002",
+      "message": "折數或折扣金額至少需要提供一個",
+      "status": 400
+    },
+    "CouponDiscountExclusive": {
+      "code": "E3COU003",
+      "message": "折數和折扣金額不能同時填寫",
+      "status": 400
+    },
+    "CouponNotFound": {
+      "code": "E3COU004",
+      "message": "優惠券不存在或已被刪除",
+      "status": 404
+    },
+    "CouponNameAlreadyExists": {
+      "code": "E3COU005",
+      "message": "優惠券名稱已存在，請使用其他名稱",
+      "status": 409
+    },
+    "CouponCodeAlreadyExists": {
+      "code": "E3COU006",
+      "message": "優惠券代碼已存在，請使用其他代碼",
+      "status": 409
+    }
+  },
   "CUSTOMER": {
     "CustomerNotFound": {
       "code": "E3C001",
@@ -220,6 +257,23 @@
       "code": "E3C003",
       "message": "客戶已存在",
       "status": 409
+    }
+  },
+  "CUSTOMER_COUPON": {
+    "CustomerCouponValidFromBeforeNow": {
+      "code": "E3CCOU001",
+      "message": "有效期間開始不能小於當前時間",
+      "status": 400
+    },
+    "CustomerCouponValidFromAfterValidTo": {
+      "code": "E3CCOU002",
+      "message": "有效期間開始不能大於有效期間結束",
+      "status": 400
+    },
+    "CustomerCouponValidToBeforeNow": {
+      "code": "E3CCOU003",
+      "message": "有效期間結束不能小於當前時間",
+      "status": 400
     }
   },
   "SCHEDULE": {
@@ -298,38 +352,6 @@
     "ServiceAlreadyExists": {
       "code": "E3SER005",
       "message": "服務已存在",
-      "status": 409
-    }
-  },
-  "COUPON": {
-    "CouponNotActive": {
-      "code": "E3COU001",
-      "message": "優惠券未啟用",
-      "status": 400
-    },
-    "CouponDiscountRequired": {
-      "code": "E3COU002",
-      "message": "折數或折扣金額至少需要提供一個",
-      "status": 400
-    },
-    "CouponDiscountExclusive": {
-      "code": "E3COU003",
-      "message": "折數和折扣金額不能同時填寫",
-      "status": 400
-    },
-    "CouponNotFound": {
-      "code": "E3COU004",
-      "message": "優惠券不存在或已被刪除",
-      "status": 404
-    },
-    "CouponNameAlreadyExists": {
-      "code": "E3COU005",
-      "message": "優惠券名稱已存在，請使用其他名稱",
-      "status": 409
-    },
-    "CouponCodeAlreadyExists": {
-      "code": "E3COU006",
-      "message": "優惠券代碼已存在，請使用其他代碼",
       "status": 409
     }
   },

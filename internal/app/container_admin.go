@@ -115,6 +115,7 @@ type AdminServices struct {
 
 	// Customer coupon services
 	CustomerCouponGetAll adminCustomerCouponService.GetAllInterface
+	CustomerCouponCreate adminCustomerCouponService.CreateInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -194,6 +195,7 @@ type AdminHandlers struct {
 
 	// Customer coupon handlers
 	CustomerCouponGetAll *adminCustomerCouponHandler.GetAll
+	CustomerCouponCreate *adminCustomerCouponHandler.Create
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -271,6 +273,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Customer coupon services
 		CustomerCouponGetAll: adminCustomerCouponService.NewGetAll(queries, repositories.SQLX),
+		CustomerCouponCreate: adminCustomerCouponService.NewCreate(queries),
 	}
 }
 
@@ -350,5 +353,6 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Customer coupon handlers
 		CustomerCouponGetAll: adminCustomerCouponHandler.NewGetAll(services.CustomerCouponGetAll),
+		CustomerCouponCreate: adminCustomerCouponHandler.NewCreate(services.CustomerCouponCreate),
 	}
 }

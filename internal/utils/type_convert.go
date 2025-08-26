@@ -336,6 +336,37 @@ func TimeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
 
+// TimePtrToPgTimestamptz converts a pointer to time.Time to pgtype.Timestamptz for nullable timestamp fields.
+// This is used for optional timestamp fields in database operations where NULL values are allowed.
+//
+// Parameters:
+//   - t: Pointer to time.Time (can be nil for NULL values)
+//
+// Returns:
+//   - pgtype.Timestamptz with Valid=false if t is nil, otherwise Valid=true with the timestamp value
+//
+// Example:
+//
+//	var createdAt *time.Time = nil
+//	pgTimestamp := utils.TimePtrToPgTimestamptz(createdAt)  // Returns {Valid: false}
+//
+//	now := time.Now()
+//	pgTimestamp = utils.TimePtrToPgTimestamptz(&now)       // Returns {Time: now, Valid: true}
+//
+// Usage in SQLC queries:
+//
+//	params := CreateUserParams{
+//	    Name:      req.Name,
+//	    CreatedAt: utils.TimePtrToPgTimestamptz(req.CreatedAt),  // Optional field
+//	    UpdatedAt: utils.TimePtrToPgTimestamptz(req.UpdatedAt),  // Optional field
+//	}
+func TimePtrToPgTimestamptz(t *time.Time) pgtype.Timestamptz {
+	if t == nil {
+		return pgtype.Timestamptz{Valid: false}
+	}
+	return pgtype.Timestamptz{Time: *t, Valid: true}
+}
+
 // TimeToPgTime converts time.Time to pgtype.Time for time-of-day fields.
 // This extracts the time portion (HH:MM:SS) and converts to PostgreSQL time type with microsecond precision.
 //

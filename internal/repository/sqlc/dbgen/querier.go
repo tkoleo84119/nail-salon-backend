@@ -44,6 +44,7 @@ type Querier interface {
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)
 	CreateCoupon(ctx context.Context, arg CreateCouponParams) error
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
+	CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCouponParams) error
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)

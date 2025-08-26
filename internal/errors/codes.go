@@ -24,6 +24,7 @@ const (
 	ValFieldArrayMinLength = "ValFieldArrayMinLength"
 	ValFieldBoolean = "ValFieldBoolean"
 	ValFieldDateFormat = "ValFieldDateFormat"
+	ValFieldISO8601Format = "ValFieldISO8601Format"
 	ValFieldInvalidEmail = "ValFieldInvalidEmail"
 	ValFieldMaxNumber = "ValFieldMaxNumber"
 	ValFieldMinNumber = "ValFieldMinNumber"
@@ -114,5 +115,10 @@ const (
 	CouponNameAlreadyExists = "CouponNameAlreadyExists"
 	CouponNotActive = "CouponNotActive"
 	CouponNotFound = "CouponNotFound"
+
+	// CUSTOMER_COUPON - customer coupon related errors
+	CustomerCouponValidFromAfterValidTo = "CustomerCouponValidFromAfterValidTo"
+	CustomerCouponValidFromBeforeNow = "CustomerCouponValidFromBeforeNow"
+	CustomerCouponValidToBeforeNow = "CustomerCouponValidToBeforeNow"
 
 )

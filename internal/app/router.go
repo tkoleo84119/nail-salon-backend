@@ -98,7 +98,7 @@ func setupPublicStoreRoutes(api *gin.RouterGroup, cfg *config.Config, queries *d
 		// Store stylists browsing
 		stores.GET("/:storeId/stylists", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.StylistGetAll.GetAll)
 
-		// Store schedule routes
+		// Store stylist schedule routes
 		stores.GET("/:storeId/stylists/:stylistId/schedules", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.ScheduleGetAll.GetAll)
 	}
 }
@@ -245,5 +245,6 @@ func setupAdminCustomerCouponRoutes(admin *gin.RouterGroup, cfg *config.Config, 
 	customerCoupons := admin.Group("/customer_coupons")
 	{
 		customerCoupons.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponGetAll.GetAll)
+		customerCoupons.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponCreate.Create)
 	}
 }
