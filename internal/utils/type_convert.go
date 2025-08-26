@@ -333,6 +333,10 @@ func Int64PtrToPgNumeric(i *int64) (pgtype.Numeric, error) {
 //	    UpdatedAt: utils.TimeToPgTimestamptz(time.Now()),
 //	}
 func TimeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
+	if t.IsZero() {
+		return pgtype.Timestamptz{Valid: false}
+	}
+
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
 

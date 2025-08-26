@@ -166,11 +166,6 @@
       "code": "E2036",
       "message": "{field} 不能為空字串",
       "status": 400
-    },
-    "ValFieldISO8601Format": {
-      "code": "E2037",
-      "message": "{field} 格式錯誤，請使用正確的 ISO 8601 格式",
-      "status": 400
     }
   },
   "BOOKING": {
@@ -257,23 +252,6 @@
       "code": "E3C003",
       "message": "客戶已存在",
       "status": 409
-    }
-  },
-  "CUSTOMER_COUPON": {
-    "CustomerCouponValidFromBeforeNow": {
-      "code": "E3CCOU001",
-      "message": "有效期間開始不能小於當前時間",
-      "status": 400
-    },
-    "CustomerCouponValidFromAfterValidTo": {
-      "code": "E3CCOU002",
-      "message": "有效期間開始不能大於有效期間結束",
-      "status": 400
-    },
-    "CustomerCouponValidToBeforeNow": {
-      "code": "E3CCOU003",
-      "message": "有效期間結束不能小於當前時間",
-      "status": 400
     }
   },
   "SCHEDULE": {

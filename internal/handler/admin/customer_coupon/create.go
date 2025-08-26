@@ -2,7 +2,6 @@ package adminCustomerCoupon
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -47,31 +46,10 @@ func (h *Create) Create(c *gin.Context) {
 		return
 	}
 
-	validFrom, err := time.Parse(time.RFC3339, req.ValidFrom)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValFieldISO8601Format, map[string]string{
-			"validFrom": "validFrom 格式錯誤",
-		})
-		return
-	}
-
-	var validToPtr *time.Time
-	if req.ValidTo != nil {
-		validTo, err := time.Parse(time.RFC3339, *req.ValidTo)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValFieldISO8601Format, map[string]string{
-				"validTo": "validTo 格式錯誤",
-			})
-			return
-		}
-		validToPtr = &validTo
-	}
-
 	parsedReq := adminCustomerCouponModel.CreateParsedRequest{
 		CustomerId: customerID,
 		CouponId:   couponID,
-		ValidFrom:  validFrom,
-		ValidTo:    validToPtr,
+		Period:     req.Period,
 	}
 
 	resp, err := h.service.Create(c.Request.Context(), parsedReq)

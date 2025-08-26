@@ -37,28 +37,15 @@ func (s *Create) Create(ctx context.Context, req adminCustomerCouponModel.Create
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CouponNotFound)
 	}
 
-	// validate time
-	now := time.Now()
-	if req.ValidFrom.Before(now) {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerCouponValidFromBeforeNow)
-	}
-	if req.ValidTo != nil {
-		if req.ValidFrom.After(*req.ValidTo) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerCouponValidFromAfterValidTo)
-		}
-		if req.ValidTo.Before(now) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerCouponValidToBeforeNow)
-		}
-	}
-
+	validFrom, validTo := s.setValidFromAndTo(req.Period)
 	id := utils.GenerateID()
 
 	err = s.queries.CreateCustomerCoupon(ctx, dbgen.CreateCustomerCouponParams{
 		ID:         id,
 		CustomerID: req.CustomerId,
 		CouponID:   req.CouponId,
-		ValidFrom:  utils.TimeToPgTimestamptz(req.ValidFrom),
-		ValidTo:    utils.TimePtrToPgTimestamptz(req.ValidTo),
+		ValidFrom:  utils.TimeToPgTimestamptz(validFrom),
+		ValidTo:    utils.TimeToPgTimestamptz(validTo),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create customer coupon", err)
@@ -68,4 +55,26 @@ func (s *Create) Create(ctx context.Context, req adminCustomerCouponModel.Create
 	return &adminCustomerCouponModel.CreateResponse{
 		ID: utils.FormatID(id),
 	}, nil
+}
+
+// setValidFromAndTo 根據 period 設定 valid_from 與 valid_to
+func (s *Create) setValidFromAndTo(period string) (time.Time, time.Time) {
+	validFrom := time.Now()
+	var validTo time.Time
+
+	switch period {
+	case "1month":
+		validTo = validFrom.AddDate(0, 1, 0)
+	case "3months":
+		validTo = validFrom.AddDate(0, 3, 0)
+	case "6months":
+		validTo = validFrom.AddDate(0, 6, 0)
+	case "1year":
+		validTo = validFrom.AddDate(1, 0, 0)
+	case "unlimited":
+		validTo = time.Time{}
+	default:
+		validTo = time.Time{}
+	}
+	return validFrom, validTo
 }
