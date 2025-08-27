@@ -79,7 +79,6 @@ func (s *GetAll) GetAll(ctx context.Context, customerID int64, req customerCoupo
 			Coupon: customerCouponModel.GetAllItemCouponDTO{
 				ID:             utils.FormatID(r.CouponID),
 				DisplayName:    coupon.DisplayName,
-				Code:           coupon.Code,
 				DiscountRate:   utils.PgNumericToFloat64(coupon.DiscountRate),
 				DiscountAmount: int64(utils.PgNumericToFloat64(coupon.DiscountAmount)),
 				IsActive:       utils.PgBoolToBool(coupon.IsActive),

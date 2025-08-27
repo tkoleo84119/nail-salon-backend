@@ -62,25 +62,26 @@
     "total": 3,
     "items": [
       {
-        "id": 1,
+        "id": "1000000001",
         "validFrom": "2025-01-01T00:00:00+08:00",
-        "validTo": "2025-01-01T00:00:00+08:00",
+        "validTo": "", // 如果為空，表示無期限
         "isUsed": false,
-        "usedAt": "",
+        "usedAt": "", // 如果為空，表示未使用
         "createdAt": "2025-01-01T00:00:00+08:00",
         "coupon": {
-          "id": 1,
+          "id": "1000000001",
           "displayName": "新客優惠",
-          "code": "NEW_CUSTOMER_80",
           "discountRate": 0.8,
           "discountAmount": 100,
-          "isActive": true
+          "isActive": true // 如果為 false，表示已失效
         },
       }
     ]
   }
 }
 ```
+
+---
 
 ### 錯誤處理
 

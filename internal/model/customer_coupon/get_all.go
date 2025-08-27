@@ -32,7 +32,6 @@ type GetAllCustomerCouponItem struct {
 type GetAllItemCouponDTO struct {
 	ID             string  `json:"id"`
 	DisplayName    string  `json:"displayName"`
-	Code           string  `json:"code"`
 	DiscountRate   float64 `json:"discountRate"`
 	DiscountAmount int64   `json:"discountAmount"`
 	IsActive       bool    `json:"isActive"`
