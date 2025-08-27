@@ -38,8 +38,17 @@ JOIN time_slots ts ON b.time_slot_id = ts.id
 JOIN schedules sch ON ts.schedule_id = sch.id
 WHERE b.id = $1;
 
--- name: GetBookingInfoByID :one
-SELECT status, customer_id, store_id FROM bookings WHERE id = $1;
+-- name: GetBookingInfoWithDateByID :one
+SELECT
+    b.status,
+    b.customer_id,
+    b.store_id,
+    sch.work_date,
+    ts.start_time
+FROM bookings b
+JOIN time_slots ts ON b.time_slot_id = ts.id
+JOIN schedules sch ON ts.schedule_id = sch.id
+WHERE b.id = $1;
 
 -- name: UpdateBookingStatus :exec
 UPDATE bookings

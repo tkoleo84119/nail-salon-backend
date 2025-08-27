@@ -43,6 +43,7 @@ const (
 	ValTypeConversionFailed = "ValTypeConversionFailed"
 
 	// BOOKING - booking related errors
+	BookingInFutureNotAllowedToCheckout = "BookingInFutureNotAllowedToCheckout"
 	BookingNotBelongToStore = "BookingNotBelongToStore"
 	BookingNotFound = "BookingNotFound"
 	BookingStatusNotAllowedToCancel = "BookingStatusNotAllowedToCancel"

@@ -102,32 +102,33 @@
   - message: 中文錯誤訊息（可參照錯誤總覽）
   - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-| 狀態碼 | 錯誤碼    | 常數名稱                          | 說明                              |
-| ------ | --------- | --------------------------------- | --------------------------------- |
-| 401    | E1002     | AuthTokenInvalid                  | 無效的 accessToken，請重新登入    |
-| 401    | E1003     | AuthTokenMissing                  | accessToken 缺失，請重新登入      |
-| 401    | E1004     | AuthTokenFormatError              | accessToken 格式錯誤，請重新登入  |
-| 401    | E1005     | AuthStaffFailed                   | 未找到有效的員工資訊，請重新登入  |
-| 401    | E1006     | AuthContextMissing                | 未找到使用者認證資訊，請重新登入  |
-| 403    | E1010     | AuthPermissionDenied              | 權限不足，無法執行此操作          |
-| 400    | E2001     | ValJsonFormat                     | JSON 格式錯誤，請檢查             |
-| 400    | E2002     | ValPathParamMissing               | 路徑參數缺失，請檢查              |
-| 400    | E2004     | ValTypeConversionFailed           | 參數類型轉換失敗                  |
-| 400    | E2020     | ValFieldRequired                  | {field} 為必填項目                |
-| 400    | E2022     | ValFieldArrayMinLength            | {field} 至少需要 {param} 個項目   |
-| 400    | E2023     | ValFieldMinNumber                 | {field} 最小值為 {param}          |
-| 400    | E2025     | ValFieldArrayMaxLength            | {field} 最多只能有 {param} 個項目 |
-| 400    | E2026     | ValFieldMaxNumber                 | {field} 最大值為 {param}          |
-| 400    | E2030     | ValFieldOneof                     | {field} 必須是 {param} 其中一個值 |
-| 400    | E3BK004   | BookingNotBelongToStore           | 預約不屬於指定的門市              |
-| 400    | E3BK008   | BookingStatusNotCheckout          | 預約狀態不允許結帳                |
-| 400    | E3CCOU001 | CustomerCouponNotBelongToCustomer | 客戶優惠券不屬於指定的顧客        |
-| 400    | E3CCOU002 | CustomerCouponAlreadyUsed         | 客戶優惠券已使用                  |
-| 400    | E3CCOU003 | CustomerCouponExpired             | 客戶優惠券已過期                  |
-| 400    | E3COU001  | CouponNotActive                   | 優惠券未啟用                      |
-| 404    | E3BKD001  | BookingDetailNotFound             | 預約明細不存在或已被刪除          |
-| 500    | E9001     | SysInternalError                  | 系統發生錯誤，請稍後再試          |
-| 500    | E9002     | SysDatabaseError                  | 資料庫操作失敗                    |
+| 狀態碼 | 錯誤碼    | 常數名稱                            | 說明                              |
+| ------ | --------- | ----------------------------------- | --------------------------------- |
+| 401    | E1002     | AuthTokenInvalid                    | 無效的 accessToken，請重新登入    |
+| 401    | E1003     | AuthTokenMissing                    | accessToken 缺失，請重新登入      |
+| 401    | E1004     | AuthTokenFormatError                | accessToken 格式錯誤，請重新登入  |
+| 401    | E1005     | AuthStaffFailed                     | 未找到有效的員工資訊，請重新登入  |
+| 401    | E1006     | AuthContextMissing                  | 未找到使用者認證資訊，請重新登入  |
+| 403    | E1010     | AuthPermissionDenied                | 權限不足，無法執行此操作          |
+| 400    | E2001     | ValJsonFormat                       | JSON 格式錯誤，請檢查             |
+| 400    | E2002     | ValPathParamMissing                 | 路徑參數缺失，請檢查              |
+| 400    | E2004     | ValTypeConversionFailed             | 參數類型轉換失敗                  |
+| 400    | E2020     | ValFieldRequired                    | {field} 為必填項目                |
+| 400    | E2022     | ValFieldArrayMinLength              | {field} 至少需要 {param} 個項目   |
+| 400    | E2023     | ValFieldMinNumber                   | {field} 最小值為 {param}          |
+| 400    | E2025     | ValFieldArrayMaxLength              | {field} 最多只能有 {param} 個項目 |
+| 400    | E2026     | ValFieldMaxNumber                   | {field} 最大值為 {param}          |
+| 400    | E2030     | ValFieldOneof                       | {field} 必須是 {param} 其中一個值 |
+| 400    | E3BK004   | BookingNotBelongToStore             | 預約不屬於指定的門市              |
+| 400    | E3BK008   | BookingStatusNotCheckout            | 預約狀態不允許結帳                |
+| 400    | E3BK009   | BookingInFutureNotAllowedToCheckout | 未來預約不允許結帳                |
+| 400    | E3CCOU001 | CustomerCouponNotBelongToCustomer   | 客戶優惠券不屬於指定的顧客        |
+| 400    | E3CCOU002 | CustomerCouponAlreadyUsed           | 客戶優惠券已使用                  |
+| 400    | E3CCOU003 | CustomerCouponExpired               | 客戶優惠券已過期                  |
+| 400    | E3COU001  | CouponNotActive                     | 優惠券未啟用                      |
+| 404    | E3BKD001  | BookingDetailNotFound               | 預約明細不存在或已被刪除          |
+| 500    | E9001     | SysInternalError                    | 系統發生錯誤，請稍後再試          |
+| 500    | E9002     | SysDatabaseError                    | 資料庫操作失敗                    |
 
 ---
 

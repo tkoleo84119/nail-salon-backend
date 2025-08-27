@@ -40,7 +40,7 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminSch
 
 	// Check permission: STYLIST can only create schedules for themselves
 	if creatorRole == common.RoleStylist {
-		if stylist.ID != creatorID {
+		if stylist.StaffUserID != creatorID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 	}
@@ -212,8 +212,8 @@ func (s *CreateBulk) validateSchedules(schedules []adminScheduleModel.CreateBulk
 
 	for _, scheduleReq := range schedules {
 		// can't pass date before today
-		if scheduleReq.WorkDate < time.Now().Format("2006-01-02") {
-			return errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotCreateBeforeToday)
+		if err := IsValidWorkDate(scheduleReq.WorkDate); err != nil {
+			return err
 		}
 
 		// Check for duplicate work dates
@@ -270,6 +270,34 @@ func (s *CreateBulk) validateTimeSlots(timeSlots []adminScheduleModel.CreateBulk
 		if parsedSlots[i].StartTime.Before(parsedSlots[i-1].EndTime) {
 			return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotConflict)
 		}
+	}
+
+	return nil
+}
+
+func IsValidWorkDate(workDateStr string) error {
+	workDate, err := utils.DateStringToTime(workDateStr)
+	if err != nil {
+		return errorCodes.NewServiceError(errorCodes.ValFieldDateFormat, "invalid date format", err)
+	}
+
+	loc, err := time.LoadLocation("Asia/Taipei")
+	if err != nil {
+		return errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to load location", err)
+	}
+
+	workDateInLoc := time.Date(
+		workDate.Year(),
+		workDate.Month(),
+		workDate.Day(),
+		0, 0, 0, 0,
+		loc,
+	)
+
+	today := time.Now().In(loc).Truncate(24 * time.Hour)
+
+	if workDateInLoc.Before(today) {
+		return errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotCreateBeforeToday)
 	}
 
 	return nil

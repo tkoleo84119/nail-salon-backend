@@ -2,6 +2,7 @@ package adminCustomerCoupon
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -37,7 +38,10 @@ func (s *Create) Create(ctx context.Context, req adminCustomerCouponModel.Create
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CouponNotFound)
 	}
 
-	validFrom, validTo := s.setValidFromAndTo(req.Period)
+	validFrom, validTo, err := s.setValidFromAndTo(req.Period)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to set valid from and to", err)
+	}
 	id := utils.GenerateID()
 
 	err = s.queries.CreateCustomerCoupon(ctx, dbgen.CreateCustomerCouponParams{
@@ -57,9 +61,14 @@ func (s *Create) Create(ctx context.Context, req adminCustomerCouponModel.Create
 	}, nil
 }
 
-// setValidFromAndTo 根據 period 設定 valid_from 與 valid_to
-func (s *Create) setValidFromAndTo(period string) (time.Time, time.Time) {
-	validFrom := time.Now()
+// setValidFromAndTo set valid_from and valid_to based on period
+func (s *Create) setValidFromAndTo(period string) (time.Time, time.Time, error) {
+	loc, err := time.LoadLocation("Asia/Taipei")
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("failed to load location: %w", err)
+	}
+
+	validFrom := time.Now().In(loc)
 	var validTo time.Time
 
 	switch period {
@@ -72,9 +81,19 @@ func (s *Create) setValidFromAndTo(period string) (time.Time, time.Time) {
 	case "1year":
 		validTo = validFrom.AddDate(1, 0, 0)
 	case "unlimited":
-		validTo = time.Time{}
+		return validFrom, time.Time{}, nil
 	default:
-		validTo = time.Time{}
+		return time.Time{}, time.Time{}, fmt.Errorf("invalid period: %s", period)
 	}
-	return validFrom, validTo
+
+	// set time to 23:59:59
+	validTo = time.Date(
+		validTo.Year(),
+		validTo.Month(),
+		validTo.Day(),
+		23, 59, 59, 0,
+		loc,
+	)
+
+	return validFrom, validTo, nil
 }

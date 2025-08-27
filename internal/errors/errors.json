@@ -208,6 +208,11 @@
       "code": "E3BK008",
       "message": "預約狀態不允許結帳",
       "status": 400
+    },
+    "BookingInFutureNotAllowedToCheckout": {
+      "code": "E3BK009",
+      "message": "未來預約不允許結帳",
+      "status": 400
     }
   },
   "BOOKING_DETAIL": {

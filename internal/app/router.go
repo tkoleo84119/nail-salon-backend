@@ -198,7 +198,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 func setupAdminServiceRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	services := admin.Group("/services")
 	{
-		services.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceGetList.GetAll)
+		services.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ServiceGetList.GetAll)
 		services.GET("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceGet.Get)
 		services.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceCreate.Create)
 		services.PATCH("/:serviceId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.ServiceUpdate.Update)

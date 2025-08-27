@@ -103,13 +103,19 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 	}
 
 	// if timeSlot time is not enough for service duration, return error
-	endTime := utils.PgTimeToTime(timeSlot.EndTime)
-	startTime := utils.PgTimeToTime(timeSlot.StartTime)
+	endTime, err := utils.PgTimeToTime(timeSlot.EndTime)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
+	}
+	startTime, err := utils.PgTimeToTime(timeSlot.StartTime)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
+	}
 
 	timeSlotDuration := endTime.Sub(startTime)
-	serviceDuration := time.Duration(mainService.DurationMinutes)
+	serviceDuration := time.Duration(mainService.DurationMinutes) * time.Minute
 	for _, subService := range subServices {
-		serviceDuration += time.Duration(subService.DurationMinutes)
+		serviceDuration += time.Duration(subService.DurationMinutes) * time.Minute
 	}
 
 	if timeSlotDuration < serviceDuration {

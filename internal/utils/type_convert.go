@@ -442,8 +442,8 @@ func PgTimeToTimeString(t pgtype.Time) string {
 //   - t: pgtype.Time from database query result
 //
 // Returns:
-//   - Zero time.Time if t.Valid is false (NULL in database)
 //   - time.Time with the time portion set (date will be 0001-01-01)
+//   - error if the time is invalid
 //
 // Example:
 //
@@ -451,25 +451,33 @@ func PgTimeToTimeString(t pgtype.Time) string {
 //	    StartTime pgtype.Time `db:"start_time"`
 //	}
 //	// After scanning from database...
-//	startTime := utils.PgTimeToTime(result.StartTime)
-//
-//	// Use for comparisons
-//	if endTime.After(startTime) {
-//	    // Valid time range
+//	startTime, err := utils.PgTimeToTime(result.StartTime)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to convert time", err)
 //	}
 //
 // Usage in business logic:
 //
-//	startTime := utils.PgTimeToTime(timeSlot.StartTime)
-//	endTime := utils.PgTimeToTime(timeSlot.EndTime)
-//	if !endTime.After(startTime) {
-//	    return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotEndBeforeStart)
+//	startTime, err := utils.PgTimeToTime(timeSlot.StartTime)
+//	if err != nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to convert time", err)
 //	}
-func PgTimeToTime(t pgtype.Time) time.Time {
+//	endTime, err := utils.PgTimeToTime(timeSlot.EndTime)
+//	if err !=	 nil {
+//	    return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to convert time", err)
+//	}
+//
+//	// Validate time range
+//	if !endTime.After(startTime) {
+//	    return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotEndBeforeStart)
+//	}
+func PgTimeToTime(t pgtype.Time) (time.Time, error) {
 	if !t.Valid {
-		return time.Time{}
+		return time.Time{}, fmt.Errorf("invalid time")
 	}
-	return time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC).Add(time.Duration(t.Microseconds) * time.Microsecond)
+
+	d := time.Duration(t.Microseconds) * time.Microsecond
+	return time.Unix(0, 0).UTC().Add(d), nil
 }
 
 // PgDateToDateString converts pgtype.Date to string in YYYY-MM-DD format.

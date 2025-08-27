@@ -79,8 +79,14 @@ func (s *Create) Create(ctx context.Context, templateID int64, req adminTimeSlot
 func (s *Create) checkTimeConflicts(startTime, endTime time.Time, existingItems []dbgen.GetTimeSlotTemplateItemsByTemplateIDRow) error {
 	for _, item := range existingItems {
 		// Convert pgtype.Time to time.Time for comparison
-		existingStart := utils.PgTimeToTime(item.StartTime)
-		existingEnd := utils.PgTimeToTime(item.EndTime)
+		existingStart, err := utils.PgTimeToTime(item.StartTime)
+		if err != nil {
+			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
+		}
+		existingEnd, err := utils.PgTimeToTime(item.EndTime)
+		if err != nil {
+			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
+		}
 
 		// Check if new slot overlaps with existing slot
 		if startTime.Before(existingEnd) && endTime.After(existingStart) {

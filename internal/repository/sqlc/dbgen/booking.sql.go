@@ -157,20 +157,37 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 	return i, err
 }
 
-const getBookingInfoByID = `-- name: GetBookingInfoByID :one
-SELECT status, customer_id, store_id FROM bookings WHERE id = $1
+const getBookingInfoWithDateByID = `-- name: GetBookingInfoWithDateByID :one
+SELECT
+    b.status,
+    b.customer_id,
+    b.store_id,
+    sch.work_date,
+    ts.start_time
+FROM bookings b
+JOIN time_slots ts ON b.time_slot_id = ts.id
+JOIN schedules sch ON ts.schedule_id = sch.id
+WHERE b.id = $1
 `
 
-type GetBookingInfoByIDRow struct {
-	Status     string `db:"status" json:"status"`
-	CustomerID int64  `db:"customer_id" json:"customer_id"`
-	StoreID    int64  `db:"store_id" json:"store_id"`
+type GetBookingInfoWithDateByIDRow struct {
+	Status     string      `db:"status" json:"status"`
+	CustomerID int64       `db:"customer_id" json:"customer_id"`
+	StoreID    int64       `db:"store_id" json:"store_id"`
+	WorkDate   pgtype.Date `db:"work_date" json:"work_date"`
+	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
 }
 
-func (q *Queries) GetBookingInfoByID(ctx context.Context, id int64) (GetBookingInfoByIDRow, error) {
-	row := q.db.QueryRow(ctx, getBookingInfoByID, id)
-	var i GetBookingInfoByIDRow
-	err := row.Scan(&i.Status, &i.CustomerID, &i.StoreID)
+func (q *Queries) GetBookingInfoWithDateByID(ctx context.Context, id int64) (GetBookingInfoWithDateByIDRow, error) {
+	row := q.db.QueryRow(ctx, getBookingInfoWithDateByID, id)
+	var i GetBookingInfoWithDateByIDRow
+	err := row.Scan(
+		&i.Status,
+		&i.CustomerID,
+		&i.StoreID,
+		&i.WorkDate,
+		&i.StartTime,
+	)
 	return i, err
 }
 

@@ -36,12 +36,12 @@ func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, re
 	}
 
 	// Verify stylist exists
-	exist, err := s.queries.CheckStylistExistAndActive(ctx, req.StylistID)
+	stylist, err := s.queries.GetStylistByID(ctx, req.StylistID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
+		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check stylist existence", err)
-	}
-	if !exist {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
 	}
 
 	// Get current schedule to verify ownership and existence
@@ -63,7 +63,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, re
 
 	// Check if user can update this schedule
 	if updaterRole == common.RoleStylist {
-		if currentSchedule.StylistID != updaterID {
+		if stylist.StaffUserID != updaterID {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 		}
 	}

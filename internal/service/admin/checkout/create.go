@@ -42,7 +42,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 	}
 
 	// check booking exists
-	booking, err := s.queries.GetBookingInfoByID(ctx, bookingID)
+	booking, err := s.queries.GetBookingInfoWithDateByID(ctx, bookingID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get booking status", err)
 	}
@@ -51,6 +51,10 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 	}
 	if booking.StoreID != storeID {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingNotBelongToStore)
+	}
+
+	if err := CheckBookingNotInFuture(booking.WorkDate, booking.StartTime); err != nil {
+		return nil, err
 	}
 
 	// when customerCouponID is not nil, get coupon info
@@ -177,6 +181,38 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 	return &adminCheckoutModel.CreateResponse{
 		ID: utils.FormatID(bookingID),
 	}, nil
+}
+
+// CheckBookingNotInFuture checks if the booking is in the future
+func CheckBookingNotInFuture(workDatePg pgtype.Date, startTime pgtype.Time) error {
+	workDate := workDatePg.Time
+	loc, err := time.LoadLocation("Asia/Taipei")
+	if err != nil {
+		return errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to load location", err)
+	}
+
+	startT, err := utils.PgTimeToTime(startTime)
+	if err != nil {
+		return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
+	}
+
+	bookingDateTime := time.Date(
+		workDate.Year(),
+		workDate.Month(),
+		workDate.Day(),
+		startT.Hour(),
+		startT.Minute(),
+		startT.Second(),
+		startT.Nanosecond(),
+		loc,
+	)
+
+	now := time.Now().In(loc)
+	if bookingDateTime.After(now) {
+		return errorCodes.NewServiceErrorWithCode(errorCodes.BookingInFutureNotAllowedToCheckout)
+	}
+
+	return nil
 }
 
 func (s *Create) prepareBookingDetailPriceInfoAndValidate(

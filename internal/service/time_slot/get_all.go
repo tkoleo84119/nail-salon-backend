@@ -46,11 +46,20 @@ func (s *GetAll) GetAll(ctx context.Context, scheduleID int64, isBlacklisted boo
 	}
 
 	for _, rawTimeSlot := range rawTimeSlots {
+		endTime, err := utils.PgTimeToTime(rawTimeSlot.EndTime)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
+		}
+		startTime, err := utils.PgTimeToTime(rawTimeSlot.StartTime)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
+		}
+
 		timeSlots = append(timeSlots, timeSlotModel.GetAllResponseItem{
 			ID:              utils.FormatID(rawTimeSlot.ID),
 			StartTime:       utils.PgTimeToTimeString(rawTimeSlot.StartTime),
 			EndTime:         utils.PgTimeToTimeString(rawTimeSlot.EndTime),
-			DurationMinutes: int(utils.PgTimeToTime(rawTimeSlot.EndTime).Sub(utils.PgTimeToTime(rawTimeSlot.StartTime)).Minutes()),
+			DurationMinutes: int(endTime.Sub(startTime).Minutes()),
 		})
 	}
 
