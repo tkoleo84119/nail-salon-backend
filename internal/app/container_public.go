@@ -9,6 +9,7 @@ import (
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
 	bookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/booking"
 	customerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer"
+	customerCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/customer_coupon"
 	scheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/schedule"
 	serviceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/service"
 	storeHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/store"
@@ -19,6 +20,7 @@ import (
 	authService "github.com/tkoleo84119/nail-salon-backend/internal/service/auth"
 	bookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/booking"
 	customerService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer"
+	customerCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/customer_coupon"
 	scheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/schedule"
 	serviceService "github.com/tkoleo84119/nail-salon-backend/internal/service/service"
 	storeService "github.com/tkoleo84119/nail-salon-backend/internal/service/store"
@@ -36,6 +38,9 @@ type PublicServices struct {
 	// Customer services
 	CustomerGetMe    customerService.GetMeInterface
 	CustomerUpdateMe customerService.UpdateMeInterface
+
+	// CustomerCoupon services
+	CustomerCouponGetAll customerCouponService.GetAllInterface
 
 	// Booking services
 	BookingCreate      bookingService.CreateInterface
@@ -70,6 +75,9 @@ type PublicHandlers struct {
 	// Customer handlers
 	CustomerGetMe    *customerHandler.GetMe
 	CustomerUpdateMe *customerHandler.UpdateMe
+
+	// CustomerCoupon handlers
+	CustomerCouponGetAll *customerCouponHandler.GetAll
 
 	// Booking handlers
 	BookingCreate      *bookingHandler.Create
@@ -106,6 +114,9 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		CustomerGetMe:    customerService.NewGetMe(queries),
 		CustomerUpdateMe: customerService.NewUpdateMe(queries, repositories.SQLX),
 
+		// CustomerCoupon services
+		CustomerCouponGetAll: customerCouponService.NewGetAll(queries, repositories.SQLX),
+
 		// Booking services
 		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool),
 		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
@@ -141,6 +152,9 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		// Customer handlers
 		CustomerGetMe:    customerHandler.NewGetMe(services.CustomerGetMe),
 		CustomerUpdateMe: customerHandler.NewUpdateMe(services.CustomerUpdateMe),
+
+		// CustomerCoupon handlers
+		CustomerCouponGetAll: customerCouponHandler.NewGetAll(services.CustomerCouponGetAll),
 
 		// Booking handlers
 		BookingCreate:      bookingHandler.NewCreate(services.BookingCreate),

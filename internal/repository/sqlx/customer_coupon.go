@@ -89,6 +89,7 @@ func (r *CustomerCouponRepository) GetAllCustomerCouponsByFilter(ctx context.Con
 		"createdAt": "created_at",
 		"updatedAt": "updated_at",
 		"isUsed":    "is_used",
+		"validTo":   "valid_to",
 	}, defaultSortArr, params.Sort)
 
 	args = append(args, limit, offset)

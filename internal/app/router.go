@@ -75,6 +75,12 @@ func setupPublicCustomerRoutes(api *gin.RouterGroup, cfg *config.Config, queries
 		customers.GET("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerGetMe.GetMe)
 		customers.PATCH("/me", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerUpdateMe.UpdateMe)
 	}
+
+	// Customer coupons
+	customerCoupons := api.Group("/customer_coupons")
+	{
+		customerCoupons.GET("", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.CustomerCouponGetAll.GetAll)
+	}
 }
 
 func setupPublicBookingRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
