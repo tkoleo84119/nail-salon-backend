@@ -50,6 +50,12 @@ SELECT
 FROM stylists
 WHERE id = $1;
 
+-- name: GetStylistIDByStaffUserID :one
+SELECT
+    id
+FROM stylists
+WHERE staff_user_id = $1;
+
 -- name: CheckStylistExistAndActive :one
 SELECT EXISTS(
     SELECT 1

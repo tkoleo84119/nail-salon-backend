@@ -470,6 +470,13 @@
       "status": 400
     }
   },
+  "REPORT": {
+    "ReportDateRangeExceed1Year": {
+      "code": "E3REP001",
+      "message": "日期範圍不能超過一年",
+      "status": 400
+    }
+  },
   "SYS": {
     "SysInternalError": {
       "code": "E9001",

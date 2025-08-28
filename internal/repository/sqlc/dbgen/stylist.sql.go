@@ -167,3 +167,17 @@ func (q *Queries) GetStylistByStaffUserID(ctx context.Context, staffUserID int64
 	)
 	return i, err
 }
+
+const getStylistIDByStaffUserID = `-- name: GetStylistIDByStaffUserID :one
+SELECT
+    id
+FROM stylists
+WHERE staff_user_id = $1
+`
+
+func (q *Queries) GetStylistIDByStaffUserID(ctx context.Context, staffUserID int64) (int64, error) {
+	row := q.db.QueryRow(ctx, getStylistIDByStaffUserID, staffUserID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}

@@ -191,6 +191,80 @@ func (q *Queries) GetBookingInfoWithDateByID(ctx context.Context, id int64) (Get
 	return i, err
 }
 
+const getStylistPerformanceGroupByStore = `-- name: GetStylistPerformanceGroupByStore :many
+SELECT
+    b.store_id,
+    s.name as store_name,
+    COUNT(*) as total_bookings,
+    SUM(CASE WHEN b.status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_bookings,
+    SUM(CASE WHEN b.status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelled_bookings,
+    SUM(CASE WHEN b.status = 'NO_SHOW' THEN 1 ELSE 0 END) as no_show_bookings,
+    COALESCE(SUM(CASE WHEN c.payment_method = 'LINE_PAY' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as line_pay_revenue,
+    COALESCE(SUM(CASE WHEN c.payment_method = 'CASH' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as cash_revenue,
+    COALESCE(SUM(CASE WHEN b.status = 'COMPLETED' THEN COALESCE(c.paid_amount, 0) ELSE 0 END), 0)::numeric(12,2) as total_paid_amount,
+    SUM(COALESCE(b.actual_duration, 0)) as total_service_time
+FROM bookings b
+INNER JOIN stores s ON b.store_id = s.id
+INNER JOIN time_slots ts ON b.time_slot_id = ts.id
+INNER JOIN schedules sch ON ts.schedule_id = sch.id
+LEFT JOIN checkouts c ON b.id = c.booking_id
+WHERE b.stylist_id = $1
+    AND b.status != 'SCHEDULE'
+    AND sch.work_date BETWEEN $2 AND $3
+GROUP BY b.store_id, s.name
+ORDER BY b.store_id
+`
+
+type GetStylistPerformanceGroupByStoreParams struct {
+	StylistID  int64       `db:"stylist_id" json:"stylist_id"`
+	WorkDate   pgtype.Date `db:"work_date" json:"work_date"`
+	WorkDate_2 pgtype.Date `db:"work_date_2" json:"work_date_2"`
+}
+
+type GetStylistPerformanceGroupByStoreRow struct {
+	StoreID           int64          `db:"store_id" json:"store_id"`
+	StoreName         string         `db:"store_name" json:"store_name"`
+	TotalBookings     int64          `db:"total_bookings" json:"total_bookings"`
+	CompletedBookings int64          `db:"completed_bookings" json:"completed_bookings"`
+	CancelledBookings int64          `db:"cancelled_bookings" json:"cancelled_bookings"`
+	NoShowBookings    int64          `db:"no_show_bookings" json:"no_show_bookings"`
+	LinePayRevenue    pgtype.Numeric `db:"line_pay_revenue" json:"line_pay_revenue"`
+	CashRevenue       pgtype.Numeric `db:"cash_revenue" json:"cash_revenue"`
+	TotalPaidAmount   pgtype.Numeric `db:"total_paid_amount" json:"total_paid_amount"`
+	TotalServiceTime  int64          `db:"total_service_time" json:"total_service_time"`
+}
+
+func (q *Queries) GetStylistPerformanceGroupByStore(ctx context.Context, arg GetStylistPerformanceGroupByStoreParams) ([]GetStylistPerformanceGroupByStoreRow, error) {
+	rows, err := q.db.Query(ctx, getStylistPerformanceGroupByStore, arg.StylistID, arg.WorkDate, arg.WorkDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetStylistPerformanceGroupByStoreRow{}
+	for rows.Next() {
+		var i GetStylistPerformanceGroupByStoreRow
+		if err := rows.Scan(
+			&i.StoreID,
+			&i.StoreName,
+			&i.TotalBookings,
+			&i.CompletedBookings,
+			&i.CancelledBookings,
+			&i.NoShowBookings,
+			&i.LinePayRevenue,
+			&i.CashRevenue,
+			&i.TotalPaidAmount,
+			&i.TotalServiceTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateBookingStatus = `-- name: UpdateBookingStatus :exec
 UPDATE bookings
 SET status = $2, updated_at = NOW()

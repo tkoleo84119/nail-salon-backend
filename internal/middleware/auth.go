@@ -130,6 +130,10 @@ func RequireAnyStaffRole() gin.HandlerFunc {
 	return RequireRoles(common.RoleSuperAdmin, common.RoleAdmin, common.RoleManager, common.RoleStylist)
 }
 
+func RequireNotSuperAdmin() gin.HandlerFunc {
+	return RequireRoles(common.RoleAdmin, common.RoleManager, common.RoleStylist)
+}
+
 // CustomerJWTAuth middleware for customer authentication
 func CustomerJWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 	return func(c *gin.Context) {

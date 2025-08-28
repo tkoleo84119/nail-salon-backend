@@ -12,6 +12,7 @@ import (
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
 	adminCustomerCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer_coupon"
+	adminReportHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/report"
 	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
 	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
 	adminStaffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/staff"
@@ -29,6 +30,7 @@ import (
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
 	adminCustomerCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer_coupon"
+	adminReportService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/report"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
@@ -122,6 +124,9 @@ type AdminServices struct {
 
 	// Checkout services
 	CheckoutCreate adminCheckoutService.CreateInterface
+
+	// Report services
+	ReportGetPerformanceMe adminReportService.GetPerformanceMeInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -206,6 +211,9 @@ type AdminHandlers struct {
 
 	// Checkout handlers
 	CheckoutCreate *adminCheckoutHandler.Create
+
+	// Report handlers
+	ReportGetPerformanceMe *adminReportHandler.GetPerformanceMe
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -288,6 +296,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Checkout services
 		CheckoutCreate: adminCheckoutService.NewCreate(queries, repositories.SQLX, database.PgxPool),
+
+		// Report services
+		ReportGetPerformanceMe: adminReportService.NewGetPerformanceMe(queries),
 	}
 }
 
@@ -372,5 +383,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Checkout handlers
 		CheckoutCreate: adminCheckoutHandler.NewCreate(services.CheckoutCreate),
+
+		// Report handlers
+		ReportGetPerformanceMe: adminReportHandler.NewGetPerformanceMe(services.ReportGetPerformanceMe),
 	}
 }

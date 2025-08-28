@@ -45,6 +45,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 			setupAdminTimeSlotTemplateRoutes(admin, cfg, queries, handlers)
 			setupAdminCouponRoutes(admin, cfg, queries, handlers)
 			setupAdminCustomerCouponRoutes(admin, cfg, queries, handlers)
+			setupAdminReportRoutes(admin, cfg, queries, handlers)
 		}
 	}
 
@@ -256,5 +257,13 @@ func setupAdminCustomerCouponRoutes(admin *gin.RouterGroup, cfg *config.Config, 
 	{
 		customerCoupons.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponGetAll.GetAll)
 		customerCoupons.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponCreate.Create)
+	}
+}
+
+func setupAdminReportRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	reports := admin.Group("/reports")
+	{
+		// Performance report - all staff except SUPER_ADMIN can access
+		reports.GET("/performance/me", middleware.JWTAuth(*cfg, queries), middleware.RequireNotSuperAdmin(), handlers.Admin.ReportGetPerformanceMe.GetPerformanceMe)
 	}
 }

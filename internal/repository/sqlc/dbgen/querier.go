@@ -88,6 +88,8 @@ type Querier interface {
 	GetStoreDetailByID(ctx context.Context, id int64) (Store, error)
 	GetStylistByID(ctx context.Context, id int64) (Stylist, error)
 	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (Stylist, error)
+	GetStylistIDByStaffUserID(ctx context.Context, staffUserID int64) (int64, error)
+	GetStylistPerformanceGroupByStore(ctx context.Context, arg GetStylistPerformanceGroupByStoreParams) ([]GetStylistPerformanceGroupByStoreRow, error)
 	GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error)
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]GetTimeSlotTemplateItemsByTemplateIDRow, error)
 	GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]GetTimeSlotTemplateItemsByTemplateIDExcludingRow, error)
