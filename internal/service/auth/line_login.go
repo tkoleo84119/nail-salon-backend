@@ -24,7 +24,7 @@ type LineLogin struct {
 }
 
 func NewLineLogin(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineLogin {
-	lineValidator := utils.NewLineValidator(lineConfig.ChannelID)
+	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineLogin{
 		queries:       queries,
 		db:            db,

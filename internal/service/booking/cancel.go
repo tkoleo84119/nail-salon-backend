@@ -3,10 +3,12 @@ package booking
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -15,14 +17,17 @@ import (
 )
 
 type Cancel struct {
-	queries dbgen.Querier
-	db      *pgxpool.Pool
+	queries       dbgen.Querier
+	db            *pgxpool.Pool
+	lineMessenger *utils.LineMessageClient
 }
 
-func NewCancel(queries dbgen.Querier, db *pgxpool.Pool) CancelInterface {
+func NewCancel(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig) CancelInterface {
+	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
 	return &Cancel{
-		queries: queries,
-		db:      db,
+		queries:       queries,
+		db:            db,
+		lineMessenger: lineMessenger,
 	}
 }
 
@@ -83,19 +88,55 @@ func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.C
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get booking", err)
 	}
 
+	bookingDetails, err := s.queries.GetBookingDetailsByBookingID(ctx, bookingID)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get booking details", err)
+	}
+
+	subServiceNames := []string{}
+	for _, detail := range bookingDetails {
+		if detail.IsAddon.Bool {
+			subServiceNames = append(subServiceNames, detail.ServiceName)
+		}
+	}
+
 	// Build response
-	return &bookingModel.CancelResponse{
-		ID:          utils.FormatID(newBooking.ID),
-		StoreId:     utils.FormatID(newBooking.StoreID),
-		StoreName:   newBooking.StoreName,
-		StylistId:   utils.FormatID(newBooking.StylistID),
-		StylistName: utils.PgTextToString(newBooking.StylistName),
-		Date:        utils.PgDateToDateString(newBooking.WorkDate),
-		TimeSlotId:  utils.FormatID(newBooking.TimeSlotID),
-		StartTime:   utils.PgTimeToTimeString(newBooking.StartTime),
-		EndTime:     utils.PgTimeToTimeString(newBooking.EndTime),
-		Status:      newBooking.Status,
-		CreatedAt:   utils.PgTimestamptzToTimeString(newBooking.CreatedAt),
-		UpdatedAt:   utils.PgTimestamptzToTimeString(newBooking.UpdatedAt),
-	}, nil
+	response := &bookingModel.CancelResponse{
+		ID:              utils.FormatID(newBooking.ID),
+		StoreId:         utils.FormatID(newBooking.StoreID),
+		StoreName:       newBooking.StoreName,
+		StylistId:       utils.FormatID(newBooking.StylistID),
+		StylistName:     utils.PgTextToString(newBooking.StylistName),
+		CustomerName:    newBooking.CustomerName,
+		CustomerPhone:   newBooking.CustomerPhone,
+		Date:            utils.PgDateToDateString(newBooking.WorkDate),
+		TimeSlotId:      utils.FormatID(newBooking.TimeSlotID),
+		StartTime:       utils.PgTimeToTimeString(newBooking.StartTime),
+		EndTime:         utils.PgTimeToTimeString(newBooking.EndTime),
+		MainServiceName: bookingDetails[0].ServiceName,
+		SubServiceNames: subServiceNames,
+		Status:          newBooking.Status,
+		CreatedAt:       utils.PgTimestamptzToTimeString(newBooking.CreatedAt),
+		UpdatedAt:       utils.PgTimestamptzToTimeString(newBooking.UpdatedAt),
+	}
+
+	// if customer no chat permission (this mean customer not give permission to liff app, so can't send message in liff app) send line message, but not return error
+	if req.HasChatPermission != nil && !*req.HasChatPermission {
+		err = s.lineMessenger.SendBookingNotification(newBooking.CustomerLineUid, common.BookingActionCancelled, &utils.BookingData{
+			StoreName:       response.StoreName,
+			Date:            response.Date,
+			StartTime:       response.StartTime,
+			EndTime:         response.EndTime,
+			CustomerName:    &response.CustomerName,
+			CustomerPhone:   &response.CustomerPhone,
+			StylistName:     response.StylistName,
+			MainServiceName: bookingDetails[0].ServiceName,
+			SubServiceNames: subServiceNames,
+		})
+		if err != nil {
+			log.Printf("failed to send line message: %v", err)
+		}
+	}
+
+	return response, nil
 }

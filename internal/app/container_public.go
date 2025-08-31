@@ -118,9 +118,9 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		CustomerCouponGetAll: customerCouponService.NewGetAll(queries, repositories.SQLX),
 
 		// Booking services
-		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool),
-		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
-		BookingCancel:      bookingService.NewCancel(queries, database.PgxPool),
+		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool, cfg.Line),
+		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx, cfg.Line),
+		BookingCancel:      bookingService.NewCancel(queries, database.PgxPool, cfg.Line),
 		BookingGetAll:      bookingService.NewGetAll(repositories.SQLX),
 		BookingGetMySingle: bookingService.NewGet(queries),
 

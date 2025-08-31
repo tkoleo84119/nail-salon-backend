@@ -269,6 +269,11 @@
       "code": "E3C003",
       "message": "客戶已存在",
       "status": 409
+    },
+    "CustomerIsBlacklisted": {
+      "code": "E3C004",
+      "message": "客戶目前無法進行預約，請聯絡門市",
+      "status": 400
     }
   },
   "CUSTOMER_COUPON": {

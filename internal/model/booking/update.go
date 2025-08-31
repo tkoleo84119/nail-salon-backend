@@ -3,23 +3,21 @@ package booking
 import "github.com/jackc/pgx/v5/pgtype"
 
 type UpdateRequest struct {
-	StoreId       *string   `json:"storeId,omitempty"`
-	StylistId     *string   `json:"stylistId,omitempty"`
-	TimeSlotId    *string   `json:"timeSlotId,omitempty"`
-	MainServiceId *string   `json:"mainServiceId,omitempty"`
-	SubServiceIds *[]string `json:"subServiceIds" binding:"omitempty,max=5"`
-	IsChatEnabled *bool     `json:"isChatEnabled,omitempty"`
-	Note          *string   `json:"note" binding:"omitempty,max=255"`
+	HasChatPermission *bool     `json:"hasChatPermission" binding:"omitempty"`
+	TimeSlotId        *string   `json:"timeSlotId"`
+	MainServiceId     *string   `json:"mainServiceId"`
+	SubServiceIds     *[]string `json:"subServiceIds" binding:"omitempty,max=5"`
+	IsChatEnabled     *bool     `json:"isChatEnabled"`
+	Note              *string   `json:"note" binding:"omitempty,max=255"`
 }
 
 type UpdateParsedRequest struct {
-	StoreId       *int64
-	StylistId     *int64
-	TimeSlotId    *int64
-	MainServiceId *int64
-	SubServiceIds *[]int64
-	IsChatEnabled *bool
-	Note          *string
+	HasChatPermission *bool
+	TimeSlotId        *int64
+	MainServiceId     *int64
+	SubServiceIds     *[]int64
+	IsChatEnabled     *bool
+	Note              *string
 }
 
 type UpdateResponse struct {
@@ -28,6 +26,8 @@ type UpdateResponse struct {
 	StoreName       string   `json:"storeName"`
 	StylistId       string   `json:"stylistId"`
 	StylistName     string   `json:"stylistName"`
+	CustomerName    string   `json:"customerName"`
+	CustomerPhone   string   `json:"customerPhone"`
 	Date            string   `json:"date"`
 	TimeSlotId      string   `json:"timeSlotId"`
 	StartTime       string   `json:"startTime"`
@@ -49,28 +49,27 @@ type UpdateBookingServiceInfo struct {
 }
 
 func (r UpdateRequest) HasUpdates() bool {
-	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil ||
-		r.MainServiceId != nil || r.SubServiceIds != nil || r.IsChatEnabled != nil || r.Note != nil
+	return r.TimeSlotId != nil || r.MainServiceId != nil || r.SubServiceIds != nil || r.IsChatEnabled != nil || r.Note != nil
 }
 
 func (r UpdateRequest) HasTimeSlotUpdate() bool {
-	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil || r.MainServiceId != nil || r.SubServiceIds != nil
+	return r.TimeSlotId != nil || r.MainServiceId != nil || r.SubServiceIds != nil
 }
 
 func (r UpdateRequest) IsTimeSlotUpdateComplete() bool {
 	if !r.HasTimeSlotUpdate() {
 		return true
 	}
-	return r.StoreId != nil && r.StylistId != nil && r.TimeSlotId != nil && r.MainServiceId != nil && r.SubServiceIds != nil
+	return r.TimeSlotId != nil && r.MainServiceId != nil && r.SubServiceIds != nil
 }
 
 func (r UpdateParsedRequest) HasTimeSlotUpdate() bool {
-	return r.StoreId != nil || r.StylistId != nil || r.TimeSlotId != nil || r.MainServiceId != nil || r.SubServiceIds != nil
+	return r.TimeSlotId != nil || r.MainServiceId != nil || r.SubServiceIds != nil
 }
 
 func (r UpdateParsedRequest) IsTimeSlotUpdateComplete() bool {
 	if !r.HasTimeSlotUpdate() {
 		return true
 	}
-	return r.StoreId != nil && r.StylistId != nil && r.TimeSlotId != nil && r.MainServiceId != nil && r.SubServiceIds != nil
+	return r.TimeSlotId != nil && r.MainServiceId != nil && r.SubServiceIds != nil
 }

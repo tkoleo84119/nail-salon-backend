@@ -22,7 +22,7 @@ type LineRegister struct {
 }
 
 func NewLineRegister(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineRegister {
-	lineValidator := utils.NewLineValidator(lineConfig.ChannelID)
+	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineRegister{
 		queries:       queries,
 		db:            db,

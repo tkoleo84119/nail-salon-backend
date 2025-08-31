@@ -29,7 +29,8 @@ type JWTConfig struct {
 }
 
 type LineConfig struct {
-	ChannelID        string
+	LiffChannelID      string
+	MessageAccessToken string
 }
 
 type CORSConfig struct {
@@ -79,7 +80,8 @@ func Load() *Config {
 	}
 
 	lineConfig := LineConfig{
-		ChannelID: getenvRequired("LINE_CHANNEL_ID"),
+		LiffChannelID:      getenvRequired("LINE_LIFF_CHANNEL_ID"),
+		MessageAccessToken: getenvRequired("LINE_MESSAGING_ACCESS_TOKEN"),
 	}
 
 	serverConfig := ServerConfig{
@@ -165,7 +167,7 @@ func getenvSlice(key string, defaultVal []string) []string {
 	if val == "" {
 		return defaultVal
 	}
-	
+
 	// Split by comma and trim spaces
 	parts := strings.Split(val, ",")
 	result := make([]string, 0, len(parts))
@@ -175,11 +177,11 @@ func getenvSlice(key string, defaultVal []string) []string {
 			result = append(result, trimmed)
 		}
 	}
-	
+
 	if len(result) == 0 {
 		return defaultVal
 	}
-	
+
 	return result
 }
 
@@ -188,11 +190,11 @@ func getenvBoolDefault(key string, defaultVal bool) bool {
 	if val == "" {
 		return defaultVal
 	}
-	
+
 	parsed, err := strconv.ParseBool(val)
 	if err != nil {
 		return defaultVal
 	}
-	
+
 	return parsed
 }

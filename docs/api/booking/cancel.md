@@ -41,15 +41,17 @@
 
 ```json
 {
+  "hasChatPermission": true,
   "cancelReason": "臨時有事無法前往，抱歉！"
 }
 ```
 
 ### 驗證規則
 
-| 欄位         | 必填 | 其他規則      | 說明     |
-| ------------ | ---- | ------------- | -------- |
-| cancelReason | 否   | <li>最長255字 | 取消原因 |
+| 欄位              | 必填 | 其他規則      | 說明                   |
+| ----------------- | ---- | ------------- | ---------------------- |
+| hasChatPermission | 是   |               | 是否擁有line聊天室權限 |
+| cancelReason      | 否   | <li>最長255字 | 取消原因               |
 
 ---
 
@@ -65,6 +67,8 @@
     "storeName": "門市名稱",
     "stylistId": "2000000001",
     "stylistName": "美甲師名稱",
+    "customerName": "顧客名稱",
+    "customerPhone": "顧客電話",
     "date": "2025-08-02",
     "timeSlotId": "3000000001",
     "startTime": "10:00",
@@ -107,6 +111,7 @@
 | 401    | E1011    | AuthCustomerFailed         | 未找到有效的顧客資訊，請重新登入      |
 | 403    | E1010    | AuthPermissionDenied       | 權限不足，無法執行此操作              |
 | 400    | E2001    | ValJSONFormatError         | JSON 格式錯誤，請檢查                 |
+| 400    | E2020    | ValFieldRequired           | {field} 為必填項目                    |
 | 400    | E2024    | ValFieldStringMaxLength    | {field} 長度最多只能有 {param} 個字元 |
 | 400    | E3STO001 | StoreNotActive             | 門市未啟用                            |
 | 400    | E3SER001 | ServiceNotActive           | 服務未啟用                            |
@@ -126,6 +131,7 @@
 ## 資料表
 
 - `bookings`
+- `time_slots`
 
 ---
 
@@ -133,7 +139,9 @@
 
 1. 驗證預約是否存在且屬於本人，且狀態為 `SCHEDULED`。
 2. 記錄取消原因，變更狀態為 `CANCELLED`。
-3. 回傳結果。
+3. 將舊時段狀態更新為可預約。
+4. 若顧客沒有聊天室權限 (代表前端沒辦法發送訊息給顧客)，則後端協助發送預約取消通知到 LINE。
+5. 回傳結果。
 
 ---
 

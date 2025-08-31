@@ -93,7 +93,9 @@ SELECT
     b.store_id,
     s.name as store_name,
     b.customer_id,
+    c.line_uid as customer_line_uid,
     c.name as customer_name,
+    c.phone as customer_phone,
     b.stylist_id,
     st.name as stylist_name,
     b.time_slot_id,
@@ -115,22 +117,24 @@ WHERE b.id = $1
 `
 
 type GetBookingDetailByIDRow struct {
-	ID            int64              `db:"id" json:"id"`
-	StoreID       int64              `db:"store_id" json:"store_id"`
-	StoreName     string             `db:"store_name" json:"store_name"`
-	CustomerID    int64              `db:"customer_id" json:"customer_id"`
-	CustomerName  string             `db:"customer_name" json:"customer_name"`
-	StylistID     int64              `db:"stylist_id" json:"stylist_id"`
-	StylistName   pgtype.Text        `db:"stylist_name" json:"stylist_name"`
-	TimeSlotID    int64              `db:"time_slot_id" json:"time_slot_id"`
-	StartTime     pgtype.Time        `db:"start_time" json:"start_time"`
-	EndTime       pgtype.Time        `db:"end_time" json:"end_time"`
-	WorkDate      pgtype.Date        `db:"work_date" json:"work_date"`
-	IsChatEnabled pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
-	Note          pgtype.Text        `db:"note" json:"note"`
-	Status        string             `db:"status" json:"status"`
-	CreatedAt     pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt     pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	ID              int64              `db:"id" json:"id"`
+	StoreID         int64              `db:"store_id" json:"store_id"`
+	StoreName       string             `db:"store_name" json:"store_name"`
+	CustomerID      int64              `db:"customer_id" json:"customer_id"`
+	CustomerLineUid string             `db:"customer_line_uid" json:"customer_line_uid"`
+	CustomerName    string             `db:"customer_name" json:"customer_name"`
+	CustomerPhone   string             `db:"customer_phone" json:"customer_phone"`
+	StylistID       int64              `db:"stylist_id" json:"stylist_id"`
+	StylistName     pgtype.Text        `db:"stylist_name" json:"stylist_name"`
+	TimeSlotID      int64              `db:"time_slot_id" json:"time_slot_id"`
+	StartTime       pgtype.Time        `db:"start_time" json:"start_time"`
+	EndTime         pgtype.Time        `db:"end_time" json:"end_time"`
+	WorkDate        pgtype.Date        `db:"work_date" json:"work_date"`
+	IsChatEnabled   pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
+	Note            pgtype.Text        `db:"note" json:"note"`
+	Status          string             `db:"status" json:"status"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
 func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookingDetailByIDRow, error) {
@@ -141,7 +145,9 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 		&i.StoreID,
 		&i.StoreName,
 		&i.CustomerID,
+		&i.CustomerLineUid,
 		&i.CustomerName,
+		&i.CustomerPhone,
 		&i.StylistID,
 		&i.StylistName,
 		&i.TimeSlotID,

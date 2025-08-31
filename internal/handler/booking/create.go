@@ -83,13 +83,14 @@ func (h *Create) Create(c *gin.Context) {
 	}
 
 	parsedRequest := bookingModel.CreateParsedRequest{
-		StoreId:       storeId,
-		StylistId:     stylistId,
-		TimeSlotId:    timeSlotId,
-		MainServiceId: mainServiceId,
-		SubServiceIds: subServiceIds,
-		Note:          req.Note,
-		IsChatEnabled: req.IsChatEnabled,
+		StoreId:           storeId,
+		StylistId:         stylistId,
+		TimeSlotId:        timeSlotId,
+		MainServiceId:     mainServiceId,
+		SubServiceIds:     subServiceIds,
+		Note:              req.Note,
+		IsChatEnabled:     req.IsChatEnabled,
+		HasChatPermission: req.HasChatPermission,
 	}
 
 	customerContext, exists := middleware.GetCustomerFromContext(c)

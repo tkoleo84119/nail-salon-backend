@@ -61,8 +61,6 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	// Business logic validation - Time slot update completeness
-	var storeId int64
-	var stylistId int64
 	var timeSlotId int64
 	var mainServiceId int64
 	var subServiceIds []int64
@@ -74,22 +72,6 @@ func (h *Update) Update(c *gin.Context) {
 		})
 		return
 	} else {
-		storeId, err = utils.ParseID(*req.StoreId)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-				"storeId": "storeId 類型轉換失敗",
-			})
-			return
-		}
-
-		stylistId, err = utils.ParseID(*req.StylistId)
-		if err != nil {
-			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-				"stylistId": "stylistId 類型轉換失敗",
-			})
-			return
-		}
-
 		timeSlotId, err = utils.ParseID(*req.TimeSlotId)
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
@@ -120,13 +102,12 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	parsedRequest := bookingModel.UpdateParsedRequest{
-		StoreId:       &storeId,
-		StylistId:     &stylistId,
-		TimeSlotId:    &timeSlotId,
-		MainServiceId: &mainServiceId,
-		SubServiceIds: &subServiceIds,
-		Note:          req.Note,
-		IsChatEnabled: req.IsChatEnabled,
+		TimeSlotId:        &timeSlotId,
+		MainServiceId:     &mainServiceId,
+		SubServiceIds:     &subServiceIds,
+		Note:              req.Note,
+		IsChatEnabled:     req.IsChatEnabled,
+		HasChatPermission: req.HasChatPermission,
 	}
 
 	// Authentication context validation
@@ -142,8 +123,6 @@ func (h *Update) Update(c *gin.Context) {
 		errorCodes.RespondWithServiceError(c, err)
 		return
 	}
-
-	fmt.Println("response", response)
 
 	// Success response
 	c.JSON(http.StatusOK, common.SuccessResponse(response))

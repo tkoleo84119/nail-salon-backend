@@ -40,21 +40,23 @@
   "mainServiceId": "9000000001",
   "subServiceIds": ["9000000002", "9000000003"],
   "isChatEnabled": true,
+  "hasChatPermission": true,
   "note": "這次想做奶茶色"
 }
 ```
 
 ### 驗證規則
 
-| 欄位          | 必填 | 其他規則      | 說明          |
-| ------------- | ---- | ------------- | ------------- |
-| storeId       | 是   |               | 預約門市      |
-| stylistId     | 是   |               | 美甲師ID      |
-| timeSlotId    | 是   |               | 時段ID        |
-| mainServiceId | 是   |               | 主服務項目ID  |
-| subServiceIds | 否   | <li>最多5項   | 副服務項目IDs |
-| isChatEnabled | 否   |               | 是否要聊天    |
-| note          | 否   | <li>最長255字 | 備註說明      |
+| 欄位              | 必填 | 其他規則      | 說明                   |
+| ----------------- | ---- | ------------- | ---------------------- |
+| storeId           | 是   |               | 預約門市               |
+| stylistId         | 是   |               | 美甲師ID               |
+| timeSlotId        | 是   |               | 時段ID                 |
+| mainServiceId     | 是   |               | 主服務項目ID           |
+| subServiceIds     | 否   | <li>最多5項   | 副服務項目IDs          |
+| hasChatPermission | 是   |               | 是否擁有line聊天室權限 |
+| isChatEnabled     | 否   |               | 是否要聊天             |
+| note              | 否   | <li>最長255字 | 備註說明               |
 
 ---
 
@@ -70,6 +72,8 @@
     "storeName": "門市名稱",
     "stylistId": "2000000001",
     "stylistName": "美甲師名稱",
+    "customerName": "顧客名稱",
+    "customerPhone": "顧客電話",
     "date": "2025-08-02",
     "timeSlotId": "3000000001",
     "startTime": "10:00",
@@ -123,6 +127,7 @@
 | 400    | E3SER002 | ServiceNotMainService      | 服務不是主服務                        |
 | 400    | E3SER003 | ServiceNotAddon            | 服務不是附屬服務                      |
 | 400    | E3TMS006 | TimeSlotNotEnoughTime      | 時段時間不足                          |
+| 400    | E3C004   | CustomerIsBlacklisted      | 客戶目前無法進行預約，請聯絡門市      |
 | 404    | E3STO002 | StoreNotFound              | 門市不存在或已被刪除                  |
 | 404    | E3TMS005 | TimeSlotNotFound           | 時段不存在或已被刪除                  |
 | 404    | E3SER004 | ServiceNotFound            | 服務不存在或已被刪除                  |
@@ -147,11 +152,13 @@
 ## Service 邏輯
 
 1. 驗證門市、美甲師、時段、服務是否存在。
-2. 驗證時段可預約（不可重複預約）。
-3. 驗證時段時間是否足夠支援服務（主服務+副服務）。
-4. 建立預約資料（bookings、booking_details）。
-5. 更新時段狀態為不可預約。
-6. 回傳預約資訊。
+2. 驗證顧客是否存在，且未被列入黑名單 (回傳保守訊息，不讓前端知道顧客是否被列入黑名單)。
+3. 驗證時段可預約（不可重複預約）。
+4. 驗證時段時間是否足夠支援服務（主服務+副服務）。
+5. 建立預約資料（`bookings`、`booking_details`）。
+6. 更新時段狀態為不可預約。
+7. 如果顧客沒有聊天室權限 (代表前端沒辦法發送訊息給顧客)，則後端協助發送預約通知到 LINE。
+8. 回傳預約資訊。
 
 ---
 

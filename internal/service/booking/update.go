@@ -3,11 +3,13 @@ package booking
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jmoiron/sqlx"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -17,16 +19,19 @@ import (
 )
 
 type Update struct {
-	queries dbgen.Querier
-	repo    *sqlxRepo.Repositories
-	db      *sqlx.DB
+	queries       dbgen.Querier
+	repo          *sqlxRepo.Repositories
+	db            *sqlx.DB
+	lineMessenger *utils.LineMessageClient
 }
 
-func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories, db *sqlx.DB) *Update {
+func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories, db *sqlx.DB, lineConfig config.LineConfig) *Update {
+	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
 	return &Update{
-		queries: queries,
-		repo:    repo,
-		db:      db,
+		queries:       queries,
+		repo:          repo,
+		db:            db,
+		lineMessenger: lineMessenger,
 	}
 }
 
@@ -54,7 +59,7 @@ func (s *Update) Update(ctx context.Context, bookingID int64, req bookingModel.U
 
 	var newServices []bookingModel.UpdateBookingServiceInfo
 	if req.HasTimeSlotUpdate() {
-		newServices, err = s.validateEntities(ctx, bookingInfo.StoreID, bookingInfo.StylistID, bookingInfo.TimeSlotID, *req.StoreId, *req.StylistId, *req.TimeSlotId, *req.MainServiceId, *req.SubServiceIds)
+		newServices, err = s.validateEntities(ctx, bookingInfo.StoreID, bookingInfo.StylistID, bookingInfo.TimeSlotID, *req.TimeSlotId, *req.MainServiceId, *req.SubServiceIds)
 		if err != nil {
 			return nil, err
 		}
@@ -69,8 +74,6 @@ func (s *Update) Update(ctx context.Context, bookingID int64, req bookingModel.U
 
 	// Update booking
 	bookingID, err = s.repo.Booking.UpdateBookingTx(ctx, tx, bookingID, sqlxRepo.UpdateBookingTxParams{
-		StoreID:       req.StoreId,
-		StylistID:     req.StylistId,
 		TimeSlotID:    req.TimeSlotId,
 		IsChatEnabled: req.IsChatEnabled,
 		Note:          req.Note,
@@ -101,36 +104,14 @@ func (s *Update) Update(ctx context.Context, bookingID int64, req bookingModel.U
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
+	// if customer not have chat permission (this mean customer not give permission to liff app, so can't send message in liff app) and update time slot, send line message
+	needSendLineMessage := req.HasChatPermission != nil && !*req.HasChatPermission && req.HasTimeSlotUpdate()
+
 	// Get updated booking with all details
-	return s.buildResponse(ctx, bookingID)
+	return s.buildResponse(ctx, bookingID, needSendLineMessage)
 }
 
-func (s *Update) validateEntities(ctx context.Context, oldStoreID, oldStylistID, oldTimeSlotID int64, storeID, stylistID, timeSlotID, mainServiceID int64, subServiceIds []int64) ([]bookingModel.UpdateBookingServiceInfo, error) {
-	// Validate store
-	if oldStoreID != storeID {
-		store, err := s.queries.GetStoreByID(ctx, storeID)
-		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-			}
-			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store", err)
-		}
-		if !store.IsActive.Bool {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
-		}
-	}
-
-	// Validate stylist
-	if oldStylistID != stylistID {
-		_, err := s.queries.GetStylistByID(ctx, stylistID)
-		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StylistNotFound)
-			}
-			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get stylist", err)
-		}
-	}
-
+func (s *Update) validateEntities(ctx context.Context, oldStoreID, oldStylistID, oldTimeSlotID int64, timeSlotID, mainServiceID int64, subServiceIds []int64) ([]bookingModel.UpdateBookingServiceInfo, error) {
 	// Validate time slot
 	timeSlot, err := s.queries.GetTimeSlotByID(ctx, timeSlotID)
 	if err != nil {
@@ -246,11 +227,11 @@ func (s *Update) createBookingDetails(ctx context.Context, tx *sqlx.Tx, bookingI
 	return nil
 }
 
-func (s *Update) buildResponse(ctx context.Context, bookingID int64) (*bookingModel.UpdateResponse, error) {
-	// Get complete booking info
+func (s *Update) buildResponse(ctx context.Context, bookingID int64, needSendLineMessage bool) (*bookingModel.UpdateResponse, error) {
+	// get new booking info, because booking info may be changed by update booking
 	bookingInfo, err := s.queries.GetBookingDetailByID(ctx, bookingID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get updated booking", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get booking details", err)
 	}
 
 	// Get booking details for services
@@ -272,12 +253,14 @@ func (s *Update) buildResponse(ctx context.Context, bookingID int64) (*bookingMo
 		}
 	}
 
-	return &bookingModel.UpdateResponse{
+	response := &bookingModel.UpdateResponse{
 		ID:              utils.FormatID(bookingInfo.ID),
 		StoreId:         utils.FormatID(bookingInfo.StoreID),
 		StoreName:       bookingInfo.StoreName,
 		StylistId:       utils.FormatID(bookingInfo.StylistID),
 		StylistName:     utils.PgTextToString(bookingInfo.StylistName),
+		CustomerName:    bookingInfo.CustomerName,
+		CustomerPhone:   bookingInfo.CustomerPhone,
 		Date:            utils.PgDateToDateString(bookingInfo.WorkDate),
 		TimeSlotId:      utils.FormatID(bookingInfo.TimeSlotID),
 		StartTime:       utils.PgTimeToTimeString(bookingInfo.StartTime),
@@ -289,5 +272,24 @@ func (s *Update) buildResponse(ctx context.Context, bookingID int64) (*bookingMo
 		Status:          bookingInfo.Status,
 		CreatedAt:       utils.PgTimestamptzToTimeString(bookingInfo.CreatedAt),
 		UpdatedAt:       utils.PgTimestamptzToTimeString(bookingInfo.UpdatedAt),
-	}, nil
+	}
+
+	if needSendLineMessage {
+		err := s.lineMessenger.SendBookingNotification(bookingInfo.CustomerLineUid, common.BookingActionUpdated, &utils.BookingData{
+			StoreName:       response.StoreName,
+			Date:            response.Date,
+			StartTime:       response.StartTime,
+			EndTime:         response.EndTime,
+			CustomerName:    &response.CustomerName,
+			CustomerPhone:   &response.CustomerPhone,
+			StylistName:     response.StylistName,
+			MainServiceName: response.MainServiceName,
+			SubServiceNames: response.SubServiceNames,
+		})
+		if err != nil {
+			log.Printf("failed to send line message: %v", err)
+		}
+	}
+
+	return response, nil
 }

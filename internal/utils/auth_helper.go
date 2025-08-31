@@ -15,7 +15,7 @@ func CheckStoreAccess(storeID int64, storeIDs []int64) error {
 	}
 
 	if !hasAccess {
-		return errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
+		return errorCodes.NewServiceErrorWithCode(errorCodes.AuthPermissionDenied)
 	}
 
 	return nil

@@ -42,30 +42,28 @@
 
 ```json
 {
-  "storeId": "8000000002",
-  "stylistId": "2000000005",
   "timeSlotId": "3000000020",
   "mainServiceId": "9000000001",
   "subServiceIds": ["9000000002", "9000000003"],
   "isChatEnabled": true,
+  "hasChatPermission": true,
   "note": "這次想做奶茶色"
 }
 ```
 
 ### 驗證規則
 
-| 欄位          | 必填 | 其他規則      | 說明          |
-| ------------- | ---- | ------------- | ------------- |
-| storeId       | 否   |               | 預約門市      |
-| stylistId     | 否   |               | 美甲師ID      |
-| timeSlotId    | 否   |               | 時段ID        |
-| mainServiceId | 否   |               | 主服務項目ID  |
-| subServiceIds | 否   | <li>最多5項   | 副服務項目IDs |
-| isChatEnabled | 否   |               | 是否要聊天    |
-| note          | 否   | <li>最長255字 | 備註說明      |
+| 欄位              | 必填 | 其他規則      | 說明                   |
+| ----------------- | ---- | ------------- | ---------------------- |
+| hasChatPermission | 是   |               | 是否擁有line聊天室權限 |
+| timeSlotId        | 否   |               | 時段ID                 |
+| mainServiceId     | 否   |               | 主服務項目ID           |
+| subServiceIds     | 否   | <li>最多5項   | 副服務項目IDs          |
+| isChatEnabled     | 否   |               | 是否要聊天             |
+| note              | 否   | <li>最長255字 | 備註說明               |
 
 - 欄位皆為選填，至少需要傳入一個欄位
-- storeId、stylistId、timeSlotId、mainServiceId、subServiceIds 必須一起傳入
+- timeSlotId、mainServiceId、subServiceIds 必須一起傳入
 
 ---
 
@@ -81,6 +79,8 @@
     "storeName": "門市名稱",
     "stylistId": "2000000001",
     "stylistName": "美甲師名稱",
+    "customerName": "顧客名稱",
+    "customerPhone": "顧客電話",
     "date": "2025-08-02",
     "timeSlotId": "3000000001",
     "startTime": "10:00",
@@ -134,16 +134,13 @@
 | 400    | E2025    | ValFieldArrayMaxLength          | {field} 最多只能有 {param} 個項目            |
 | 400    | E3BK002  | BookingStatusNotAllowedToUpdate | 預約狀態不允許更新                           |
 | 400    | E3BK007  | BookingUpdateIncomplete         | 預約更新資訊不完整，所有必要資訊必須一起傳入 |
-| 400    | E3STO001 | StoreNotActive                  | 門市未啟用                                   |
 | 400    | E3SER001 | ServiceNotActive                | 服務未啟用                                   |
 | 400    | E3SER002 | ServiceNotMainService           | 服務不是主服務                               |
 | 400    | E3SER003 | ServiceNotAddon                 | 服務不是附屬服務                             |
 | 400    | E3TMS006 | TimeSlotNotEnoughTime           | 時段時間不足                                 |
 | 404    | E3BK001  | BookingNotFound                 | 預約不存在或已被取消                         |
-| 404    | E3STO002 | StoreNotFound                   | 門市不存在或已被刪除                         |
 | 404    | E3TMS005 | TimeSlotNotFound                | 時段不存在或已被刪除                         |
 | 404    | E3SER004 | ServiceNotFound                 | 服務不存在或已被刪除                         |
-| 404    | E3STY001 | StylistNotFound                 | 美甲師資料不存在                             |
 | 409    | E3BK006  | BookingTimeSlotUnavailable      | 該時段已被預約，請重新選擇                   |
 | 500    | E9001    | SysInternalError                | 系統發生錯誤，請稍後再試                     |
 | 500    | E9002    | SysDatabaseError                | 資料庫操作失敗                               |
@@ -164,14 +161,17 @@
 ## Service 邏輯
 
 1. 驗證預約是否存在且屬於本人，並且預約狀態為 `SCHEDULED`。
-2. 若有傳入門市、美甲師、時段、服務，則驗證異動後的門市、美甲師、時段、服務。
-   1. 驗證門市、美甲師、時段、服務是否存在
+2. 若有傳入時段、服務，則驗證異動後的時段、服務。
+   1. 驗證時段、服務是否存在
    2. 驗證時段是否可用
    3. 驗證服務是否可用
    4. 驗證時段時間是否足夠
    5. 驗證附加服務是否可用
 3. 更新預約內容（`bookings`、`booking_details`）。
-4. 回傳最新預約資訊。
+4. 若異動了時段，則更新舊有時段狀態為可預約。
+5. 若異動了時段，則更新新時段狀態為不可預約。
+6. 若顧客沒有聊天室權限 (代表前端沒辦法發送訊息給顧客)，且異動了時段，則後端協助發送預約通知到 LINE。
+7. 回傳最新預約資訊。
 
 ---
 

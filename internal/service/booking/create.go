@@ -3,11 +3,13 @@ package booking
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -16,14 +18,17 @@ import (
 )
 
 type Create struct {
-	queries dbgen.Querier
-	db      *pgxpool.Pool
+	queries       dbgen.Querier
+	db            *pgxpool.Pool
+	lineMessenger *utils.LineMessageClient
 }
 
-func NewCreate(queries dbgen.Querier, db *pgxpool.Pool) *Create {
+func NewCreate(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig) *Create {
+	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
 	return &Create{
-		queries: queries,
-		db:      db,
+		queries:       queries,
+		db:            db,
+		lineMessenger: lineMessenger,
 	}
 }
 
@@ -38,6 +43,15 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 	}
 	if !store.IsActive.Bool {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
+	}
+
+	// Check if customer exists
+	customer, err := s.queries.GetCustomerByID(ctx, customerID)
+	if err != nil {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerNotFound)
+	}
+	if customer.IsBlacklisted.Bool {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerIsBlacklisted)
 	}
 
 	// Check if stylist exists
@@ -191,6 +205,8 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 		StoreName:       store.Name,
 		StylistId:       utils.FormatID(req.StylistId),
 		StylistName:     utils.PgTextToString(stylistName),
+		CustomerName:    customer.Name,
+		CustomerPhone:   customer.Phone,
 		Date:            utils.PgDateToDateString(timeSlot.WorkDate),
 		TimeSlotId:      utils.FormatID(req.TimeSlotId),
 		StartTime:       utils.PgTimeToTimeString(timeSlot.StartTime),
@@ -202,6 +218,24 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 		Status:          common.BookingStatusScheduled,
 		CreatedAt:       utils.PgTimestamptzToTimeString(bookingInfo.CreatedAt),
 		UpdatedAt:       utils.PgTimestamptzToTimeString(bookingInfo.UpdatedAt),
+	}
+
+	// if customer no chat permission (this mean customer not give permission to liff app, so can't send message in liff app) send line message, but not return error
+	if req.HasChatPermission != nil && !*req.HasChatPermission {
+		err := s.lineMessenger.SendBookingNotification(customer.LineUid, common.BookingActionCreated, &utils.BookingData{
+			StoreName:       response.StoreName,
+			Date:            response.Date,
+			StartTime:       response.StartTime,
+			EndTime:         response.EndTime,
+			CustomerName:    &response.CustomerName,
+			CustomerPhone:   &response.CustomerPhone,
+			StylistName:     response.StylistName,
+			MainServiceName: response.MainServiceName,
+			SubServiceNames: response.SubServiceNames,
+		})
+		if err != nil {
+			log.Printf("failed to send line message: %v", err)
+		}
 	}
 
 	return response, nil
