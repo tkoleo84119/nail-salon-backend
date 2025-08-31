@@ -86,6 +86,7 @@ type Querier interface {
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error)
 	GetStoreDetailByID(ctx context.Context, id int64) (Store, error)
+	GetStorePerformanceGroupByStylist(ctx context.Context, arg GetStorePerformanceGroupByStylistParams) ([]GetStorePerformanceGroupByStylistRow, error)
 	GetStylistByID(ctx context.Context, id int64) (Stylist, error)
 	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (Stylist, error)
 	GetStylistIDByStaffUserID(ctx context.Context, staffUserID int64) (int64, error)

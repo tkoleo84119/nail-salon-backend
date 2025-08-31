@@ -265,5 +265,7 @@ func setupAdminReportRoutes(admin *gin.RouterGroup, cfg *config.Config, queries 
 	{
 		// Performance report - all staff except SUPER_ADMIN can access
 		reports.GET("/performance/me", middleware.JWTAuth(*cfg, queries), middleware.RequireNotSuperAdmin(), handlers.Admin.ReportGetPerformanceMe.GetPerformanceMe)
+		// Store performance report - SUPER_ADMIN, ADMIN, and MANAGER can access
+		reports.GET("/performance/store/:storeId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ReportGetStorePerformance.GetStorePerformance)
 	}
 }

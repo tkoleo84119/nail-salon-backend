@@ -126,7 +126,8 @@ type AdminServices struct {
 	CheckoutCreate adminCheckoutService.CreateInterface
 
 	// Report services
-	ReportGetPerformanceMe adminReportService.GetPerformanceMeInterface
+	ReportGetPerformanceMe    adminReportService.GetPerformanceMeInterface
+	ReportGetStorePerformance adminReportService.GetStorePerformanceInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -213,7 +214,8 @@ type AdminHandlers struct {
 	CheckoutCreate *adminCheckoutHandler.Create
 
 	// Report handlers
-	ReportGetPerformanceMe *adminReportHandler.GetPerformanceMe
+	ReportGetPerformanceMe    *adminReportHandler.GetPerformanceMe
+	ReportGetStorePerformance *adminReportHandler.GetStorePerformance
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -298,7 +300,8 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CheckoutCreate: adminCheckoutService.NewCreate(queries, repositories.SQLX, database.PgxPool),
 
 		// Report services
-		ReportGetPerformanceMe: adminReportService.NewGetPerformanceMe(queries),
+		ReportGetPerformanceMe:    adminReportService.NewGetPerformanceMe(queries),
+		ReportGetStorePerformance: adminReportService.NewGetStorePerformance(queries),
 	}
 }
 
@@ -385,6 +388,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		CheckoutCreate: adminCheckoutHandler.NewCreate(services.CheckoutCreate),
 
 		// Report handlers
-		ReportGetPerformanceMe: adminReportHandler.NewGetPerformanceMe(services.ReportGetPerformanceMe),
+		ReportGetPerformanceMe:    adminReportHandler.NewGetPerformanceMe(services.ReportGetPerformanceMe),
+		ReportGetStorePerformance: adminReportHandler.NewGetStorePerformance(services.ReportGetStorePerformance),
 	}
 }
