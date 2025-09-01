@@ -274,6 +274,7 @@ func setupAdminBrandRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 func setupAdminProductCategoryRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	productCategories := admin.Group("/product-categories")
 	{
+		productCategories.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ProductCategoryGetAll.GetAll)
 		productCategories.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ProductCategoryCreate.Create)
 	}
 }

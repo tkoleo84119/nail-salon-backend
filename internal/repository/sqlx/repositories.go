@@ -12,6 +12,7 @@ type Repositories struct {
 	Customer       *CustomerRepository
 	Coupon         *CouponRepository
 	CustomerCoupon *CustomerCouponRepository
+	ProductCategory *ProductCategoryRepository
 	Schedule       *ScheduleRepository
 	Service        *ServiceRepository
 	Staff          *StaffUserRepository
@@ -30,6 +31,7 @@ func NewRepositories(db *sqlx.DB) *Repositories {
 		Customer:       NewCustomerRepository(db),
 		Coupon:         NewCouponRepository(db),
 		CustomerCoupon: NewCustomerCouponRepository(db),
+		ProductCategory: NewProductCategoryRepository(db),
 		Schedule:       NewScheduleRepository(db),
 		Service:        NewServiceRepository(db),
 		Staff:          NewStaffUserRepository(db),

@@ -80,6 +80,7 @@ type AdminServices struct {
 
 	// Product category management services
 	ProductCategoryCreate adminProductCategoryService.CreateInterface
+	ProductCategoryGetAll adminProductCategoryService.GetAllInterface
 
 	// Service management services
 	ServiceGetList adminServiceService.GetAllInterface
@@ -176,6 +177,7 @@ type AdminHandlers struct {
 
 	// Product category management handlers
 	ProductCategoryCreate *adminProductCategoryHandler.Create
+	ProductCategoryGetAll *adminProductCategoryHandler.GetAll
 
 	// Service management handlers
 	ServiceGetList *adminServiceHandler.GetAll
@@ -271,6 +273,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Product category management services
 		ProductCategoryCreate: adminProductCategoryService.NewCreate(queries),
+		ProductCategoryGetAll: adminProductCategoryService.NewGetAll(repositories.SQLX),
 
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
@@ -366,6 +369,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Product category management handlers
 		ProductCategoryCreate: adminProductCategoryHandler.NewCreate(services.ProductCategoryCreate),
+		ProductCategoryGetAll: adminProductCategoryHandler.NewGetAll(services.ProductCategoryGetAll),
 
 		// Service management handlers
 		ServiceGetList: adminServiceHandler.NewGetAll(services.ServiceGetList),
