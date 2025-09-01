@@ -305,6 +305,18 @@
       "status": 400
     }
   },
+  "PRODUCT_CATEGORY": {
+    "CategoryNameAlreadyExists": {
+      "code": "E3PC001",
+      "message": "分類名稱已存在，請使用其他名稱",
+      "status": 409
+    },
+    "CategoryNotFound": {
+      "code": "E3PC002",
+      "message": "分類不存在或已被刪除",
+      "status": 404
+    }
+  },
   "SCHEDULE": {
     "ScheduleAlreadyBookedDoNotUpdateDate": {
       "code": "E3SCH001",

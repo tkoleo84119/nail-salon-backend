@@ -25,6 +25,9 @@ type Querier interface {
 	CheckCouponNameExistsExcluding(ctx context.Context, arg CheckCouponNameExistsExcludingParams) (bool, error)
 	CheckCustomerExistsByID(ctx context.Context, id int64) (bool, error)
 	CheckCustomerExistsByLineUid(ctx context.Context, lineUid string) (bool, error)
+	CheckProductCategoryExistByID(ctx context.Context, id int64) (bool, error)
+	CheckProductCategoryNameExists(ctx context.Context, name string) (bool, error)
+	CheckProductCategoryNameExistsExcludeSelf(ctx context.Context, arg CheckProductCategoryNameExistsExcludeSelfParams) (bool, error)
 	CheckScheduleCanUpdateDate(ctx context.Context, scheduleID int64) (bool, error)
 	CheckScheduleDateExists(ctx context.Context, arg CheckScheduleDateExistsParams) (bool, error)
 	CheckScheduleExistsByID(ctx context.Context, id int64) (bool, error)
@@ -46,12 +49,13 @@ type Querier interface {
 	CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)
-	CreateBrand(ctx context.Context, arg CreateBrandParams) (Brand, error)
+	CreateBrand(ctx context.Context, arg CreateBrandParams) (int64, error)
 	CreateCheckout(ctx context.Context, arg CreateCheckoutParams) error
 	CreateCoupon(ctx context.Context, arg CreateCouponParams) error
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
 	CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCouponParams) error
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
+	CreateProductCategory(ctx context.Context, arg CreateProductCategoryParams) (int64, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error

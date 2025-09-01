@@ -41,6 +41,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 			setupAdminCustomerRoutes(admin, cfg, queries, handlers)
 			setupAdminStoreRoutes(admin, cfg, queries, handlers)
 			setupAdminBrandRoutes(admin, cfg, queries, handlers)
+			setupAdminProductCategoryRoutes(admin, cfg, queries, handlers)
 			setupAdminServiceRoutes(admin, cfg, queries, handlers)
 			setupAdminScheduleRoutes(admin, cfg, queries, handlers)
 			setupAdminTimeSlotTemplateRoutes(admin, cfg, queries, handlers)
@@ -267,6 +268,13 @@ func setupAdminBrandRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		brands.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BrandGetAll.GetAll)
 		brands.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.BrandCreate.Create)
 		brands.PATCH("/:brandId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.BrandUpdate.Update)
+	}
+}
+
+func setupAdminProductCategoryRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	productCategories := admin.Group("/product-categories")
+	{
+		productCategories.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ProductCategoryCreate.Create)
 	}
 }
 

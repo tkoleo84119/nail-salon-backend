@@ -29,7 +29,7 @@ func (s *Create) Create(ctx context.Context, req adminBrandModel.CreateRequest) 
 	}
 
 	brandID := utils.GenerateID()
-	brand, err := s.queries.CreateBrand(ctx, dbgen.CreateBrandParams{
+	_, err = s.queries.CreateBrand(ctx, dbgen.CreateBrandParams{
 		ID:   brandID,
 		Name: req.Name,
 	})
@@ -38,6 +38,6 @@ func (s *Create) Create(ctx context.Context, req adminBrandModel.CreateRequest) 
 	}
 
 	return &adminBrandModel.CreateResponse{
-		ID: utils.FormatID(brand.ID),
+		ID: utils.FormatID(brandID),
 	}, nil
 }

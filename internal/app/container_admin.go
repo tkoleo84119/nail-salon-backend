@@ -23,6 +23,7 @@ import (
 	adminTimeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time-slot-template"
 	adminTimeSlotHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot"
 	adminTimeSlotTemplateItemHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot_template_item"
+	adminProductCategoryHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/product_category"
 
 	// Admin services
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
@@ -42,6 +43,7 @@ import (
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
 	adminTimeSlotService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot"
 	adminTimeSlotTemplateItemService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot_template_item"
+	adminProductCategoryService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/product_category"
 )
 
 // AdminServices contains all admin-facing services
@@ -75,6 +77,9 @@ type AdminServices struct {
 	BrandCreate adminBrandService.CreateInterface
 	BrandGetAll adminBrandService.GetAllInterface
 	BrandUpdate adminBrandService.UpdateInterface
+
+	// Product category management services
+	ProductCategoryCreate adminProductCategoryService.CreateInterface
 
 	// Service management services
 	ServiceGetList adminServiceService.GetAllInterface
@@ -169,6 +174,9 @@ type AdminHandlers struct {
 	BrandGetAll *adminBrandHandler.GetAll
 	BrandUpdate *adminBrandHandler.Update
 
+	// Product category management handlers
+	ProductCategoryCreate *adminProductCategoryHandler.Create
+
 	// Service management handlers
 	ServiceGetList *adminServiceHandler.GetAll
 	ServiceGet     *adminServiceHandler.Get
@@ -261,6 +269,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BrandGetAll: adminBrandService.NewGetAll(repositories.SQLX),
 		BrandUpdate: adminBrandService.NewUpdate(queries, repositories.SQLX),
 
+		// Product category management services
+		ProductCategoryCreate: adminProductCategoryService.NewCreate(queries),
+
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
 		ServiceGet:     adminServiceService.NewGet(queries),
@@ -352,6 +363,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),
 		BrandGetAll: adminBrandHandler.NewGetAll(services.BrandGetAll),
 		BrandUpdate: adminBrandHandler.NewUpdate(services.BrandUpdate),
+
+		// Product category management handlers
+		ProductCategoryCreate: adminProductCategoryHandler.NewCreate(services.ProductCategoryCreate),
 
 		// Service management handlers
 		ServiceGetList: adminServiceHandler.NewGetAll(services.ServiceGetList),

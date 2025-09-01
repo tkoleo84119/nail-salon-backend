@@ -50,7 +50,7 @@ func (q *Queries) CheckBrandNameExistsExcludeSelf(ctx context.Context, arg Check
 const createBrand = `-- name: CreateBrand :one
 INSERT INTO brands (id, name)
 VALUES ($1, $2)
-RETURNING id, name, is_active, created_at, updated_at
+RETURNING id
 `
 
 type CreateBrandParams struct {
@@ -58,15 +58,9 @@ type CreateBrandParams struct {
 	Name string `db:"name" json:"name"`
 }
 
-func (q *Queries) CreateBrand(ctx context.Context, arg CreateBrandParams) (Brand, error) {
+func (q *Queries) CreateBrand(ctx context.Context, arg CreateBrandParams) (int64, error) {
 	row := q.db.QueryRow(ctx, createBrand, arg.ID, arg.Name)
-	var i Brand
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.IsActive,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }

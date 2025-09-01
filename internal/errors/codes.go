@@ -130,6 +130,10 @@ const (
 	CustomerCouponExpired = "CustomerCouponExpired"
 	CustomerCouponNotBelongToCustomer = "CustomerCouponNotBelongToCustomer"
 
+	// PRODUCT_CATEGORY - product category related errors
+	CategoryNameAlreadyExists = "CategoryNameAlreadyExists"
+	CategoryNotFound = "CategoryNotFound"
+
 	// REPORT - report related errors
 	ReportDateRangeExceed1Year = "ReportDateRangeExceed1Year"
 
