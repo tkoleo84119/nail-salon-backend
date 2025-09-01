@@ -8,6 +8,7 @@ import (
 	// Admin handlers
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
+	adminBrandHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/brand"
 	adminCheckoutHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/checkout"
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
@@ -26,6 +27,7 @@ import (
 	// Admin services
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
+	adminBrandService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/brand"
 	adminCheckoutService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/checkout"
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
@@ -68,6 +70,9 @@ type AdminServices struct {
 	StoreGet     adminStoreService.GetInterface
 	StoreCreate  adminStoreService.CreateInterface
 	StoreUpdate  adminStoreService.UpdateInterface
+
+	// Brand management services
+	BrandCreate adminBrandService.CreateInterface
 
 	// Service management services
 	ServiceGetList adminServiceService.GetAllInterface
@@ -157,6 +162,9 @@ type AdminHandlers struct {
 	StoreCreate  *adminStoreHandler.Create
 	StoreUpdate  *adminStoreHandler.Update
 
+	// Brand management handlers
+	BrandCreate *adminBrandHandler.Create
+
 	// Service management handlers
 	ServiceGetList *adminServiceHandler.GetAll
 	ServiceGet     *adminServiceHandler.Get
@@ -244,6 +252,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StoreCreate:  adminStoreService.NewCreate(queries, database.PgxPool),
 		StoreUpdate:  adminStoreService.NewUpdate(queries, repositories.SQLX),
 
+		// Brand management services
+		BrandCreate: adminBrandService.NewCreate(queries),
+
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
 		ServiceGet:     adminServiceService.NewGet(queries),
@@ -330,6 +341,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StoreGet:     adminStoreHandler.NewGet(services.StoreGet),
 		StoreCreate:  adminStoreHandler.NewCreate(services.StoreCreate),
 		StoreUpdate:  adminStoreHandler.NewUpdate(services.StoreUpdate),
+
+		// Brand management handlers
+		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),
 
 		// Service management handlers
 		ServiceGetList: adminServiceHandler.NewGetAll(services.ServiceGetList),

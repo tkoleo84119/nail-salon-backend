@@ -1,0 +1,11 @@
+package adminBrand
+
+import (
+	"context"
+
+	adminBrandModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/brand"
+)
+
+type CreateInterface interface {
+	Create(ctx context.Context, req adminBrandModel.CreateRequest) (*adminBrandModel.CreateResponse, error)
+}

@@ -222,6 +222,18 @@
       "status": 404
     }
   },
+  "BRAND": {
+    "BrandNameAlreadyExists": {
+      "code": "E3BRN001",
+      "message": "品牌名稱已存在，請使用其他名稱",
+      "status": 409
+    },
+    "BrandNotFound": {
+      "code": "E3BRN002",
+      "message": "品牌不存在或已被刪除",
+      "status": 404
+    }
+  },
   "COUPON": {
     "CouponNotActive": {
       "code": "E3COU001",

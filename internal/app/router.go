@@ -40,6 +40,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 			setupAdminStylistRoutes(admin, cfg, queries, handlers)
 			setupAdminCustomerRoutes(admin, cfg, queries, handlers)
 			setupAdminStoreRoutes(admin, cfg, queries, handlers)
+			setupAdminBrandRoutes(admin, cfg, queries, handlers)
 			setupAdminServiceRoutes(admin, cfg, queries, handlers)
 			setupAdminScheduleRoutes(admin, cfg, queries, handlers)
 			setupAdminTimeSlotTemplateRoutes(admin, cfg, queries, handlers)
@@ -257,6 +258,13 @@ func setupAdminCustomerCouponRoutes(admin *gin.RouterGroup, cfg *config.Config, 
 	{
 		customerCoupons.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponGetAll.GetAll)
 		customerCoupons.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponCreate.Create)
+	}
+}
+
+func setupAdminBrandRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	brands := admin.Group("/brands")
+	{
+		brands.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.BrandCreate.Create)
 	}
 }
 

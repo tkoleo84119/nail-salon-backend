@@ -16,6 +16,7 @@ type Querier interface {
 	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
 	CancelBooking(ctx context.Context, arg CancelBookingParams) (int64, error)
+	CheckBrandNameExists(ctx context.Context, name string) (bool, error)
 	CheckCouponCodeExists(ctx context.Context, code string) (bool, error)
 	CheckCouponExists(ctx context.Context, id int64) (bool, error)
 	CheckCouponNameExists(ctx context.Context, name string) (bool, error)
@@ -43,6 +44,7 @@ type Querier interface {
 	CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)
+	CreateBrand(ctx context.Context, arg CreateBrandParams) (Brand, error)
 	CreateCheckout(ctx context.Context, arg CreateCheckoutParams) error
 	CreateCoupon(ctx context.Context, arg CreateCouponParams) error
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error

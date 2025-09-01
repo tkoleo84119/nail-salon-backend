@@ -113,6 +113,10 @@ const (
 	// BOOKING_DETAIL - booking detail related errors
 	BookingDetailNotFound = "BookingDetailNotFound"
 
+	// BRAND - brand related errors
+	BrandNameAlreadyExists = "BrandNameAlreadyExists"
+	BrandNotFound = "BrandNotFound"
+
 	// COUPON - coupon related errors
 	CouponCodeAlreadyExists = "CouponCodeAlreadyExists"
 	CouponDiscountExclusive = "CouponDiscountExclusive"
