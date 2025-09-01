@@ -74,6 +74,7 @@ type AdminServices struct {
 	// Brand management services
 	BrandCreate adminBrandService.CreateInterface
 	BrandGetAll adminBrandService.GetAllInterface
+	BrandUpdate adminBrandService.UpdateInterface
 
 	// Service management services
 	ServiceGetList adminServiceService.GetAllInterface
@@ -166,6 +167,7 @@ type AdminHandlers struct {
 	// Brand management handlers
 	BrandCreate *adminBrandHandler.Create
 	BrandGetAll *adminBrandHandler.GetAll
+	BrandUpdate *adminBrandHandler.Update
 
 	// Service management handlers
 	ServiceGetList *adminServiceHandler.GetAll
@@ -257,6 +259,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Brand management services
 		BrandCreate: adminBrandService.NewCreate(queries),
 		BrandGetAll: adminBrandService.NewGetAll(repositories.SQLX),
+		BrandUpdate: adminBrandService.NewUpdate(queries, repositories.SQLX),
 
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
@@ -348,6 +351,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Brand management handlers
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),
 		BrandGetAll: adminBrandHandler.NewGetAll(services.BrandGetAll),
+		BrandUpdate: adminBrandHandler.NewUpdate(services.BrandUpdate),
 
 		// Service management handlers
 		ServiceGetList: adminServiceHandler.NewGetAll(services.ServiceGetList),

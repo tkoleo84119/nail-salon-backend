@@ -266,6 +266,7 @@ func setupAdminBrandRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 	{
 		brands.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BrandGetAll.GetAll)
 		brands.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.BrandCreate.Create)
+		brands.PATCH("/:brandId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.BrandUpdate.Update)
 	}
 }
 

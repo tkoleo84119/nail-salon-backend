@@ -105,3 +105,49 @@ func (r *BrandRepository) GetAllBrandsByFilter(ctx context.Context, params GetAl
 
 	return total, results, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateBrandParams struct {
+	Name     *string
+	IsActive *bool
+}
+
+type UpdateBrandResponse struct {
+	ID int64 `db:"id"`
+}
+
+func (r *BrandRepository) UpdateBrand(ctx context.Context, id int64, params UpdateBrandParams) (UpdateBrandResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *params.Name)
+	}
+
+	if params.IsActive != nil {
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
+	}
+
+	if len(setParts) == 1 {
+		return UpdateBrandResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, id)
+	query := fmt.Sprintf(`
+		UPDATE brands
+		SET %s
+		WHERE id = $%d
+		RETURNING id
+	`, strings.Join(setParts, ", "), len(args))
+
+	var response UpdateBrandResponse
+	err := r.db.GetContext(ctx, &response, query, args...)
+	if err != nil {
+		return UpdateBrandResponse{}, err
+	}
+
+	return response, nil
+}

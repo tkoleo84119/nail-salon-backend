@@ -9,12 +9,39 @@ import (
 	"context"
 )
 
+const checkBrandExistByID = `-- name: CheckBrandExistByID :one
+SELECT EXISTS(SELECT 1 FROM brands WHERE id = $1)
+`
+
+func (q *Queries) CheckBrandExistByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkBrandExistByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkBrandNameExists = `-- name: CheckBrandNameExists :one
 SELECT EXISTS(SELECT 1 FROM brands WHERE name = $1)
 `
 
 func (q *Queries) CheckBrandNameExists(ctx context.Context, name string) (bool, error) {
 	row := q.db.QueryRow(ctx, checkBrandNameExists, name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const checkBrandNameExistsExcludeSelf = `-- name: CheckBrandNameExistsExcludeSelf :one
+SELECT EXISTS(SELECT 1 FROM brands WHERE name = $1 AND id != $2)
+`
+
+type CheckBrandNameExistsExcludeSelfParams struct {
+	Name string `db:"name" json:"name"`
+	ID   int64  `db:"id" json:"id"`
+}
+
+func (q *Queries) CheckBrandNameExistsExcludeSelf(ctx context.Context, arg CheckBrandNameExistsExcludeSelfParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkBrandNameExistsExcludeSelf, arg.Name, arg.ID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
