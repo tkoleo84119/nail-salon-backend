@@ -8,6 +8,7 @@ import (
 type Repositories struct {
 	Booking        *BookingRepository
 	BookingDetail  *BookingDetailRepository
+	Brand          *BrandRepository
 	Customer       *CustomerRepository
 	Coupon         *CouponRepository
 	CustomerCoupon *CustomerCouponRepository
@@ -25,6 +26,7 @@ func NewRepositories(db *sqlx.DB) *Repositories {
 	return &Repositories{
 		Booking:        NewBookingRepository(db),
 		BookingDetail:  NewBookingDetailRepository(db),
+		Brand:          NewBrandRepository(db),
 		Customer:       NewCustomerRepository(db),
 		Coupon:         NewCouponRepository(db),
 		CustomerCoupon: NewCustomerCouponRepository(db),

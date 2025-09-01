@@ -264,6 +264,7 @@ func setupAdminCustomerCouponRoutes(admin *gin.RouterGroup, cfg *config.Config, 
 func setupAdminBrandRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	brands := admin.Group("/brands")
 	{
+		brands.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BrandGetAll.GetAll)
 		brands.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.BrandCreate.Create)
 	}
 }
