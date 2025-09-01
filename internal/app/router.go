@@ -276,6 +276,7 @@ func setupAdminProductCategoryRoutes(admin *gin.RouterGroup, cfg *config.Config,
 	{
 		productCategories.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ProductCategoryGetAll.GetAll)
 		productCategories.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ProductCategoryCreate.Create)
+		productCategories.PATCH("/:productCategoryId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ProductCategoryUpdate.Update)
 	}
 }
 

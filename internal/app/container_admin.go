@@ -13,6 +13,7 @@ import (
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
 	adminCustomerCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer_coupon"
+	adminProductCategoryHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/product_category"
 	adminReportHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/report"
 	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
 	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
@@ -23,7 +24,6 @@ import (
 	adminTimeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time-slot-template"
 	adminTimeSlotHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot"
 	adminTimeSlotTemplateItemHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot_template_item"
-	adminProductCategoryHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/product_category"
 
 	// Admin services
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
@@ -33,6 +33,7 @@ import (
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
 	adminCustomerCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer_coupon"
+	adminProductCategoryService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/product_category"
 	adminReportService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/report"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
@@ -43,7 +44,6 @@ import (
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
 	adminTimeSlotService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot"
 	adminTimeSlotTemplateItemService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot_template_item"
-	adminProductCategoryService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/product_category"
 )
 
 // AdminServices contains all admin-facing services
@@ -81,6 +81,7 @@ type AdminServices struct {
 	// Product category management services
 	ProductCategoryCreate adminProductCategoryService.CreateInterface
 	ProductCategoryGetAll adminProductCategoryService.GetAllInterface
+	ProductCategoryUpdate adminProductCategoryService.UpdateInterface
 
 	// Service management services
 	ServiceGetList adminServiceService.GetAllInterface
@@ -178,6 +179,7 @@ type AdminHandlers struct {
 	// Product category management handlers
 	ProductCategoryCreate *adminProductCategoryHandler.Create
 	ProductCategoryGetAll *adminProductCategoryHandler.GetAll
+	ProductCategoryUpdate *adminProductCategoryHandler.Update
 
 	// Service management handlers
 	ServiceGetList *adminServiceHandler.GetAll
@@ -274,6 +276,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Product category management services
 		ProductCategoryCreate: adminProductCategoryService.NewCreate(queries),
 		ProductCategoryGetAll: adminProductCategoryService.NewGetAll(repositories.SQLX),
+		ProductCategoryUpdate: adminProductCategoryService.NewUpdate(queries, repositories.SQLX),
 
 		// Service management services
 		ServiceGetList: adminServiceService.NewGetAll(repositories.SQLX),
@@ -370,6 +373,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Product category management handlers
 		ProductCategoryCreate: adminProductCategoryHandler.NewCreate(services.ProductCategoryCreate),
 		ProductCategoryGetAll: adminProductCategoryHandler.NewGetAll(services.ProductCategoryGetAll),
+		ProductCategoryUpdate: adminProductCategoryHandler.NewUpdate(services.ProductCategoryUpdate),
 
 		// Service management handlers
 		ServiceGetList: adminServiceHandler.NewGetAll(services.ServiceGetList),

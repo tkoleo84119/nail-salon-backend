@@ -105,3 +105,49 @@ func (r *ProductCategoryRepository) GetAllProductCategoriesByFilter(ctx context.
 
 	return total, results, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateProductCategoryParams struct {
+	Name     *string
+	IsActive *bool
+}
+
+type UpdateProductCategoryResponse struct {
+	ID int64 `db:"id"`
+}
+
+func (r *ProductCategoryRepository) UpdateProductCategory(ctx context.Context, id int64, params UpdateProductCategoryParams) (UpdateProductCategoryResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *params.Name)
+	}
+
+	if params.IsActive != nil {
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
+	}
+
+	if len(setParts) == 1 {
+		return UpdateProductCategoryResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, id)
+	query := fmt.Sprintf(`
+		UPDATE product_categories
+		SET %s
+		WHERE id = $%d
+		RETURNING id
+	`, strings.Join(setParts, ", "), len(args))
+
+	var response UpdateProductCategoryResponse
+	err := r.db.GetContext(ctx, &response, query, args...)
+	if err != nil {
+		return UpdateProductCategoryResponse{}, err
+	}
+
+	return response, nil
+}
