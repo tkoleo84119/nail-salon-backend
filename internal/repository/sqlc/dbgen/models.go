@@ -41,7 +41,6 @@ type Booking struct {
 	IsChatEnabled  pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
 	ActualDuration pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
 	Note           pgtype.Text        `db:"note" json:"note"`
-	UsedProducts   []string           `db:"used_products" json:"used_products"`
 	Status         string             `db:"status" json:"status"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
@@ -57,6 +56,12 @@ type BookingDetail struct {
 	DiscountAmount pgtype.Numeric     `db:"discount_amount" json:"discount_amount"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+type BookingProduct struct {
+	BookingID int64              `db:"booking_id" json:"booking_id"`
+	ProductID int64              `db:"product_id" json:"product_id"`
+	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
 }
 
 type Brand struct {

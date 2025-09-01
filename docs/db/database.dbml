@@ -255,6 +255,19 @@ Table customer_coupons {
 Ref: customer_coupons.customer_id > customers.id [delete: cascade]
 Ref: customer_coupons.coupon_id > coupons.id [delete: cascade]
 
+Table booking_products {
+  booking_id bigint [not null]
+  product_id bigint [not null]
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    (booking_id, product_id) [unique] // 一個預約只能使用一次商品
+  }
+}
+
+Ref: booking_products.booking_id > bookings.id [delete: cascade]
+Ref: booking_products.product_id > products.id [delete: cascade]
+
 // ========== 支出與供應商 ==========
 Table suppliers {
   id bigint [pk]
