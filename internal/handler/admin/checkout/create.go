@@ -24,7 +24,7 @@ func NewCreate(service adminCheckoutService.CreateInterface) *Create {
 }
 
 func (h *Create) Create(c *gin.Context) {
-	storeID := c.Param("storeID")
+	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"storeID": "storeID 為必填項目",
@@ -39,7 +39,7 @@ func (h *Create) Create(c *gin.Context) {
 		return
 	}
 
-	bookingID := c.Param("bookingID")
+	bookingID := c.Param("bookingId")
 	if bookingID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
 			"bookingID": "bookingID 為必填項目",

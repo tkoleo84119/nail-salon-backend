@@ -162,7 +162,7 @@ func PgNumericToFloat64(n pgtype.Numeric) float64 {
 //	}
 func Float64ToPgNumeric(f float64) (pgtype.Numeric, error) {
 	var n pgtype.Numeric
-	err := n.Scan(f)
+	err := n.Scan(fmt.Sprintf("%f", f))
 	if err != nil {
 		return pgtype.Numeric{Valid: false}, err
 	}
