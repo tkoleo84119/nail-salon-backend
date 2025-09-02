@@ -28,6 +28,7 @@ type Querier interface {
 	CheckProductCategoryExistByID(ctx context.Context, id int64) (bool, error)
 	CheckProductCategoryNameExists(ctx context.Context, name string) (bool, error)
 	CheckProductCategoryNameExistsExcludeSelf(ctx context.Context, arg CheckProductCategoryNameExistsExcludeSelfParams) (bool, error)
+	CheckProductNameBrandExistsInStore(ctx context.Context, arg CheckProductNameBrandExistsInStoreParams) (bool, error)
 	CheckScheduleCanUpdateDate(ctx context.Context, scheduleID int64) (bool, error)
 	CheckScheduleDateExists(ctx context.Context, arg CheckScheduleDateExistsParams) (bool, error)
 	CheckScheduleExistsByID(ctx context.Context, id int64) (bool, error)
@@ -55,6 +56,7 @@ type Querier interface {
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
 	CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCouponParams) error
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
+	CreateProduct(ctx context.Context, arg CreateProductParams) error
 	CreateProductCategory(ctx context.Context, arg CreateProductCategoryParams) (int64, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)

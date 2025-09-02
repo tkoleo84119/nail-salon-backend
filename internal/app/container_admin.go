@@ -13,6 +13,7 @@ import (
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
 	adminCustomerCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer_coupon"
+	adminProductHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/product"
 	adminProductCategoryHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/product_category"
 	adminReportHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/report"
 	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
@@ -33,6 +34,7 @@ import (
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
 	adminCustomerCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer_coupon"
+	adminProductService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/product"
 	adminProductCategoryService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/product_category"
 	adminReportService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/report"
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
@@ -77,6 +79,9 @@ type AdminServices struct {
 	BrandCreate adminBrandService.CreateInterface
 	BrandGetAll adminBrandService.GetAllInterface
 	BrandUpdate adminBrandService.UpdateInterface
+
+	// Product management services
+	ProductCreate adminProductService.CreateInterface
 
 	// Product category management services
 	ProductCategoryCreate adminProductCategoryService.CreateInterface
@@ -176,6 +181,9 @@ type AdminHandlers struct {
 	BrandGetAll *adminBrandHandler.GetAll
 	BrandUpdate *adminBrandHandler.Update
 
+	// Product management handlers
+	ProductCreate *adminProductHandler.Create
+
 	// Product category management handlers
 	ProductCategoryCreate *adminProductCategoryHandler.Create
 	ProductCategoryGetAll *adminProductCategoryHandler.GetAll
@@ -273,6 +281,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BrandGetAll: adminBrandService.NewGetAll(repositories.SQLX),
 		BrandUpdate: adminBrandService.NewUpdate(queries, repositories.SQLX),
 
+		// Product management services
+		ProductCreate: adminProductService.NewCreate(queries),
+
 		// Product category management services
 		ProductCategoryCreate: adminProductCategoryService.NewCreate(queries),
 		ProductCategoryGetAll: adminProductCategoryService.NewGetAll(repositories.SQLX),
@@ -369,6 +380,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),
 		BrandGetAll: adminBrandHandler.NewGetAll(services.BrandGetAll),
 		BrandUpdate: adminBrandHandler.NewUpdate(services.BrandUpdate),
+
+		// Product management handlers
+		ProductCreate: adminProductHandler.NewCreate(services.ProductCreate),
 
 		// Product category management handlers
 		ProductCategoryCreate: adminProductCategoryHandler.NewCreate(services.ProductCategoryCreate),

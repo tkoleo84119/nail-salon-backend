@@ -130,6 +130,10 @@ const (
 	CustomerCouponExpired = "CustomerCouponExpired"
 	CustomerCouponNotBelongToCustomer = "CustomerCouponNotBelongToCustomer"
 
+	// PRODUCT - product related errors
+	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"
+	ProductNotFound = "ProductNotFound"
+
 	// PRODUCT_CATEGORY - product category related errors
 	CategoryNameAlreadyExists = "CategoryNameAlreadyExists"
 	CategoryNotFound = "CategoryNotFound"

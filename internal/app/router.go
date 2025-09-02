@@ -195,6 +195,9 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 
 		// Store checkouts routes
 		stores.POST("/:storeId/bookings/:bookingId/checkouts", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CheckoutCreate.Create)
+
+		// Store products routes
+		stores.POST("/:storeId/products", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ProductCreate.Create)
 	}
 }
 
