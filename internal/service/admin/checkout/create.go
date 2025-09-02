@@ -236,7 +236,8 @@ func (s *Create) prepareBookingDetailPriceInfoAndValidate(
 		discountRatePg := pgtype.Numeric{}
 		discountAmountPg := pgtype.Numeric{}
 
-		if couponInfo != nil {
+		// if coupon info exists and booking detail use coupon, apply coupon
+		if couponInfo != nil && bookingDetail.UseCoupon {
 			if couponInfo.DiscountRate != nil {
 				discountedPrice = originalPrice * *couponInfo.DiscountRate
 
