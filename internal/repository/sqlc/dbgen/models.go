@@ -189,6 +189,7 @@ type Product struct {
 	Note            pgtype.Text        `db:"note" json:"note"`
 	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	IsActive        pgtype.Bool        `db:"is_active" json:"is_active"`
 }
 
 type ProductCategory struct {

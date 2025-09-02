@@ -84,6 +84,7 @@
         "unit": "瓶",
         "storageLocation": "櫃子B",
         "note": "左下角",
+        "isActive": true,
         "createdAt": "2025-01-01T00:00:00+08:00",
         "updatedAt": "2025-01-01T00:00:00+08:00"
       }

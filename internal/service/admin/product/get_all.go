@@ -55,6 +55,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminProductMode
 			Unit:            utils.PgTextToString(product.Unit),
 			StorageLocation: utils.PgTextToString(product.StorageLocation),
 			Note:            utils.PgTextToString(product.Note),
+			IsActive:        utils.PgBoolToBool(product.IsActive),
 			CreatedAt:       utils.PgTimestamptzToTimeString(product.CreatedAt),
 			UpdatedAt:       utils.PgTimestamptzToTimeString(product.UpdatedAt),
 		}

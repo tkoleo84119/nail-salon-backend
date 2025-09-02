@@ -45,6 +45,7 @@ type GetAllStoreProductsByFilterItem struct {
 	Unit            pgtype.Text        `db:"unit"`
 	StorageLocation pgtype.Text        `db:"storage_location"`
 	Note            pgtype.Text        `db:"note"`
+	IsActive        pgtype.Bool        `db:"is_active"`
 	CreatedAt       pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 }
@@ -85,6 +86,7 @@ func (r *ProductRepository) GetAllStoreProductsByFilter(ctx context.Context, sto
 	if err := r.db.GetContext(ctx, &total, countQuery, args...); err != nil {
 		return 0, nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
+
 	if total == 0 {
 		return 0, []GetAllStoreProductsByFilterItem{}, nil
 	}
@@ -117,6 +119,7 @@ func (r *ProductRepository) GetAllStoreProductsByFilter(ctx context.Context, sto
 			p.unit,
 			p.storage_location,
 			p.note,
+			p.is_active,
 			p.created_at,
 			p.updated_at
 		FROM products p
@@ -146,6 +149,7 @@ type UpdateStoreProductParams struct {
 	Unit            *string
 	StorageLocation *string
 	Note            *string
+	IsActive        *bool
 }
 
 type UpdateStoreProductResponse struct {
@@ -195,6 +199,11 @@ func (r *ProductRepository) UpdateStoreProduct(ctx context.Context, productID in
 	if params.Note != nil {
 		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
 		args = append(args, *params.Note)
+	}
+
+	if params.IsActive != nil {
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
 	}
 
 	if len(setParts) == 1 {

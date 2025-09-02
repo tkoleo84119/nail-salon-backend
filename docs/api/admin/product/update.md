@@ -48,7 +48,8 @@
   "safetyStock": 5,
   "unit": "瓶",
   "storageLocation": "櫃子B",
-  "note": "左下角"
+  "note": "左下角",
+  "isActive": true
 }
 ```
 
@@ -64,6 +65,7 @@
 | unit            | 否   | <li>最大長度50字元                  | 單位         |
 | storageLocation | 否   | <li>最大長度100字元                 | 存放位置     |
 | note            | 否   | <li>最大長度255字元                 | 備註         |
+| isActive        | 否   |                                     | 是否啟用     |
 
 - 至少需要提供一個欄位進行更新。
 

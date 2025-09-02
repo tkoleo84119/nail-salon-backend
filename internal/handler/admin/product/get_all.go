@@ -52,10 +52,11 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		*req.Name = strings.TrimSpace(*req.Name)
 	}
 
-	var brandID int64
-	var categoryID int64
+	var brandID *int64
+	var categoryID *int64
 	if req.BrandID != nil && *req.BrandID != "" {
-		brandID, err = utils.ParseID(*req.BrandID)
+		parsed, err := utils.ParseID(*req.BrandID)
+		brandID = &parsed
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
 				"brandId": "brandId 類型轉換失敗",
@@ -64,7 +65,8 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		}
 	}
 	if req.CategoryID != nil && *req.CategoryID != "" {
-		categoryID, err = utils.ParseID(*req.CategoryID)
+		parsed, err := utils.ParseID(*req.CategoryID)
+		categoryID = &parsed
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
 				"categoryId": "categoryId 類型轉換失敗",
@@ -87,8 +89,8 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	}
 
 	parsedReq := adminProductModel.GetAllParsedRequest{
-		BrandID:             &brandID,
-		CategoryID:          &categoryID,
+		BrandID:             brandID,
+		CategoryID:          categoryID,
 		Name:                req.Name,
 		LessThanSafetyStock: req.LessThanSafetyStock,
 		Limit:               limit,

@@ -9,6 +9,7 @@ type UpdateRequest struct {
 	Unit            *string `json:"unit" binding:"omitempty,max=50"`
 	StorageLocation *string `json:"storageLocation" binding:"omitempty,max=100"`
 	Note            *string `json:"note" binding:"omitempty,max=255"`
+	IsActive        *bool   `json:"isActive" binding:"omitempty"`
 }
 
 type UpdateParsedRequest struct {
@@ -20,6 +21,7 @@ type UpdateParsedRequest struct {
 	Unit            *string
 	StorageLocation *string
 	Note            *string
+	IsActive        *bool
 }
 
 type UpdateResponse struct {
@@ -27,5 +29,5 @@ type UpdateResponse struct {
 }
 
 func (r *UpdateRequest) HasUpdates() bool {
-	return r.BrandID != nil || r.CategoryID != nil || r.Name != nil || r.CurrentStock != nil || r.SafetyStock != nil || r.Unit != nil || r.StorageLocation != nil || r.Note != nil
+	return r.BrandID != nil || r.CategoryID != nil || r.Name != nil || r.CurrentStock != nil || r.SafetyStock != nil || r.Unit != nil || r.StorageLocation != nil || r.Note != nil || r.IsActive != nil
 }

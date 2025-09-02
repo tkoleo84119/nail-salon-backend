@@ -90,7 +90,7 @@ type Querier interface {
 	GetCustomerByIDs(ctx context.Context, dollar_1 []int64) ([]GetCustomerByIDsRow, error)
 	GetCustomerByLineUid(ctx context.Context, lineUid string) (GetCustomerByLineUidRow, error)
 	GetCustomerCouponPriceInfoByID(ctx context.Context, id int64) (GetCustomerCouponPriceInfoByIDRow, error)
-	GetProductByID(ctx context.Context, id int64) (Product, error)
+	GetProductByID(ctx context.Context, id int64) (GetProductByIDRow, error)
 	GetScheduleByID(ctx context.Context, id int64) (GetScheduleByIDRow, error)
 	GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error)
 	GetServiceByID(ctx context.Context, id int64) (Service, error)

@@ -342,6 +342,7 @@ Table products {
   unit varchar(50)
   storage_location varchar(100)
   note text
+  is_active boolean [default: true]
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 

@@ -35,6 +35,7 @@ type GetAllProductItem struct {
 	Unit            string                    `json:"unit"`
 	StorageLocation string                    `json:"storageLocation"`
 	Note            string                    `json:"note"`
+	IsActive        bool                      `json:"isActive"`
 	CreatedAt       string                    `json:"createdAt"`
 	UpdatedAt       string                    `json:"updatedAt"`
 }

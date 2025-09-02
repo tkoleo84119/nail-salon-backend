@@ -115,6 +115,7 @@ func (h *Update) Update(c *gin.Context) {
 		Unit:            req.Unit,
 		StorageLocation: req.StorageLocation,
 		Note:            req.Note,
+		IsActive:        req.IsActive,
 	}
 
 	staffContext, exists := middleware.GetStaffFromContext(c)

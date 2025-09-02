@@ -100,6 +100,7 @@ func (s *Update) Update(ctx context.Context, storeID, productID int64, req admin
 		Unit:            req.Unit,
 		StorageLocation: req.StorageLocation,
 		Note:            req.Note,
+		IsActive:        req.IsActive,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update product", err)

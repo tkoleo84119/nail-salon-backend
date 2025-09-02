@@ -121,9 +121,24 @@ FROM products
 WHERE id = $1
 `
 
-func (q *Queries) GetProductByID(ctx context.Context, id int64) (Product, error) {
+type GetProductByIDRow struct {
+	ID              int64              `db:"id" json:"id"`
+	StoreID         int64              `db:"store_id" json:"store_id"`
+	Name            string             `db:"name" json:"name"`
+	BrandID         int64              `db:"brand_id" json:"brand_id"`
+	CategoryID      int64              `db:"category_id" json:"category_id"`
+	CurrentStock    int32              `db:"current_stock" json:"current_stock"`
+	SafetyStock     pgtype.Int4        `db:"safety_stock" json:"safety_stock"`
+	Unit            pgtype.Text        `db:"unit" json:"unit"`
+	StorageLocation pgtype.Text        `db:"storage_location" json:"storage_location"`
+	Note            pgtype.Text        `db:"note" json:"note"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) GetProductByID(ctx context.Context, id int64) (GetProductByIDRow, error) {
 	row := q.db.QueryRow(ctx, getProductByID, id)
-	var i Product
+	var i GetProductByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.StoreID,
