@@ -345,6 +345,22 @@ func (q *Queries) GetStylistPerformanceGroupByStore(ctx context.Context, arg Get
 	return items, nil
 }
 
+const updateBookingActualDuration = `-- name: UpdateBookingActualDuration :exec
+UPDATE bookings
+SET actual_duration = $2, updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateBookingActualDurationParams struct {
+	ID             int64       `db:"id" json:"id"`
+	ActualDuration pgtype.Int4 `db:"actual_duration" json:"actual_duration"`
+}
+
+func (q *Queries) UpdateBookingActualDuration(ctx context.Context, arg UpdateBookingActualDurationParams) error {
+	_, err := q.db.Exec(ctx, updateBookingActualDuration, arg.ID, arg.ActualDuration)
+	return err
+}
+
 const updateBookingStatus = `-- name: UpdateBookingStatus :exec
 UPDATE bookings
 SET status = $2, updated_at = NOW()

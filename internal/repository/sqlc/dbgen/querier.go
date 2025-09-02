@@ -111,6 +111,7 @@ type Querier interface {
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (GetValidCustomerTokenRow, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error)
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
+	UpdateBookingActualDuration(ctx context.Context, arg UpdateBookingActualDurationParams) error
 	UpdateBookingDetailPriceInfo(ctx context.Context, arg UpdateBookingDetailPriceInfoParams) error
 	UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error
 	UpdateCustomerCouponUsed(ctx context.Context, id int64) error

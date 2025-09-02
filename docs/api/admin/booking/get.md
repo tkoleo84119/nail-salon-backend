@@ -72,7 +72,7 @@
         "service": {
           "id": "9000000010",
           "name": "法式美甲",
-          "is_addon": false,
+          "isAddon": false,
         },
         "rawPrice": 1000,
         "price": 800
@@ -82,7 +82,7 @@
         "service": {
           "id": "9000000010",
           "name": "卸甲",
-          "is_addon": true,
+          "isAddon": true,
         },
         "rawPrice": 300,
         "price": 300

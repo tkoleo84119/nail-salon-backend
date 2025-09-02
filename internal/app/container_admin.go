@@ -106,11 +106,12 @@ type AdminServices struct {
 	CustomerUpdate adminCustomerService.UpdateInterface
 
 	// Booking management services
-	BookingCreate adminBookingService.CreateInterface
-	BookingGetAll adminBookingService.GetAllInterface
-	BookingUpdate adminBookingService.UpdateInterface
-	BookingCancel adminBookingService.CancelInterface
-	BookingGet    adminBookingService.GetInterface
+	BookingCreate          adminBookingService.CreateInterface
+	BookingGetAll          adminBookingService.GetAllInterface
+	BookingUpdate          adminBookingService.UpdateInterface
+	BookingCancel          adminBookingService.CancelInterface
+	BookingGet             adminBookingService.GetInterface
+	BookingUpdateCompleted adminBookingService.UpdateCompletedInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateBulkInterface
@@ -209,11 +210,12 @@ type AdminHandlers struct {
 	CustomerUpdate *adminCustomerHandler.Update
 
 	// Booking management handlers
-	BookingCreate *adminBookingHandler.Create
-	BookingGetAll *adminBookingHandler.GetAll
-	BookingUpdate *adminBookingHandler.Update
-	BookingCancel *adminBookingHandler.Cancel
-	BookingGet    *adminBookingHandler.Get
+	BookingCreate          *adminBookingHandler.Create
+	BookingGetAll          *adminBookingHandler.GetAll
+	BookingUpdate          *adminBookingHandler.Update
+	BookingCancel          *adminBookingHandler.Cancel
+	BookingGet             *adminBookingHandler.Get
+	BookingUpdateCompleted *adminBookingHandler.UpdateCompleted
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateBulk
@@ -310,11 +312,12 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CustomerGet:    adminCustomerService.NewGet(queries),
 		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX),
 		// Booking management services
-		BookingCreate: adminBookingService.NewCreate(queries, database.PgxPool),
-		BookingGetAll: adminBookingService.NewGetAll(queries, repositories.SQLX),
-		BookingUpdate: adminBookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
-		BookingCancel: adminBookingService.NewCancel(queries, database.Sqlx, repositories.SQLX),
-		BookingGet:    adminBookingService.NewGet(queries),
+		BookingCreate:          adminBookingService.NewCreate(queries, database.PgxPool),
+		BookingGetAll:          adminBookingService.NewGetAll(queries, repositories.SQLX),
+		BookingUpdate:          adminBookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
+		BookingCancel:          adminBookingService.NewCancel(queries, database.Sqlx, repositories.SQLX),
+		BookingGet:             adminBookingService.NewGet(queries),
+		BookingUpdateCompleted: adminBookingService.NewUpdateCompleted(queries),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateBulk(queries, database.PgxPool),
@@ -413,11 +416,12 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		CustomerUpdate: adminCustomerHandler.NewUpdate(services.CustomerUpdate),
 
 		// Booking management handlers
-		BookingCreate: adminBookingHandler.NewCreate(services.BookingCreate),
-		BookingGetAll: adminBookingHandler.NewGetAll(services.BookingGetAll),
-		BookingUpdate: adminBookingHandler.NewUpdate(services.BookingUpdate),
-		BookingCancel: adminBookingHandler.NewCancel(services.BookingCancel),
-		BookingGet:    adminBookingHandler.NewGet(services.BookingGet),
+		BookingCreate:          adminBookingHandler.NewCreate(services.BookingCreate),
+		BookingGetAll:          adminBookingHandler.NewGetAll(services.BookingGetAll),
+		BookingUpdate:          adminBookingHandler.NewUpdate(services.BookingUpdate),
+		BookingCancel:          adminBookingHandler.NewCancel(services.BookingCancel),
+		BookingGet:             adminBookingHandler.NewGet(services.BookingGet),
+		BookingUpdateCompleted: adminBookingHandler.NewUpdateCompleted(services.BookingUpdateCompleted),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateBulk(services.ScheduleCreateBulk),

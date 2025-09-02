@@ -57,6 +57,11 @@ UPDATE bookings
 SET status = $2, updated_at = NOW()
 WHERE id = $1;
 
+-- name: UpdateBookingActualDuration :exec
+UPDATE bookings
+SET actual_duration = $2, updated_at = NOW()
+WHERE id = $1;
+
 -- name: CancelBooking :one
 UPDATE bookings
 SET status = $2, cancel_reason = $3, updated_at = NOW()
