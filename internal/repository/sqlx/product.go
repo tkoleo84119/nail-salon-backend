@@ -134,3 +134,86 @@ func (r *ProductRepository) GetAllStoreProductsByFilter(ctx context.Context, sto
 
 	return total, results, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateStoreProductParams struct {
+	BrandID         *int64
+	CategoryID      *int64
+	Name            *string
+	CurrentStock    *int
+	SafetyStock     *int
+	Unit            *string
+	StorageLocation *string
+	Note            *string
+}
+
+type UpdateStoreProductResponse struct {
+	ID int64 `db:"id"`
+}
+
+func (r *ProductRepository) UpdateStoreProduct(ctx context.Context, productID int64, params UpdateStoreProductParams) (UpdateStoreProductResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	// dynamic set conditions
+	if params.BrandID != nil {
+		setParts = append(setParts, fmt.Sprintf("brand_id = $%d", len(args)+1))
+		args = append(args, *params.BrandID)
+	}
+
+	if params.CategoryID != nil {
+		setParts = append(setParts, fmt.Sprintf("category_id = $%d", len(args)+1))
+		args = append(args, *params.CategoryID)
+	}
+
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *params.Name)
+	}
+
+	if params.CurrentStock != nil {
+		setParts = append(setParts, fmt.Sprintf("current_stock = $%d", len(args)+1))
+		args = append(args, *params.CurrentStock)
+	}
+
+	if params.SafetyStock != nil {
+		setParts = append(setParts, fmt.Sprintf("safety_stock = $%d", len(args)+1))
+		args = append(args, *params.SafetyStock)
+	}
+
+	if params.Unit != nil {
+		setParts = append(setParts, fmt.Sprintf("unit = $%d", len(args)+1))
+		args = append(args, *params.Unit)
+	}
+
+	if params.StorageLocation != nil {
+		setParts = append(setParts, fmt.Sprintf("storage_location = $%d", len(args)+1))
+		args = append(args, *params.StorageLocation)
+	}
+
+	if params.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
+		args = append(args, *params.Note)
+	}
+
+	if len(setParts) == 1 {
+		return UpdateStoreProductResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, productID)
+
+	query := fmt.Sprintf(`
+		UPDATE products
+		SET %s
+		WHERE id = $%d
+		RETURNING id
+	`, strings.Join(setParts, ", "), len(args))
+
+	var result UpdateStoreProductResponse
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return UpdateStoreProductResponse{}, fmt.Errorf("failed to update product: %w", err)
+	}
+
+	return result, nil
+}

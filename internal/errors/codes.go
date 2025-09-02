@@ -132,6 +132,7 @@ const (
 
 	// PRODUCT - product related errors
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"
+	ProductNotBelongToStore = "ProductNotBelongToStore"
 	ProductNotFound = "ProductNotFound"
 
 	// PRODUCT_CATEGORY - product category related errors

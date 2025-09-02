@@ -13,7 +13,7 @@ import (
 
 const checkProductNameBrandExistsInStore = `-- name: CheckProductNameBrandExistsInStore :one
 SELECT EXISTS(
-    SELECT 1 FROM products 
+    SELECT 1 FROM products
     WHERE store_id = $1 AND name = $2 AND brand_id = $3
 )
 `
@@ -26,6 +26,32 @@ type CheckProductNameBrandExistsInStoreParams struct {
 
 func (q *Queries) CheckProductNameBrandExistsInStore(ctx context.Context, arg CheckProductNameBrandExistsInStoreParams) (bool, error) {
 	row := q.db.QueryRow(ctx, checkProductNameBrandExistsInStore, arg.StoreID, arg.Name, arg.BrandID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const checkProductNameBrandExistsInStoreExcluding = `-- name: CheckProductNameBrandExistsInStoreExcluding :one
+SELECT EXISTS(
+    SELECT 1 FROM products
+    WHERE store_id = $1 AND name = $2 AND brand_id = $3 AND id != $4
+)
+`
+
+type CheckProductNameBrandExistsInStoreExcludingParams struct {
+	StoreID int64  `db:"store_id" json:"store_id"`
+	Name    string `db:"name" json:"name"`
+	BrandID int64  `db:"brand_id" json:"brand_id"`
+	ID      int64  `db:"id" json:"id"`
+}
+
+func (q *Queries) CheckProductNameBrandExistsInStoreExcluding(ctx context.Context, arg CheckProductNameBrandExistsInStoreExcludingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkProductNameBrandExistsInStoreExcluding,
+		arg.StoreID,
+		arg.Name,
+		arg.BrandID,
+		arg.ID,
+	)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -75,4 +101,42 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) er
 		arg.Note,
 	)
 	return err
+}
+
+const getProductByID = `-- name: GetProductByID :one
+SELECT
+    id,
+    store_id,
+    name,
+    brand_id,
+    category_id,
+    current_stock,
+    safety_stock,
+    unit,
+    storage_location,
+    note,
+    created_at,
+    updated_at
+FROM products
+WHERE id = $1
+`
+
+func (q *Queries) GetProductByID(ctx context.Context, id int64) (Product, error) {
+	row := q.db.QueryRow(ctx, getProductByID, id)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.StoreID,
+		&i.Name,
+		&i.BrandID,
+		&i.CategoryID,
+		&i.CurrentStock,
+		&i.SafetyStock,
+		&i.Unit,
+		&i.StorageLocation,
+		&i.Note,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
