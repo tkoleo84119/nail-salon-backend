@@ -157,6 +157,40 @@ func (q *Queries) BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTim
 	return q.db.CopyFrom(ctx, []string{"time_slots"}, []string{"id", "schedule_id", "start_time", "end_time", "is_available", "created_at", "updated_at"}, &iteratorForBatchCreateTimeSlots{rows: arg})
 }
 
+// iteratorForBulkCreateBookingProducts implements pgx.CopyFromSource.
+type iteratorForBulkCreateBookingProducts struct {
+	rows                 []BulkCreateBookingProductsParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForBulkCreateBookingProducts) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForBulkCreateBookingProducts) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].BookingID,
+		r.rows[0].ProductID,
+		r.rows[0].CreatedAt,
+	}, nil
+}
+
+func (r iteratorForBulkCreateBookingProducts) Err() error {
+	return nil
+}
+
+func (q *Queries) BulkCreateBookingProducts(ctx context.Context, arg []BulkCreateBookingProductsParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"booking_products"}, []string{"booking_id", "product_id", "created_at"}, &iteratorForBulkCreateBookingProducts{rows: arg})
+}
+
 // iteratorForCreateBookingDetails implements pgx.CopyFromSource.
 type iteratorForCreateBookingDetails struct {
 	rows                 []CreateBookingDetailsParams

@@ -38,7 +38,7 @@ func (s *UpdateCompleted) UpdateCompleted(ctx context.Context, storeID, bookingI
 
 	// Verify booking belongs to the store
 	if existingBooking.StoreID != storeID {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingNotFound)
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingNotBelongToStore)
 	}
 
 	// Verify booking is in COMPLETED status

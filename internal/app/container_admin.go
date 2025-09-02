@@ -8,6 +8,7 @@ import (
 	// Admin handlers
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
+	adminBookingProductHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking_product"
 	adminBrandHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/brand"
 	adminCheckoutHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/checkout"
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
@@ -29,6 +30,7 @@ import (
 	// Admin services
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
+	adminBookingProductService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking_product"
 	adminBrandService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/brand"
 	adminCheckoutService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/checkout"
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
@@ -112,6 +114,9 @@ type AdminServices struct {
 	BookingCancel          adminBookingService.CancelInterface
 	BookingGet             adminBookingService.GetInterface
 	BookingUpdateCompleted adminBookingService.UpdateCompletedInterface
+
+	// Booking product services
+	BookingProductBulkCreate adminBookingProductService.BulkCreateInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateBulkInterface
@@ -217,6 +222,9 @@ type AdminHandlers struct {
 	BookingGet             *adminBookingHandler.Get
 	BookingUpdateCompleted *adminBookingHandler.UpdateCompleted
 
+	// Booking product handlers
+	BookingProductBulkCreate *adminBookingProductHandler.BulkCreate
+
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateBulk
 	ScheduleDeleteBulk     *adminScheduleHandler.DeleteBulk
@@ -318,6 +326,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BookingCancel:          adminBookingService.NewCancel(queries, database.Sqlx, repositories.SQLX),
 		BookingGet:             adminBookingService.NewGet(queries),
 		BookingUpdateCompleted: adminBookingService.NewUpdateCompleted(queries),
+
+		// Booking product services
+		BookingProductBulkCreate: adminBookingProductService.NewBulkCreate(queries),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateBulk(queries, database.PgxPool),
@@ -422,6 +433,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		BookingCancel:          adminBookingHandler.NewCancel(services.BookingCancel),
 		BookingGet:             adminBookingHandler.NewGet(services.BookingGet),
 		BookingUpdateCompleted: adminBookingHandler.NewUpdateCompleted(services.BookingUpdateCompleted),
+
+		// Booking product handlers
+		BookingProductBulkCreate: adminBookingProductHandler.NewBulkCreate(services.BookingProductBulkCreate),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateBulk(services.ScheduleCreateBulk),
