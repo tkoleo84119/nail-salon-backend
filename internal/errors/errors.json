@@ -332,6 +332,11 @@
       "code": "E3PRO003",
       "message": "產品不屬於指定的門市",
       "status": 400
+    },
+    "ProductStockNotEnough": {
+      "code": "E3PRO004",
+      "message": "產品庫存不足",
+      "status": 400
     }
   },
   "SCHEDULE": {

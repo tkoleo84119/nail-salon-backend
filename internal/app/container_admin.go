@@ -20,6 +20,7 @@ import (
 	adminScheduleHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/schedule"
 	adminServiceHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/service"
 	adminStaffHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/staff"
+	adminStockUsagesHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/stock_usages"
 	adminStoreHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store"
 	adminStoreAccessHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store_access"
 	adminStylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/stylist"
@@ -42,6 +43,7 @@ import (
 	adminScheduleService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/schedule"
 	adminServiceService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/service"
 	adminStaffService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/staff"
+	adminStockUsagesService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/stock_usages"
 	adminStoreService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store"
 	adminStoreAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store_access"
 	adminStylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/stylist"
@@ -157,6 +159,9 @@ type AdminServices struct {
 	// Report services
 	ReportGetPerformanceMe    adminReportService.GetPerformanceMeInterface
 	ReportGetStorePerformance adminReportService.GetStorePerformanceInterface
+
+	// Stock usages services
+	StockUsagesCreate adminStockUsagesService.CreateInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -266,6 +271,9 @@ type AdminHandlers struct {
 	// Report handlers
 	ReportGetPerformanceMe    *adminReportHandler.GetPerformanceMe
 	ReportGetStorePerformance *adminReportHandler.GetStorePerformance
+
+	// Stock usages handlers
+	StockUsagesCreate *adminStockUsagesHandler.Create
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -373,6 +381,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Report services
 		ReportGetPerformanceMe:    adminReportService.NewGetPerformanceMe(queries),
 		ReportGetStorePerformance: adminReportService.NewGetStorePerformance(queries),
+
+		// Stock usages services
+		StockUsagesCreate: adminStockUsagesService.NewCreate(queries),
 	}
 }
 
@@ -482,5 +493,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Report handlers
 		ReportGetPerformanceMe:    adminReportHandler.NewGetPerformanceMe(services.ReportGetPerformanceMe),
 		ReportGetStorePerformance: adminReportHandler.NewGetStorePerformance(services.ReportGetStorePerformance),
+
+		// Stock usages handlers
+		StockUsagesCreate: adminStockUsagesHandler.NewCreate(services.StockUsagesCreate),
 	}
 }

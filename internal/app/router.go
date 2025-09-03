@@ -206,6 +206,9 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.GET("/:storeId/products", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.ProductGetAll.GetAll)
 		stores.POST("/:storeId/products", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ProductCreate.Create)
 		stores.PATCH("/:storeId/products/:productId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ProductUpdate.Update)
+
+		// Store stock usages routes
+		stores.POST("/:storeId/stock-usages", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.StockUsagesCreate.Create)
 	}
 }
 

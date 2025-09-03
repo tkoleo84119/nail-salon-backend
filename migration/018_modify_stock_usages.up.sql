@@ -1,0 +1,2 @@
+ALTER TABLE stock_usages
+ALTER COLUMN expiration DROP NOT NULL;

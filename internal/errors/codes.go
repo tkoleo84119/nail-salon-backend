@@ -134,6 +134,7 @@ const (
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"
 	ProductNotBelongToStore = "ProductNotBelongToStore"
 	ProductNotFound = "ProductNotFound"
+	ProductStockNotEnough = "ProductStockNotEnough"
 
 	// PRODUCT_CATEGORY - product category related errors
 	CategoryNameAlreadyExists = "CategoryNameAlreadyExists"

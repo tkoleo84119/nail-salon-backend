@@ -66,6 +66,7 @@ type Querier interface {
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
+	CreateStockUsage(ctx context.Context, arg CreateStockUsageParams) error
 	CreateStore(ctx context.Context, arg CreateStoreParams) error
 	CreateStylist(ctx context.Context, arg CreateStylistParams) (Stylist, error)
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)

@@ -360,7 +360,7 @@ Table stock_usages {
   product_id bigint [not null]
   quantity int [not null]
   is_in_use boolean [default: true]
-  expiration date [not null] // 有限期限
+  expiration date // 有限期限
   usage_started date [not null]
   usage_ended_at date
   created_at timestamptz [default: `now()`]

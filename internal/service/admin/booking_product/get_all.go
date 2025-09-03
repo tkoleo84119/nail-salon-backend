@@ -9,7 +9,6 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminBookingProductModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking_product"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -47,7 +46,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, bookingID int64, req
 	}
 
 	// Query booking products with filtering and pagination
-	total, items, err := s.repo.BookingProduct.GetAllBookingProductsByFilter(ctx, sqlx.GetAllBookingProductsByFilterParams{
+	total, items, err := s.repo.BookingProduct.GetAllBookingProductsByFilter(ctx, sqlxRepo.GetAllBookingProductsByFilterParams{
 		BookingID: bookingID,
 		Limit:     &req.Limit,
 		Offset:    &req.Offset,
