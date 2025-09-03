@@ -46,7 +46,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get booking status", err)
 	}
-	if booking.Status != "SCHEDULED" {
+	if booking.Status != common.BookingStatusScheduled {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.BookingStatusNotCheckout)
 	}
 	if booking.StoreID != storeID {
@@ -263,14 +263,14 @@ func (s *Create) prepareBookingDetailPriceInfoAndValidate(
 		totalAmount += originalPrice
 		finalAmount += discountedPrice
 
-		discountedPricePg, err := utils.Float64ToPgNumeric(discountedPrice)
+		originalPricePg, err := utils.Float64ToPgNumeric(originalPrice)
 		if err != nil {
 			return nil, totalAmount, finalAmount, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price to pgtype.Numeric", err)
 		}
 
 		bookingDetailPriceInfo = append(bookingDetailPriceInfo, dbgen.UpdateBookingDetailPriceInfoParams{
 			ID:             bookingDetail.ID,
-			Price:          discountedPricePg,
+			Price:          originalPricePg, // store original price
 			DiscountRate:   discountRatePg,
 			DiscountAmount: discountAmountPg,
 		})
