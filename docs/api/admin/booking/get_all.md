@@ -74,6 +74,7 @@
     "items": [
       {
         "id": "3000000001",
+        "actualDuration": 120, // 如果非 "COMPLETED" 則不會有該欄位
         "customer": {
           "id": "2000000001",
           "name": "小美"

@@ -57,12 +57,13 @@ func (s *Get) Get(ctx context.Context, storeID, bookingID int64, role string, st
 			StartTime: utils.PgTimeToTimeString(booking.StartTime),
 			EndTime:   utils.PgTimeToTimeString(booking.EndTime),
 		},
-		IsChatEnabled: utils.PgBoolToBool(booking.IsChatEnabled),
-		Note:          utils.PgTextToString(booking.Note),
-		Status:        booking.Status,
-		CreatedAt:     utils.PgTimestamptzToTimeString(booking.CreatedAt),
-		UpdatedAt:     utils.PgTimestamptzToTimeString(booking.UpdatedAt),
-		Checkout:      nil, // default is nil
+		IsChatEnabled:  utils.PgBoolToBool(booking.IsChatEnabled),
+		Note:           utils.PgTextToString(booking.Note),
+		ActualDuration: utils.PgInt4ToInt32Ptr(booking.ActualDuration),
+		Status:         booking.Status,
+		CreatedAt:      utils.PgTimestamptzToTimeString(booking.CreatedAt),
+		UpdatedAt:      utils.PgTimestamptzToTimeString(booking.UpdatedAt),
+		Checkout:       nil, // default is nil
 	}
 
 	bookingDetails, err := s.queries.GetBookingDetailsByBookingID(ctx, bookingID)

@@ -28,13 +28,14 @@ type GetAllResponse struct {
 }
 
 type GetAllItem struct {
-	ID          string             `json:"id"`
-	Customer    GetAllCustomer     `json:"customer"`
-	Stylist     GetAllStylist      `json:"stylist"`
-	TimeSlot    GetAllTimeSlot     `json:"timeSlot"`
-	MainService GetAllMainService  `json:"mainService"`
-	SubServices []GetAllSubService `json:"subServices"`
-	Status      string             `json:"status"`
+	ID             string             `json:"id"`
+	Customer       GetAllCustomer     `json:"customer"`
+	Stylist        GetAllStylist      `json:"stylist"`
+	TimeSlot       GetAllTimeSlot     `json:"timeSlot"`
+	MainService    GetAllMainService  `json:"mainService"`
+	SubServices    []GetAllSubService `json:"subServices"`
+	ActualDuration *int32             `json:"actualDuration,omitempty"`
+	Status         string             `json:"status"`
 }
 
 type GetAllCustomer struct {

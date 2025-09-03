@@ -62,6 +62,7 @@
       "endTime": "11:00"
     },
     "isChatEnabled": true,
+    "actualDuration": 120, // 如果非 "COMPLETED" 則不會有該欄位
     "status": "SCHEDULED",
     "note": "這是備註",
     "createdAt": "2025-01-01T00:00:00+08:00",

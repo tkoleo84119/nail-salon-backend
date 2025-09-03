@@ -5,6 +5,7 @@ type GetResponse struct {
 	Customer       GetCustomer            `json:"customer"`
 	Stylist        GetStylist             `json:"stylist"`
 	TimeSlot       GetTimeSlot            `json:"timeSlot"`
+	ActualDuration *int32                 `json:"actualDuration,omitempty"`
 	Status         string                 `json:"status"`
 	IsChatEnabled  bool                   `json:"isChatEnabled"`
 	Note           string                 `json:"note"`

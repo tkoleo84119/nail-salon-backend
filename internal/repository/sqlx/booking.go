@@ -127,17 +127,18 @@ type GetAllStoreBookingsByFilterParams struct {
 }
 
 type GetAllStoreBookingsByFilterItem struct {
-	ID           int64       `db:"id"`
-	StoreID      int64       `db:"store_id"`
-	CustomerID   int64       `db:"customer_id"`
-	CustomerName string      `db:"customer_name"`
-	StylistID    int64       `db:"stylist_id"`
-	StylistName  pgtype.Text `db:"stylist_name"`
-	TimeSlotID   int64       `db:"time_slot_id"`
-	StartTime    pgtype.Time `db:"start_time"`
-	EndTime      pgtype.Time `db:"end_time"`
-	WorkDate     pgtype.Date `db:"work_date"`
-	Status       string      `db:"status"`
+	ID             int64       `db:"id"`
+	StoreID        int64       `db:"store_id"`
+	CustomerID     int64       `db:"customer_id"`
+	CustomerName   string      `db:"customer_name"`
+	StylistID      int64       `db:"stylist_id"`
+	StylistName    pgtype.Text `db:"stylist_name"`
+	TimeSlotID     int64       `db:"time_slot_id"`
+	StartTime      pgtype.Time `db:"start_time"`
+	EndTime        pgtype.Time `db:"end_time"`
+	WorkDate       pgtype.Date `db:"work_date"`
+	ActualDuration pgtype.Int4 `db:"actual_duration"`
+	Status         string      `db:"status"`
 }
 
 // GetAllStoreBookingsByFilter retrieves bookings for a specific store with dynamic filtering and pagination
@@ -212,6 +213,7 @@ func (r *BookingRepository) GetAllStoreBookingsByFilter(ctx context.Context, sto
 			ts.start_time,
 			ts.end_time,
 			sch.work_date,
+			b.actual_duration,
 			b.status
 		FROM bookings b
 		JOIN customers c ON b.customer_id = c.id

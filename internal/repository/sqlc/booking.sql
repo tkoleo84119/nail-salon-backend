@@ -29,6 +29,7 @@ SELECT
     sch.work_date,
     b.is_chat_enabled,
     b.note,
+    b.actual_duration,
     b.status,
     b.created_at,
     b.updated_at
