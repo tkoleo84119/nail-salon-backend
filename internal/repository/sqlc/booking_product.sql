@@ -13,3 +13,7 @@ SELECT product_id FROM booking_products WHERE booking_id = $1;
 -- name: CountProductsByIDs :one
 SELECT COUNT(*) FROM products
 WHERE id = ANY($1::bigint[]) AND store_id = $2;
+
+-- name: BulkDeleteBookingProducts :exec
+DELETE FROM booking_products
+WHERE booking_id = $1 AND product_id = ANY($2::bigint[]);

@@ -17,6 +17,21 @@ type BulkCreateBookingProductsParams struct {
 	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
 }
 
+const bulkDeleteBookingProducts = `-- name: BulkDeleteBookingProducts :exec
+DELETE FROM booking_products
+WHERE booking_id = $1 AND product_id = ANY($2::bigint[])
+`
+
+type BulkDeleteBookingProductsParams struct {
+	BookingID int64   `db:"booking_id" json:"booking_id"`
+	Column2   []int64 `db:"column_2" json:"column_2"`
+}
+
+func (q *Queries) BulkDeleteBookingProducts(ctx context.Context, arg BulkDeleteBookingProductsParams) error {
+	_, err := q.db.Exec(ctx, bulkDeleteBookingProducts, arg.BookingID, arg.Column2)
+	return err
+}
+
 const countProductsByIDs = `-- name: CountProductsByIDs :one
 SELECT COUNT(*) FROM products
 WHERE id = ANY($1::bigint[]) AND store_id = $2

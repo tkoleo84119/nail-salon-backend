@@ -117,6 +117,7 @@ type AdminServices struct {
 
 	// Booking product services
 	BookingProductBulkCreate adminBookingProductService.BulkCreateInterface
+	BookingProductBulkDelete adminBookingProductService.BulkDeleteInterface
 
 	// Schedule management services
 	ScheduleCreateBulk     adminScheduleService.CreateBulkInterface
@@ -224,6 +225,7 @@ type AdminHandlers struct {
 
 	// Booking product handlers
 	BookingProductBulkCreate *adminBookingProductHandler.BulkCreate
+	BookingProductBulkDelete *adminBookingProductHandler.BulkDelete
 
 	// Schedule management handlers
 	ScheduleCreateBulk     *adminScheduleHandler.CreateBulk
@@ -329,6 +331,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Booking product services
 		BookingProductBulkCreate: adminBookingProductService.NewBulkCreate(queries),
+		BookingProductBulkDelete: adminBookingProductService.NewBulkDelete(queries),
 
 		// Schedule management services
 		ScheduleCreateBulk:     adminScheduleService.NewCreateBulk(queries, database.PgxPool),
@@ -436,6 +439,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Booking product handlers
 		BookingProductBulkCreate: adminBookingProductHandler.NewBulkCreate(services.BookingProductBulkCreate),
+		BookingProductBulkDelete: adminBookingProductHandler.NewBulkDelete(services.BookingProductBulkDelete),
 
 		// Schedule management handlers
 		ScheduleCreateBulk:     adminScheduleHandler.NewCreateBulk(services.ScheduleCreateBulk),
