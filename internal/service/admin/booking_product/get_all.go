@@ -61,18 +61,15 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, bookingID int64, req
 	itemsDTO := make([]adminBookingProductModel.GetAllItemData, len(items))
 	for i, item := range items {
 		itemsDTO[i] = adminBookingProductModel.GetAllItemData{
-			ID: utils.FormatID(item.ID),
-			Product: adminBookingProductModel.GetAllItemProductData{
-				ID:   utils.FormatID(item.ProductID),
-				Name: item.ProductName,
-				Brand: adminBookingProductModel.GetAllItemProductBrandData{
-					ID:   utils.FormatID(item.BrandID),
-					Name: item.BrandName,
-				},
-				Category: adminBookingProductModel.GetAllItemProductCategoryData{
-					ID:   utils.FormatID(item.CategoryID),
-					Name: item.CategoryName,
-				},
+			ID:   utils.FormatID(item.ProductID),
+			Name: item.ProductName,
+			Brand: adminBookingProductModel.GetAllItemProductBrandData{
+				ID:   utils.FormatID(item.BrandID),
+				Name: item.BrandName,
+			},
+			Category: adminBookingProductModel.GetAllItemProductCategoryData{
+				ID:   utils.FormatID(item.CategoryID),
+				Name: item.CategoryName,
 			},
 			CreatedAt: utils.PgTimestamptzToTimeString(item.CreatedAt),
 		}

@@ -18,16 +18,11 @@ type GetAllResponse struct {
 }
 
 type GetAllItemData struct {
-	ID        string                `json:"id"`
-	Product   GetAllItemProductData `json:"product"`
-	CreatedAt string                `json:"createdAt"`
-}
-
-type GetAllItemProductData struct {
-	ID       string                        `json:"id"`
-	Name     string                        `json:"name"`
-	Brand    GetAllItemProductBrandData    `json:"brand"`
-	Category GetAllItemProductCategoryData `json:"category"`
+	ID        string                        `json:"id"`
+	Name      string                        `json:"name"`
+	Brand     GetAllItemProductBrandData    `json:"brand"`
+	Category  GetAllItemProductCategoryData `json:"category"`
+	CreatedAt string                        `json:"createdAt"`
 }
 
 type GetAllItemProductBrandData struct {

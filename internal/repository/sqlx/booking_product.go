@@ -30,7 +30,6 @@ type GetAllBookingProductsByFilterParams struct {
 }
 
 type GetAllBookingProductsByFilterItem struct {
-	ID           int64              `db:"id"`
 	ProductID    int64              `db:"product_id"`
 	ProductName  string             `db:"product_name"`
 	BrandID      int64              `db:"brand_id"`
@@ -79,7 +78,6 @@ func (r *BookingProductRepository) GetAllBookingProductsByFilter(ctx context.Con
 	// Data query with JOINs
 	query := fmt.Sprintf(`
 		SELECT
-			bp.id,
 			bp.product_id,
 			p.name AS product_name,
 			b.id AS brand_id,
