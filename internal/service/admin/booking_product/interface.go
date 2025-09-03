@@ -13,3 +13,7 @@ type BulkCreateInterface interface {
 type BulkDeleteInterface interface {
 	BulkDelete(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.BulkDeleteParsedRequest, staffStoreIDs []int64) (*adminBookingProductModel.BulkDeleteResponse, error)
 }
+
+type GetAllInterface interface {
+	GetAll(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.GetAllParsedRequest, staffStoreIDs []int64) (*adminBookingProductModel.GetAllResponse, error)
+}

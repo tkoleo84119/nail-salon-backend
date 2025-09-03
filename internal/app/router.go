@@ -198,6 +198,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.POST("/:storeId/bookings/:bookingId/checkouts", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.CheckoutCreate.Create)
 
 		// Store booking products routes
+		stores.GET("/:storeId/bookings/:bookingId/products", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingProductGetAll.GetAll)
 		stores.POST("/:storeId/bookings/:bookingId/products/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingProductBulkCreate.BulkCreate)
 		stores.DELETE("/:storeId/bookings/:bookingId/products/bulk", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.BookingProductBulkDelete.BulkDelete)
 
