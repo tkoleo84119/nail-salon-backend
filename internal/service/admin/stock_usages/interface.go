@@ -13,3 +13,7 @@ type CreateInterface interface {
 type GetAllInterface interface {
 	GetAll(ctx context.Context, storeID int64, req adminStockUsagesModel.GetAllParsedRequest, staffStoreIDs []int64) (*adminStockUsagesModel.GetAllResponse, error)
 }
+
+type UpdateFinishInterface interface {
+	UpdateFinish(ctx context.Context, storeID int64, stockUsageID int64, req adminStockUsagesModel.UpdateFinishParsedRequest, staffStoreIDs []int64) (*adminStockUsagesModel.UpdateFinishResponse, error)
+}

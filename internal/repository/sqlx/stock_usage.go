@@ -24,11 +24,12 @@ func NewStockUsageRepository(db *sqlx.DB) *StockUsageRepository {
 // ---------------------------------------------------------------------------------------------------------------------
 
 type GetAllStockUsagesByFilterParams struct {
-	Name    *string
-	IsInUse *bool
-	Limit   *int
-	Offset  *int
-	Sort    *[]string
+	ProductID *int64
+	Name      *string
+	IsInUse   *bool
+	Limit     *int
+	Offset    *int
+	Sort      *[]string
 }
 
 type GetAllStockUsagesByFilterItem struct {
@@ -47,8 +48,13 @@ type GetAllStockUsagesByFilterItem struct {
 // GetAllStockUsagesByFilter retrieves stock usages with filtering, pagination and sorting
 func (r *StockUsageRepository) GetAllStockUsagesByFilter(ctx context.Context, storeID int64, params GetAllStockUsagesByFilterParams) (int, []GetAllStockUsagesByFilterItem, error) {
 	// where conditions
-	whereConditions := []string{"su.store_id = $1"}
+	whereConditions := []string{"p.store_id = $1"}
 	args := []interface{}{storeID}
+
+	if params.ProductID != nil {
+		whereConditions = append(whereConditions, fmt.Sprintf("p.id = $%d", len(args)+1))
+		args = append(args, *params.ProductID)
+	}
 
 	if params.Name != nil && *params.Name != "" {
 		whereConditions = append(whereConditions, fmt.Sprintf("p.name ILIKE $%d", len(args)+1))
@@ -99,7 +105,7 @@ func (r *StockUsageRepository) GetAllStockUsagesByFilter(ctx context.Context, st
 	query := fmt.Sprintf(`
 		SELECT
 			su.id,
-			su.product_id,
+			p.id as product_id,
 			p.name as product_name,
 			su.quantity,
 			su.is_in_use,

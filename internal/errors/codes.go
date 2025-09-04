@@ -143,4 +143,8 @@ const (
 	// REPORT - report related errors
 	ReportDateRangeExceed1Year = "ReportDateRangeExceed1Year"
 
+	// STOCK_USAGE - stock usage related errors
+	StockUsageNotFound = "StockUsageNotFound"
+	StockUsageNotInUse = "StockUsageNotInUse"
+
 )

@@ -1,18 +1,18 @@
 ## User Story
 
-作為一位管理員，我希望能新增產品庫存使用紀錄，方便維護庫存使用紀錄。
+作為一位管理員，我希望能更新產品庫存使用紀錄，方便維護庫存使用紀錄。
 
 ---
 
 ## Endpoint
 
-**POST** `/api/admin/stores/{storeId}/stock-usages`
+**PATCH** `/api/admin/stores/{storeId}/stock-usages/{stockUsageId}/finish`
 
 ---
 
 ## 說明
 
-- 提供後台管理員新增產品庫存使用紀錄功能。
+- 提供後台管理員更新產品庫存使用紀錄為完成狀態功能。
 
 ---
 
@@ -30,31 +30,31 @@
 - Content-Type: application/json
 - Authorization: Bearer <access_token>
 
+### Path Parameter
+
+| 參數         | 說明           |
+| ------------ | -------------- |
+| stockUsageId | 庫存使用紀錄ID |
+
 ### Body 範例
 
 ```json
 {
-  "productId": "9000000001",
-  "quantity": 10,
-  "expiration": "2027-01-01",
-  "usageStarted": "2025-01-01"
+  "usageEndedAt": "2025-01-01"
 }
 ```
 
 ### 驗證規則
 
-| 欄位         | 必填 | 其他規則                     | 說明                      |
-| ------------ | ---- | ---------------------------- | ------------------------- |
-| productId    | 是   |                              | 產品 ID                   |
-| quantity     | 是   | <li>最小值1<li>最大值1000000 | 使用數量                  |
-| expiration   | 否   | <li>格式是YYYY-MM-DD         | 有限期限 (未傳代表無期限) |
-| usageStarted | 是   | <li>格式是YYYY-MM-DD         | 使用開始日期              |
+| 欄位         | 必填 | 其他規則             | 說明         |
+| ------------ | ---- | -------------------- | ------------ |
+| usageEndedAt | 是   | <li>格式是YYYY-MM-DD | 使用結束日期 |
 
 ---
 
 ## Response
 
-### 成功 201 Created
+### 成功 200 OK
 
 ```json
 {
@@ -98,12 +98,9 @@
 | 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查                                |
 | 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                                    |
 | 400    | E2020    | ValFieldRequired        | {field} 為必填項目                                  |
-| 400    | E2023    | ValFieldMinNumber       | {field} 最小值為 {param}                            |
-| 400    | E2026    | ValFieldMaxNumber       | {field} 最大值為 {param}                            |
 | 400    | E2033    | ValFieldDateFormat      | {field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD) |
-| 400    | E3PRO003 | ProductNotBelongToStore | 產品不屬於指定的門市                                |
-| 404    | E3PRO002 | ProductNotFound         | 產品不存在或已被刪除                                |
-| 400    | E3PRO004 | ProductStockNotEnough   | 產品庫存不足                                        |
+| 400    | E3STU002 | StockUsageNotInUse      | 庫存使用紀錄已完成，無法再次完成                    |
+| 404    | E3STU001 | StockUsageNotFound      | 庫存使用紀錄不存在或已被刪除                        |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試                            |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                                      |
 
@@ -111,7 +108,6 @@
 
 ## 資料表
 
-- `products`
 - `stock_usages`
 
 ---
@@ -119,9 +115,7 @@
 ## Service 邏輯
 
 1. 確認門市存取權限。
-2. 確認產品是否存在。
-3. 確認產品是否屬於該門市。
-4. 確認產品庫存是否足夠。
-5. 建立 `stock_usages` 資料。
-6. 更新產品庫存。
-7. 回傳新增結果。
+2. 確認庫存使用紀錄是否存在。
+4. 確認庫存使用紀錄是否為正在使用中。
+5. 更新 `stock_usages` 資料。
+6. 回傳更新結果。

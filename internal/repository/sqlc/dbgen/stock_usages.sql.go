@@ -41,3 +41,54 @@ func (q *Queries) CreateStockUsage(ctx context.Context, arg CreateStockUsagePara
 	)
 	return err
 }
+
+const getStockUsageByID = `-- name: GetStockUsageByID :one
+SELECT
+    id,
+    product_id,
+    quantity,
+    is_in_use,
+    expiration,
+    usage_started,
+    usage_ended_at,
+    created_at,
+    updated_at
+FROM stock_usages
+WHERE id = $1
+`
+
+func (q *Queries) GetStockUsageByID(ctx context.Context, id int64) (StockUsage, error) {
+	row := q.db.QueryRow(ctx, getStockUsageByID, id)
+	var i StockUsage
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.IsInUse,
+		&i.Expiration,
+		&i.UsageStarted,
+		&i.UsageEndedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateStockUsageFinish = `-- name: UpdateStockUsageFinish :exec
+UPDATE stock_usages
+SET 
+    is_in_use = false,
+    usage_ended_at = $2,
+    updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateStockUsageFinishParams struct {
+	ID           int64       `db:"id" json:"id"`
+	UsageEndedAt pgtype.Date `db:"usage_ended_at" json:"usage_ended_at"`
+}
+
+func (q *Queries) UpdateStockUsageFinish(ctx context.Context, arg UpdateStockUsageFinishParams) error {
+	_, err := q.db.Exec(ctx, updateStockUsageFinish, arg.ID, arg.UsageEndedAt)
+	return err
+}

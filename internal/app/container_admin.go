@@ -161,8 +161,9 @@ type AdminServices struct {
 	ReportGetStorePerformance adminReportService.GetStorePerformanceInterface
 
 	// Stock usages services
-	StockUsagesCreate adminStockUsagesService.CreateInterface
-	StockUsagesGetAll adminStockUsagesService.GetAllInterface
+	StockUsagesCreate       adminStockUsagesService.CreateInterface
+	StockUsagesGetAll       adminStockUsagesService.GetAllInterface
+	StockUsagesUpdateFinish adminStockUsagesService.UpdateFinishInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -274,8 +275,9 @@ type AdminHandlers struct {
 	ReportGetStorePerformance *adminReportHandler.GetStorePerformance
 
 	// Stock usages handlers
-	StockUsagesCreate *adminStockUsagesHandler.Create
-	StockUsagesGetAll *adminStockUsagesHandler.GetAll
+	StockUsagesCreate       *adminStockUsagesHandler.Create
+	StockUsagesGetAll       *adminStockUsagesHandler.GetAll
+	StockUsagesUpdateFinish *adminStockUsagesHandler.UpdateFinish
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -385,8 +387,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ReportGetStorePerformance: adminReportService.NewGetStorePerformance(queries),
 
 		// Stock usages services
-		StockUsagesCreate: adminStockUsagesService.NewCreate(queries, database.PgxPool),
-		StockUsagesGetAll: adminStockUsagesService.NewGetAll(queries, repositories.SQLX),
+		StockUsagesCreate:       adminStockUsagesService.NewCreate(queries, database.PgxPool),
+		StockUsagesGetAll:       adminStockUsagesService.NewGetAll(queries, repositories.SQLX),
+		StockUsagesUpdateFinish: adminStockUsagesService.NewUpdateFinish(queries),
 	}
 }
 
@@ -498,7 +501,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		ReportGetStorePerformance: adminReportHandler.NewGetStorePerformance(services.ReportGetStorePerformance),
 
 		// Stock usages handlers
-		StockUsagesCreate: adminStockUsagesHandler.NewCreate(services.StockUsagesCreate),
-		StockUsagesGetAll: adminStockUsagesHandler.NewGetAll(services.StockUsagesGetAll),
+		StockUsagesCreate:       adminStockUsagesHandler.NewCreate(services.StockUsagesCreate),
+		StockUsagesGetAll:       adminStockUsagesHandler.NewGetAll(services.StockUsagesGetAll),
+		StockUsagesUpdateFinish: adminStockUsagesHandler.NewUpdateFinish(services.StockUsagesUpdateFinish),
 	}
 }

@@ -462,6 +462,18 @@
       "status": 409
     }
   },
+  "STOCK_USAGE": {
+    "StockUsageNotFound": {
+      "code": "E3STU001",
+      "message": "庫存使用紀錄不存在或已被刪除",
+      "status": 404
+    },
+    "StockUsageNotInUse": {
+      "code": "E3STU002",
+      "message": "庫存使用紀錄已完成，無法再次完成",
+      "status": 400
+    }
+  },
   "STYLIST": {
     "StylistNotFound": {
       "code": "E3STY001",

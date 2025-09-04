@@ -101,6 +101,7 @@ type Querier interface {
 	GetServiceByID(ctx context.Context, id int64) (Service, error)
 	GetServiceByIds(ctx context.Context, dollar_1 []int64) ([]GetServiceByIdsRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
+	GetStockUsageByID(ctx context.Context, id int64) (StockUsage, error)
 	GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error)
 	GetStoreDetailByID(ctx context.Context, id int64) (Store, error)
 	GetStorePerformanceGroupByStylist(ctx context.Context, arg GetStorePerformanceGroupByStylistParams) ([]GetStorePerformanceGroupByStylistRow, error)
@@ -122,6 +123,7 @@ type Querier interface {
 	UpdateCustomerCouponUsed(ctx context.Context, id int64) error
 	UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error
 	UpdateProductCurrentStock(ctx context.Context, arg UpdateProductCurrentStockParams) error
+	UpdateStockUsageFinish(ctx context.Context, arg UpdateStockUsageFinishParams) error
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
 	UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (UpdateTimeSlotTemplateItemRow, error)
