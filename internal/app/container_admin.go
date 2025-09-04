@@ -162,6 +162,7 @@ type AdminServices struct {
 
 	// Stock usages services
 	StockUsagesCreate adminStockUsagesService.CreateInterface
+	StockUsagesGetAll adminStockUsagesService.GetAllInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -274,6 +275,7 @@ type AdminHandlers struct {
 
 	// Stock usages handlers
 	StockUsagesCreate *adminStockUsagesHandler.Create
+	StockUsagesGetAll *adminStockUsagesHandler.GetAll
 }
 
 // NewAdminServices creates and initializes all admin services
@@ -384,6 +386,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Stock usages services
 		StockUsagesCreate: adminStockUsagesService.NewCreate(queries),
+		StockUsagesGetAll: adminStockUsagesService.NewGetAll(queries, repositories.SQLX),
 	}
 }
 
@@ -496,5 +499,6 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Stock usages handlers
 		StockUsagesCreate: adminStockUsagesHandler.NewCreate(services.StockUsagesCreate),
+		StockUsagesGetAll: adminStockUsagesHandler.NewGetAll(services.StockUsagesGetAll),
 	}
 }

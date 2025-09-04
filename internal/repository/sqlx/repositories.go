@@ -18,6 +18,7 @@ type Repositories struct {
 	Schedule        *ScheduleRepository
 	Service         *ServiceRepository
 	Staff           *StaffUserRepository
+	StockUsage      *StockUsageRepository
 	Store           *StoreRepository
 	Stylist         *StylistRepository
 	TimeSlot        *TimeSlotRepository
@@ -39,6 +40,7 @@ func NewRepositories(db *sqlx.DB) *Repositories {
 		Schedule:        NewScheduleRepository(db),
 		Service:         NewServiceRepository(db),
 		Staff:           NewStaffUserRepository(db),
+		StockUsage:      NewStockUsageRepository(db),
 		Store:           NewStoreRepository(db),
 		Stylist:         NewStylistRepository(db),
 		TimeSlot:        NewTimeSlotRepository(db),
