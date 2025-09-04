@@ -155,3 +155,19 @@ func (q *Queries) GetProductByID(ctx context.Context, id int64) (GetProductByIDR
 	)
 	return i, err
 }
+
+const updateProductCurrentStock = `-- name: UpdateProductCurrentStock :exec
+UPDATE products
+SET current_stock = $2, updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateProductCurrentStockParams struct {
+	ID           int64 `db:"id" json:"id"`
+	CurrentStock int32 `db:"current_stock" json:"current_stock"`
+}
+
+func (q *Queries) UpdateProductCurrentStock(ctx context.Context, arg UpdateProductCurrentStockParams) error {
+	_, err := q.db.Exec(ctx, updateProductCurrentStock, arg.ID, arg.CurrentStock)
+	return err
+}

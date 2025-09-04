@@ -31,6 +31,11 @@ SELECT
 FROM products
 WHERE id = $1;
 
+-- name: UpdateProductCurrentStock :exec
+UPDATE products
+SET current_stock = $2, updated_at = NOW()
+WHERE id = $1;
+
 -- name: CheckProductNameBrandExistsInStore :one
 SELECT EXISTS(
     SELECT 1 FROM products

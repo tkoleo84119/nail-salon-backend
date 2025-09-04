@@ -121,6 +121,7 @@ type Querier interface {
 	UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error
 	UpdateCustomerCouponUsed(ctx context.Context, id int64) error
 	UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error
+	UpdateProductCurrentStock(ctx context.Context, arg UpdateProductCurrentStockParams) error
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
 	UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (UpdateTimeSlotTemplateItemRow, error)

@@ -385,7 +385,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		ReportGetStorePerformance: adminReportService.NewGetStorePerformance(queries),
 
 		// Stock usages services
-		StockUsagesCreate: adminStockUsagesService.NewCreate(queries),
+		StockUsagesCreate: adminStockUsagesService.NewCreate(queries, database.PgxPool),
 		StockUsagesGetAll: adminStockUsagesService.NewGetAll(queries, repositories.SQLX),
 	}
 }

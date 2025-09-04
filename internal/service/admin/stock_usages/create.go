@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStockUsagesModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/stock_usages"
@@ -15,11 +16,13 @@ import (
 
 type Create struct {
 	queries *dbgen.Queries
+	db      *pgxpool.Pool
 }
 
-func NewCreate(queries *dbgen.Queries) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
 	return &Create{
 		queries: queries,
+		db:      db,
 	}
 }
 
@@ -44,6 +47,9 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminStockUsages
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ProductStockNotEnough)
 	}
 
+	// prepare new product stock
+	newProductStock := product.CurrentStock - int32(req.Quantity)
+
 	// Create stock usage
 	stockUsageID := utils.GenerateID()
 	var expiration pgtype.Date
@@ -53,7 +59,14 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminStockUsages
 		expiration = pgtype.Date{Valid: false}
 	}
 
-	err = s.queries.CreateStockUsage(ctx, dbgen.CreateStockUsageParams{
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
+	}
+	defer tx.Rollback(ctx)
+	qtx := dbgen.New(tx)
+
+	err = qtx.CreateStockUsage(ctx, dbgen.CreateStockUsageParams{
 		ID:           stockUsageID,
 		ProductID:    req.ProductID,
 		Quantity:     int32(req.Quantity),
@@ -62,6 +75,18 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminStockUsages
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create stock usage", err)
+	}
+
+	err = qtx.UpdateProductCurrentStock(ctx, dbgen.UpdateProductCurrentStockParams{
+		ID:           req.ProductID,
+		CurrentStock: newProductStock,
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update product current stock", err)
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
 	return &adminStockUsagesModel.CreateResponse{
