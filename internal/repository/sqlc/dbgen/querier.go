@@ -46,6 +46,7 @@ type Querier interface {
 	CheckStoreNameExistsExcluding(ctx context.Context, arg CheckStoreNameExistsExcludingParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
 	CheckStylistExistAndActive(ctx context.Context, id int64) (bool, error)
+	CheckSupplierNameExists(ctx context.Context, name string) (bool, error)
 	CheckTimeSlotOverlap(ctx context.Context, arg CheckTimeSlotOverlapParams) (bool, error)
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
@@ -69,6 +70,7 @@ type Querier interface {
 	CreateStockUsage(ctx context.Context, arg CreateStockUsageParams) error
 	CreateStore(ctx context.Context, arg CreateStoreParams) error
 	CreateStylist(ctx context.Context, arg CreateStylistParams) (Stylist, error)
+	CreateSupplier(ctx context.Context, arg CreateSupplierParams) (int64, error)
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
 	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)
 	CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (CreateTimeSlotTemplateItemRow, error)

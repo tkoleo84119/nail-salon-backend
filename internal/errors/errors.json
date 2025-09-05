@@ -540,6 +540,13 @@
       "status": 400
     }
   },
+  "SUPPLIER": {
+    "SupplierNameAlreadyExists": {
+      "code": "E3SUP001",
+      "message": "供應商名稱已存在，請使用其他名稱",
+      "status": 409
+    }
+  },
   "SYS": {
     "SysInternalError": {
       "code": "E9001",

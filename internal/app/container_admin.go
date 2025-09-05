@@ -24,6 +24,7 @@ import (
 	adminStoreHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store"
 	adminStoreAccessHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/store_access"
 	adminStylistHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/stylist"
+	adminSupplierHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/supplier"
 	adminTimeSlotTemplateHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time-slot-template"
 	adminTimeSlotHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot"
 	adminTimeSlotTemplateItemHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot_template_item"
@@ -47,6 +48,7 @@ import (
 	adminStoreService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store"
 	adminStoreAccessService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/store_access"
 	adminStylistService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/stylist"
+	adminSupplierService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/supplier"
 	adminTimeSlotTemplateService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time-slot-template"
 	adminTimeSlotService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot"
 	adminTimeSlotTemplateItemService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/time_slot_template_item"
@@ -83,6 +85,9 @@ type AdminServices struct {
 	BrandCreate adminBrandService.CreateInterface
 	BrandGetAll adminBrandService.GetAllInterface
 	BrandUpdate adminBrandService.UpdateInterface
+
+	// Supplier management services
+	SupplierCreate adminSupplierService.CreateInterface
 
 	// Product management services
 	ProductCreate adminProductService.CreateInterface
@@ -198,6 +203,9 @@ type AdminHandlers struct {
 	BrandGetAll *adminBrandHandler.GetAll
 	BrandUpdate *adminBrandHandler.Update
 
+	// Supplier management handlers
+	SupplierCreate *adminSupplierHandler.Create
+
 	// Product management handlers
 	ProductCreate *adminProductHandler.Create
 	ProductGetAll *adminProductHandler.GetAll
@@ -311,6 +319,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		BrandGetAll: adminBrandService.NewGetAll(repositories.SQLX),
 		BrandUpdate: adminBrandService.NewUpdate(queries, repositories.SQLX),
 
+		// Supplier management services
+		SupplierCreate: adminSupplierService.NewCreate(queries),
+
 		// Product management services
 		ProductCreate: adminProductService.NewCreate(queries),
 		ProductGetAll: adminProductService.NewGetAll(repositories.SQLX),
@@ -423,6 +434,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),
 		BrandGetAll: adminBrandHandler.NewGetAll(services.BrandGetAll),
 		BrandUpdate: adminBrandHandler.NewUpdate(services.BrandUpdate),
+
+		// Supplier management handlers
+		SupplierCreate: adminSupplierHandler.NewCreate(services.SupplierCreate),
 
 		// Product management handlers
 		ProductCreate: adminProductHandler.NewCreate(services.ProductCreate),

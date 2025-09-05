@@ -147,4 +147,7 @@ const (
 	StockUsageNotFound = "StockUsageNotFound"
 	StockUsageNotInUse = "StockUsageNotInUse"
 
+	// SUPPLIER - supplier related errors
+	SupplierNameAlreadyExists = "SupplierNameAlreadyExists"
+
 )

@@ -76,7 +76,7 @@ func (q *Queries) GetStockUsageByID(ctx context.Context, id int64) (StockUsage, 
 
 const updateStockUsageFinish = `-- name: UpdateStockUsageFinish :exec
 UPDATE stock_usages
-SET 
+SET
     is_in_use = false,
     usage_ended_at = $2,
     updated_at = NOW()

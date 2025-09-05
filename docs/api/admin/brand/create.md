@@ -4,7 +4,7 @@
 
 ---
 
-## Endpointˆ
+## Endpoint
 
 **POST** `/api/admin/brands`
 
