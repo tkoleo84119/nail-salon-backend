@@ -22,6 +22,10 @@ type GetMeInterface interface {
 	GetMe(ctx context.Context, staffUserID int64) (*adminStaffModel.GetMeResponse, error)
 }
 
+type GetStoreUsernameInterface interface {
+	GetStoreUsername(ctx context.Context, storeID int64, req adminStaffModel.GetStoreUsernameParsedRequest, storeIDs []int64) (*adminStaffModel.GetStoreUsernameResponse, error)
+}
+
 type UpdateInterface interface {
 	Update(ctx context.Context, targetID int64, req adminStaffModel.UpdateRequest, updaterID int64, updaterRole string) (*adminStaffModel.UpdateResponse, error)
 }

@@ -186,3 +186,81 @@ func (r *StaffUserRepository) UpdateStaffUser(ctx context.Context, id int64, par
 
 	return result, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type GetAllStaffUsernameByStoreFilterParams struct {
+	IsActive *bool
+	Limit    *int
+	Offset   *int
+	Sort     *[]string
+}
+
+type GetAllStaffUsernameByStoreFilterResponse struct {
+	ID       int64       `db:"id"`
+	Username string      `db:"username"`
+	IsActive pgtype.Bool `db:"is_active"`
+}
+
+// GetAllStaffUsernameByStoreFilter retrieves staff usernames for a specific store with dynamic filtering and pagination
+func (r *StaffUserRepository) GetAllStaffUsernameByStoreFilter(ctx context.Context, storeID int64, params GetAllStaffUsernameByStoreFilterParams) (int, []GetAllStaffUsernameByStoreFilterResponse, error) {
+	// where conditions
+	whereConditions := []string{"sa.store_id = $1"}
+	args := []interface{}{storeID}
+
+	if params.IsActive != nil {
+		whereConditions = append(whereConditions, fmt.Sprintf("su.is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
+	}
+
+	whereClause := "WHERE " + strings.Join(whereConditions, " AND ")
+
+	// Count query
+	countQuery := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM staff_users su
+		JOIN staff_user_store_access sa ON su.id = sa.staff_user_id
+		%s
+	`, whereClause)
+
+	var total int
+	if err := r.db.GetContext(ctx, &total, countQuery, args...); err != nil {
+		return 0, nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+	if total == 0 {
+		return 0, []GetAllStaffUsernameByStoreFilterResponse{}, nil
+	}
+
+	// Pagination + Sorting
+	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
+	defaultSortArr := []string{"su.created_at ASC"}
+	sort := utils.HandleSortByMap(map[string]string{
+		"isActive":  "su.is_active",
+		"createdAt": "su.created_at",
+		"updatedAt": "su.updated_at",
+	}, defaultSortArr, params.Sort)
+
+	args = append(args, limit, offset)
+	limitIndex := len(args) - 1
+	offsetIndex := len(args)
+
+	// Data query
+	query := fmt.Sprintf(`
+		SELECT
+			su.id,
+			su.username,
+			su.is_active
+		FROM staff_users su
+		JOIN staff_user_store_access sa ON su.id = sa.staff_user_id
+		%s
+		ORDER BY %s
+		LIMIT $%d OFFSET $%d
+	`, whereClause, sort, limitIndex, offsetIndex)
+
+	var result []GetAllStaffUsernameByStoreFilterResponse
+	if err := r.db.SelectContext(ctx, &result, query, args...); err != nil {
+		return 0, nil, fmt.Errorf("failed to execute data query: %w", err)
+	}
+
+	return total, result, nil
+}

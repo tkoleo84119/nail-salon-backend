@@ -65,12 +65,13 @@ type AdminServices struct {
 	AuthStaffPermission   adminAuthService.PermissionInterface
 
 	// Staff management services
-	StaffCreate   adminStaffService.CreateInterface
-	StaffGetAll   adminStaffService.GetAllInterface
-	StaffUpdate   adminStaffService.UpdateInterface
-	StaffUpdateMe adminStaffService.UpdateMeInterface
-	StaffGet      adminStaffService.GetInterface
-	StaffGetMe    adminStaffService.GetMeInterface
+	StaffCreate           adminStaffService.CreateInterface
+	StaffGetAll           adminStaffService.GetAllInterface
+	StaffUpdate           adminStaffService.UpdateInterface
+	StaffUpdateMe         adminStaffService.UpdateMeInterface
+	StaffGet              adminStaffService.GetInterface
+	StaffGetMe            adminStaffService.GetMeInterface
+	StaffGetStoreUsername adminStaffService.GetStoreUsernameInterface
 
 	// Store access services
 	StaffGetStoreAccess        adminStoreAccessService.GetInterface
@@ -188,12 +189,13 @@ type AdminHandlers struct {
 	AuthStaffPermission   *adminAuthHandler.Permission
 
 	// Staff management handlers
-	StaffCreate   *adminStaffHandler.Create
-	StaffUpdate   *adminStaffHandler.Update
-	StaffUpdateMe *adminStaffHandler.UpdateMe
-	StaffGet      *adminStaffHandler.Get
-	StaffGetMe    *adminStaffHandler.GetMe
-	StaffGetAll   *adminStaffHandler.GetAll
+	StaffCreate           *adminStaffHandler.Create
+	StaffUpdate           *adminStaffHandler.Update
+	StaffUpdateMe         *adminStaffHandler.UpdateMe
+	StaffGet              *adminStaffHandler.Get
+	StaffGetMe            *adminStaffHandler.GetMe
+	StaffGetAll           *adminStaffHandler.GetAll
+	StaffGetStoreUsername *adminStaffHandler.GetStoreUsername
 
 	// Store access handlers
 	StaffGetStoreAccess        *adminStoreAccessHandler.Get
@@ -318,6 +320,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StaffGet:                   adminStaffService.NewGet(queries),
 		StaffGetMe:                 adminStaffService.NewGetMe(queries),
 		StaffGetAll:                adminStaffService.NewGetAll(repositories.SQLX),
+		StaffGetStoreUsername:      adminStaffService.NewGetStoreUsername(repositories.SQLX),
 		StaffGetStoreAccess:        adminStoreAccessService.NewGet(queries),
 		StaffCreateStoreAccess:     adminStoreAccessService.NewCreate(queries),
 		StaffDeleteBulkStoreAccess: adminStoreAccessService.NewDeleteBulk(queries),
@@ -440,6 +443,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StaffGet:                   adminStaffHandler.NewGet(services.StaffGet),
 		StaffGetMe:                 adminStaffHandler.NewGetMe(services.StaffGetMe),
 		StaffGetAll:                adminStaffHandler.NewGetAll(services.StaffGetAll),
+		StaffGetStoreUsername:      adminStaffHandler.NewGetStoreUsername(services.StaffGetStoreUsername),
 		StaffGetStoreAccess:        adminStoreAccessHandler.NewGet(services.StaffGetStoreAccess),
 		StaffCreateStoreAccess:     adminStoreAccessHandler.NewCreate(services.StaffCreateStoreAccess),
 		StaffDeleteBulkStoreAccess: adminStoreAccessHandler.NewDeleteBulk(services.StaffDeleteBulkStoreAccess),
