@@ -38,6 +38,7 @@ type Querier interface {
 	CheckSchedulesCanDelete(ctx context.Context, dollar_1 []int64) ([]CheckSchedulesCanDeleteRow, error)
 	CheckServiceNameExists(ctx context.Context, name string) (bool, error)
 	CheckServiceNameExistsExcluding(ctx context.Context, arg CheckServiceNameExistsExcludingParams) (bool, error)
+	CheckStaffHasStoreAccess(ctx context.Context, arg CheckStaffHasStoreAccessParams) (bool, error)
 	CheckStaffUserExistsByUsername(ctx context.Context, username string) (bool, error)
 	CheckStoreAccessExists(ctx context.Context, arg CheckStoreAccessExistsParams) (bool, error)
 	CheckStoreExistAndActive(ctx context.Context, id int64) (bool, error)
@@ -46,6 +47,7 @@ type Querier interface {
 	CheckStoreNameExistsExcluding(ctx context.Context, arg CheckStoreNameExistsExcludingParams) (bool, error)
 	CheckStoresExistAndActive(ctx context.Context, dollar_1 []int64) (CheckStoresExistAndActiveRow, error)
 	CheckStylistExistAndActive(ctx context.Context, id int64) (bool, error)
+	CheckSupplierExists(ctx context.Context, id int64) (bool, error)
 	CheckSupplierExistsByID(ctx context.Context, id int64) (bool, error)
 	CheckSupplierNameExists(ctx context.Context, name string) (bool, error)
 	CheckSupplierNameExistsExcluding(ctx context.Context, arg CheckSupplierNameExistsExcludingParams) (bool, error)
@@ -63,6 +65,7 @@ type Querier interface {
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
 	CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCouponParams) error
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
+	CreateExpense(ctx context.Context, arg CreateExpenseParams) (int64, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) error
 	CreateProductCategory(ctx context.Context, arg CreateProductCategoryParams) (int64, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)

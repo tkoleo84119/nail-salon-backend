@@ -18,6 +18,29 @@ type BatchCreateStaffUserStoreAccessParams struct {
 	UpdatedAt   pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
+const checkStaffHasStoreAccess = `-- name: CheckStaffHasStoreAccess :one
+SELECT EXISTS(
+    SELECT 1
+    FROM staff_user_store_access susa
+    JOIN staff_users su ON susa.staff_user_id = su.id
+    WHERE susa.staff_user_id = $1
+    AND susa.store_id = $2
+    AND su.is_active = true
+)
+`
+
+type CheckStaffHasStoreAccessParams struct {
+	StaffUserID int64 `db:"staff_user_id" json:"staff_user_id"`
+	StoreID     int64 `db:"store_id" json:"store_id"`
+}
+
+func (q *Queries) CheckStaffHasStoreAccess(ctx context.Context, arg CheckStaffHasStoreAccessParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkStaffHasStoreAccess, arg.StaffUserID, arg.StoreID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkStoreAccessExists = `-- name: CheckStoreAccessExists :one
 SELECT EXISTS(
     SELECT 1 FROM staff_user_store_access

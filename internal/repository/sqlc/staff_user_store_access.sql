@@ -35,3 +35,13 @@ SELECT EXISTS(
 -- name: DeleteStaffUserStoreAccess :exec
 DELETE FROM staff_user_store_access
 WHERE staff_user_id = $1 AND store_id = ANY($2::bigint[]);
+
+-- name: CheckStaffHasStoreAccess :one
+SELECT EXISTS(
+    SELECT 1
+    FROM staff_user_store_access susa
+    JOIN staff_users su ON susa.staff_user_id = su.id
+    WHERE susa.staff_user_id = $1
+    AND susa.store_id = $2
+    AND su.is_active = true
+);

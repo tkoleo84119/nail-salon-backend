@@ -14,6 +14,7 @@ import (
 	adminCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/coupon"
 	adminCustomerHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer"
 	adminCustomerCouponHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/customer_coupon"
+	adminExpenseHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/expense"
 	adminProductHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/product"
 	adminProductCategoryHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/product_category"
 	adminReportHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/report"
@@ -38,6 +39,7 @@ import (
 	adminCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/coupon"
 	adminCustomerService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer"
 	adminCustomerCouponService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/customer_coupon"
+	adminExpenseService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/expense"
 	adminProductService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/product"
 	adminProductCategoryService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/product_category"
 	adminReportService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/report"
@@ -90,6 +92,9 @@ type AdminServices struct {
 	SupplierCreate adminSupplierService.CreateInterface
 	SupplierGetAll adminSupplierService.GetAllInterface
 	SupplierUpdate adminSupplierService.UpdateInterface
+
+	// Expense management services
+	ExpenseCreate adminExpenseService.CreateInterface
 
 	// Product management services
 	ProductCreate adminProductService.CreateInterface
@@ -210,6 +215,9 @@ type AdminHandlers struct {
 	SupplierGetAll *adminSupplierHandler.GetAll
 	SupplierUpdate *adminSupplierHandler.Update
 
+	// Expense management handlers
+	ExpenseCreate *adminExpenseHandler.Create
+
 	// Product management handlers
 	ProductCreate *adminProductHandler.Create
 	ProductGetAll *adminProductHandler.GetAll
@@ -328,6 +336,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		SupplierGetAll: adminSupplierService.NewGetAll(repositories.SQLX),
 		SupplierUpdate: adminSupplierService.NewUpdate(queries, repositories.SQLX),
 
+		// Expense management services
+		ExpenseCreate: adminExpenseService.NewCreate(queries),
+
 		// Product management services
 		ProductCreate: adminProductService.NewCreate(queries),
 		ProductGetAll: adminProductService.NewGetAll(repositories.SQLX),
@@ -445,6 +456,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		SupplierCreate: adminSupplierHandler.NewCreate(services.SupplierCreate),
 		SupplierGetAll: adminSupplierHandler.NewGetAll(services.SupplierGetAll),
 		SupplierUpdate: adminSupplierHandler.NewUpdate(services.SupplierUpdate),
+
+		// Expense management handlers
+		ExpenseCreate: adminExpenseHandler.NewCreate(services.ExpenseCreate),
 
 		// Product management handlers
 		ProductCreate: adminProductHandler.NewCreate(services.ProductCreate),

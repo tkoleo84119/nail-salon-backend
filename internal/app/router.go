@@ -42,6 +42,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 			setupAdminStoreRoutes(admin, cfg, queries, handlers)
 			setupAdminBrandRoutes(admin, cfg, queries, handlers)
 			setupAdminSupplierRoutes(admin, cfg, queries, handlers)
+			setupAdminExpenseRoutes(admin, cfg, queries, handlers)
 			setupAdminProductCategoryRoutes(admin, cfg, queries, handlers)
 			setupAdminServiceRoutes(admin, cfg, queries, handlers)
 			setupAdminScheduleRoutes(admin, cfg, queries, handlers)
@@ -294,6 +295,13 @@ func setupAdminSupplierRoutes(admin *gin.RouterGroup, cfg *config.Config, querie
 		suppliers.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.SupplierGetAll.GetAll)
 		suppliers.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.SupplierCreate.Create)
 		suppliers.PATCH("/:supplierId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.SupplierUpdate.Update)
+	}
+}
+
+func setupAdminExpenseRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
+	stores := admin.Group("/stores")
+	{
+		stores.POST("/:storeId/expenses", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseCreate.Create)
 	}
 }
 
