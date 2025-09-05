@@ -293,6 +293,7 @@ func setupAdminSupplierRoutes(admin *gin.RouterGroup, cfg *config.Config, querie
 	{
 		suppliers.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.SupplierGetAll.GetAll)
 		suppliers.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.SupplierCreate.Create)
+		suppliers.PATCH("/:supplierId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.SupplierUpdate.Update)
 	}
 }
 

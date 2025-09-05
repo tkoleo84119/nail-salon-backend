@@ -149,5 +149,6 @@ const (
 
 	// SUPPLIER - supplier related errors
 	SupplierNameAlreadyExists = "SupplierNameAlreadyExists"
+	SupplierNotFound = "SupplierNotFound"
 
 )

@@ -9,12 +9,39 @@ import (
 	"context"
 )
 
+const checkSupplierExistsByID = `-- name: CheckSupplierExistsByID :one
+SELECT EXISTS(SELECT 1 FROM suppliers WHERE id = $1)
+`
+
+func (q *Queries) CheckSupplierExistsByID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkSupplierExistsByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkSupplierNameExists = `-- name: CheckSupplierNameExists :one
 SELECT EXISTS(SELECT 1 FROM suppliers WHERE name = $1)
 `
 
 func (q *Queries) CheckSupplierNameExists(ctx context.Context, name string) (bool, error) {
 	row := q.db.QueryRow(ctx, checkSupplierNameExists, name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const checkSupplierNameExistsExcluding = `-- name: CheckSupplierNameExistsExcluding :one
+SELECT EXISTS(SELECT 1 FROM suppliers WHERE name = $1 AND id != $2)
+`
+
+type CheckSupplierNameExistsExcludingParams struct {
+	Name string `db:"name" json:"name"`
+	ID   int64  `db:"id" json:"id"`
+}
+
+func (q *Queries) CheckSupplierNameExistsExcluding(ctx context.Context, arg CheckSupplierNameExistsExcludingParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkSupplierNameExistsExcluding, arg.Name, arg.ID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err

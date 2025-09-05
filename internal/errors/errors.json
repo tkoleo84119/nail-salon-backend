@@ -545,6 +545,11 @@
       "code": "E3SUP001",
       "message": "供應商名稱已存在，請使用其他名稱",
       "status": 409
+    },
+    "SupplierNotFound": {
+      "code": "E3SUP002",
+      "message": "供應商不存在或已被刪除",
+      "status": 404
     }
   },
   "SYS": {

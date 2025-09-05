@@ -105,3 +105,52 @@ func (r *SupplierRepository) GetAllSuppliersByFilter(ctx context.Context, params
 
 	return total, results, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateSupplierParams struct {
+	Name     *string
+	IsActive *bool
+}
+
+type UpdateSupplierResponse struct {
+	ID int64 `db:"id"`
+}
+
+func (r *SupplierRepository) UpdateSupplier(ctx context.Context, id int64, params UpdateSupplierParams) (UpdateSupplierResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *params.Name)
+	}
+
+	if params.IsActive != nil {
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
+	}
+
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return UpdateSupplierResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	// Add id parameter
+	args = append(args, id)
+	idIndex := len(args)
+
+	query := fmt.Sprintf(`
+		UPDATE suppliers
+		SET %s
+		WHERE id = $%d
+		RETURNING id
+	`, strings.Join(setParts, ", "), idIndex)
+
+	var response UpdateSupplierResponse
+	if err := r.db.GetContext(ctx, &response, query, args...); err != nil {
+		return UpdateSupplierResponse{}, fmt.Errorf("failed to update supplier: %w", err)
+	}
+
+	return response, nil
+}

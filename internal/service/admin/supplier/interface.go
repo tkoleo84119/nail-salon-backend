@@ -13,3 +13,7 @@ type CreateInterface interface {
 type GetAllInterface interface {
 	GetAll(ctx context.Context, req adminSupplierModel.GetAllParsedRequest) (*adminSupplierModel.GetAllResponse, error)
 }
+
+type UpdateInterface interface {
+	Update(ctx context.Context, id int64, req adminSupplierModel.UpdateRequest) (*adminSupplierModel.UpdateResponse, error)
+}
