@@ -9,3 +9,7 @@ import (
 type CreateInterface interface {
 	Create(ctx context.Context, storeID int64, req adminExpenseModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminExpenseModel.CreateResponse, error)
 }
+
+type GetAllInterface interface {
+	GetAll(ctx context.Context, storeID int64, req adminExpenseModel.GetAllParsedRequest, creatorStoreIDs []int64) (*adminExpenseModel.GetAllResponse, error)
+}

@@ -95,6 +95,7 @@ type AdminServices struct {
 
 	// Expense management services
 	ExpenseCreate adminExpenseService.CreateInterface
+	ExpenseGetAll adminExpenseService.GetAllInterface
 
 	// Product management services
 	ProductCreate adminProductService.CreateInterface
@@ -217,6 +218,7 @@ type AdminHandlers struct {
 
 	// Expense management handlers
 	ExpenseCreate *adminExpenseHandler.Create
+	ExpenseGetAll *adminExpenseHandler.GetAll
 
 	// Product management handlers
 	ProductCreate *adminProductHandler.Create
@@ -338,6 +340,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Expense management services
 		ExpenseCreate: adminExpenseService.NewCreate(queries),
+		ExpenseGetAll: adminExpenseService.NewGetAll(repositories.SQLX),
 
 		// Product management services
 		ProductCreate: adminProductService.NewCreate(queries),
@@ -459,6 +462,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Expense management handlers
 		ExpenseCreate: adminExpenseHandler.NewCreate(services.ExpenseCreate),
+		ExpenseGetAll: adminExpenseHandler.NewGetAll(services.ExpenseGetAll),
 
 		// Product management handlers
 		ProductCreate: adminProductHandler.NewCreate(services.ProductCreate),

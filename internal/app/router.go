@@ -302,6 +302,7 @@ func setupAdminExpenseRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	stores := admin.Group("/stores")
 	{
 		stores.POST("/:storeId/expenses", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseCreate.Create)
+		stores.GET("/:storeId/expenses", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseGetAll.GetAll)
 	}
 }
 
