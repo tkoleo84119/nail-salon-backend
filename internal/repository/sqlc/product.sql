@@ -31,6 +31,14 @@ SELECT
 FROM products
 WHERE id = $1;
 
+-- name: GetProductsStockInfoByIDs :many
+SELECT
+    id,
+    store_id,
+    current_stock
+FROM products
+WHERE id = ANY($1::bigint[]);
+
 -- name: UpdateProductCurrentStock :exec
 UPDATE products
 SET current_stock = $2, updated_at = NOW()

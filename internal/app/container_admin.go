@@ -339,7 +339,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		SupplierUpdate: adminSupplierService.NewUpdate(queries, repositories.SQLX),
 
 		// Expense management services
-		ExpenseCreate: adminExpenseService.NewCreate(queries),
+		ExpenseCreate: adminExpenseService.NewCreate(queries, database.PgxPool),
 		ExpenseGetAll: adminExpenseService.NewGetAll(repositories.SQLX),
 
 		// Product management services

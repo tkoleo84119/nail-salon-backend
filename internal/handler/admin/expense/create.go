@@ -3,6 +3,7 @@ package adminExpense
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -85,6 +86,75 @@ func (h *Create) Create(c *gin.Context) {
 		amount = *req.Amount
 	}
 
+	items := make([]adminExpenseModel.CreateItemParsedRequest, 0)
+	for _, item := range req.Items {
+		productID, err := utils.ParseID(item.ProductID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"productId": "productId 轉換類型失敗",
+			})
+			return
+		}
+
+		quantity := int64(0)
+		if item.Quantity != nil {
+			quantity = *item.Quantity
+		}
+
+		totalPrice := int64(0)
+		if item.TotalPrice != nil {
+			totalPrice = *item.TotalPrice
+		}
+
+		expirationDate := time.Time{}
+		if item.ExpirationDate != nil {
+			expirationDate, err = utils.DateStringToTime(*item.ExpirationDate)
+			if err != nil {
+				errorCodes.AbortWithError(c, errorCodes.ValFieldDateFormat, map[string]string{
+					"expirationDate": "expirationDate 日期格式錯誤，應為 YYYY-MM-DD",
+				})
+				return
+			}
+		}
+
+		isArrived := false
+		if item.IsArrived != nil {
+			isArrived = *item.IsArrived
+		}
+
+		arrivalDate := time.Time{}
+		if item.ArrivalDate != nil {
+			arrivalDate, err = utils.DateStringToTime(*item.ArrivalDate)
+			if err != nil {
+				errorCodes.AbortWithError(c, errorCodes.ValFieldDateFormat, map[string]string{
+					"arrivalDate": "arrivalDate 日期格式錯誤，應為 YYYY-MM-DD",
+				})
+				return
+			}
+		}
+
+		if item.StorageLocation != nil {
+			trimmed := strings.TrimSpace(*item.StorageLocation)
+			item.StorageLocation = &trimmed
+		}
+
+		if item.Note != nil {
+			trimmed := strings.TrimSpace(*item.Note)
+			item.Note = &trimmed
+		}
+
+		items = append(items, adminExpenseModel.CreateItemParsedRequest{
+			ProductID:       productID,
+			Quantity:        quantity,
+			TotalPrice:      totalPrice,
+			ExpirationDate:  &expirationDate,
+			IsArrived:       isArrived,
+			ArrivalDate:     &arrivalDate,
+			StorageLocation: item.StorageLocation,
+			Note:            item.Note,
+		})
+	}
+
 	parsedReq := adminExpenseModel.CreateParsedRequest{
 		SupplierID:  parsedSupplierID,
 		Category:    req.Category,
@@ -92,6 +162,7 @@ func (h *Create) Create(c *gin.Context) {
 		ExpenseDate: expenseDate,
 		Note:        req.Note,
 		PayerID:     parsedPayerID,
+		Items:       items,
 	}
 
 	// Get staff context from middleware

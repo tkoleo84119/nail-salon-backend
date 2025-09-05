@@ -39,20 +39,41 @@
   "amount": 100,
   "expenseDate": "2025-01-01",
   "note": "支出備註",
-  "payerId": "1"
+  "payerId": "1",
+  "items": [
+    {
+      "productId": "1",
+      "quantity": 1,
+      "totalPrice": 100,
+      "expirationDate": "2025-01-01",
+      "isArrived": true, // 預設為 false
+      "arrivalDate": "2025-01-01",
+      "storageLocation": "庫存位置",
+      "note": "支出備註"
+    }
+  ]
 }
 ```
 
 ### 驗證規則
 
-| 欄位        | 必填 | 其他規則                            | 說明     |
-| ----------- | ---- | ----------------------------------- | -------- |
-| supplierId  | 是   |                                     | 供應商ID |
-| category    | 是   | <li>不能為空字串<li>最大長度100字元 | 支出類別 |
-| amount      | 是   | <li>最小值為 0<li>最大值為1000000   | 支出金額 |
-| expenseDate | 是   | <li>格式為YYYY-MM-DD                | 支出日期 |
-| note        | 否   | <li>最大長度255字元                 | 支出備註 |
-| payerId     | 否   |                                     | 代墊人ID |
+| 欄位                 | 必填 | 其他規則                            | 說明       |
+| -------------------- | ---- | ----------------------------------- | ---------- |
+| supplierId           | 是   |                                     | 供應商ID   |
+| category             | 是   | <li>不能為空字串<li>最大長度100字元 | 支出類別   |
+| amount               | 是   | <li>最小值為 0<li>最大值為1000000   | 支出金額   |
+| expenseDate          | 是   | <li>格式為YYYY-MM-DD                | 支出日期   |
+| note                 | 否   | <li>最大長度255字元                 | 支出備註   |
+| payerId              | 否   |                                     | 代墊人ID   |
+| items                | 否   | <li>最小長度1<li>最大長度100        | 支出項目   |
+| item.productId       | 是   |                                     | 商品ID     |
+| item.quantity        | 是   | <li>最小值為 0<li>最大值為1000000   | 數量       |
+| item.totalPrice      | 是   | <li>最小值為 0<li>最大值為1000000   | 總價格     |
+| item.expirationDate  | 否   | <li>格式為YYYY-MM-DD                | 有限期限   |
+| item.isArrived       | 是   |                                     | 是否已到貨 |
+| item.arrivalDate     | 否   | <li>格式為YYYY-MM-DD                | 到貨日期   |
+| item.storageLocation | 否   | <li>最大長度100字元                 | 庫存位置   |
+| item.note            | 否   | <li>最大長度255字元                 | 支出備註   |
 
 ---
 
@@ -105,8 +126,10 @@
 | 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元               |
 | 400    | E2033    | ValFieldDateFormat      | {field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD) |
 | 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                                |
+| 400    | E3PRO003 | ProductNotBelongToStore | 產品不屬於指定的門市                                |
 | 404    | E3SUP002 | SupplierNotFound        | 供應商不存在或已被刪除                              |
 | 404    | E3STA004 | StaffNotFound           | 員工帳號不存在                                      |
+| 404    | E3PRO002 | ProductNotFound         | 產品不存在或已被刪除                                |
 | 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試                            |
 | 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                                      |
 
@@ -123,8 +146,11 @@
 1. 確認 `supplierId` 是否存在。
 2. 如果有傳入`payerId`，則確認 `payerId` 是否存在，並且擁有該店權限(`staff_user_store_access`)。
    - 且 `is_reimbursed` 為 `false`。
-3. 建立 `expenses` 資料。
-4. 回傳新增結果。
+3. 確認傳入的 `productId` 是否存在，並且屬於指定的門市。
+4. 建立 `expenses` 資料。
+5. 建立 `expense_items` 資料。
+6. 更新產品庫存。
+7. 回傳新增結果。
 
 ---
 

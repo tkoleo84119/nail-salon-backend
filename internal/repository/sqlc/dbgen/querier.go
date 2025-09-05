@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	BatchCreateExpenseItems(ctx context.Context, arg []BatchCreateExpenseItemsParams) (int64, error)
 	BatchCreateSchedules(ctx context.Context, arg []BatchCreateSchedulesParams) (int64, error)
 	BatchCreateStaffUserStoreAccess(ctx context.Context, arg []BatchCreateStaffUserStoreAccessParams) (int64, error)
 	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
@@ -103,6 +104,7 @@ type Querier interface {
 	GetCustomerByLineUid(ctx context.Context, lineUid string) (GetCustomerByLineUidRow, error)
 	GetCustomerCouponPriceInfoByID(ctx context.Context, id int64) (GetCustomerCouponPriceInfoByIDRow, error)
 	GetProductByID(ctx context.Context, id int64) (GetProductByIDRow, error)
+	GetProductsStockInfoByIDs(ctx context.Context, dollar_1 []int64) ([]GetProductsStockInfoByIDsRow, error)
 	GetScheduleByID(ctx context.Context, id int64) (GetScheduleByIDRow, error)
 	GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error)
 	GetServiceByID(ctx context.Context, id int64) (Service, error)

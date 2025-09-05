@@ -2,7 +2,10 @@ package adminExpense
 
 import (
 	"context"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminExpenseModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/expense"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
@@ -11,11 +14,13 @@ import (
 
 type Create struct {
 	queries *dbgen.Queries
+	db      *pgxpool.Pool
 }
 
-func NewCreate(queries *dbgen.Queries) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
 	return &Create{
 		queries: queries,
+		db:      db,
 	}
 }
 
@@ -50,8 +55,10 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 		isReimbursed = &falseValue
 	}
 
-	// Create expense data
-	expenseID := utils.GenerateID()
+	expenseID, itemRows, updateProductStockRows, err := s.checkAndPrepareBatchData(ctx, storeID, req.Items)
+	if err != nil {
+		return nil, err
+	}
 
 	// Convert type
 	amountNumeric, err := utils.Int64ToPgNumeric(req.Amount)
@@ -59,7 +66,15 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert amount", err)
 	}
 
-	_, err = s.queries.CreateExpense(ctx, dbgen.CreateExpenseParams{
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := dbgen.New(tx)
+
+	_, err = qtx.CreateExpense(ctx, dbgen.CreateExpenseParams{
 		ID:           expenseID,
 		StoreID:      storeID,
 		Category:     utils.StringPtrToPgText(&req.Category, false),
@@ -74,7 +89,93 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create expense", err)
 	}
 
+	_, err = qtx.BatchCreateExpenseItems(ctx, itemRows)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create expense items", err)
+	}
+
+	for _, updateProductStockRow := range updateProductStockRows {
+		err = qtx.UpdateProductCurrentStock(ctx, updateProductStockRow)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update product current stock", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
+	}
+
 	return &adminExpenseModel.CreateResponse{
 		ID: utils.FormatID(expenseID),
 	}, nil
+}
+
+func (s *Create) checkAndPrepareBatchData(ctx context.Context, storeID int64, items []adminExpenseModel.CreateItemParsedRequest) (expenseID int64, itemRows []dbgen.BatchCreateExpenseItemsParams, updateProductStockRows []dbgen.UpdateProductCurrentStockParams, err error) {
+	productIDs := make([]int64, 0)
+	for _, item := range items {
+		productIDs = append(productIDs, item.ProductID)
+	}
+
+	products, err := s.queries.GetProductsStockInfoByIDs(ctx, productIDs)
+	if err != nil {
+		return 0, nil, nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get products stock info by ids", err)
+	}
+
+	productMap := make(map[int64]dbgen.GetProductsStockInfoByIDsRow)
+	for _, product := range products {
+		productMap[product.ID] = product
+
+		if product.StoreID != storeID {
+			return 0, nil, nil, errorCodes.NewServiceErrorWithCode(errorCodes.ProductNotBelongToStore)
+		}
+	}
+
+	expenseID = utils.GenerateID()
+	itemRows = make([]dbgen.BatchCreateExpenseItemsParams, 0)
+	updateProductStockRows = make([]dbgen.UpdateProductCurrentStockParams, 0)
+	now := utils.TimeToPgTimestamptz(time.Now())
+	for _, item := range items {
+		product, ok := productMap[item.ProductID]
+		if !ok {
+			return 0, nil, nil, errorCodes.NewServiceErrorWithCode(errorCodes.ProductNotFound)
+		}
+
+		quantity := int32(item.Quantity)
+
+		totalPrice, err := utils.Int64ToPgNumeric(item.TotalPrice)
+		if err != nil {
+			return 0, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert total price", err)
+		}
+
+		expirationDate := pgtype.Date{Valid: false}
+		if item.ExpirationDate != nil {
+			expirationDate = utils.TimeToPgDate(*item.ExpirationDate)
+		}
+
+		arrivalDate := pgtype.Date{Valid: false}
+		if item.ArrivalDate != nil {
+			arrivalDate = utils.TimeToPgDate(*item.ArrivalDate)
+		}
+
+		itemRows = append(itemRows, dbgen.BatchCreateExpenseItemsParams{
+			ExpenseID:       expenseID,
+			ProductID:       item.ProductID,
+			Quantity:        quantity,
+			TotalPrice:      totalPrice,
+			ExpirationDate:  expirationDate,
+			IsArrived:       utils.BoolToPgBool(item.IsArrived),
+			ArrivalDate:     arrivalDate,
+			StorageLocation: utils.StringPtrToPgText(item.StorageLocation, true),
+			Note:            utils.StringPtrToPgText(item.Note, true),
+			CreatedAt:       now,
+			UpdatedAt:       now,
+		})
+
+		updateProductStockRows = append(updateProductStockRows, dbgen.UpdateProductCurrentStockParams{
+			ID:           item.ProductID,
+			CurrentStock: product.CurrentStock + int32(item.Quantity),
+		})
+	}
+
+	return expenseID, itemRows, updateProductStockRows, nil
 }

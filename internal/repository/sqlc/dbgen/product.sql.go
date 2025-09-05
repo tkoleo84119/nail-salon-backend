@@ -156,6 +156,41 @@ func (q *Queries) GetProductByID(ctx context.Context, id int64) (GetProductByIDR
 	return i, err
 }
 
+const getProductsStockInfoByIDs = `-- name: GetProductsStockInfoByIDs :many
+SELECT
+    id,
+    store_id,
+    current_stock
+FROM products
+WHERE id = ANY($1::bigint[])
+`
+
+type GetProductsStockInfoByIDsRow struct {
+	ID           int64 `db:"id" json:"id"`
+	StoreID      int64 `db:"store_id" json:"store_id"`
+	CurrentStock int32 `db:"current_stock" json:"current_stock"`
+}
+
+func (q *Queries) GetProductsStockInfoByIDs(ctx context.Context, dollar_1 []int64) ([]GetProductsStockInfoByIDsRow, error) {
+	rows, err := q.db.Query(ctx, getProductsStockInfoByIDs, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetProductsStockInfoByIDsRow{}
+	for rows.Next() {
+		var i GetProductsStockInfoByIDsRow
+		if err := rows.Scan(&i.ID, &i.StoreID, &i.CurrentStock); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateProductCurrentStock = `-- name: UpdateProductCurrentStock :exec
 UPDATE products
 SET current_stock = $2, updated_at = NOW()
