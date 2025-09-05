@@ -291,6 +291,7 @@ func setupAdminBrandRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 func setupAdminSupplierRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	suppliers := admin.Group("/suppliers")
 	{
+		suppliers.GET("", middleware.JWTAuth(*cfg, queries), middleware.RequireAnyStaffRole(), handlers.Admin.SupplierGetAll.GetAll)
 		suppliers.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.SupplierCreate.Create)
 	}
 }

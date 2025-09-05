@@ -88,6 +88,7 @@ type AdminServices struct {
 
 	// Supplier management services
 	SupplierCreate adminSupplierService.CreateInterface
+	SupplierGetAll adminSupplierService.GetAllInterface
 
 	// Product management services
 	ProductCreate adminProductService.CreateInterface
@@ -205,6 +206,7 @@ type AdminHandlers struct {
 
 	// Supplier management handlers
 	SupplierCreate *adminSupplierHandler.Create
+	SupplierGetAll *adminSupplierHandler.GetAll
 
 	// Product management handlers
 	ProductCreate *adminProductHandler.Create
@@ -321,6 +323,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Supplier management services
 		SupplierCreate: adminSupplierService.NewCreate(queries),
+		SupplierGetAll: adminSupplierService.NewGetAll(repositories.SQLX.Supplier),
 
 		// Product management services
 		ProductCreate: adminProductService.NewCreate(queries),
@@ -437,6 +440,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 
 		// Supplier management handlers
 		SupplierCreate: adminSupplierHandler.NewCreate(services.SupplierCreate),
+		SupplierGetAll: adminSupplierHandler.NewGetAll(services.SupplierGetAll),
 
 		// Product management handlers
 		ProductCreate: adminProductHandler.NewCreate(services.ProductCreate),

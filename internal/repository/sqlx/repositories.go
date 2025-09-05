@@ -21,6 +21,7 @@ type Repositories struct {
 	StockUsage      *StockUsageRepository
 	Store           *StoreRepository
 	Stylist         *StylistRepository
+	Supplier        *SupplierRepository
 	TimeSlot        *TimeSlotRepository
 	Template        *TimeSlotTemplateRepository
 }
@@ -43,6 +44,7 @@ func NewRepositories(db *sqlx.DB) *Repositories {
 		StockUsage:      NewStockUsageRepository(db),
 		Store:           NewStoreRepository(db),
 		Stylist:         NewStylistRepository(db),
+		Supplier:        NewSupplierRepository(db),
 		TimeSlot:        NewTimeSlotRepository(db),
 		Template:        NewTimeSlotTemplateRepository(db),
 	}
