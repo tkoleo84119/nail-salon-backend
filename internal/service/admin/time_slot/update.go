@@ -7,16 +7,16 @@ import (
 	adminTimeSlotModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time_slot"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	queries dbgen.Querier
-	repo    *sqlx.Repositories
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
 	return &Update{
 		queries: queries,
 		repo:    repo,
@@ -98,7 +98,7 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 	}
 
 	// Update time slot using sqlx repository
-	response, err := s.repo.TimeSlot.UpdateTimeSlot(ctx, timeSlotID, sqlx.UpdateTimeSlotParams{
+	response, err := s.repo.TimeSlot.UpdateTimeSlot(ctx, timeSlotID, sqlxRepo.UpdateTimeSlotParams{
 		StartTime:   req.StartTime,
 		EndTime:     req.EndTime,
 		IsAvailable: req.IsAvailable,

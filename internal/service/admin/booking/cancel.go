@@ -15,12 +15,12 @@ import (
 )
 
 type Cancel struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 	db      *sqlx.DB
 	repo    *sqlxRepo.Repositories
 }
 
-func NewCancel(queries dbgen.Querier, db *sqlx.DB, repo *sqlxRepo.Repositories) CancelInterface {
+func NewCancel(queries *dbgen.Queries, db *sqlx.DB, repo *sqlxRepo.Repositories) CancelInterface {
 	return &Cancel{
 		queries: queries,
 		db:      db,

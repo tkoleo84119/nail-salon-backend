@@ -13,11 +13,11 @@ import (
 )
 
 type UpdateMe struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateMe(queries dbgen.Querier, repo *sqlxRepo.Repositories) *UpdateMe {
+func NewUpdateMe(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *UpdateMe {
 	return &UpdateMe{
 		queries: queries,
 		repo:    repo,

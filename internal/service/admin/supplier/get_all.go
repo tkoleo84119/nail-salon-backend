@@ -10,17 +10,17 @@ import (
 )
 
 type GetAll struct {
-	supplierRepository *sqlxRepo.SupplierRepository
+	repo *sqlxRepo.Repositories
 }
 
-func NewGetAll(supplierRepository *sqlxRepo.SupplierRepository) *GetAll {
+func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
 	return &GetAll{
-		supplierRepository: supplierRepository,
+		repo: repo,
 	}
 }
 
 func (s *GetAll) GetAll(ctx context.Context, req adminSupplierModel.GetAllParsedRequest) (*adminSupplierModel.GetAllResponse, error) {
-	total, items, err := s.supplierRepository.GetAllSuppliersByFilter(ctx, sqlxRepo.GetAllSuppliersByFilterParams{
+	total, items, err := s.repo.Supplier.GetAllSuppliersByFilter(ctx, sqlxRepo.GetAllSuppliersByFilterParams{
 		Name:     req.Name,
 		IsActive: req.IsActive,
 		Limit:    &req.Limit,

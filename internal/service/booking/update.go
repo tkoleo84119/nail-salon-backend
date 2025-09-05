@@ -19,13 +19,13 @@ import (
 )
 
 type Update struct {
-	queries       dbgen.Querier
+	queries       *dbgen.Queries
 	repo          *sqlxRepo.Repositories
 	db            *sqlx.DB
 	lineMessenger *utils.LineMessageClient
 }
 
-func NewUpdate(queries dbgen.Querier, repo *sqlxRepo.Repositories, db *sqlx.DB, lineConfig config.LineConfig) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB, lineConfig config.LineConfig) *Update {
 	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
 	return &Update{
 		queries:       queries,

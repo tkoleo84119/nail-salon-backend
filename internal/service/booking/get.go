@@ -13,10 +13,10 @@ import (
 )
 
 type Get struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 }
 
-func NewGet(queries dbgen.Querier) GetInterface {
+func NewGet(queries *dbgen.Queries) GetInterface {
 	return &Get{
 		queries: queries,
 	}

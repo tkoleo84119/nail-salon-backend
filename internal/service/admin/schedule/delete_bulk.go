@@ -11,10 +11,10 @@ import (
 )
 
 type DeleteBulk struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 }
 
-func NewDeleteBulk(queries dbgen.Querier) *DeleteBulk {
+func NewDeleteBulk(queries *dbgen.Queries) *DeleteBulk {
 	return &DeleteBulk{
 		queries: queries,
 	}

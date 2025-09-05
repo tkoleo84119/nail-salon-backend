@@ -325,7 +325,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Supplier management services
 		SupplierCreate: adminSupplierService.NewCreate(queries),
-		SupplierGetAll: adminSupplierService.NewGetAll(repositories.SQLX.Supplier),
+		SupplierGetAll: adminSupplierService.NewGetAll(repositories.SQLX),
 		SupplierUpdate: adminSupplierService.NewUpdate(queries, repositories.SQLX),
 
 		// Product management services

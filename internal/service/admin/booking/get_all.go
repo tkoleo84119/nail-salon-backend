@@ -10,16 +10,16 @@ import (
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type GetAll struct {
 	queries *dbgen.Queries
-	repo    *sqlx.Repositories
+	repo    *sqlxRepo.Repositories
 }
 
-func NewGetAll(queries *dbgen.Queries, repo *sqlx.Repositories) *GetAll {
+func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *GetAll {
 	return &GetAll{
 		queries: queries,
 		repo:    repo,
@@ -44,7 +44,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingMode
 	}
 
 	// Get booking list from repository
-	total, bookings, err := s.repo.Booking.GetAllStoreBookingsByFilter(ctx, storeID, sqlx.GetAllStoreBookingsByFilterParams{
+	total, bookings, err := s.repo.Booking.GetAllStoreBookingsByFilter(ctx, storeID, sqlxRepo.GetAllStoreBookingsByFilterParams{
 		StylistID: req.StylistID,
 		StartDate: req.StartDate,
 		EndDate:   req.EndDate,

@@ -14,11 +14,11 @@ import (
 )
 
 type Create struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 	db      *pgxpool.Pool
 }
 
-func NewCreate(queries dbgen.Querier, db *pgxpool.Pool) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
 	return &Create{
 		queries: queries,
 		db:      db,

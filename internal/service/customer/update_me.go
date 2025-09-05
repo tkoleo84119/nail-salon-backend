@@ -6,16 +6,16 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateMe struct {
-	repo *sqlx.Repositories
-	db   dbgen.Querier
+	repo *sqlxRepo.Repositories
+	db   *dbgen.Queries
 }
 
-func NewUpdateMe(db dbgen.Querier, repo *sqlx.Repositories) *UpdateMe {
+func NewUpdateMe(db *dbgen.Queries, repo *sqlxRepo.Repositories) *UpdateMe {
 	return &UpdateMe{
 		repo: repo,
 		db:   db,
@@ -32,7 +32,7 @@ func (s *UpdateMe) UpdateMe(ctx context.Context, customerID int64, req customerM
 	}
 
 	// Data Integrity: Update customer data
-	result, err := s.repo.Customer.UpdateCustomer(ctx, customerID, sqlx.UpdateCustomerParams{
+	result, err := s.repo.Customer.UpdateCustomer(ctx, customerID, sqlxRepo.UpdateCustomerParams{
 		Name:           req.Name,
 		Phone:          req.Phone,
 		Birthday:       req.Birthday,

@@ -6,16 +6,16 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminBrandModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/brand"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	queries dbgen.Querier
-	repo    *sqlx.Repositories
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
 	return &Update{
 		queries: queries,
 		repo:    repo,
@@ -44,7 +44,7 @@ func (s *Update) Update(ctx context.Context, brandID int64, req adminBrandModel.
 		}
 	}
 
-	_, err = s.repo.Brand.UpdateBrand(ctx, brandID, sqlx.UpdateBrandParams{
+	_, err = s.repo.Brand.UpdateBrand(ctx, brandID, sqlxRepo.UpdateBrandParams{
 		Name:     req.Name,
 		IsActive: req.IsActive,
 	})

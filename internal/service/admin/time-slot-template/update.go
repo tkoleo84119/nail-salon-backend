@@ -11,11 +11,11 @@ import (
 )
 
 type Update struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 	repo    *sqlx.Repositories
 }
 
-func NewUpdate(queries dbgen.Querier, repo *sqlx.Repositories) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlx.Repositories) *Update {
 	return &Update{
 		queries: queries,
 		repo:    repo,

@@ -16,7 +16,7 @@ import (
 )
 
 type Create struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 	db      *pgxpool.Pool
 	repo    *sqlxRepo.Repositories
 }
@@ -27,7 +27,7 @@ type CouponInfo struct {
 	DiscountRate   *float64
 }
 
-func NewCreate(queries dbgen.Querier, repo *sqlxRepo.Repositories, db *pgxpool.Pool) *Create {
+func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *pgxpool.Pool) *Create {
 	return &Create{
 		queries: queries,
 		repo:    repo,

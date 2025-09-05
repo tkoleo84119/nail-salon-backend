@@ -10,10 +10,10 @@ import (
 )
 
 type Delete struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 }
 
-func NewDelete(queries dbgen.Querier) *Delete {
+func NewDelete(queries *dbgen.Queries) *Delete {
 	return &Delete{
 		queries: queries,
 	}

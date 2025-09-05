@@ -15,13 +15,13 @@ import (
 )
 
 type LineRegister struct {
-	queries       dbgen.Querier
+	queries       *dbgen.Queries
 	db            *pgxpool.Pool
 	lineValidator *utils.LineValidator
 	jwtConfig     config.JWTConfig
 }
 
-func NewLineRegister(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineRegister {
+func NewLineRegister(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineRegister {
 	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineRegister{
 		queries:       queries,

@@ -18,12 +18,12 @@ import (
 )
 
 type Create struct {
-	queries       dbgen.Querier
+	queries       *dbgen.Queries
 	db            *pgxpool.Pool
 	lineMessenger *utils.LineMessageClient
 }
 
-func NewCreate(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig) *Create {
 	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
 	return &Create{
 		queries:       queries,

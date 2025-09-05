@@ -7,17 +7,17 @@ import (
 	"github.com/jackc/pgx/v5"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminProductModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/product"
-	sqlcRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	queries *sqlcRepo.Queries
+	queries *dbgen.Queries
 	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdate(queries *sqlcRepo.Queries, repo *sqlxRepo.Repositories) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
 	return &Update{
 		queries: queries,
 		repo:    repo,
@@ -77,7 +77,7 @@ func (s *Update) Update(ctx context.Context, storeID, productID int64, req admin
 		}
 
 		// check uniqueness
-		nameExists, err := s.queries.CheckProductNameBrandExistsInStoreExcluding(ctx, sqlcRepo.CheckProductNameBrandExistsInStoreExcludingParams{
+		nameExists, err := s.queries.CheckProductNameBrandExistsInStoreExcluding(ctx, dbgen.CheckProductNameBrandExistsInStoreExcludingParams{
 			ID:      productID,
 			StoreID: storeID,
 			Name:    checkName,

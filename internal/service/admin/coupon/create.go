@@ -6,16 +6,16 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminCouponModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/coupon"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Create struct {
-	queries dbgen.Querier
-	repo    *sqlx.Repositories
+	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewCreate(queries dbgen.Querier, repo *sqlx.Repositories) *Create {
+func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Create {
 	return &Create{
 		queries: queries,
 		repo:    repo,

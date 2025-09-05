@@ -11,11 +11,11 @@ import (
 )
 
 type GetAll struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 	repo    *sqlxRepo.Repositories
 }
 
-func NewGetAll(queries dbgen.Querier, repo *sqlxRepo.Repositories) GetAllInterface {
+func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) GetAllInterface {
 	return &GetAll{
 		queries: queries,
 		repo:    repo,

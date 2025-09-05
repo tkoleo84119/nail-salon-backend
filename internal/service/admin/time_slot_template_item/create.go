@@ -11,10 +11,10 @@ import (
 )
 
 type Create struct {
-	queries dbgen.Querier
+	queries *dbgen.Queries
 }
 
-func NewCreate(queries dbgen.Querier) *Create {
+func NewCreate(queries *dbgen.Queries) *Create {
 	return &Create{
 		queries: queries,
 	}

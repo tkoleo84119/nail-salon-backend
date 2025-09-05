@@ -17,12 +17,12 @@ import (
 )
 
 type Cancel struct {
-	queries       dbgen.Querier
+	queries       *dbgen.Queries
 	db            *pgxpool.Pool
 	lineMessenger *utils.LineMessageClient
 }
 
-func NewCancel(queries dbgen.Querier, db *pgxpool.Pool, lineConfig config.LineConfig) CancelInterface {
+func NewCancel(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig) CancelInterface {
 	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
 	return &Cancel{
 		queries:       queries,
