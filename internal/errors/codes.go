@@ -132,6 +132,8 @@ const (
 
 	// EXPENSE - expense related errors
 	ExpenseNotFound = "ExpenseNotFound"
+	ExpenseNotUpdateAmountWithExpenseItems = "ExpenseNotUpdateAmountWithExpenseItems"
+	ExpenseNotUpdateReimbursedInfoWithoutPayerID = "ExpenseNotUpdateReimbursedInfoWithoutPayerID"
 
 	// PRODUCT - product related errors
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"

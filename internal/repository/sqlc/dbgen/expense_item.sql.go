@@ -26,6 +26,17 @@ type BatchCreateExpenseItemsParams struct {
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
+const checkExpenseItemsExistsByExpenseID = `-- name: CheckExpenseItemsExistsByExpenseID :one
+SELECT EXISTS(SELECT 1 FROM expense_items WHERE expense_id = $1)
+`
+
+func (q *Queries) CheckExpenseItemsExistsByExpenseID(ctx context.Context, expenseID int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkExpenseItemsExistsByExpenseID, expenseID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getStoreExpenseItemsByExpenseID = `-- name: GetStoreExpenseItemsByExpenseID :many
 SELECT
     ei.id,

@@ -28,6 +28,7 @@ type Querier interface {
 	CheckCouponNameExistsExcluding(ctx context.Context, arg CheckCouponNameExistsExcludingParams) (bool, error)
 	CheckCustomerExistsByID(ctx context.Context, id int64) (bool, error)
 	CheckCustomerExistsByLineUid(ctx context.Context, lineUid string) (bool, error)
+	CheckExpenseItemsExistsByExpenseID(ctx context.Context, expenseID int64) (bool, error)
 	CheckProductCategoryExistByID(ctx context.Context, id int64) (bool, error)
 	CheckProductCategoryNameExists(ctx context.Context, name string) (bool, error)
 	CheckProductCategoryNameExistsExcludeSelf(ctx context.Context, arg CheckProductCategoryNameExistsExcludeSelfParams) (bool, error)

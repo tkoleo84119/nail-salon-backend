@@ -31,3 +31,6 @@ SELECT
 FROM expense_items ei
 LEFT JOIN products p ON ei.product_id = p.id
 WHERE ei.expense_id = $1;
+
+-- name: CheckExpenseItemsExistsByExpenseID :one
+SELECT EXISTS(SELECT 1 FROM expense_items WHERE expense_id = $1);

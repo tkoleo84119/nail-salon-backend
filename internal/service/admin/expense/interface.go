@@ -17,3 +17,7 @@ type GetAllInterface interface {
 type GetInterface interface {
 	Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs []int64) (*adminExpenseModel.GetResponse, error)
 }
+
+type UpdateInterface interface {
+	Update(ctx context.Context, storeID, expenseID int64, req adminExpenseModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminExpenseModel.UpdateResponse, error)
+}

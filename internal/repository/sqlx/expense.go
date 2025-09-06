@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
@@ -139,4 +140,114 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 	}
 
 	return total, results, nil
+}
+
+// ------------------------------------------------------------------------------------------------
+
+type UpdateStoreExpenseParams struct {
+	SupplierID    *int64
+	Category      *string
+	Amount        *int64
+	OtherFee      *int64
+	ExpenseDate   *time.Time
+	Note          *string
+	PayerID       *int64
+	PayerIDIsNone *bool
+	IsReimbursed  *bool
+	ReimbursedAt  *time.Time
+}
+
+type UpdateStoreExpenseResponse struct {
+	ID int64 `db:"id"`
+}
+
+func (r *ExpenseRepository) UpdateStoreExpense(ctx context.Context, storeID, expenseID int64, req UpdateStoreExpenseParams) (UpdateStoreExpenseResponse, error) {
+	// Set conditions
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if req.SupplierID != nil {
+		setParts = append(setParts, fmt.Sprintf("supplier_id = $%d", len(args)+1))
+		args = append(args, utils.Int64PtrToPgInt8(req.SupplierID))
+	}
+
+	if req.Category != nil && *req.Category != "" {
+		setParts = append(setParts, fmt.Sprintf("category = $%d", len(args)+1))
+		args = append(args, utils.StringPtrToPgText(req.Category, false))
+	}
+
+	if req.Amount != nil {
+		pgAmount, err := utils.Int64PtrToPgNumeric(req.Amount)
+		if err != nil {
+			return UpdateStoreExpenseResponse{}, fmt.Errorf("failed to convert amount: %w", err)
+		}
+		setParts = append(setParts, fmt.Sprintf("amount = $%d", len(args)+1))
+		args = append(args, pgAmount)
+	}
+
+	if req.OtherFee != nil {
+		pgOtherFee, err := utils.Int64PtrToPgNumeric(req.OtherFee)
+		if err != nil {
+			return UpdateStoreExpenseResponse{}, fmt.Errorf("failed to convert other fee: %w", err)
+		}
+		setParts = append(setParts, fmt.Sprintf("other_fee = $%d", len(args)+1))
+		args = append(args, pgOtherFee)
+	}
+
+	if req.ExpenseDate != nil {
+		pgDate := pgtype.Date{Time: *req.ExpenseDate, Valid: true}
+		setParts = append(setParts, fmt.Sprintf("expense_date = $%d", len(args)+1))
+		args = append(args, pgDate)
+	}
+
+	if req.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
+		args = append(args, utils.StringPtrToPgText(req.Note, true))
+	}
+
+	if req.PayerID != nil {
+		setParts = append(setParts, fmt.Sprintf("payer_id = $%d", len(args)+1))
+		args = append(args, utils.Int64PtrToPgInt8(req.PayerID))
+	}
+
+	if req.IsReimbursed != nil {
+		setParts = append(setParts, fmt.Sprintf("is_reimbursed = $%d", len(args)+1))
+		args = append(args, utils.BoolPtrToPgBool(req.IsReimbursed))
+	}
+
+	if req.ReimbursedAt != nil {
+		setParts = append(setParts, fmt.Sprintf("reimbursed_at = $%d", len(args)+1))
+		args = append(args, utils.TimePtrToPgTimestamptz(req.ReimbursedAt))
+	}
+
+	if req.PayerIDIsNone != nil && *req.PayerIDIsNone {
+		// set payerId, isReimbursed, and reimbursedAt to nil
+		setParts = append(setParts, fmt.Sprintf("payer_id = $%d", len(args)+1))
+		args = append(args, nil)
+		setParts = append(setParts, fmt.Sprintf("is_reimbursed = $%d", len(args)+1))
+		args = append(args, nil)
+		setParts = append(setParts, fmt.Sprintf("reimbursed_at = $%d", len(args)+1))
+		args = append(args, nil)
+	}
+
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return UpdateStoreExpenseResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, expenseID, storeID)
+
+	query := fmt.Sprintf(`
+		UPDATE expenses
+		SET %s
+		WHERE id = $%d AND store_id = $%d
+		RETURNING id
+	`, strings.Join(setParts, ", "), len(args)-1, len(args))
+
+	var result UpdateStoreExpenseResponse
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return UpdateStoreExpenseResponse{}, fmt.Errorf("failed to execute update query: %w", err)
+	}
+
+	return result, nil
 }

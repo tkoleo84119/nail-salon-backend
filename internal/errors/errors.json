@@ -310,6 +310,16 @@
       "code": "E3EXP001",
       "message": "支出不存在或已被刪除",
       "status": 404
+    },
+    "ExpenseNotUpdateReimbursedInfoWithoutPayerID": {
+      "code": "E3EXP002",
+      "message": "沒有代墊人，無法更新結清資訊",
+      "status": 400
+    },
+    "ExpenseNotUpdateAmountWithExpenseItems": {
+      "code": "E3EXP003",
+      "message": "有產品明細，無法單獨更新金額",
+      "status": 400
     }
   },
   "PRODUCT_CATEGORY": {
