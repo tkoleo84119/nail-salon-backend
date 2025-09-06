@@ -66,3 +66,127 @@ func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (i
 	err := row.Scan(&id)
 	return id, err
 }
+
+const getStoreExpenseByID = `-- name: GetStoreExpenseByID :one
+SELECT
+    e.id,
+    e.supplier_id,
+    COALESCE(s.name, '') AS supplier_name,
+    e.payer_id,
+    COALESCE(su.username, '') AS payer_name,
+    e.category,
+    e.amount,
+    e.expense_date,
+    e.note,
+    e.is_reimbursed,
+    e.reimbursed_at,
+    e.created_at,
+    e.updated_at
+FROM expenses e
+LEFT JOIN suppliers s ON e.supplier_id = s.id
+LEFT JOIN staff_users su ON e.payer_id = su.id
+WHERE e.id = $1 AND e.store_id = $2
+`
+
+type GetStoreExpenseByIDParams struct {
+	ID      int64 `db:"id" json:"id"`
+	StoreID int64 `db:"store_id" json:"store_id"`
+}
+
+type GetStoreExpenseByIDRow struct {
+	ID           int64              `db:"id" json:"id"`
+	SupplierID   pgtype.Int8        `db:"supplier_id" json:"supplier_id"`
+	SupplierName string             `db:"supplier_name" json:"supplier_name"`
+	PayerID      pgtype.Int8        `db:"payer_id" json:"payer_id"`
+	PayerName    string             `db:"payer_name" json:"payer_name"`
+	Category     pgtype.Text        `db:"category" json:"category"`
+	Amount       pgtype.Numeric     `db:"amount" json:"amount"`
+	ExpenseDate  pgtype.Date        `db:"expense_date" json:"expense_date"`
+	Note         pgtype.Text        `db:"note" json:"note"`
+	IsReimbursed pgtype.Bool        `db:"is_reimbursed" json:"is_reimbursed"`
+	ReimbursedAt pgtype.Timestamptz `db:"reimbursed_at" json:"reimbursed_at"`
+	CreatedAt    pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) GetStoreExpenseByID(ctx context.Context, arg GetStoreExpenseByIDParams) (GetStoreExpenseByIDRow, error) {
+	row := q.db.QueryRow(ctx, getStoreExpenseByID, arg.ID, arg.StoreID)
+	var i GetStoreExpenseByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.SupplierID,
+		&i.SupplierName,
+		&i.PayerID,
+		&i.PayerName,
+		&i.Category,
+		&i.Amount,
+		&i.ExpenseDate,
+		&i.Note,
+		&i.IsReimbursed,
+		&i.ReimbursedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getStoreExpenseItemsByExpenseID = `-- name: GetStoreExpenseItemsByExpenseID :many
+SELECT
+    ei.id,
+    ei.product_id,
+    p.name AS product_name,
+    ei.quantity,
+    ei.total_price,
+    ei.expiration_date,
+    ei.is_arrived,
+    ei.arrival_date,
+    ei.storage_location,
+    ei.note
+FROM expense_items ei
+LEFT JOIN products p ON ei.product_id = p.id
+WHERE ei.expense_id = $1
+`
+
+type GetStoreExpenseItemsByExpenseIDRow struct {
+	ID              int64          `db:"id" json:"id"`
+	ProductID       int64          `db:"product_id" json:"product_id"`
+	ProductName     pgtype.Text    `db:"product_name" json:"product_name"`
+	Quantity        int32          `db:"quantity" json:"quantity"`
+	TotalPrice      pgtype.Numeric `db:"total_price" json:"total_price"`
+	ExpirationDate  pgtype.Date    `db:"expiration_date" json:"expiration_date"`
+	IsArrived       pgtype.Bool    `db:"is_arrived" json:"is_arrived"`
+	ArrivalDate     pgtype.Date    `db:"arrival_date" json:"arrival_date"`
+	StorageLocation pgtype.Text    `db:"storage_location" json:"storage_location"`
+	Note            pgtype.Text    `db:"note" json:"note"`
+}
+
+func (q *Queries) GetStoreExpenseItemsByExpenseID(ctx context.Context, expenseID int64) ([]GetStoreExpenseItemsByExpenseIDRow, error) {
+	rows, err := q.db.Query(ctx, getStoreExpenseItemsByExpenseID, expenseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetStoreExpenseItemsByExpenseIDRow{}
+	for rows.Next() {
+		var i GetStoreExpenseItemsByExpenseIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductID,
+			&i.ProductName,
+			&i.Quantity,
+			&i.TotalPrice,
+			&i.ExpirationDate,
+			&i.IsArrived,
+			&i.ArrivalDate,
+			&i.StorageLocation,
+			&i.Note,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

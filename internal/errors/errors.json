@@ -305,6 +305,13 @@
       "status": 400
     }
   },
+  "EXPENSE": {
+    "ExpenseNotFound": {
+      "code": "E3EXP001",
+      "message": "支出不存在或已被刪除",
+      "status": 404
+    }
+  },
   "PRODUCT_CATEGORY": {
     "CategoryNameAlreadyExists": {
       "code": "E3PC001",

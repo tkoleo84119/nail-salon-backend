@@ -113,6 +113,8 @@ type Querier interface {
 	GetStockUsageByID(ctx context.Context, id int64) (StockUsage, error)
 	GetStoreByID(ctx context.Context, id int64) (GetStoreByIDRow, error)
 	GetStoreDetailByID(ctx context.Context, id int64) (Store, error)
+	GetStoreExpenseByID(ctx context.Context, arg GetStoreExpenseByIDParams) (GetStoreExpenseByIDRow, error)
+	GetStoreExpenseItemsByExpenseID(ctx context.Context, expenseID int64) ([]GetStoreExpenseItemsByExpenseIDRow, error)
 	GetStorePerformanceGroupByStylist(ctx context.Context, arg GetStorePerformanceGroupByStylistParams) ([]GetStorePerformanceGroupByStylistRow, error)
 	GetStylistByID(ctx context.Context, id int64) (Stylist, error)
 	GetStylistByStaffUserID(ctx context.Context, staffUserID int64) (Stylist, error)

@@ -130,6 +130,9 @@ const (
 	CustomerCouponExpired = "CustomerCouponExpired"
 	CustomerCouponNotBelongToCustomer = "CustomerCouponNotBelongToCustomer"
 
+	// EXPENSE - expense related errors
+	ExpenseNotFound = "ExpenseNotFound"
+
 	// PRODUCT - product related errors
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"
 	ProductNotBelongToStore = "ProductNotBelongToStore"
