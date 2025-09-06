@@ -40,17 +40,20 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminExpenseMode
 	items := make([]adminExpenseModel.GetAllExpenseItem, len(expenses))
 	for i, expense := range expenses {
 		item := adminExpenseModel.GetAllExpenseItem{
-			ID: utils.FormatID(expense.ID),
-			Supplier: adminExpenseModel.GetAllExpenseSupplierItem{
-				ID:   utils.FormatID(expense.SupplierID),
-				Name: expense.SupplierName,
-			},
+			ID:          utils.FormatID(expense.ID),
 			Category:    utils.PgTextToString(expense.Category),
 			Amount:      int(utils.PgNumericToFloat64(expense.Amount)),
 			ExpenseDate: utils.PgDateToDateString(expense.ExpenseDate),
 			Note:        utils.PgTextToString(expense.Note),
 			CreatedAt:   utils.PgTimestamptzToTimeString(expense.CreatedAt),
 			UpdatedAt:   utils.PgTimestamptzToTimeString(expense.UpdatedAt),
+		}
+
+		if expense.SupplierID.Valid {
+			item.Supplier = &adminExpenseModel.GetAllExpenseSupplierItem{
+				ID:   utils.FormatID(expense.SupplierID.Int64),
+				Name: expense.SupplierName,
+			}
 		}
 
 		// Only include payer, isReimbursed, and reimbursedAt if payer exists

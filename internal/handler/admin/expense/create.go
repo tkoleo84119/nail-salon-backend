@@ -53,14 +53,6 @@ func (h *Create) Create(c *gin.Context) {
 		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
-	parsedSupplierID, err := utils.ParseID(req.SupplierID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"supplierId": "supplierId 轉換類型失敗",
-		})
-		return
-	}
-
 	expenseDate, err := utils.DateStringToTime(req.ExpenseDate)
 	if err != nil {
 		errorCodes.AbortWithError(c, errorCodes.ValFieldDateFormat, map[string]string{
@@ -79,6 +71,18 @@ func (h *Create) Create(c *gin.Context) {
 			return
 		}
 		parsedPayerID = &payerID
+	}
+
+	var parsedSupplierID *int64
+	if req.SupplierID != nil && *req.SupplierID != "" {
+		supplierID, err := utils.ParseID(*req.SupplierID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"supplierId": "supplierId 轉換類型失敗",
+			})
+			return
+		}
+		parsedSupplierID = &supplierID
 	}
 
 	amount := int64(0)

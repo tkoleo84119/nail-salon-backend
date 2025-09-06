@@ -30,12 +30,14 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 	}
 
 	// Check if supplierId exists
-	supplierExists, err := s.queries.CheckSupplierExists(ctx, req.SupplierID)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check supplier existence", err)
-	}
-	if !supplierExists {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.SupplierNotFound)
+	if req.SupplierID != nil {
+		supplierExists, err := s.queries.CheckSupplierExists(ctx, *req.SupplierID)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check supplier existence", err)
+		}
+		if !supplierExists {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.SupplierNotFound)
+		}
 	}
 
 	var isReimbursed *bool
@@ -78,7 +80,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 		ID:           expenseID,
 		StoreID:      storeID,
 		Category:     utils.StringPtrToPgText(&req.Category, false),
-		SupplierID:   req.SupplierID,
+		SupplierID:   utils.Int64PtrToPgInt8(req.SupplierID),
 		Amount:       amountNumeric,
 		ExpenseDate:  utils.TimeToPgDate(req.ExpenseDate),
 		Note:         utils.StringPtrToPgText(req.Note, true),

@@ -3,7 +3,7 @@ package adminExpense
 import "time"
 
 type CreateRequest struct {
-	SupplierID  string              `json:"supplierId" binding:"required"`
+	SupplierID  *string             `json:"supplierId" binding:"omitempty"`
 	Category    string              `json:"category" binding:"required,noBlank,max=100"`
 	Amount      *int64              `json:"amount" binding:"omitempty,min=0,max=1000000"`
 	ExpenseDate string              `json:"expenseDate" binding:"required"`
@@ -24,7 +24,7 @@ type CreateItemRequest struct {
 }
 
 type CreateParsedRequest struct {
-	SupplierID  int64
+	SupplierID  *int64
 	Category    string
 	Amount      int64
 	ExpenseDate time.Time

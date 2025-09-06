@@ -1,0 +1,2 @@
+ALTER TABLE expenses
+ALTER COLUMN supplier_id SET NOT NULL;

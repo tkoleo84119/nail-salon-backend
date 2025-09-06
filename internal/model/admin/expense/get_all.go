@@ -26,17 +26,17 @@ type GetAllResponse struct {
 }
 
 type GetAllExpenseItem struct {
-	ID           string                    `json:"id"`
-	Supplier     GetAllExpenseSupplierItem `json:"supplier"`
-	Payer        *GetAllExpensePayerItem   `json:"payer,omitempty"`
-	Category     string                    `json:"category"`
-	Amount       int                       `json:"amount"`
-	ExpenseDate  string                    `json:"expenseDate"`
-	Note         string                    `json:"note"`
-	IsReimbursed *bool                     `json:"isReimbursed,omitempty"`
-	ReimbursedAt *string                   `json:"reimbursedAt,omitempty"`
-	CreatedAt    string                    `json:"createdAt"`
-	UpdatedAt    string                    `json:"updatedAt"`
+	ID           string                     `json:"id"`
+	Supplier     *GetAllExpenseSupplierItem `json:"supplier,omitempty"`
+	Payer        *GetAllExpensePayerItem    `json:"payer,omitempty"`
+	Category     string                     `json:"category"`
+	Amount       int                        `json:"amount"`
+	ExpenseDate  string                     `json:"expenseDate"`
+	Note         string                     `json:"note"`
+	IsReimbursed *bool                      `json:"isReimbursed,omitempty"`
+	ReimbursedAt *string                    `json:"reimbursedAt,omitempty"`
+	CreatedAt    string                     `json:"createdAt"`
+	UpdatedAt    string                     `json:"updatedAt"`
 }
 
 type GetAllExpenseSupplierItem struct {

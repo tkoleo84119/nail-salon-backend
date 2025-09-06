@@ -35,7 +35,7 @@ type GetAllStoreExpensesByFilterParams struct {
 
 type GetAllStoreExpensesByFilterItem struct {
 	ID           int64              `db:"id"`
-	SupplierID   int64              `db:"supplier_id"`
+	SupplierID   pgtype.Int8        `db:"supplier_id"`
 	SupplierName string             `db:"supplier_name"`
 	PayerID      pgtype.Int8        `db:"payer_id"`
 	PayerName    pgtype.Text        `db:"payer_name"`
@@ -112,9 +112,9 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 		SELECT
 			e.id,
 			e.supplier_id,
-			s.name AS supplier_name,
+			COALESCE(s.name, '') AS supplier_name,
 			e.payer_id,
-			su.name AS payer_name,
+			COALESCE(su.username, '') AS payer_name,
 			e.category,
 			e.amount,
 			e.expense_date,
@@ -124,7 +124,7 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 			e.created_at,
 			e.updated_at
 		FROM expenses e
-		INNER JOIN suppliers s ON e.supplier_id = s.id
+		LEFT JOIN suppliers s ON e.supplier_id = s.id
 		LEFT JOIN staff_users su ON e.payer_id = su.id
 		%s
 		ORDER BY %s

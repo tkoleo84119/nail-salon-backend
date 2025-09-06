@@ -59,7 +59,7 @@
 
 | 欄位                 | 必填 | 其他規則                            | 說明       |
 | -------------------- | ---- | ----------------------------------- | ---------- |
-| supplierId           | 是   |                                     | 供應商ID   |
+| supplierId           | 否   |                                     | 供應商ID   |
 | category             | 是   | <li>不能為空字串<li>最大長度100字元 | 支出類別   |
 | amount               | 是   | <li>最小值為 0<li>最大值為1000000   | 支出金額   |
 | expenseDate          | 是   | <li>格式為YYYY-MM-DD                | 支出日期   |
@@ -143,7 +143,7 @@
 
 ## Service 邏輯
 
-1. 確認 `supplierId` 是否存在。
+1. 如果有傳入`supplierId`，則確認 `supplierId` 是否存在。
 2. 如果有傳入`payerId`，則確認 `payerId` 是否存在，並且擁有該店權限(`staff_user_store_access`)。
    - 且 `is_reimbursed` 為 `false`。
 3. 確認傳入的 `productId` 是否存在，並且屬於指定的門市。

@@ -281,7 +281,7 @@ Table expenses {
   id bigint [pk]
   store_id bigint [not null]
   category varchar(100) // 支出類別
-  supplier_id bigint [not null] // 實際購買供應商Id
+  supplier_id bigint // 供應商Id (如果沒有供應商就是null)
   amount numeric(12,2) [not null]
   expense_date date [not null]
   note text

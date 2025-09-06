@@ -42,7 +42,7 @@ type CreateExpenseParams struct {
 	ID           int64          `db:"id" json:"id"`
 	StoreID      int64          `db:"store_id" json:"store_id"`
 	Category     pgtype.Text    `db:"category" json:"category"`
-	SupplierID   int64          `db:"supplier_id" json:"supplier_id"`
+	SupplierID   pgtype.Int8    `db:"supplier_id" json:"supplier_id"`
 	Amount       pgtype.Numeric `db:"amount" json:"amount"`
 	ExpenseDate  pgtype.Date    `db:"expense_date" json:"expense_date"`
 	Note         pgtype.Text    `db:"note" json:"note"`
