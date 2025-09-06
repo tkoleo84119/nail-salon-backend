@@ -29,12 +29,13 @@ INSERT INTO expenses (
     category,
     supplier_id,
     amount,
+    other_fee,
     expense_date,
     note,
     payer_id,
     is_reimbursed
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 ) RETURNING id
 `
 
@@ -44,6 +45,7 @@ type CreateExpenseParams struct {
 	Category     pgtype.Text    `db:"category" json:"category"`
 	SupplierID   pgtype.Int8    `db:"supplier_id" json:"supplier_id"`
 	Amount       pgtype.Numeric `db:"amount" json:"amount"`
+	OtherFee     pgtype.Numeric `db:"other_fee" json:"other_fee"`
 	ExpenseDate  pgtype.Date    `db:"expense_date" json:"expense_date"`
 	Note         pgtype.Text    `db:"note" json:"note"`
 	PayerID      pgtype.Int8    `db:"payer_id" json:"payer_id"`
@@ -57,6 +59,7 @@ func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (i
 		arg.Category,
 		arg.SupplierID,
 		arg.Amount,
+		arg.OtherFee,
 		arg.ExpenseDate,
 		arg.Note,
 		arg.PayerID,
@@ -76,6 +79,7 @@ SELECT
     COALESCE(su.username, '') AS payer_name,
     e.category,
     e.amount,
+    e.other_fee,
     e.expense_date,
     e.note,
     e.is_reimbursed,
@@ -101,6 +105,7 @@ type GetStoreExpenseByIDRow struct {
 	PayerName    string             `db:"payer_name" json:"payer_name"`
 	Category     pgtype.Text        `db:"category" json:"category"`
 	Amount       pgtype.Numeric     `db:"amount" json:"amount"`
+	OtherFee     pgtype.Numeric     `db:"other_fee" json:"other_fee"`
 	ExpenseDate  pgtype.Date        `db:"expense_date" json:"expense_date"`
 	Note         pgtype.Text        `db:"note" json:"note"`
 	IsReimbursed pgtype.Bool        `db:"is_reimbursed" json:"is_reimbursed"`
@@ -120,6 +125,7 @@ func (q *Queries) GetStoreExpenseByID(ctx context.Context, arg GetStoreExpenseBy
 		&i.PayerName,
 		&i.Category,
 		&i.Amount,
+		&i.OtherFee,
 		&i.ExpenseDate,
 		&i.Note,
 		&i.IsReimbursed,
@@ -128,65 +134,4 @@ func (q *Queries) GetStoreExpenseByID(ctx context.Context, arg GetStoreExpenseBy
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const getStoreExpenseItemsByExpenseID = `-- name: GetStoreExpenseItemsByExpenseID :many
-SELECT
-    ei.id,
-    ei.product_id,
-    p.name AS product_name,
-    ei.quantity,
-    ei.total_price,
-    ei.expiration_date,
-    ei.is_arrived,
-    ei.arrival_date,
-    ei.storage_location,
-    ei.note
-FROM expense_items ei
-LEFT JOIN products p ON ei.product_id = p.id
-WHERE ei.expense_id = $1
-`
-
-type GetStoreExpenseItemsByExpenseIDRow struct {
-	ID              int64          `db:"id" json:"id"`
-	ProductID       int64          `db:"product_id" json:"product_id"`
-	ProductName     pgtype.Text    `db:"product_name" json:"product_name"`
-	Quantity        int32          `db:"quantity" json:"quantity"`
-	TotalPrice      pgtype.Numeric `db:"total_price" json:"total_price"`
-	ExpirationDate  pgtype.Date    `db:"expiration_date" json:"expiration_date"`
-	IsArrived       pgtype.Bool    `db:"is_arrived" json:"is_arrived"`
-	ArrivalDate     pgtype.Date    `db:"arrival_date" json:"arrival_date"`
-	StorageLocation pgtype.Text    `db:"storage_location" json:"storage_location"`
-	Note            pgtype.Text    `db:"note" json:"note"`
-}
-
-func (q *Queries) GetStoreExpenseItemsByExpenseID(ctx context.Context, expenseID int64) ([]GetStoreExpenseItemsByExpenseIDRow, error) {
-	rows, err := q.db.Query(ctx, getStoreExpenseItemsByExpenseID, expenseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetStoreExpenseItemsByExpenseIDRow{}
-	for rows.Next() {
-		var i GetStoreExpenseItemsByExpenseIDRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.ProductID,
-			&i.ProductName,
-			&i.Quantity,
-			&i.TotalPrice,
-			&i.ExpirationDate,
-			&i.IsArrived,
-			&i.ArrivalDate,
-			&i.StorageLocation,
-			&i.Note,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }

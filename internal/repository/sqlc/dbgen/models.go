@@ -159,6 +159,7 @@ type Expense struct {
 	ReimbursedAt pgtype.Timestamptz `db:"reimbursed_at" json:"reimbursed_at"`
 	CreatedAt    pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	OtherFee     pgtype.Numeric     `db:"other_fee" json:"other_fee"`
 }
 
 type ExpenseItem struct {
@@ -166,7 +167,7 @@ type ExpenseItem struct {
 	ExpenseID       int64              `db:"expense_id" json:"expense_id"`
 	ProductID       int64              `db:"product_id" json:"product_id"`
 	Quantity        int32              `db:"quantity" json:"quantity"`
-	TotalPrice      pgtype.Numeric     `db:"total_price" json:"total_price"`
+	Price           pgtype.Numeric     `db:"price" json:"price"`
 	ExpirationDate  pgtype.Date        `db:"expiration_date" json:"expiration_date"`
 	IsArrived       pgtype.Bool        `db:"is_arrived" json:"is_arrived"`
 	ArrivalDate     pgtype.Date        `db:"arrival_date" json:"arrival_date"`

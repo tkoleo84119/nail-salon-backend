@@ -105,9 +105,9 @@ func (h *Create) Create(c *gin.Context) {
 			quantity = *item.Quantity
 		}
 
-		totalPrice := int64(0)
-		if item.TotalPrice != nil {
-			totalPrice = *item.TotalPrice
+		price := int64(0)
+		if item.Price != nil {
+			price = *item.Price
 		}
 
 		expirationDate := time.Time{}
@@ -150,7 +150,7 @@ func (h *Create) Create(c *gin.Context) {
 		items = append(items, adminExpenseModel.CreateItemParsedRequest{
 			ProductID:       productID,
 			Quantity:        quantity,
-			TotalPrice:      totalPrice,
+			Price:           price,
 			ExpirationDate:  &expirationDate,
 			IsArrived:       isArrived,
 			ArrivalDate:     &arrivalDate,
@@ -163,6 +163,7 @@ func (h *Create) Create(c *gin.Context) {
 		SupplierID:  parsedSupplierID,
 		Category:    req.Category,
 		Amount:      amount,
+		OtherFee:    req.OtherFee,
 		ExpenseDate: expenseDate,
 		Note:        req.Note,
 		PayerID:     parsedPayerID,

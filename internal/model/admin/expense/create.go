@@ -6,6 +6,7 @@ type CreateRequest struct {
 	SupplierID  *string             `json:"supplierId" binding:"omitempty"`
 	Category    string              `json:"category" binding:"required,noBlank,max=100"`
 	Amount      *int64              `json:"amount" binding:"omitempty,min=0,max=1000000"`
+	OtherFee    *int64              `json:"otherFee" binding:"omitempty,min=0,max=1000000"`
 	ExpenseDate string              `json:"expenseDate" binding:"required"`
 	Note        *string             `json:"note" binding:"omitempty,max=255"`
 	PayerID     *string             `json:"payerId" binding:"omitempty"`
@@ -15,7 +16,7 @@ type CreateRequest struct {
 type CreateItemRequest struct {
 	ProductID       string  `json:"productId" binding:"required"`
 	Quantity        *int64  `json:"quantity" binding:"omitempty,min=0,max=1000000"`
-	TotalPrice      *int64  `json:"totalPrice" binding:"omitempty,min=0,max=1000000"`
+	Price           *int64  `json:"price" binding:"omitempty,min=0,max=1000000"`
 	ExpirationDate  *string `json:"expirationDate" binding:"omitempty"`
 	IsArrived       *bool   `json:"isArrived" binding:"omitempty"`
 	ArrivalDate     *string `json:"arrivalDate" binding:"omitempty"`
@@ -27,6 +28,7 @@ type CreateParsedRequest struct {
 	SupplierID  *int64
 	Category    string
 	Amount      int64
+	OtherFee    *int64
 	ExpenseDate time.Time
 	Note        *string
 	PayerID     *int64
@@ -36,7 +38,7 @@ type CreateParsedRequest struct {
 type CreateItemParsedRequest struct {
 	ProductID       int64
 	Quantity        int64
-	TotalPrice      int64
+	Price           int64
 	ExpirationDate  *time.Time
 	IsArrived       bool
 	ArrivalDate     *time.Time

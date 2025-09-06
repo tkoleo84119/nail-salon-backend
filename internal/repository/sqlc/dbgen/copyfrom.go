@@ -33,7 +33,7 @@ func (r iteratorForBatchCreateExpenseItems) Values() ([]interface{}, error) {
 		r.rows[0].ExpenseID,
 		r.rows[0].ProductID,
 		r.rows[0].Quantity,
-		r.rows[0].TotalPrice,
+		r.rows[0].Price,
 		r.rows[0].ExpirationDate,
 		r.rows[0].IsArrived,
 		r.rows[0].ArrivalDate,
@@ -49,7 +49,7 @@ func (r iteratorForBatchCreateExpenseItems) Err() error {
 }
 
 func (q *Queries) BatchCreateExpenseItems(ctx context.Context, arg []BatchCreateExpenseItemsParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"expense_items"}, []string{"id", "expense_id", "product_id", "quantity", "total_price", "expiration_date", "is_arrived", "arrival_date", "storage_location", "note", "created_at", "updated_at"}, &iteratorForBatchCreateExpenseItems{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"expense_items"}, []string{"id", "expense_id", "product_id", "quantity", "price", "expiration_date", "is_arrived", "arrival_date", "storage_location", "note", "created_at", "updated_at"}, &iteratorForBatchCreateExpenseItems{rows: arg})
 }
 
 // iteratorForBatchCreateSchedules implements pgx.CopyFromSource.

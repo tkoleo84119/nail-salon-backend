@@ -41,6 +41,7 @@ type GetAllStoreExpensesByFilterItem struct {
 	PayerName    pgtype.Text        `db:"payer_name"`
 	Category     pgtype.Text        `db:"category"`
 	Amount       pgtype.Numeric     `db:"amount"`
+	OtherFee     pgtype.Numeric     `db:"other_fee"`
 	ExpenseDate  pgtype.Date        `db:"expense_date"`
 	Note         pgtype.Text        `db:"note"`
 	IsReimbursed pgtype.Bool        `db:"is_reimbursed"`
@@ -117,6 +118,7 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 			COALESCE(su.username, '') AS payer_name,
 			e.category,
 			e.amount,
+			e.other_fee,
 			e.expense_date,
 			e.note,
 			e.is_reimbursed,

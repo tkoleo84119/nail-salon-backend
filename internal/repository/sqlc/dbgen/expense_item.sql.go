@@ -6,6 +6,8 @@
 package dbgen
 
 import (
+	"context"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -14,7 +16,7 @@ type BatchCreateExpenseItemsParams struct {
 	ExpenseID       int64              `db:"expense_id" json:"expense_id"`
 	ProductID       int64              `db:"product_id" json:"product_id"`
 	Quantity        int32              `db:"quantity" json:"quantity"`
-	TotalPrice      pgtype.Numeric     `db:"total_price" json:"total_price"`
+	Price           pgtype.Numeric     `db:"price" json:"price"`
 	ExpirationDate  pgtype.Date        `db:"expiration_date" json:"expiration_date"`
 	IsArrived       pgtype.Bool        `db:"is_arrived" json:"is_arrived"`
 	ArrivalDate     pgtype.Date        `db:"arrival_date" json:"arrival_date"`
@@ -22,4 +24,65 @@ type BatchCreateExpenseItemsParams struct {
 	Note            pgtype.Text        `db:"note" json:"note"`
 	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+const getStoreExpenseItemsByExpenseID = `-- name: GetStoreExpenseItemsByExpenseID :many
+SELECT
+    ei.id,
+    ei.product_id,
+    p.name AS product_name,
+    ei.quantity,
+    ei.price,
+    ei.expiration_date,
+    ei.is_arrived,
+    ei.arrival_date,
+    ei.storage_location,
+    ei.note
+FROM expense_items ei
+LEFT JOIN products p ON ei.product_id = p.id
+WHERE ei.expense_id = $1
+`
+
+type GetStoreExpenseItemsByExpenseIDRow struct {
+	ID              int64          `db:"id" json:"id"`
+	ProductID       int64          `db:"product_id" json:"product_id"`
+	ProductName     pgtype.Text    `db:"product_name" json:"product_name"`
+	Quantity        int32          `db:"quantity" json:"quantity"`
+	Price           pgtype.Numeric `db:"price" json:"price"`
+	ExpirationDate  pgtype.Date    `db:"expiration_date" json:"expiration_date"`
+	IsArrived       pgtype.Bool    `db:"is_arrived" json:"is_arrived"`
+	ArrivalDate     pgtype.Date    `db:"arrival_date" json:"arrival_date"`
+	StorageLocation pgtype.Text    `db:"storage_location" json:"storage_location"`
+	Note            pgtype.Text    `db:"note" json:"note"`
+}
+
+func (q *Queries) GetStoreExpenseItemsByExpenseID(ctx context.Context, expenseID int64) ([]GetStoreExpenseItemsByExpenseIDRow, error) {
+	rows, err := q.db.Query(ctx, getStoreExpenseItemsByExpenseID, expenseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetStoreExpenseItemsByExpenseIDRow{}
+	for rows.Next() {
+		var i GetStoreExpenseItemsByExpenseIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductID,
+			&i.ProductName,
+			&i.Quantity,
+			&i.Price,
+			&i.ExpirationDate,
+			&i.IsArrived,
+			&i.ArrivalDate,
+			&i.StorageLocation,
+			&i.Note,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

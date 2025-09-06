@@ -81,6 +81,11 @@ func (s *Get) Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs
 		}
 	}
 
+	if expense.OtherFee.Valid {
+		otherFee := int(utils.PgNumericToFloat64(expense.OtherFee))
+		response.OtherFee = &otherFee
+	}
+
 	// Add expense items if exist
 	if len(expenseItems) > 0 {
 		response.Items = make([]adminExpenseModel.GetExpenseItem, len(expenseItems))
@@ -92,7 +97,7 @@ func (s *Get) Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs
 					Name: utils.PgTextToString(item.ProductName),
 				},
 				Quantity:        int(item.Quantity),
-				TotalPrice:      int(utils.PgNumericToFloat64(item.TotalPrice)),
+				Price:           int(utils.PgNumericToFloat64(item.Price)),
 				IsArrived:       utils.PgBoolToBool(item.IsArrived),
 				StorageLocation: utils.PgTextToString(item.StorageLocation),
 				Note:            utils.PgTextToString(item.Note),

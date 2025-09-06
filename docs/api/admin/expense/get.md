@@ -56,7 +56,8 @@
       "name": "員工A"
     }, // 如果沒有代墊人沒有此欄位
     "category": "薪資",
-    "amount": 100,
+    "amount": 200, // 支出金額 (排除其他費用後的金額)
+    "otherFee": 10, // 其他費用
     "expenseDate": "2025-01-01",
     "note": "薪資備註",
     "isReimbursed": true, // 如果沒有代墊人沒有此欄位
@@ -71,7 +72,7 @@
           "name": "商品A"
         },
         "quantity": 2,
-        "totalPrice": 200,
+        "price": 100, // 單價
         "expirationDate": "2025-01-01", // 如果沒有限期限沒有此欄位
         "isArrived": true,
         "arrivalDate": "2025-01-01", // 如果還沒有到貨沒有此欄位

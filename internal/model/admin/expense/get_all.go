@@ -31,6 +31,7 @@ type GetAllExpenseItem struct {
 	Payer        *GetAllExpensePayerItem    `json:"payer,omitempty"`
 	Category     string                     `json:"category"`
 	Amount       int                        `json:"amount"`
+	OtherFee     *int                       `json:"otherFee,omitempty"`
 	ExpenseDate  string                     `json:"expenseDate"`
 	Note         string                     `json:"note"`
 	IsReimbursed *bool                      `json:"isReimbursed,omitempty"`

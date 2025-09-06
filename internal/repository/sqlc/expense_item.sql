@@ -4,7 +4,7 @@ INSERT INTO expense_items (
     expense_id,
     product_id,
     quantity,
-    total_price,
+    price,
     expiration_date,
     is_arrived,
     arrival_date,
@@ -15,3 +15,19 @@ INSERT INTO expense_items (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 );
+
+-- name: GetStoreExpenseItemsByExpenseID :many
+SELECT
+    ei.id,
+    ei.product_id,
+    p.name AS product_name,
+    ei.quantity,
+    ei.price,
+    ei.expiration_date,
+    ei.is_arrived,
+    ei.arrival_date,
+    ei.storage_location,
+    ei.note
+FROM expense_items ei
+LEFT JOIN products p ON ei.product_id = p.id
+WHERE ei.expense_id = $1;

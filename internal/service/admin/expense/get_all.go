@@ -56,6 +56,11 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminExpenseMode
 			}
 		}
 
+		if expense.OtherFee.Valid {
+			otherFee := int(utils.PgNumericToFloat64(expense.OtherFee))
+			item.OtherFee = &otherFee
+		}
+
 		// Only include payer, isReimbursed, and reimbursedAt if payer exists
 		if expense.PayerID.Valid {
 			item.Payer = &adminExpenseModel.GetAllExpensePayerItem{

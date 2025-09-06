@@ -6,6 +6,7 @@ type GetResponse struct {
 	Payer        *GetExpensePayer    `json:"payer,omitempty"`
 	Category     string              `json:"category"`
 	Amount       int                 `json:"amount"`
+	OtherFee     *int                `json:"otherFee,omitempty"`
 	ExpenseDate  string              `json:"expenseDate"`
 	Note         string              `json:"note"`
 	IsReimbursed *bool               `json:"isReimbursed,omitempty"`
@@ -29,7 +30,7 @@ type GetExpenseItem struct {
 	ID              string                `json:"id"`
 	Product         GetExpenseItemProduct `json:"product"`
 	Quantity        int                   `json:"quantity"`
-	TotalPrice      int                   `json:"totalPrice"`
+	Price           int                   `json:"price"`
 	ExpirationDate  *string               `json:"expirationDate,omitempty"`
 	IsArrived       bool                  `json:"isArrived"`
 	ArrivalDate     *string               `json:"arrivalDate,omitempty"`

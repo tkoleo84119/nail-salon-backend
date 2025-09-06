@@ -67,6 +67,13 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert amount", err)
 	}
+	otherFeeNumeric := pgtype.Numeric{Valid: false}
+	if req.OtherFee != nil {
+		otherFeeNumeric, err = utils.Int64ToPgNumeric(*req.OtherFee)
+	}
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert other fee", err)
+	}
 
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
@@ -82,6 +89,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 		Category:     utils.StringPtrToPgText(&req.Category, false),
 		SupplierID:   utils.Int64PtrToPgInt8(req.SupplierID),
 		Amount:       amountNumeric,
+		OtherFee:     otherFeeNumeric,
 		ExpenseDate:  utils.TimeToPgDate(req.ExpenseDate),
 		Note:         utils.StringPtrToPgText(req.Note, true),
 		PayerID:      utils.Int64PtrToPgInt8(req.PayerID),
@@ -144,26 +152,27 @@ func (s *Create) checkAndPrepareBatchData(ctx context.Context, storeID int64, it
 
 		quantity := int32(item.Quantity)
 
-		totalPrice, err := utils.Int64ToPgNumeric(item.TotalPrice)
+		price, err := utils.Int64ToPgNumeric(item.Price)
 		if err != nil {
 			return 0, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert total price", err)
 		}
 
 		expirationDate := pgtype.Date{Valid: false}
-		if item.ExpirationDate != nil {
+		if item.ExpirationDate != nil && !item.ExpirationDate.IsZero() {
 			expirationDate = utils.TimeToPgDate(*item.ExpirationDate)
 		}
 
 		arrivalDate := pgtype.Date{Valid: false}
-		if item.ArrivalDate != nil {
+		if item.ArrivalDate != nil && !item.ArrivalDate.IsZero() {
 			arrivalDate = utils.TimeToPgDate(*item.ArrivalDate)
 		}
 
 		itemRows = append(itemRows, dbgen.BatchCreateExpenseItemsParams{
+			ID:              utils.GenerateID(),
 			ExpenseID:       expenseID,
 			ProductID:       item.ProductID,
 			Quantity:        quantity,
-			TotalPrice:      totalPrice,
+			Price:           price,
 			ExpirationDate:  expirationDate,
 			IsArrived:       utils.BoolToPgBool(item.IsArrived),
 			ArrivalDate:     arrivalDate,

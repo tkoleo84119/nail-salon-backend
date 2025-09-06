@@ -36,7 +36,8 @@
 {
   "supplierId": "1",
   "category": "水電",
-  "amount": 100,
+  "amount": 100, // 支出金額 (排除其他費用後的金額)
+  "otherFee": 10, // 其他費用
   "expenseDate": "2025-01-01",
   "note": "支出備註",
   "payerId": "1",
@@ -44,7 +45,7 @@
     {
       "productId": "1",
       "quantity": 1,
-      "totalPrice": 100,
+      "price": 100, // 單價
       "expirationDate": "2025-01-01",
       "isArrived": true, // 預設為 false
       "arrivalDate": "2025-01-01",
@@ -57,23 +58,24 @@
 
 ### 驗證規則
 
-| 欄位                 | 必填 | 其他規則                            | 說明       |
-| -------------------- | ---- | ----------------------------------- | ---------- |
-| supplierId           | 否   |                                     | 供應商ID   |
-| category             | 是   | <li>不能為空字串<li>最大長度100字元 | 支出類別   |
-| amount               | 是   | <li>最小值為 0<li>最大值為1000000   | 支出金額   |
-| expenseDate          | 是   | <li>格式為YYYY-MM-DD                | 支出日期   |
-| note                 | 否   | <li>最大長度255字元                 | 支出備註   |
-| payerId              | 否   |                                     | 代墊人ID   |
-| items                | 否   | <li>最小長度1<li>最大長度100        | 支出項目   |
-| item.productId       | 是   |                                     | 商品ID     |
-| item.quantity        | 是   | <li>最小值為 0<li>最大值為1000000   | 數量       |
-| item.totalPrice      | 是   | <li>最小值為 0<li>最大值為1000000   | 總價格     |
-| item.expirationDate  | 否   | <li>格式為YYYY-MM-DD                | 有限期限   |
-| item.isArrived       | 是   |                                     | 是否已到貨 |
-| item.arrivalDate     | 否   | <li>格式為YYYY-MM-DD                | 到貨日期   |
-| item.storageLocation | 否   | <li>最大長度100字元                 | 庫存位置   |
-| item.note            | 否   | <li>最大長度255字元                 | 支出備註   |
+| 欄位                 | 必填 | 其他規則                            | 說明                            |
+| -------------------- | ---- | ----------------------------------- | ------------------------------- |
+| supplierId           | 否   |                                     | 供應商ID                        |
+| category             | 是   | <li>不能為空字串<li>最大長度100字元 | 支出類別                        |
+| amount               | 是   | <li>最小值為 0<li>最大值為1000000   | 支出金額 (排除其他費用後的金額) |
+| otherFee             | 否   | <li>最小值為 0<li>最大值為1000000   | 其他費用                        |
+| expenseDate          | 是   | <li>格式為YYYY-MM-DD                | 支出日期                        |
+| note                 | 否   | <li>最大長度255字元                 | 支出備註                        |
+| payerId              | 否   |                                     | 代墊人ID                        |
+| items                | 否   | <li>最小長度1<li>最大長度100        | 支出項目                        |
+| item.productId       | 是   |                                     | 商品ID                          |
+| item.quantity        | 是   | <li>最小值為 0<li>最大值為1000000   | 數量                            |
+| item.price           | 是   | <li>最小值為 0<li>最大值為1000000   | 單價                            |
+| item.expirationDate  | 否   | <li>格式為YYYY-MM-DD                | 有限期限                        |
+| item.isArrived       | 是   |                                     | 是否已到貨                      |
+| item.arrivalDate     | 否   | <li>格式為YYYY-MM-DD                | 到貨日期                        |
+| item.storageLocation | 否   | <li>最大長度100字元                 | 庫存位置                        |
+| item.note            | 否   | <li>最大長度255字元                 | 支出備註                        |
 
 ---
 

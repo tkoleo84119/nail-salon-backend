@@ -282,7 +282,8 @@ Table expenses {
   store_id bigint [not null]
   category varchar(100) // 支出類別
   supplier_id bigint // 供應商Id (如果沒有供應商就是null)
-  amount numeric(12,2) [not null]
+  amount numeric(12,2) [not null] // 總金額 (排除其他費用後的金額)
+  other_fee numeric(12,2) // 其他費用
   expense_date date [not null]
   note text
   payer_id bigint // 代墊人Id (如果沒有代墊人就是null)
@@ -301,7 +302,7 @@ Table expense_items {
   expense_id bigint [not null]
   product_id bigint [not null]
   quantity int [not null]
-  total_price numeric(10,2) [not null]
+  price numeric(10,2) [not null] // 單價
   expiration_date date // 有限期限
   is_arrived boolean [default: false]
   arrival_date date

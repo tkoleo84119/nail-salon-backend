@@ -8,12 +8,13 @@ INSERT INTO expenses (
     category,
     supplier_id,
     amount,
+    other_fee,
     expense_date,
     note,
     payer_id,
     is_reimbursed
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 ) RETURNING id;
 
 -- name: GetStoreExpenseByID :one
@@ -25,6 +26,7 @@ SELECT
     COALESCE(su.username, '') AS payer_name,
     e.category,
     e.amount,
+    e.other_fee,
     e.expense_date,
     e.note,
     e.is_reimbursed,
@@ -35,19 +37,3 @@ FROM expenses e
 LEFT JOIN suppliers s ON e.supplier_id = s.id
 LEFT JOIN staff_users su ON e.payer_id = su.id
 WHERE e.id = $1 AND e.store_id = $2;
-
--- name: GetStoreExpenseItemsByExpenseID :many
-SELECT
-    ei.id,
-    ei.product_id,
-    p.name AS product_name,
-    ei.quantity,
-    ei.total_price,
-    ei.expiration_date,
-    ei.is_arrived,
-    ei.arrival_date,
-    ei.storage_location,
-    ei.note
-FROM expense_items ei
-LEFT JOIN products p ON ei.product_id = p.id
-WHERE ei.expense_id = $1;

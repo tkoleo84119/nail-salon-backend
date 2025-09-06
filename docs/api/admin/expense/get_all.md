@@ -79,7 +79,8 @@
           "name": "員工A"
         }, // 如果沒有代墊人沒有此欄位
         "category": "薪資",
-        "amount": 100,
+        "amount": 100, // 支出金額 (排除其他費用後的金額)
+        "otherFee": 10, // 其他費用
         "expenseDate": "2025-01-01",
         "note": "薪資備註",
         "isReimbursed": true, // 如果沒有代墊人沒有此欄位
