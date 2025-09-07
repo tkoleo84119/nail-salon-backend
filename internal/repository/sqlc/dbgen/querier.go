@@ -76,6 +76,7 @@ type Querier interface {
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
 	CreateStockUsage(ctx context.Context, arg CreateStockUsageParams) error
 	CreateStore(ctx context.Context, arg CreateStoreParams) error
+	CreateStoreExpenseItem(ctx context.Context, arg CreateStoreExpenseItemParams) error
 	CreateStylist(ctx context.Context, arg CreateStylistParams) (Stylist, error)
 	CreateSupplier(ctx context.Context, arg CreateSupplierParams) (int64, error)
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
@@ -137,6 +138,7 @@ type Querier interface {
 	UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error
 	UpdateProductCurrentStock(ctx context.Context, arg UpdateProductCurrentStockParams) error
 	UpdateStockUsageFinish(ctx context.Context, arg UpdateStockUsageFinishParams) error
+	UpdateStoreExpenseAmount(ctx context.Context, arg UpdateStoreExpenseAmountParams) error
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)
 	UpdateTimeSlotIsAvailable(ctx context.Context, arg UpdateTimeSlotIsAvailableParams) (int64, error)
 	UpdateTimeSlotTemplateItem(ctx context.Context, arg UpdateTimeSlotTemplateItemParams) (UpdateTimeSlotTemplateItemRow, error)

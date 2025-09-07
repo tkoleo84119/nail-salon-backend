@@ -135,3 +135,17 @@ func (q *Queries) GetStoreExpenseByID(ctx context.Context, arg GetStoreExpenseBy
 	)
 	return i, err
 }
+
+const updateStoreExpenseAmount = `-- name: UpdateStoreExpenseAmount :exec
+UPDATE expenses SET amount = $1, updated_at = NOW() WHERE id = $2
+`
+
+type UpdateStoreExpenseAmountParams struct {
+	Amount pgtype.Numeric `db:"amount" json:"amount"`
+	ID     int64          `db:"id" json:"id"`
+}
+
+func (q *Queries) UpdateStoreExpenseAmount(ctx context.Context, arg UpdateStoreExpenseAmountParams) error {
+	_, err := q.db.Exec(ctx, updateStoreExpenseAmount, arg.Amount, arg.ID)
+	return err
+}

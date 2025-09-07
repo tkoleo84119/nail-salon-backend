@@ -1,0 +1,115 @@
+package adminExpenseItem
+
+import (
+	"context"
+	"errors"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
+	adminExpenseItemModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/expense_item"
+	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
+)
+
+type Create struct {
+	queries *dbgen.Queries
+	db      *pgxpool.Pool
+}
+
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
+	return &Create{
+		queries: queries,
+		db:      db,
+	}
+}
+
+func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req adminExpenseItemModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminExpenseItemModel.CreateResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+		return nil, err
+	}
+
+	expense, err := s.queries.GetStoreExpenseByID(ctx, dbgen.GetStoreExpenseByIDParams{
+		ID:      expenseID,
+		StoreID: storeID,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotFound)
+		}
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get expense", err)
+	}
+
+	product, err := s.queries.GetProductByID(ctx, req.ProductID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ProductNotFound)
+		}
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get product", err)
+	}
+	if product.StoreID != storeID {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ProductNotBelongToStore)
+	}
+
+	expenseItemID := utils.GenerateID()
+	oldExpenseAmount := utils.PgNumericToFloat64(expense.Amount)
+	newExpenseAmount := oldExpenseAmount + (float64(req.Price) * float64(req.Quantity))
+
+	priceNumeric, err := utils.Int64ToPgNumeric(req.Price)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price", err)
+	}
+	newExpenseAmountNumeric, err := utils.Float64ToPgNumeric(newExpenseAmount)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert new expense amount", err)
+	}
+
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := dbgen.New(tx)
+
+	err = qtx.CreateStoreExpenseItem(ctx, dbgen.CreateStoreExpenseItemParams{
+		ID:              expenseItemID,
+		ExpenseID:       expenseID,
+		ProductID:       req.ProductID,
+		Quantity:        int32(req.Quantity),
+		Price:           priceNumeric,
+		ExpirationDate:  utils.TimeToPgDate(*req.ExpirationDate),
+		IsArrived:       utils.BoolToPgBool(req.IsArrived),
+		ArrivalDate:     utils.TimeToPgDate(*req.ArrivalDate),
+		StorageLocation: utils.StringPtrToPgText(req.StorageLocation, true),
+		Note:            utils.StringPtrToPgText(req.Note, true),
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create expense item", err)
+	}
+
+	err = qtx.UpdateStoreExpenseAmount(ctx, dbgen.UpdateStoreExpenseAmountParams{
+		Amount: newExpenseAmountNumeric,
+		ID:     expenseID,
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update expense amount", err)
+	}
+
+	newProductStock := int64(product.CurrentStock) + req.Quantity
+	err = qtx.UpdateProductCurrentStock(ctx, dbgen.UpdateProductCurrentStockParams{
+		ID:           req.ProductID,
+		CurrentStock: int32(newProductStock),
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update product stock", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
+	}
+
+	return &adminExpenseItemModel.CreateResponse{
+		ID: utils.FormatID(expenseItemID),
+	}, nil
+}

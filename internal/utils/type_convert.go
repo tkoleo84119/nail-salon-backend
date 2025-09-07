@@ -667,6 +667,10 @@ func TimeStringToPgTime(s string) (pgtype.Time, error) {
 //	    WorkDate: utils.TimeToPgDate(time.Now()),
 //	}
 func TimeToPgDate(t time.Time) pgtype.Date {
+	if t.IsZero() {
+		return pgtype.Date{Valid: false}
+	}
+
 	return pgtype.Date{Time: t, Valid: true}
 }
 

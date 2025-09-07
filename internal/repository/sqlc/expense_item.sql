@@ -16,6 +16,22 @@ INSERT INTO expense_items (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 );
 
+-- name: CreateStoreExpenseItem :exec
+INSERT INTO expense_items (
+    id,
+    expense_id,
+    product_id,
+    quantity,
+    price,
+    expiration_date,
+    is_arrived,
+    arrival_date,
+    storage_location,
+    note
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+);
+
 -- name: GetStoreExpenseItemsByExpenseID :many
 SELECT
     ei.id,

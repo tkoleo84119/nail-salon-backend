@@ -37,6 +37,52 @@ func (q *Queries) CheckExpenseItemsExistsByExpenseID(ctx context.Context, expens
 	return exists, err
 }
 
+const createStoreExpenseItem = `-- name: CreateStoreExpenseItem :exec
+INSERT INTO expense_items (
+    id,
+    expense_id,
+    product_id,
+    quantity,
+    price,
+    expiration_date,
+    is_arrived,
+    arrival_date,
+    storage_location,
+    note
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+)
+`
+
+type CreateStoreExpenseItemParams struct {
+	ID              int64          `db:"id" json:"id"`
+	ExpenseID       int64          `db:"expense_id" json:"expense_id"`
+	ProductID       int64          `db:"product_id" json:"product_id"`
+	Quantity        int32          `db:"quantity" json:"quantity"`
+	Price           pgtype.Numeric `db:"price" json:"price"`
+	ExpirationDate  pgtype.Date    `db:"expiration_date" json:"expiration_date"`
+	IsArrived       pgtype.Bool    `db:"is_arrived" json:"is_arrived"`
+	ArrivalDate     pgtype.Date    `db:"arrival_date" json:"arrival_date"`
+	StorageLocation pgtype.Text    `db:"storage_location" json:"storage_location"`
+	Note            pgtype.Text    `db:"note" json:"note"`
+}
+
+func (q *Queries) CreateStoreExpenseItem(ctx context.Context, arg CreateStoreExpenseItemParams) error {
+	_, err := q.db.Exec(ctx, createStoreExpenseItem,
+		arg.ID,
+		arg.ExpenseID,
+		arg.ProductID,
+		arg.Quantity,
+		arg.Price,
+		arg.ExpirationDate,
+		arg.IsArrived,
+		arg.ArrivalDate,
+		arg.StorageLocation,
+		arg.Note,
+	)
+	return err
+}
+
 const getStoreExpenseItemByID = `-- name: GetStoreExpenseItemByID :one
 SELECT
     id,

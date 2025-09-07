@@ -37,3 +37,6 @@ FROM expenses e
 LEFT JOIN suppliers s ON e.supplier_id = s.id
 LEFT JOIN staff_users su ON e.payer_id = su.id
 WHERE e.id = $1 AND e.store_id = $2;
+
+-- name: UpdateStoreExpenseAmount :exec
+UPDATE expenses SET amount = $1, updated_at = NOW() WHERE id = $2;
