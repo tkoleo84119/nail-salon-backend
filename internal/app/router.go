@@ -308,6 +308,9 @@ func setupAdminExpenseRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 		stores.GET("/:storeId/expenses", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseGetAll.GetAll)
 		stores.GET("/:storeId/expenses/:expenseId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseGet.Get)
 		stores.PATCH("/:storeId/expenses/:expenseId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseUpdate.Update)
+
+		// Expense items routes
+		stores.PATCH("/:storeId/expenses/:expenseId/items/:expenseItemId", middleware.JWTAuth(*cfg, queries), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseItemUpdate.Update)
 	}
 }
 

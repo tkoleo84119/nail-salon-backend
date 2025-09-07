@@ -32,5 +32,21 @@ FROM expense_items ei
 LEFT JOIN products p ON ei.product_id = p.id
 WHERE ei.expense_id = $1;
 
+-- name: GetStoreExpenseItemByID :one
+SELECT
+    id,
+    expense_id,
+    product_id,
+    quantity,
+    price,
+    expiration_date,
+    is_arrived,
+    arrival_date,
+    storage_location,
+    note
+FROM expense_items
+WHERE id = $1
+AND expense_id = $2;
+
 -- name: CheckExpenseItemsExistsByExpenseID :one
 SELECT EXISTS(SELECT 1 FROM expense_items WHERE expense_id = $1);

@@ -37,6 +37,59 @@ func (q *Queries) CheckExpenseItemsExistsByExpenseID(ctx context.Context, expens
 	return exists, err
 }
 
+const getStoreExpenseItemByID = `-- name: GetStoreExpenseItemByID :one
+SELECT
+    id,
+    expense_id,
+    product_id,
+    quantity,
+    price,
+    expiration_date,
+    is_arrived,
+    arrival_date,
+    storage_location,
+    note
+FROM expense_items
+WHERE id = $1
+AND expense_id = $2
+`
+
+type GetStoreExpenseItemByIDParams struct {
+	ID        int64 `db:"id" json:"id"`
+	ExpenseID int64 `db:"expense_id" json:"expense_id"`
+}
+
+type GetStoreExpenseItemByIDRow struct {
+	ID              int64          `db:"id" json:"id"`
+	ExpenseID       int64          `db:"expense_id" json:"expense_id"`
+	ProductID       int64          `db:"product_id" json:"product_id"`
+	Quantity        int32          `db:"quantity" json:"quantity"`
+	Price           pgtype.Numeric `db:"price" json:"price"`
+	ExpirationDate  pgtype.Date    `db:"expiration_date" json:"expiration_date"`
+	IsArrived       pgtype.Bool    `db:"is_arrived" json:"is_arrived"`
+	ArrivalDate     pgtype.Date    `db:"arrival_date" json:"arrival_date"`
+	StorageLocation pgtype.Text    `db:"storage_location" json:"storage_location"`
+	Note            pgtype.Text    `db:"note" json:"note"`
+}
+
+func (q *Queries) GetStoreExpenseItemByID(ctx context.Context, arg GetStoreExpenseItemByIDParams) (GetStoreExpenseItemByIDRow, error) {
+	row := q.db.QueryRow(ctx, getStoreExpenseItemByID, arg.ID, arg.ExpenseID)
+	var i GetStoreExpenseItemByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.ExpenseID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.Price,
+		&i.ExpirationDate,
+		&i.IsArrived,
+		&i.ArrivalDate,
+		&i.StorageLocation,
+		&i.Note,
+	)
+	return i, err
+}
+
 const getStoreExpenseItemsByExpenseID = `-- name: GetStoreExpenseItemsByExpenseID :many
 SELECT
     ei.id,

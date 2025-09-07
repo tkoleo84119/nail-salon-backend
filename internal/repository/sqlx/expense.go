@@ -251,3 +251,26 @@ func (r *ExpenseRepository) UpdateStoreExpense(ctx context.Context, storeID, exp
 
 	return result, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateStoreExpenseAmountTxParams struct {
+	Amount int64
+}
+
+func (r *ExpenseRepository) UpdateStoreExpenseAmountTx(ctx context.Context, tx *sqlx.Tx, expenseID int64, params UpdateStoreExpenseAmountTxParams) error {
+	query := `
+		UPDATE expenses
+		SET amount = $1
+		WHERE id = $2
+	`
+
+	args := []interface{}{params.Amount, expenseID}
+
+	_, err := tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update expense amount: %w", err)
+	}
+
+	return nil
+}

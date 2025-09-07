@@ -226,3 +226,26 @@ func (r *ProductRepository) UpdateStoreProduct(ctx context.Context, productID in
 
 	return result, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateStoreProductStockTxParams struct {
+	Stock int
+}
+
+func (r *ProductRepository) UpdateStoreProductStockTx(ctx context.Context, tx *sqlx.Tx, productID int64, params UpdateStoreProductStockTxParams) error {
+	query := `
+		UPDATE products
+		SET current_stock = $1
+		WHERE id = $2
+	`
+
+	args := []interface{}{params.Stock, productID}
+
+	_, err := tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update product stock: %w", err)
+	}
+
+	return nil
+}
