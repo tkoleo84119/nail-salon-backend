@@ -7,6 +7,7 @@ import (
 
 	// Admin handlers
 	adminAccountHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/account"
+	adminAccountTransactionHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/account_transaction"
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
 	adminBookingProductHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking_product"
@@ -34,6 +35,7 @@ import (
 
 	// Admin services
 	adminAccountService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/account"
+	adminAccountTransactionService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/account_transaction"
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
 	adminBookingProductService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking_product"
@@ -92,6 +94,9 @@ type AdminServices struct {
 	AccountCreate adminAccountService.CreateInterface
 	AccountGetAll adminAccountService.GetAllInterface
 	AccountUpdate adminAccountService.UpdateInterface
+
+	// Account transaction management services
+	AccountTransactionGetAll adminAccountTransactionService.GetAllInterface
 
 	// Brand management services
 	BrandCreate adminBrandService.CreateInterface
@@ -228,6 +233,9 @@ type AdminHandlers struct {
 	AccountGetAll *adminAccountHandler.GetAll
 	AccountUpdate *adminAccountHandler.Update
 
+	// Account transaction management handlers
+	AccountTransactionGetAll *adminAccountTransactionHandler.GetAll
+
 	// Brand management handlers
 	BrandCreate *adminBrandHandler.Create
 	BrandGetAll *adminBrandHandler.GetAll
@@ -362,6 +370,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		AccountGetAll: adminAccountService.NewGetAll(repositories.SQLX.Account),
 		AccountUpdate: adminAccountService.NewUpdate(repositories.SQLX.Account),
 
+		// Account transaction management services
+		AccountTransactionGetAll: adminAccountTransactionService.NewGetAll(repositories.SQLX),
+
 		// Brand management services
 		BrandCreate: adminBrandService.NewCreate(queries),
 		BrandGetAll: adminBrandService.NewGetAll(repositories.SQLX),
@@ -495,6 +506,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		AccountCreate: adminAccountHandler.NewCreate(services.AccountCreate),
 		AccountGetAll: adminAccountHandler.NewGetAll(services.AccountGetAll),
 		AccountUpdate: adminAccountHandler.NewUpdate(services.AccountUpdate),
+
+		// Account transaction management handlers
+		AccountTransactionGetAll: adminAccountTransactionHandler.NewGetAll(services.AccountTransactionGetAll),
 
 		// Brand management handlers
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),

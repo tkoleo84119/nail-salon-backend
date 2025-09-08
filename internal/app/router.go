@@ -220,6 +220,9 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 
 		// Store accounts routes
 		stores.GET("/:storeId/accounts", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.AccountGetAll.GetAll)
+
+		// Store account transactions routes
+		stores.GET("/:storeId/accounts/:accountId/transactions", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionGetAll.GetAll)
 	}
 }
 
