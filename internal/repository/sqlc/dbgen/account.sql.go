@@ -38,3 +38,28 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) er
 	)
 	return err
 }
+
+const getAccountByID = `-- name: GetAccountByID :one
+SELECT id, store_id, name, note, is_active FROM accounts WHERE id = $1
+`
+
+type GetAccountByIDRow struct {
+	ID       int64       `db:"id" json:"id"`
+	StoreID  int64       `db:"store_id" json:"store_id"`
+	Name     string      `db:"name" json:"name"`
+	Note     pgtype.Text `db:"note" json:"note"`
+	IsActive pgtype.Bool `db:"is_active" json:"is_active"`
+}
+
+func (q *Queries) GetAccountByID(ctx context.Context, id int64) (GetAccountByIDRow, error) {
+	row := q.db.QueryRow(ctx, getAccountByID, id)
+	var i GetAccountByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.StoreID,
+		&i.Name,
+		&i.Note,
+		&i.IsActive,
+	)
+	return i, err
+}

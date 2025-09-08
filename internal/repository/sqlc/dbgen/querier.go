@@ -60,6 +60,7 @@ type Querier interface {
 	CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error)
 	CountProductsByIDs(ctx context.Context, arg CountProductsByIDsParams) (int64, error)
 	CreateAccount(ctx context.Context, arg CreateAccountParams) error
+	CreateAccountTransaction(ctx context.Context, arg CreateAccountTransactionParams) (int64, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)
 	CreateBrand(ctx context.Context, arg CreateBrandParams) (int64, error)
@@ -88,6 +89,8 @@ type Querier interface {
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplate(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
+	GetAccountByID(ctx context.Context, id int64) (GetAccountByIDRow, error)
+	GetAccountTransactionCurrentBalance(ctx context.Context, accountID int64) (int32, error)
 	GetActiveStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetActiveStylistNameByID(ctx context.Context, id int64) (pgtype.Text, error)
 	GetAllActiveStoreAccessByStaffId(ctx context.Context, staffUserID int64) ([]GetAllActiveStoreAccessByStaffIdRow, error)

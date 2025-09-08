@@ -24,6 +24,7 @@ const (
 	ValFieldArrayMinLength = "ValFieldArrayMinLength"
 	ValFieldBoolean = "ValFieldBoolean"
 	ValFieldDateFormat = "ValFieldDateFormat"
+	ValFieldISO8601Format = "ValFieldISO8601Format"
 	ValFieldInvalidEmail = "ValFieldInvalidEmail"
 	ValFieldMaxNumber = "ValFieldMaxNumber"
 	ValFieldMinNumber = "ValFieldMinNumber"
@@ -111,6 +112,7 @@ const (
 	SysTimeout = "SysTimeout"
 
 	// ACCOUNT - account related errors
+	AccountNotBelongToStore = "AccountNotBelongToStore"
 	AccountNotFound = "AccountNotFound"
 
 	// BOOKING_DETAIL - booking detail related errors
