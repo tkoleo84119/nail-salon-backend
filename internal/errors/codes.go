@@ -110,6 +110,9 @@ const (
 	SysInternalError = "SysInternalError"
 	SysTimeout = "SysTimeout"
 
+	// ACCOUNT - account related errors
+	AccountNotFound = "AccountNotFound"
+
 	// BOOKING_DETAIL - booking detail related errors
 	BookingDetailNotFound = "BookingDetailNotFound"
 

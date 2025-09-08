@@ -332,6 +332,7 @@ func setupAdminAccountRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 	accounts := admin.Group("/accounts")
 	{
 		accounts.POST("", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.AccountCreate.Create)
+		accounts.PATCH("/:accountId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.AccountUpdate.Update)
 	}
 }
 

@@ -462,6 +462,13 @@
       "status": 409
     }
   },
+  "ACCOUNT": {
+    "AccountNotFound": {
+      "code": "E3ACC01",
+      "message": "帳戶不存在或已被刪除",
+      "status": 404
+    }
+  },
   "STORE": {
     "StoreNotActive": {
       "code": "E3STO001",

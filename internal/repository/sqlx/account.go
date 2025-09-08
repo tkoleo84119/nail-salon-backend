@@ -104,3 +104,88 @@ func (r *AccountRepository) GetAllAccountsByFilter(ctx context.Context, params G
 
 	return total, results, nil
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type GetAccountByIDResponse struct {
+	ID        int64              `db:"id"`
+	StoreID   int64              `db:"store_id"`
+	Name      string             `db:"name"`
+	Note      pgtype.Text        `db:"note"`
+	IsActive  pgtype.Bool        `db:"is_active"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (r *AccountRepository) GetAccountByID(ctx context.Context, accountID int64) (GetAccountByIDResponse, error) {
+	query := `
+		SELECT id, store_id, name, note, is_active, created_at, updated_at
+		FROM accounts
+		WHERE id = $1
+	`
+
+	var result GetAccountByIDResponse
+	if err := r.db.GetContext(ctx, &result, query, accountID); err != nil {
+		return GetAccountByIDResponse{}, fmt.Errorf("failed to get account by id: %w", err)
+	}
+
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateAccountParams struct {
+	Name     *string
+	Note     *string
+	IsActive *bool
+}
+
+type UpdateAccountResponse struct {
+	ID        int64              `db:"id"`
+}
+
+func (r *AccountRepository) UpdateAccount(ctx context.Context, accountID int64, params UpdateAccountParams) (UpdateAccountResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if params.Name != nil && *params.Name != "" {
+		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))
+		args = append(args, *params.Name)
+	}
+
+	if params.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
+		if *params.Note == "" {
+			args = append(args, nil)
+		} else {
+			args = append(args, *params.Note)
+		}
+	}
+
+	if params.IsActive != nil {
+		setParts = append(setParts, fmt.Sprintf("is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
+	}
+
+	// Check if at least one field to update (excluding updated_at)
+	if len(setParts) == 1 {
+		return UpdateAccountResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, accountID)
+	accountIDIndex := len(args)
+
+	query := fmt.Sprintf(`
+		UPDATE accounts
+		SET %s
+		WHERE id = $%d
+		RETURNING id
+	`, strings.Join(setParts, ", "), accountIDIndex)
+
+	var result UpdateAccountResponse
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return UpdateAccountResponse{}, fmt.Errorf("failed to update account: %w", err)
+	}
+
+	return result, nil
+}
