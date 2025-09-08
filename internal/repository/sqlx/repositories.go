@@ -6,6 +6,7 @@ import (
 
 // Repositories consolidates all SQLX repositories into a single interface
 type Repositories struct {
+	Account         *AccountRepository
 	Booking         *BookingRepository
 	BookingDetail   *BookingDetailRepository
 	BookingProduct  *BookingProductRepository
@@ -31,6 +32,7 @@ type Repositories struct {
 // NewRepositories creates a new instance of Repositories with all repository instances
 func NewRepositories(db *sqlx.DB) *Repositories {
 	return &Repositories{
+		Account:         NewAccountRepository(db),
 		Booking:         NewBookingRepository(db),
 		BookingDetail:   NewBookingDetailRepository(db),
 		BookingProduct:  NewBookingProductRepository(db),
