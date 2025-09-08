@@ -6,6 +6,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 
 	// Admin handlers
+	adminAccountHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/account"
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
 	adminBookingProductHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking_product"
@@ -32,6 +33,7 @@ import (
 	adminTimeSlotTemplateItemHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/time_slot_template_item"
 
 	// Admin services
+	adminAccountService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/account"
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
 	adminBookingProductService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking_product"
@@ -85,6 +87,9 @@ type AdminServices struct {
 	StoreGet     adminStoreService.GetInterface
 	StoreCreate  adminStoreService.CreateInterface
 	StoreUpdate  adminStoreService.UpdateInterface
+
+	// Account management services
+	AccountCreate adminAccountService.CreateInterface
 
 	// Brand management services
 	BrandCreate adminBrandService.CreateInterface
@@ -216,6 +221,9 @@ type AdminHandlers struct {
 	StoreCreate  *adminStoreHandler.Create
 	StoreUpdate  *adminStoreHandler.Update
 
+	// Account management handlers
+	AccountCreate *adminAccountHandler.Create
+
 	// Brand management handlers
 	BrandCreate *adminBrandHandler.Create
 	BrandGetAll *adminBrandHandler.GetAll
@@ -345,6 +353,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StoreCreate:  adminStoreService.NewCreate(queries, database.PgxPool),
 		StoreUpdate:  adminStoreService.NewUpdate(queries, repositories.SQLX),
 
+		// Account management services
+		AccountCreate: adminAccountService.NewCreate(queries),
+
 		// Brand management services
 		BrandCreate: adminBrandService.NewCreate(queries),
 		BrandGetAll: adminBrandService.NewGetAll(repositories.SQLX),
@@ -473,6 +484,9 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StoreGet:     adminStoreHandler.NewGet(services.StoreGet),
 		StoreCreate:  adminStoreHandler.NewCreate(services.StoreCreate),
 		StoreUpdate:  adminStoreHandler.NewUpdate(services.StoreUpdate),
+
+		// Account management handlers
+		AccountCreate: adminAccountHandler.NewCreate(services.AccountCreate),
 
 		// Brand management handlers
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),

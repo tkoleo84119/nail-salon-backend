@@ -59,6 +59,7 @@ type Querier interface {
 	CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.Context, arg CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams) (bool, error)
 	CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error)
 	CountProductsByIDs(ctx context.Context, arg CountProductsByIDsParams) (int64, error)
+	CreateAccount(ctx context.Context, arg CreateAccountParams) error
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)
 	CreateBrand(ctx context.Context, arg CreateBrandParams) (int64, error)
