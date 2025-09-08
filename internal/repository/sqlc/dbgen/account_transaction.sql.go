@@ -50,6 +50,37 @@ func (q *Queries) CreateAccountTransaction(ctx context.Context, arg CreateAccoun
 	return id, err
 }
 
+const getAccountTransactionByID = `-- name: GetAccountTransactionByID :one
+SELECT id, account_id, transaction_date, type, amount, balance, note
+FROM account_transactions
+WHERE id = $1
+`
+
+type GetAccountTransactionByIDRow struct {
+	ID              int64              `db:"id" json:"id"`
+	AccountID       int64              `db:"account_id" json:"account_id"`
+	TransactionDate pgtype.Timestamptz `db:"transaction_date" json:"transaction_date"`
+	Type            string             `db:"type" json:"type"`
+	Amount          pgtype.Numeric     `db:"amount" json:"amount"`
+	Balance         pgtype.Numeric     `db:"balance" json:"balance"`
+	Note            pgtype.Text        `db:"note" json:"note"`
+}
+
+func (q *Queries) GetAccountTransactionByID(ctx context.Context, id int64) (GetAccountTransactionByIDRow, error) {
+	row := q.db.QueryRow(ctx, getAccountTransactionByID, id)
+	var i GetAccountTransactionByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.TransactionDate,
+		&i.Type,
+		&i.Amount,
+		&i.Balance,
+		&i.Note,
+	)
+	return i, err
+}
+
 const getAccountTransactionCurrentBalance = `-- name: GetAccountTransactionCurrentBalance :one
 SELECT COALESCE(
 (SELECT balance

@@ -3,6 +3,7 @@ package sqlx
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jmoiron/sqlx"
@@ -84,4 +85,48 @@ func (r *AccountTransactionRepository) GetAllAccountTransactionsByFilter(ctx con
 	}
 
 	return total, results, nil
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateAccountTransactionParams struct {
+	Note *string
+}
+
+type UpdateAccountTransactionResponse struct {
+	ID int64 `db:"id"`
+}
+
+func (r *AccountTransactionRepository) UpdateAccountTransaction(ctx context.Context, id int64, params UpdateAccountTransactionParams) (UpdateAccountTransactionResponse, error) {
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	// Dynamic SET conditions
+	if params.Note != nil {
+		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
+		args = append(args, *params.Note)
+	}
+
+	// Check if there are fields to update
+	if len(setParts) == 1 {
+		return UpdateAccountTransactionResponse{}, fmt.Errorf("no fields to update")
+	}
+
+	// Add WHERE condition ID
+	args = append(args, id)
+	whereIndex := len(args)
+
+	query := fmt.Sprintf(`
+		UPDATE account_transactions
+		SET %s
+		WHERE id = $%d
+		RETURNING id
+	`, strings.Join(setParts, ", "), whereIndex)
+
+	var result UpdateAccountTransactionResponse
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return UpdateAccountTransactionResponse{}, fmt.Errorf("failed to update account transaction: %w", err)
+	}
+
+	return result, nil
 }

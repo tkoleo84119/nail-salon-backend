@@ -224,6 +224,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		// Store account transactions routes
 		stores.GET("/:storeId/accounts/:accountId/transactions", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionGetAll.GetAll)
 		stores.POST("/:storeId/accounts/:accountId/transactions", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionCreate.Create)
+		stores.PATCH("/:storeId/accounts/:accountId/transactions/:transactionId", middleware.JWTAuth(*cfg, queries), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionUpdate.Update)
 	}
 }
 

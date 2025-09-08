@@ -98,6 +98,7 @@ type AdminServices struct {
 	// Account transaction management services
 	AccountTransactionGetAll adminAccountTransactionService.GetAllInterface
 	AccountTransactionCreate adminAccountTransactionService.CreateInterface
+	AccountTransactionUpdate adminAccountTransactionService.UpdateInterface
 
 	// Brand management services
 	BrandCreate adminBrandService.CreateInterface
@@ -237,6 +238,7 @@ type AdminHandlers struct {
 	// Account transaction management handlers
 	AccountTransactionGetAll *adminAccountTransactionHandler.GetAll
 	AccountTransactionCreate *adminAccountTransactionHandler.Create
+	AccountTransactionUpdate *adminAccountTransactionHandler.Update
 
 	// Brand management handlers
 	BrandCreate *adminBrandHandler.Create
@@ -375,6 +377,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Account transaction management services
 		AccountTransactionGetAll: adminAccountTransactionService.NewGetAll(repositories.SQLX),
 		AccountTransactionCreate: adminAccountTransactionService.NewCreate(queries),
+		AccountTransactionUpdate: adminAccountTransactionService.NewUpdate(queries, repositories.SQLX),
 
 		// Brand management services
 		BrandCreate: adminBrandService.NewCreate(queries),
@@ -513,6 +516,7 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		// Account transaction management handlers
 		AccountTransactionGetAll: adminAccountTransactionHandler.NewGetAll(services.AccountTransactionGetAll),
 		AccountTransactionCreate: adminAccountTransactionHandler.NewCreate(services.AccountTransactionCreate),
+		AccountTransactionUpdate: adminAccountTransactionHandler.NewUpdate(services.AccountTransactionUpdate),
 
 		// Brand management handlers
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),

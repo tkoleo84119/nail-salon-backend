@@ -90,6 +90,7 @@ type Querier interface {
 	DeleteTimeSlotTemplate(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error
 	GetAccountByID(ctx context.Context, id int64) (GetAccountByIDRow, error)
+	GetAccountTransactionByID(ctx context.Context, id int64) (GetAccountTransactionByIDRow, error)
 	GetAccountTransactionCurrentBalance(ctx context.Context, accountID int64) (int32, error)
 	GetActiveStaffUserByUsername(ctx context.Context, username string) (StaffUser, error)
 	GetActiveStylistNameByID(ctx context.Context, id int64) (pgtype.Text, error)

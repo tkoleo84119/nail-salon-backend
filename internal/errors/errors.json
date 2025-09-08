@@ -183,6 +183,16 @@
       "code": "E3ACC02",
       "message": "帳戶不屬於指定的門市",
       "status": 400
+    },
+    "AccountTransactionNotFound": {
+      "code": "E3ACC03",
+      "message": "帳戶交易紀錄不存在或已被刪除",
+      "status": 404
+    },
+    "AccountTransactionNotBelongToAccount": {
+      "code": "E3ACC04",
+      "message": "帳戶交易紀錄不屬於指定的帳戶",
+      "status": 400
     }
   },
   "BOOKING": {

@@ -11,6 +11,11 @@ INSERT INTO account_transactions (
     $1, $2, $3, $4, $5, $6, $7
 ) RETURNING id;
 
+-- name: GetAccountTransactionByID :one
+SELECT id, account_id, transaction_date, type, amount, balance, note
+FROM account_transactions
+WHERE id = $1;
+
 -- name: GetAccountTransactionCurrentBalance :one
 SELECT COALESCE(
 (SELECT balance

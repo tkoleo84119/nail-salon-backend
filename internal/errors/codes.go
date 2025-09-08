@@ -114,6 +114,8 @@ const (
 	// ACCOUNT - account related errors
 	AccountNotBelongToStore = "AccountNotBelongToStore"
 	AccountNotFound = "AccountNotFound"
+	AccountTransactionNotBelongToAccount = "AccountTransactionNotBelongToAccount"
+	AccountTransactionNotFound = "AccountTransactionNotFound"
 
 	// BOOKING_DETAIL - booking detail related errors
 	BookingDetailNotFound = "BookingDetailNotFound"

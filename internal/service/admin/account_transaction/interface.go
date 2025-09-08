@@ -13,3 +13,7 @@ type GetAllInterface interface {
 type CreateInterface interface {
 	Create(ctx context.Context, storeID, accountID int64, req adminAccountTransactionModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminAccountTransactionModel.CreateResponse, error)
 }
+
+type UpdateInterface interface {
+	Update(ctx context.Context, storeID, accountID, transactionID int64, req adminAccountTransactionModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminAccountTransactionModel.UpdateResponse, error)
+}
