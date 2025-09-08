@@ -3,6 +3,7 @@ package adminAccountTransaction
 import (
 	"context"
 
+	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAccountTransactionModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/account_transaction"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -39,12 +40,22 @@ func (s *GetAll) GetAll(ctx context.Context, storeID, accountID int64, req admin
 	// Convert to response format
 	responseItems := make([]adminAccountTransactionModel.GetAllItem, len(items))
 	for i, item := range items {
+		amount, err := utils.PgNumericToInt64(item.Amount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert amount to int64", err)
+		}
+
+		balance, err := utils.PgNumericToInt64(item.Balance)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert balance to int64", err)
+		}
+
 		responseItems[i] = adminAccountTransactionModel.GetAllItem{
 			ID:              utils.FormatID(item.ID),
 			TransactionDate: utils.PgTimestamptzToTimeString(item.TransactionDate),
 			Type:            item.Type,
-			Amount:          int(utils.PgNumericToFloat64(item.Amount)),
-			Balance:         int(utils.PgNumericToFloat64(item.Balance)),
+			Amount:          amount,
+			Balance:         balance,
 			Note:            utils.PgTextToString(item.Note),
 			CreatedAt:       utils.PgTimestamptzToTimeString(item.CreatedAt),
 			UpdatedAt:       utils.PgTimestamptzToTimeString(item.UpdatedAt),

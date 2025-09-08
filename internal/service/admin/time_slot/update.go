@@ -86,8 +86,8 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 		hasOverlap, err := s.queries.CheckTimeSlotOverlapExcluding(ctx, dbgen.CheckTimeSlotOverlapExcludingParams{
 			ScheduleID: scheduleID,
 			ID:         timeSlotID,
-			StartTime:  utils.TimeToPgTime(startTimeParsed),
-			EndTime:    utils.TimeToPgTime(endTimeParsed),
+			StartTime:  utils.TimePtrToPgTime(&startTimeParsed),
+			EndTime:    utils.TimePtrToPgTime(&endTimeParsed),
 		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check time slot overlap", err)

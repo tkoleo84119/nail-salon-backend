@@ -78,8 +78,8 @@ func (s *Create) Create(ctx context.Context, scheduleID int64, req adminTimeSlot
 	// Check for time slot overlap
 	hasOverlap, err := s.queries.CheckTimeSlotOverlap(ctx, dbgen.CheckTimeSlotOverlapParams{
 		ScheduleID: scheduleID,
-		StartTime:  utils.TimeToPgTime(startTime),
-		EndTime:    utils.TimeToPgTime(endTime),
+		StartTime:  utils.TimePtrToPgTime(&startTime),
+		EndTime:    utils.TimePtrToPgTime(&endTime),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check time slot overlap", err)
@@ -93,8 +93,8 @@ func (s *Create) Create(ctx context.Context, scheduleID int64, req adminTimeSlot
 	createdTimeSlot, err := s.queries.CreateTimeSlot(ctx, dbgen.CreateTimeSlotParams{
 		ID:         timeSlotID,
 		ScheduleID: scheduleID,
-		StartTime:  utils.TimeToPgTime(startTime),
-		EndTime:    utils.TimeToPgTime(endTime),
+		StartTime:  utils.TimePtrToPgTime(&startTime),
+		EndTime:    utils.TimePtrToPgTime(&endTime),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create time slot", err)

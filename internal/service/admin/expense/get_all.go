@@ -39,10 +39,15 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminExpenseMode
 
 	items := make([]adminExpenseModel.GetAllExpenseItem, len(expenses))
 	for i, expense := range expenses {
+		amount, err := utils.PgNumericToInt64(expense.Amount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert amount to int64", err)
+		}
+
 		item := adminExpenseModel.GetAllExpenseItem{
 			ID:          utils.FormatID(expense.ID),
 			Category:    utils.PgTextToString(expense.Category),
-			Amount:      int(utils.PgNumericToFloat64(expense.Amount)),
+			Amount:      amount,
 			ExpenseDate: utils.PgDateToDateString(expense.ExpenseDate),
 			Note:        utils.PgTextToString(expense.Note),
 			CreatedAt:   utils.PgTimestamptzToTimeString(expense.CreatedAt),
@@ -57,7 +62,11 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminExpenseMode
 		}
 
 		if expense.OtherFee.Valid {
-			otherFee := int(utils.PgNumericToFloat64(expense.OtherFee))
+			otherFee, err := utils.PgNumericToInt64(expense.OtherFee)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert other fee to int64", err)
+			}
+
 			item.OtherFee = &otherFee
 		}
 

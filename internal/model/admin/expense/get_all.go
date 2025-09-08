@@ -30,8 +30,8 @@ type GetAllExpenseItem struct {
 	Supplier     *GetAllExpenseSupplierItem `json:"supplier,omitempty"`
 	Payer        *GetAllExpensePayerItem    `json:"payer,omitempty"`
 	Category     string                     `json:"category"`
-	Amount       int                        `json:"amount"`
-	OtherFee     *int                       `json:"otherFee,omitempty"`
+	Amount       int64                      `json:"amount"`
+	OtherFee     *int64                     `json:"otherFee,omitempty"`
 	ExpenseDate  string                     `json:"expenseDate"`
 	Note         string                     `json:"note"`
 	IsReimbursed *bool                      `json:"isReimbursed,omitempty"`

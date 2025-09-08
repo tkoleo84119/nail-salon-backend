@@ -69,6 +69,15 @@ func (s *GetAll) GetAll(ctx context.Context, customerID int64, req customerCoupo
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Coupon not found", nil)
 		}
 
+		discountRate, err := utils.PgNumericToFloat64(coupon.DiscountRate)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount rate to float64", err)
+		}
+		discountAmount, err := utils.PgNumericToInt64(coupon.DiscountAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount amount to int64", err)
+		}
+
 		items[i] = customerCouponModel.GetAllCustomerCouponItem{
 			ID:        utils.FormatID(r.ID),
 			ValidFrom: utils.PgTimestamptzToTimeString(r.ValidFrom),
@@ -79,8 +88,8 @@ func (s *GetAll) GetAll(ctx context.Context, customerID int64, req customerCoupo
 			Coupon: customerCouponModel.GetAllItemCouponDTO{
 				ID:             utils.FormatID(r.CouponID),
 				DisplayName:    coupon.DisplayName,
-				DiscountRate:   utils.PgNumericToFloat64(coupon.DiscountRate),
-				DiscountAmount: int64(utils.PgNumericToFloat64(coupon.DiscountAmount)),
+				DiscountRate:   discountRate,
+				DiscountAmount: discountAmount,
 				IsActive:       utils.PgBoolToBool(coupon.IsActive),
 			},
 		}

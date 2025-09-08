@@ -41,8 +41,8 @@ func (s *GetPerformanceMe) GetPerformanceMe(ctx context.Context, req adminReport
 	// Get performance data by store
 	storePerformances, err := s.queries.GetStylistPerformanceGroupByStore(ctx, dbgen.GetStylistPerformanceGroupByStoreParams{
 		StylistID:  stylistID,
-		WorkDate:   utils.TimeToPgDate(req.StartDate),
-		WorkDate_2: utils.TimeToPgDate(req.EndDate),
+		WorkDate:   utils.TimePtrToPgDate(&req.StartDate),
+		WorkDate_2: utils.TimePtrToPgDate(&req.EndDate),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get performance data", err)
@@ -78,6 +78,19 @@ func (s *GetPerformanceMe) GetPerformanceMe(ctx context.Context, req adminReport
 		storeTotalPaidAmount := store.TotalPaidAmount
 		storeTotalServiceTime := store.TotalServiceTime
 
+		storeTotalLinePayRevenueFloat, err := utils.PgNumericToFloat64(storeTotalLinePayRevenue)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert store total line pay revenue to float64", err)
+		}
+		storeTotalCashRevenueFloat, err := utils.PgNumericToFloat64(storeTotalCashRevenue)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert store total cash revenue to float64", err)
+		}
+		storeTotalPaidAmountFloat, err := utils.PgNumericToFloat64(storeTotalPaidAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert store total paid amount to float64", err)
+		}
+
 		stores[i] = adminReportModel.GetPerformanceMeStore{
 			StoreID:           utils.FormatID(store.StoreID),
 			StoreName:         store.StoreName,
@@ -85,9 +98,9 @@ func (s *GetPerformanceMe) GetPerformanceMe(ctx context.Context, req adminReport
 			CompletedBookings: int(store.CompletedBookings),
 			CancelledBookings: int(store.CancelledBookings),
 			NoShowBookings:    int(store.NoShowBookings),
-			LinePayRevenue:    utils.PgNumericToFloat64(storeTotalLinePayRevenue),
-			CashRevenue:       utils.PgNumericToFloat64(storeTotalCashRevenue),
-			TotalPaidAmount:   utils.PgNumericToFloat64(storeTotalPaidAmount),
+			LinePayRevenue:    storeTotalLinePayRevenueFloat,
+			CashRevenue:       storeTotalCashRevenueFloat,
+			TotalPaidAmount:   storeTotalPaidAmountFloat,
 			TotalServiceTime:  int(storeTotalServiceTime),
 		}
 
@@ -96,9 +109,9 @@ func (s *GetPerformanceMe) GetPerformanceMe(ctx context.Context, req adminReport
 		completedBookings += int(store.CompletedBookings)
 		cancelledBookings += int(store.CancelledBookings)
 		noShowBookings += int(store.NoShowBookings)
-		totalLinePayRevenue += utils.PgNumericToFloat64(storeTotalLinePayRevenue)
-		totalCashRevenue += utils.PgNumericToFloat64(storeTotalCashRevenue)
-		totalPaidAmount += utils.PgNumericToFloat64(storeTotalPaidAmount)
+		totalLinePayRevenue += storeTotalLinePayRevenueFloat
+		totalCashRevenue += storeTotalCashRevenueFloat
+		totalPaidAmount += storeTotalPaidAmountFloat
 		totalServiceTime += int(storeTotalServiceTime)
 	}
 

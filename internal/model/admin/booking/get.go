@@ -48,9 +48,9 @@ type GetService struct {
 type GetCheckout struct {
 	ID            string     `json:"id"`
 	PaymentMethod string     `json:"paymentMethod"`
-	TotalAmount   int        `json:"totalAmount"`
-	FinalAmount   int        `json:"finalAmount"`
-	PaidAmount    int        `json:"paidAmount"`
+	TotalAmount   int64      `json:"totalAmount"`
+	FinalAmount   int64      `json:"finalAmount"`
+	PaidAmount    int64      `json:"paidAmount"`
 	CheckoutUser  string     `json:"checkoutUser"`
 	Coupon        *GetCoupon `json:"coupon"`
 }

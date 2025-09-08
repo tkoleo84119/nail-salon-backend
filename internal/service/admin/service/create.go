@@ -39,7 +39,7 @@ func (s *Create) Create(ctx context.Context, req adminServiceModel.CreateRequest
 	serviceID := utils.GenerateID()
 
 	// Convert price to pgtype.Numeric
-	priceNumeric, err := utils.Int64ToPgNumeric(*req.Price)
+	priceNumeric, err := utils.Int64PtrToPgNumeric(req.Price)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price", err)
 	}

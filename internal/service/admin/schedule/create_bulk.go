@@ -65,7 +65,7 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminSch
 		exists, err := s.queries.CheckScheduleDateExists(ctx, dbgen.CheckScheduleDateExistsParams{
 			StoreID:   storeID,
 			StylistID: parsedStylistID,
-			WorkDate:  utils.TimeToPgDate(workDate),
+			WorkDate:  utils.TimePtrToPgDate(&workDate),
 		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check schedule existence", err)
@@ -129,7 +129,8 @@ func (s *CreateBulk) prepareBatchData(schedules []adminScheduleModel.CreateBulkS
 
 		// Generate schedule ID
 		scheduleID := utils.GenerateID()
-		now := utils.TimeToPgTimestamptz(time.Now())
+		now := time.Now()
+		nowPg := utils.TimePtrToPgTimestamptz(&now)
 
 		scheduleRow := dbgen.BatchCreateSchedulesParams{
 			ID:        scheduleID,
@@ -137,8 +138,8 @@ func (s *CreateBulk) prepareBatchData(schedules []adminScheduleModel.CreateBulkS
 			StylistID: stylistID,
 			WorkDate:  workDate,
 			Note:      utils.StringPtrToPgText(scheduleReq.Note, true),
-			CreatedAt: now,
-			UpdatedAt: now,
+			CreatedAt: nowPg,
+			UpdatedAt: nowPg,
 		}
 		scheduleRows = append(scheduleRows, scheduleRow)
 
@@ -160,11 +161,11 @@ func (s *CreateBulk) prepareBatchData(schedules []adminScheduleModel.CreateBulkS
 			timeSlotRow := dbgen.BatchCreateTimeSlotsParams{
 				ID:          timeSlotID,
 				ScheduleID:  scheduleID,
-				StartTime:   utils.TimeToPgTime(startTime),
-				EndTime:     utils.TimeToPgTime(endTime),
+				StartTime:   utils.TimePtrToPgTime(&startTime),
+				EndTime:     utils.TimePtrToPgTime(&endTime),
 				IsAvailable: utils.BoolPtrToPgBool(&isAvailable),
-				CreatedAt:   now,
-				UpdatedAt:   now,
+				CreatedAt:   nowPg,
+				UpdatedAt:   nowPg,
 			}
 			timeSlotRows = append(timeSlotRows, timeSlotRow)
 		}
@@ -276,27 +277,20 @@ func (s *CreateBulk) validateTimeSlots(timeSlots []adminScheduleModel.CreateBulk
 }
 
 func IsValidWorkDate(workDateStr string) error {
-	workDate, err := utils.DateStringToTime(workDateStr)
-	if err != nil {
-		return errorCodes.NewServiceError(errorCodes.ValFieldDateFormat, "invalid date format", err)
-	}
-
 	loc, err := time.LoadLocation("Asia/Taipei")
 	if err != nil {
 		return errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to load location", err)
 	}
 
-	workDateInLoc := time.Date(
-		workDate.Year(),
-		workDate.Month(),
-		workDate.Day(),
-		0, 0, 0, 0,
-		loc,
-	)
+	workDate, err := utils.DateStringToTimeInLoc(workDateStr, loc)
+	if err != nil {
+		return errorCodes.NewServiceError(errorCodes.ValFieldDateFormat, "invalid date format", err)
+	}
 
-	today := time.Now().In(loc).Truncate(24 * time.Hour)
+	now := time.Now().In(loc)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
 
-	if workDateInLoc.Before(today) {
+	if workDate.Before(today) {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotCreateBeforeToday)
 	}
 

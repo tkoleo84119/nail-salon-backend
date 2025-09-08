@@ -72,8 +72,8 @@ func (s *Update) Update(ctx context.Context, templateID int64, itemID int64, req
 	// Update time slot template item
 	updatedItem, err := s.queries.UpdateTimeSlotTemplateItem(ctx, dbgen.UpdateTimeSlotTemplateItemParams{
 		ID:        itemID,
-		StartTime: utils.TimeToPgTime(startTime),
-		EndTime:   utils.TimeToPgTime(endTime),
+		StartTime: utils.TimePtrToPgTime(&startTime),
+		EndTime:   utils.TimePtrToPgTime(&endTime),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update time slot template item", err)

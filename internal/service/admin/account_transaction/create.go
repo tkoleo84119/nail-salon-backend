@@ -49,11 +49,14 @@ func (s *Create) Create(ctx context.Context, storeID, accountID int64, req admin
 		balance -= int32(req.Amount)
 	}
 
-	balanceNumeric, err := utils.Int64ToPgNumeric(int64(balance))
+	int64Balance := int64(balance)
+	balanceNumeric, err := utils.Int64PtrToPgNumeric(&int64Balance)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert balance", err)
 	}
-	amountNumeric, err := utils.Int64ToPgNumeric(int64(req.Amount))
+
+	int64Amount := int64(req.Amount)
+	amountNumeric, err := utils.Int64PtrToPgNumeric(&int64Amount)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert amount", err)
 	}
@@ -63,7 +66,7 @@ func (s *Create) Create(ctx context.Context, storeID, accountID int64, req admin
 	_, err = s.queries.CreateAccountTransaction(ctx, dbgen.CreateAccountTransactionParams{
 		ID:              accountTransactionID,
 		AccountID:       accountID,
-		TransactionDate: utils.TimeToPgTimestamptz(req.TransactionDate),
+		TransactionDate: utils.TimePtrToPgTimestamptz(&req.TransactionDate),
 		Type:            req.Type,
 		Amount:          amountNumeric,
 		Balance:         balanceNumeric,

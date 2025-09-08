@@ -46,7 +46,7 @@ func (s *Create) Create(ctx context.Context, req adminTimeSlotTemplateModel.Crea
 		ID:      templateID,
 		Name:    req.Name,
 		Note:    utils.StringPtrToPgText(req.Note, true),
-		Updater: utils.Int64ToPgInt8(creatorID),
+		Updater: utils.Int64PtrToPgInt8(&creatorID),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create time slot template", err)
@@ -103,13 +103,14 @@ func (s *Create) validateTimeSlotsAndPrepareData(timeSlots []adminTimeSlotTempla
 
 		itemID := utils.GenerateID()
 		now := time.Now()
+		nowPg := utils.TimePtrToPgTimestamptz(&now)
 		templateItems[i] = dbgen.BatchCreateTimeSlotTemplateItemsParams{
 			ID:         itemID,
 			TemplateID: templateID,
-			StartTime:  utils.TimeToPgTime(startTime),
-			EndTime:    utils.TimeToPgTime(endTime),
-			CreatedAt:  utils.TimeToPgTimestamptz(now),
-			UpdatedAt:  utils.TimeToPgTimestamptz(now),
+			StartTime:  utils.TimePtrToPgTime(&startTime),
+			EndTime:    utils.TimePtrToPgTime(&endTime),
+			CreatedAt:  nowPg,
+			UpdatedAt:  nowPg,
 		}
 
 		responseTimeSlots[i] = adminTimeSlotTemplateModel.CreateTimeSlotItemResponse{

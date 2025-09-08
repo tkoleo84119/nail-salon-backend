@@ -9,7 +9,6 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAccountTransactionModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/account_transaction"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
-	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -42,7 +41,7 @@ func (s *Update) Update(ctx context.Context, storeID, accountID, transactionID i
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AccountTransactionNotBelongToAccount)
 	}
 
-	updateResponse, err := s.repo.AccountTransaction.UpdateAccountTransaction(ctx, transactionID, sqlx.UpdateAccountTransactionParams{
+	updateResponse, err := s.repo.AccountTransaction.UpdateAccountTransaction(ctx, transactionID, sqlxRepo.UpdateAccountTransactionParams{
 		Note: req.Note,
 	})
 	if err != nil {

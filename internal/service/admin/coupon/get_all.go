@@ -32,13 +32,22 @@ func (s *GetAll) GetAll(ctx context.Context, req adminCouponModel.GetAllParsedRe
 
 	items := make([]adminCouponModel.GetAllCouponItemDTO, len(results))
 	for i, result := range results {
+		discountRate, err := utils.PgNumericToFloat64(result.DiscountRate)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount rate to float64", err)
+		}
+		discountAmount, err := utils.PgNumericToInt64(result.DiscountAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount amount to int64", err)
+		}
+
 		items[i] = adminCouponModel.GetAllCouponItemDTO{
 			ID:             utils.FormatID(result.ID),
 			Name:           result.Name,
 			DisplayName:    result.DisplayName,
 			Code:           result.Code,
-			DiscountRate:   utils.PgNumericToFloat64(result.DiscountRate),
-			DiscountAmount: int64(utils.PgNumericToFloat64(result.DiscountAmount)),
+			DiscountRate:   discountRate,
+			DiscountAmount: discountAmount,
 			IsActive:       utils.PgBoolToBool(result.IsActive),
 			Note:           utils.PgTextToString(result.Note),
 			CreatedAt:      utils.PgTimestamptzToTimeString(result.CreatedAt),

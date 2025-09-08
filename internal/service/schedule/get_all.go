@@ -67,8 +67,8 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, stylistID int64, req
 	rows, err := s.queries.GetAvailableSchedules(ctx, dbgen.GetAvailableSchedulesParams{
 		StoreID:    storeID,
 		StylistID:  stylistID,
-		WorkDate:   utils.TimeToPgDate(startDate),
-		WorkDate_2: utils.TimeToPgDate(req.EndDate),
+		WorkDate:   utils.TimePtrToPgDate(&startDate),
+		WorkDate_2: utils.TimePtrToPgDate(&req.EndDate),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get available schedules", err)

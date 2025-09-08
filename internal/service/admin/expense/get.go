@@ -45,11 +45,16 @@ func (s *Get) Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get expense items", err)
 	}
 
+	amount, err := utils.PgNumericToInt64(expense.Amount)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert amount to int64", err)
+	}
+
 	// Build response
 	response := &adminExpenseModel.GetResponse{
 		ID:          utils.FormatID(expense.ID),
 		Category:    utils.PgTextToString(expense.Category),
-		Amount:      int(utils.PgNumericToFloat64(expense.Amount)),
+		Amount:      amount,
 		ExpenseDate: utils.PgDateToDateString(expense.ExpenseDate),
 		Note:        utils.PgTextToString(expense.Note),
 		CreatedAt:   utils.PgTimestamptzToTimeString(expense.CreatedAt),
@@ -82,7 +87,11 @@ func (s *Get) Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs
 	}
 
 	if expense.OtherFee.Valid {
-		otherFee := int(utils.PgNumericToFloat64(expense.OtherFee))
+		otherFee, err := utils.PgNumericToInt64(expense.OtherFee)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert other fee to int64", err)
+		}
+
 		response.OtherFee = &otherFee
 	}
 
@@ -90,14 +99,19 @@ func (s *Get) Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs
 	if len(expenseItems) > 0 {
 		response.Items = make([]adminExpenseModel.GetExpenseItem, len(expenseItems))
 		for i, item := range expenseItems {
+			price, err := utils.PgNumericToInt64(item.Price)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price to int64", err)
+			}
+
 			responseItem := adminExpenseModel.GetExpenseItem{
 				ID: utils.FormatID(item.ID),
 				Product: adminExpenseModel.GetExpenseItemProduct{
 					ID:   utils.FormatID(item.ProductID),
 					Name: utils.PgTextToString(item.ProductName),
 				},
-				Quantity:        int(item.Quantity),
-				Price:           int(utils.PgNumericToFloat64(item.Price)),
+				Quantity:        int64(item.Quantity),
+				Price:           price,
 				IsArrived:       utils.PgBoolToBool(item.IsArrived),
 				StorageLocation: utils.PgTextToString(item.StorageLocation),
 				Note:            utils.PgTextToString(item.Note),

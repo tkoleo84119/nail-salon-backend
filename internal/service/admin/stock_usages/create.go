@@ -54,7 +54,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminStockUsages
 	stockUsageID := utils.GenerateID()
 	var expiration pgtype.Date
 	if req.Expiration != nil {
-		expiration = utils.TimeToPgDate(*req.Expiration)
+		expiration = utils.TimePtrToPgDate(req.Expiration)
 	} else {
 		expiration = pgtype.Date{Valid: false}
 	}
@@ -71,7 +71,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminStockUsages
 		ProductID:    req.ProductID,
 		Quantity:     int32(req.Quantity),
 		Expiration:   expiration,
-		UsageStarted: utils.TimeToPgDate(req.UsageStarted),
+		UsageStarted: utils.TimePtrToPgDate(&req.UsageStarted),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create stock usage", err)

@@ -67,15 +67,16 @@ func (s *Create) Create(ctx context.Context, req adminStaffModel.CreateParsedReq
 
 	// prepare of insert data
 	staffID := utils.GenerateID()
-	now := utils.TimeToPgTimestamptz(time.Now())
+	now := time.Now()
+	nowPg := utils.TimePtrToPgTimestamptz(&now)
 
 	storeAccessParams := make([]dbgen.BatchCreateStaffUserStoreAccessParams, 0, len(req.StoreIDs))
 	for _, storeID := range req.StoreIDs {
 		storeAccessParams = append(storeAccessParams, dbgen.BatchCreateStaffUserStoreAccessParams{
 			StoreID:     storeID,
 			StaffUserID: staffID,
-			CreatedAt:   now,
-			UpdatedAt:   now,
+			CreatedAt:   nowPg,
+			UpdatedAt:   nowPg,
 		})
 	}
 

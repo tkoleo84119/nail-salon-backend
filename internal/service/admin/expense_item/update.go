@@ -85,8 +85,19 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID, expenseItemID i
 	}
 
 	if req.Price != nil || req.Quantity != nil {
-		oldExpenseAmount := utils.PgNumericToFloat64(expense.Amount)
-		newExpenseAmount := oldExpenseAmount - (utils.PgNumericToFloat64(oldExpenseItem.Price) * float64(oldExpenseItem.Quantity)) + (utils.PgNumericToFloat64(updatedExpenseItem.Price) * float64(updatedExpenseItem.Quantity))
+		oldExpenseAmount, err := utils.PgNumericToFloat64(expense.Amount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert old expense amount to float64", err)
+		}
+		oldExpenseItemPrice, err := utils.PgNumericToFloat64(oldExpenseItem.Price)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert old expense item price to float64", err)
+		}
+		updatedExpenseItemPrice, err := utils.PgNumericToFloat64(updatedExpenseItem.Price)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert updated expense item price to float64", err)
+		}
+		newExpenseAmount := oldExpenseAmount - (oldExpenseItemPrice * float64(oldExpenseItem.Quantity)) + (updatedExpenseItemPrice * float64(updatedExpenseItem.Quantity))
 
 		// Update expense amount
 		err = s.repo.Expense.UpdateStoreExpenseAmountTx(ctx, tx, expenseID, sqlxRepo.UpdateStoreExpenseAmountTxParams{

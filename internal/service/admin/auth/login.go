@@ -78,7 +78,7 @@ func (s *Login) storeRefreshToken(ctx context.Context, tokenInfo adminAuthModel.
 		RefreshToken: tokenInfo.RefreshToken,
 		UserAgent:    utils.StringPtrToPgText(&tokenInfo.Context.UserAgent, true),
 		IpAddress:    ipAddr,
-		ExpiredAt:    utils.TimeToPgTimestamptz(tokenInfo.ExpiresAt),
+		ExpiredAt:    utils.TimePtrToPgTimestamptz(&tokenInfo.ExpiresAt),
 	})
 
 	return err

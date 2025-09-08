@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminExpenseModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/expense"
@@ -63,14 +62,11 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 	}
 
 	// Convert type
-	amountNumeric, err := utils.Int64ToPgNumeric(req.Amount)
+	amountNumeric, err := utils.Int64PtrToPgNumeric(&req.Amount)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert amount", err)
 	}
-	otherFeeNumeric := pgtype.Numeric{Valid: false}
-	if req.OtherFee != nil {
-		otherFeeNumeric, err = utils.Int64ToPgNumeric(*req.OtherFee)
-	}
+	otherFeeNumeric, err := utils.Int64PtrToPgNumeric(req.OtherFee)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert other fee", err)
 	}
@@ -90,7 +86,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 		SupplierID:   utils.Int64PtrToPgInt8(req.SupplierID),
 		Amount:       amountNumeric,
 		OtherFee:     otherFeeNumeric,
-		ExpenseDate:  utils.TimeToPgDate(req.ExpenseDate),
+		ExpenseDate:  utils.TimePtrToPgDate(&req.ExpenseDate),
 		Note:         utils.StringPtrToPgText(req.Note, true),
 		PayerID:      utils.Int64PtrToPgInt8(req.PayerID),
 		IsReimbursed: utils.BoolPtrToPgBool(isReimbursed),
@@ -143,7 +139,8 @@ func (s *Create) checkAndPrepareBatchData(ctx context.Context, storeID int64, it
 	expenseID = utils.GenerateID()
 	itemRows = make([]dbgen.BatchCreateExpenseItemsParams, 0)
 	updateProductStockRows = make([]dbgen.UpdateProductCurrentStockParams, 0)
-	now := utils.TimeToPgTimestamptz(time.Now())
+	now := time.Now()
+	nowPg := utils.TimePtrToPgTimestamptz(&now)
 	for _, item := range items {
 		product, ok := productMap[item.ProductID]
 		if !ok {
@@ -152,19 +149,9 @@ func (s *Create) checkAndPrepareBatchData(ctx context.Context, storeID int64, it
 
 		quantity := int32(item.Quantity)
 
-		price, err := utils.Int64ToPgNumeric(item.Price)
+		priceNumeric, err := utils.Int64PtrToPgNumeric(&item.Price)
 		if err != nil {
 			return 0, nil, nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert total price", err)
-		}
-
-		expirationDate := pgtype.Date{Valid: false}
-		if item.ExpirationDate != nil && !item.ExpirationDate.IsZero() {
-			expirationDate = utils.TimeToPgDate(*item.ExpirationDate)
-		}
-
-		arrivalDate := pgtype.Date{Valid: false}
-		if item.ArrivalDate != nil && !item.ArrivalDate.IsZero() {
-			arrivalDate = utils.TimeToPgDate(*item.ArrivalDate)
 		}
 
 		itemRows = append(itemRows, dbgen.BatchCreateExpenseItemsParams{
@@ -172,14 +159,14 @@ func (s *Create) checkAndPrepareBatchData(ctx context.Context, storeID int64, it
 			ExpenseID:       expenseID,
 			ProductID:       item.ProductID,
 			Quantity:        quantity,
-			Price:           price,
-			ExpirationDate:  expirationDate,
-			IsArrived:       utils.BoolToPgBool(item.IsArrived),
-			ArrivalDate:     arrivalDate,
+			Price:           priceNumeric,
+			ExpirationDate:  utils.TimePtrToPgDate(item.ExpirationDate),
+			IsArrived:       utils.BoolPtrToPgBool(&item.IsArrived),
+			ArrivalDate:     utils.TimePtrToPgDate(item.ArrivalDate),
 			StorageLocation: utils.StringPtrToPgText(item.StorageLocation, true),
 			Note:            utils.StringPtrToPgText(item.Note, true),
-			CreatedAt:       now,
-			UpdatedAt:       now,
+			CreatedAt:       nowPg,
+			UpdatedAt:       nowPg,
 		})
 
 		updateProductStockRows = append(updateProductStockRows, dbgen.UpdateProductCurrentStockParams{

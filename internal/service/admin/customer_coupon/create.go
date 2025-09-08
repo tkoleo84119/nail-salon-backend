@@ -48,8 +48,8 @@ func (s *Create) Create(ctx context.Context, req adminCustomerCouponModel.Create
 		ID:         id,
 		CustomerID: req.CustomerId,
 		CouponID:   req.CouponId,
-		ValidFrom:  utils.TimeToPgTimestamptz(validFrom),
-		ValidTo:    utils.TimeToPgTimestamptz(validTo),
+		ValidFrom:  utils.TimePtrToPgTimestamptz(&validFrom),
+		ValidTo:    utils.TimePtrToPgTimestamptz(&validTo),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create customer coupon", err)

@@ -62,10 +62,15 @@ func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceMo
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update service", err)
 	}
 
+	price, err := utils.PgNumericToInt64(updatedService.Price)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price to int64", err)
+	}
+
 	response := adminServiceModel.UpdateResponse{
 		ID:              utils.FormatID(updatedService.ID),
 		Name:            updatedService.Name,
-		Price:           int64(utils.PgNumericToFloat64(updatedService.Price)),
+		Price:           price,
 		DurationMinutes: updatedService.DurationMinutes,
 		IsAddon:         utils.PgBoolToBool(updatedService.IsAddon),
 		IsVisible:       utils.PgBoolToBool(updatedService.IsVisible),

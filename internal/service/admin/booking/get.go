@@ -73,13 +73,26 @@ func (s *Get) Get(ctx context.Context, storeID, bookingID int64, role string, st
 
 	response.BookingDetails = make([]adminBookingModel.GetBookingDetailItem, len(bookingDetails))
 	for i, detail := range bookingDetails {
-		rawPrice := utils.PgNumericToFloat64(detail.Price)
+		rawPrice, err := utils.PgNumericToFloat64(detail.Price)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price to float64", err)
+		}
 		price := rawPrice
 
 		if detail.DiscountRate.Valid {
-			price = rawPrice * utils.PgNumericToFloat64(detail.DiscountRate)
+			discountRate, err := utils.PgNumericToFloat64(detail.DiscountRate)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount rate to float64", err)
+			}
+
+			price = rawPrice * discountRate
 		} else if detail.DiscountAmount.Valid {
-			price = rawPrice - utils.PgNumericToFloat64(detail.DiscountAmount)
+			discountAmount, err := utils.PgNumericToFloat64(detail.DiscountAmount)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount amount to float64", err)
+			}
+
+			price = rawPrice - discountAmount
 		}
 
 		response.BookingDetails[i] = adminBookingModel.GetBookingDetailItem{
@@ -100,12 +113,25 @@ func (s *Get) Get(ctx context.Context, storeID, bookingID int64, role string, st
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get checkout", err)
 		}
 
+		totalAmount, err := utils.PgNumericToInt64(checkout.TotalAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert total amount to int64", err)
+		}
+		finalAmount, err := utils.PgNumericToInt64(checkout.FinalAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert final amount to int64", err)
+		}
+		paidAmount, err := utils.PgNumericToInt64(checkout.PaidAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert paid amount to int64", err)
+		}
+
 		response.Checkout = &adminBookingModel.GetCheckout{
 			ID:            utils.FormatID(checkout.ID),
 			PaymentMethod: checkout.PaymentMethod,
-			TotalAmount:   int(utils.PgNumericToFloat64(checkout.TotalAmount)),
-			FinalAmount:   int(utils.PgNumericToFloat64(checkout.FinalAmount)),
-			PaidAmount:    int(utils.PgNumericToFloat64(checkout.PaidAmount)),
+			TotalAmount:   totalAmount,
+			FinalAmount:   finalAmount,
+			PaidAmount:    paidAmount,
 			CheckoutUser:  utils.PgTextToString(checkout.CheckoutUser),
 			Coupon:        nil, // default is nil
 		}

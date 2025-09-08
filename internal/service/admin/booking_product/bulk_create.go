@@ -74,13 +74,14 @@ func (s *BulkCreate) BulkCreate(ctx context.Context, storeID int64, bookingID in
 	}
 
 	// create booking products
-	now := utils.TimeToPgTimestamptz(time.Now())
+	now := time.Now()
+	nowPg := utils.TimePtrToPgTimestamptz(&now)
 	bookingProductsData := make([]dbgen.BulkCreateBookingProductsParams, len(needCreateProductIds))
 	for i, productID := range needCreateProductIds {
 		bookingProductsData[i] = dbgen.BulkCreateBookingProductsParams{
 			BookingID: bookingID,
 			ProductID: productID,
-			CreatedAt: now,
+			CreatedAt: nowPg,
 		}
 	}
 

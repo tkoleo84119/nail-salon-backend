@@ -32,12 +32,17 @@ func (s *Get) Get(ctx context.Context, serviceID int64) (*adminServiceModel.GetR
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get service", err)
 	}
 
+	price, err := utils.PgNumericToInt64(service.Price)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price to int64", err)
+	}
+
 	// Build response
 	response := &adminServiceModel.GetResponse{
 		ID:              utils.FormatID(service.ID),
 		Name:            service.Name,
 		DurationMinutes: service.DurationMinutes,
-		Price:           int64(utils.PgNumericToFloat64(service.Price)),
+		Price:           price,
 		IsAddon:         utils.PgBoolToBool(service.IsAddon),
 		IsActive:        utils.PgBoolToBool(service.IsActive),
 		IsVisible:       utils.PgBoolToBool(service.IsVisible),

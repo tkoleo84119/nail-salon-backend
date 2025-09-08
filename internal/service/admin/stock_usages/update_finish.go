@@ -57,7 +57,7 @@ func (s *UpdateFinish) UpdateFinish(ctx context.Context, storeID int64, stockUsa
 	// Update stock usage
 	err = s.queries.UpdateStockUsageFinish(ctx, dbgen.UpdateStockUsageFinishParams{
 		ID:           stockUsageID,
-		UsageEndedAt: utils.TimeToPgDate(req.UsageEndedAt),
+		UsageEndedAt: utils.TimePtrToPgDate(&req.UsageEndedAt),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update stock usage", err)

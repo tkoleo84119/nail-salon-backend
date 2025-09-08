@@ -64,7 +64,7 @@ func (r *ExpenseItemRepository) UpdateStoreExpenseItemTx(ctx context.Context, tx
 	}
 
 	if params.ExpirationDate != nil {
-		pgDate := utils.TimeToPgDate(*params.ExpirationDate)
+		pgDate := utils.TimePtrToPgDate(params.ExpirationDate)
 		setParts = append(setParts, fmt.Sprintf("expiration_date = $%d", len(args)+1))
 		args = append(args, pgDate)
 	}
@@ -75,7 +75,7 @@ func (r *ExpenseItemRepository) UpdateStoreExpenseItemTx(ctx context.Context, tx
 	}
 
 	if params.ArrivalDate != nil {
-		pgDate := utils.TimeToPgDate(*params.ArrivalDate)
+		pgDate := utils.TimePtrToPgDate(params.ArrivalDate)
 		setParts = append(setParts, fmt.Sprintf("arrival_date = $%d", len(args)+1))
 		args = append(args, pgDate)
 	}

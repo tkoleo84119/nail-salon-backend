@@ -52,14 +52,17 @@ func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req admin
 	}
 
 	expenseItemID := utils.GenerateID()
-	oldExpenseAmount := utils.PgNumericToFloat64(expense.Amount)
+	oldExpenseAmount, err := utils.PgNumericToFloat64(expense.Amount)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert old expense amount to float64", err)
+	}
 	newExpenseAmount := oldExpenseAmount + (float64(req.Price) * float64(req.Quantity))
 
-	priceNumeric, err := utils.Int64ToPgNumeric(req.Price)
+	priceNumeric, err := utils.Int64PtrToPgNumeric(&req.Price)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price", err)
 	}
-	newExpenseAmountNumeric, err := utils.Float64ToPgNumeric(newExpenseAmount)
+	newExpenseAmountNumeric, err := utils.Float64PtrToPgNumeric(&newExpenseAmount)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert new expense amount", err)
 	}
@@ -78,9 +81,9 @@ func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req admin
 		ProductID:       req.ProductID,
 		Quantity:        int32(req.Quantity),
 		Price:           priceNumeric,
-		ExpirationDate:  utils.TimeToPgDate(*req.ExpirationDate),
-		IsArrived:       utils.BoolToPgBool(req.IsArrived),
-		ArrivalDate:     utils.TimeToPgDate(*req.ArrivalDate),
+		ExpirationDate:  utils.TimePtrToPgDate(req.ExpirationDate),
+		IsArrived:       utils.BoolPtrToPgBool(&req.IsArrived),
+		ArrivalDate:     utils.TimePtrToPgDate(req.ArrivalDate),
 		StorageLocation: utils.StringPtrToPgText(req.StorageLocation, true),
 		Note:            utils.StringPtrToPgText(req.Note, true),
 	})

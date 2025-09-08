@@ -37,10 +37,15 @@ func (s *GetAll) GetAll(ctx context.Context, queryParams serviceModel.GetAllPars
 
 	items := make([]serviceModel.GetAllItem, len(services))
 	for i, service := range services {
+		price, err := utils.PgNumericToInt64(service.Price)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price to int64", err)
+		}
+
 		items[i] = serviceModel.GetAllItem{
 			ID:              utils.FormatID(service.ID),
 			Name:            service.Name,
-			Price:           int(utils.PgNumericToFloat64(service.Price)),
+			Price:           price,
 			DurationMinutes: int(service.DurationMinutes),
 			IsAddon:         utils.PgBoolToBool(service.IsAddon),
 			Note:            utils.PgTextToString(service.Note),

@@ -160,7 +160,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 		CustomerID:    req.CustomerID,
 		StylistID:     schedule.StylistID,
 		TimeSlotID:    req.TimeSlotID,
-		IsChatEnabled: utils.BoolToPgBool(req.IsChatEnabled),
+		IsChatEnabled: utils.BoolPtrToPgBool(&req.IsChatEnabled),
 		Note:          utils.StringPtrToPgText(req.Note, true),
 		Status:        common.BookingStatusScheduled,
 	})
@@ -199,7 +199,8 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 
 func (s *Create) parseBookingDetails(bookingId int64, services []bookingModel.CreateBookingServiceInfo) ([]dbgen.CreateBookingDetailsParams, error) {
 	bookingDetails := make([]dbgen.CreateBookingDetailsParams, len(services))
-	now := utils.TimeToPgTimestamptz(time.Now())
+	now := time.Now()
+	nowPg := utils.TimePtrToPgTimestamptz(&now)
 
 	for i, service := range services {
 		bookingDetails[i] = dbgen.CreateBookingDetailsParams{
@@ -207,8 +208,8 @@ func (s *Create) parseBookingDetails(bookingId int64, services []bookingModel.Cr
 			BookingID: bookingId,
 			ServiceID: service.ServiceId,
 			Price:     service.Price,
-			CreatedAt: now,
-			UpdatedAt: now,
+			CreatedAt: nowPg,
+			UpdatedAt: nowPg,
 		}
 	}
 	return bookingDetails, nil

@@ -243,7 +243,8 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 
 func (s *Create) parseBookingDetails(bookingId int64, services []bookingModel.CreateBookingServiceInfo) ([]dbgen.CreateBookingDetailsParams, error) {
 	bookingDetails := make([]dbgen.CreateBookingDetailsParams, len(services))
-	now := utils.TimeToPgTimestamptz(time.Now())
+	now := time.Now()
+	nowPg := utils.TimePtrToPgTimestamptz(&now)
 
 	for i, service := range services {
 		bookingDetails[i] = dbgen.CreateBookingDetailsParams{
@@ -251,8 +252,8 @@ func (s *Create) parseBookingDetails(bookingId int64, services []bookingModel.Cr
 			BookingID: bookingId,
 			ServiceID: service.ServiceId,
 			Price:     service.Price,
-			CreatedAt: now,
-			UpdatedAt: now,
+			CreatedAt: nowPg,
+			UpdatedAt: nowPg,
 		}
 	}
 	return bookingDetails, nil

@@ -22,7 +22,7 @@ type GetAllResponse struct {
 type GetAllItem struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
-	Price           int    `json:"price"`
+	Price           int64  `json:"price"`
 	DurationMinutes int    `json:"durationMinutes"`
 	IsAddon         bool   `json:"isAddon"`
 	Note            string `json:"note"`

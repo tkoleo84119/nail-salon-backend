@@ -150,7 +150,8 @@ func (s *LineRegister) generateRefreshToken(ctx context.Context, queries dbgen.Q
 	tokenID := utils.GenerateID()
 
 	// Store refresh token in database
-	expiresAt := utils.TimeToPgTimestamptz(time.Now().Add(7 * 24 * time.Hour)) // 7 days
+	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+	expiresAtPg := utils.TimePtrToPgTimestamptz(&expiresAt)
 	userAgent := utils.StringPtrToPgText(&loginCtx.UserAgent, false)
 
 	var ipAddress *netip.Addr
@@ -166,7 +167,7 @@ func (s *LineRegister) generateRefreshToken(ctx context.Context, queries dbgen.Q
 		RefreshToken: refreshToken,
 		UserAgent:    userAgent,
 		IpAddress:    ipAddress,
-		ExpiredAt:    expiresAt,
+		ExpiredAt:    expiresAtPg,
 	})
 
 	if err != nil {

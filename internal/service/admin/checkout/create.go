@@ -79,11 +79,19 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 		}
 
 		if coupon.DiscountRate.Valid {
-			discountRate := utils.PgNumericToFloat64(coupon.DiscountRate)
+			discountRate, err := utils.PgNumericToFloat64(coupon.DiscountRate)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount rate to float64", err)
+			}
+
 			couponInfo.DiscountRate = &discountRate
 		}
 		if coupon.DiscountAmount.Valid {
-			discountAmount := utils.PgNumericToFloat64(coupon.DiscountAmount)
+			discountAmount, err := utils.PgNumericToFloat64(coupon.DiscountAmount)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount amount to float64", err)
+			}
+
 			couponInfo.DiscountAmount = &discountAmount
 		}
 
@@ -112,15 +120,15 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 		return nil, err
 	}
 
-	totalAmountPg, err := utils.Float64ToPgNumeric(totalAmount)
+	totalAmountPg, err := utils.Float64PtrToPgNumeric(&totalAmount)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert total amount to pgtype.Numeric", err)
 	}
-	finalAmountPg, err := utils.Float64ToPgNumeric(finalAmount)
+	finalAmountPg, err := utils.Float64PtrToPgNumeric(&finalAmount)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert final amount to pgtype.Numeric", err)
 	}
-	paidAmountPg, err := utils.Int64ToPgNumeric(req.PaidAmount)
+	paidAmountPg, err := utils.Int64PtrToPgNumeric(&req.PaidAmount)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert paid amount to pgtype.Numeric", err)
 	}
@@ -128,15 +136,12 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 	newCheckout := dbgen.CreateCheckoutParams{
 		ID:            utils.GenerateID(),
 		BookingID:     bookingID,
+		CouponID:      utils.Int64PtrToPgInt8(&couponInfo.ID),
 		TotalAmount:   totalAmountPg,
 		FinalAmount:   finalAmountPg,
 		PaidAmount:    paidAmountPg,
 		PaymentMethod: req.PaymentMethod,
-		CheckoutUser:  utils.Int64ToPgInt8(creatorID),
-	}
-
-	if couponInfo.ID != 0 {
-		newCheckout.CouponID = utils.Int64ToPgInt8(couponInfo.ID)
+		CheckoutUser:  utils.Int64PtrToPgInt8(&creatorID),
 	}
 
 	tx, err := s.db.Begin(ctx)
@@ -241,7 +246,7 @@ func (s *Create) prepareBookingDetailPriceInfoAndValidate(
 			if couponInfo.DiscountRate != nil {
 				discountedPrice = originalPrice * *couponInfo.DiscountRate
 
-				ratePg, err := utils.Float64ToPgNumeric(*couponInfo.DiscountRate)
+				ratePg, err := utils.Float64PtrToPgNumeric(couponInfo.DiscountRate)
 				if err != nil {
 					return nil, totalAmount, finalAmount, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount rate to pgtype.Numeric", err)
 				}
@@ -252,7 +257,7 @@ func (s *Create) prepareBookingDetailPriceInfoAndValidate(
 					discountedPrice = 0 // not allow negative price
 				}
 
-				amountPg, err := utils.Float64ToPgNumeric(*couponInfo.DiscountAmount)
+				amountPg, err := utils.Float64PtrToPgNumeric(couponInfo.DiscountAmount)
 				if err != nil {
 					return nil, totalAmount, finalAmount, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert discount amount to pgtype.Numeric", err)
 				}
@@ -263,7 +268,7 @@ func (s *Create) prepareBookingDetailPriceInfoAndValidate(
 		totalAmount += originalPrice
 		finalAmount += discountedPrice
 
-		originalPricePg, err := utils.Float64ToPgNumeric(originalPrice)
+		originalPricePg, err := utils.Float64PtrToPgNumeric(&originalPrice)
 		if err != nil {
 			return nil, totalAmount, finalAmount, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert price to pgtype.Numeric", err)
 		}

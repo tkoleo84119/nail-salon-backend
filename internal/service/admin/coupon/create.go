@@ -66,7 +66,7 @@ func (s *Create) Create(ctx context.Context, req adminCouponModel.CreateRequest)
 		Code:           req.Code,
 		DiscountRate:   discountRate,
 		DiscountAmount: discountAmount,
-		IsActive:       utils.BoolToPgBool(isActive),
+		IsActive:       utils.BoolPtrToPgBool(&isActive),
 		Note:           utils.StringPtrToPgText(req.Note, true),
 	})
 	if err != nil {

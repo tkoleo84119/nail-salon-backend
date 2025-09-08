@@ -91,7 +91,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, re
 			exists, err := s.queries.CheckScheduleDateExists(ctx, dbgen.CheckScheduleDateExistsParams{
 				StoreID:   storeID,
 				StylistID: req.StylistID,
-				WorkDate:  utils.TimeToPgDate(workDate),
+				WorkDate:  utils.TimePtrToPgDate(&workDate),
 			})
 			if err != nil {
 				return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check schedule existence", err)
@@ -104,7 +104,7 @@ func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, re
 
 	// Update schedule
 	updatedSchedule, err := s.repo.Schedule.UpdateSchedule(ctx, scheduleID, sqlxRepo.UpdateScheduleParams{
-		WorkDate: utils.TimeToPgDate(workDate),
+		WorkDate: utils.TimePtrToPgDate(&workDate),
 		Note:     req.Note,
 	})
 	if err != nil {

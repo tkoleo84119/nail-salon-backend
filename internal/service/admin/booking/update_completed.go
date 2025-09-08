@@ -49,7 +49,7 @@ func (s *UpdateCompleted) UpdateCompleted(ctx context.Context, storeID, bookingI
 	// Update booking completed record
 	err = s.queries.UpdateBookingActualDuration(ctx, dbgen.UpdateBookingActualDurationParams{
 		ID:             bookingID,
-		ActualDuration: utils.Int32ToPgInt4(int32(*req.ActualDuration)),
+		ActualDuration: utils.Int32PtrToPgInt4(req.ActualDuration),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update completed booking", err)

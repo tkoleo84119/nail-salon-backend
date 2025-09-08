@@ -60,8 +60,8 @@ func (s *Create) Create(ctx context.Context, templateID int64, req adminTimeSlot
 	item, err := s.queries.CreateTimeSlotTemplateItem(ctx, dbgen.CreateTimeSlotTemplateItemParams{
 		ID:         itemID,
 		TemplateID: templateID,
-		StartTime:  utils.TimeToPgTime(startTime),
-		EndTime:    utils.TimeToPgTime(endTime),
+		StartTime:  utils.TimePtrToPgTime(&startTime),
+		EndTime:    utils.TimePtrToPgTime(&endTime),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create time slot template item", err)

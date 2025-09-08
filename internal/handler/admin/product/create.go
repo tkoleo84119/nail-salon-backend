@@ -77,10 +77,14 @@ func (h *Create) Create(c *gin.Context) {
 		return
 	}
 
-	parsedCurrentStock := int(*req.CurrentStock)
-	parsedSafetyStock := -1
+	parsedCurrentStock := int32(0)
+	if req.CurrentStock != nil {
+		parsedCurrentStock = *req.CurrentStock
+	}
+
+	parsedSafetyStock := int32(-1)
 	if req.SafetyStock != nil {
-		parsedSafetyStock = int(*req.SafetyStock)
+		parsedSafetyStock = *req.SafetyStock
 	}
 
 	parsedReq := adminProductModel.CreateParsedRequest{
