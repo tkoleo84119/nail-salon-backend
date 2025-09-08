@@ -3,7 +3,6 @@ package adminBooking
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jmoiron/sqlx"
@@ -158,26 +157,6 @@ func (s *Update) validateEntities(ctx context.Context, oldStylistID, oldTimeSlot
 			}
 			subServices[i] = subService
 		}
-	}
-
-	// if timeSlot time is not enough for service duration, return error
-	endTime, err := utils.PgTimeToTime(timeSlot.EndTime)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
-	}
-	startTime, err := utils.PgTimeToTime(timeSlot.StartTime)
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
-	}
-
-	timeSlotDuration := endTime.Sub(startTime)
-	serviceDuration := time.Duration(mainService.DurationMinutes) * time.Minute
-	for _, subService := range subServices {
-		serviceDuration += time.Duration(subService.DurationMinutes) * time.Minute
-	}
-
-	if timeSlotDuration < serviceDuration {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotEnoughTime)
 	}
 
 	services := make([]adminBookingModel.UpdateBookingServiceInfo, len(subServices)+1)

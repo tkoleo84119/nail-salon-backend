@@ -123,7 +123,6 @@
 | 400    | E3SER001 | ServiceNotActive                | 服務未啟用                                   |
 | 400    | E3SER002 | ServiceNotMainService           | 服務不是主服務                               |
 | 400    | E3SER003 | ServiceNotAddon                 | 服務不是附屬服務                             |
-| 400    | E3TMS006 | TimeSlotNotEnoughTime           | 時段時間不足                                 |
 | 404    | E3BK001  | BookingNotFound                 | 預約不存在或已被取消                         |
 | 404    | E3TMS005 | TimeSlotNotFound                | 時段不存在或已被刪除                         |
 | 404    | E3SER004 | ServiceNotFound                 | 服務不存在或已被刪除                         |
@@ -150,7 +149,6 @@
    1. 驗證門市、美甲師、時段、服務是否存在
    2. 驗證時段是否可用
    3. 驗證服務是否可用
-   4. 驗證時段時間是否足夠
-   5. 驗證附加服務是否可用
+   4. 驗證附加服務是否可用
 4. 更新預約內容（`bookings`、`booking_details`）。
 5. 回傳最新預約資訊。
