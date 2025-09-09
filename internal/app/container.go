@@ -9,6 +9,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/job"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -18,6 +19,7 @@ type Container struct {
 	redis         *redis.Client
 	queries       *dbgen.Queries
 	lineMessenger *utils.LineMessageClient
+	authCache     cache.AuthCacheInterface
 
 	repositories Repositories
 	services     Services
@@ -46,14 +48,15 @@ type Jobs struct {
 func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.Client) (*Container, error) {
 	queries := dbgen.New(database.PgxPool)
 	lineMessenger := utils.NewLineMessenger(cfg.Line.MessageAccessToken)
+	authCache := cache.NewAuthCache(redisClient)
 
 	repositories := Repositories{
 		SQLX: sqlx.NewRepositories(database.Sqlx),
 	}
 
 	// Initialize services using separated containers
-	publicServices := NewPublicServices(queries, database, repositories, cfg, lineMessenger)
-	adminServices := NewAdminServices(queries, database, repositories, cfg, lineMessenger)
+	publicServices := NewPublicServices(queries, database, repositories, cfg, lineMessenger, authCache)
+	adminServices := NewAdminServices(queries, database, repositories, cfg, lineMessenger, authCache)
 
 	services := Services{
 		Public: publicServices,
@@ -85,6 +88,7 @@ func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.
 		redis:         redisClient,
 		queries:       queries,
 		lineMessenger: lineMessenger,
+		authCache:     authCache,
 		repositories:  repositories,
 		services:      services,
 		handlers:      handlers,
@@ -126,4 +130,8 @@ func (c *Container) GetJobs() Jobs {
 
 func (c *Container) GetLineMessenger() *utils.LineMessageClient {
 	return c.lineMessenger
+}
+
+func (c *Container) GetAuthCache() cache.AuthCacheInterface {
+	return c.authCache
 }

@@ -2,23 +2,27 @@ package customer
 
 import (
 	"context"
+	"log"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	customerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateMe struct {
-	repo *sqlxRepo.Repositories
-	db   *dbgen.Queries
+	repo      *sqlxRepo.Repositories
+	db        *dbgen.Queries
+	authCache cache.AuthCacheInterface
 }
 
-func NewUpdateMe(db *dbgen.Queries, repo *sqlxRepo.Repositories) *UpdateMe {
+func NewUpdateMe(db *dbgen.Queries, repo *sqlxRepo.Repositories, authCache cache.AuthCacheInterface) *UpdateMe {
 	return &UpdateMe{
-		repo: repo,
-		db:   db,
+		repo:      repo,
+		db:        db,
+		authCache: authCache,
 	}
 }
 
@@ -46,6 +50,11 @@ func (s *UpdateMe) UpdateMe(ctx context.Context, customerID int64, req customerM
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update customer", err)
+	}
+
+	// delete customer context from cache
+	if cacheErr := s.authCache.DeleteCustomerContext(ctx, customerID); cacheErr != nil {
+		log.Println("failed to delete customer context from cache", cacheErr)
 	}
 
 	favoriteShapes := []string{}

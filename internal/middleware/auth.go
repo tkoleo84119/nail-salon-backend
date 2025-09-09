@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -18,7 +20,7 @@ const (
 	CustomerContextKey = "customer"
 )
 
-func JWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
+func JWTAuth(cfg config.Config, db dbgen.Querier, authCache cache.AuthCacheInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -39,7 +41,7 @@ func JWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 			return
 		}
 
-		if err := validateStaffToken(c, db, claims); err != nil {
+		if err := validateStaffToken(c, db, authCache, claims); err != nil {
 			errorCodes.AbortWithError(c, errorCodes.AuthStaffFailed, nil)
 			return
 		}
@@ -49,12 +51,26 @@ func JWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 }
 
 // validate staff is active with token claims
-func validateStaffToken(c *gin.Context, db dbgen.Querier, claims *common.StaffJWTClaims) error {
+func validateStaffToken(c *gin.Context, db dbgen.Querier, authCache cache.AuthCacheInterface, claims *common.StaffJWTClaims) error {
 	userID, err := utils.ParseID(claims.UserID)
 	if err != nil {
 		return err
 	}
 
+	// get context from cache
+	staffContext, err := authCache.GetStaffContext(c.Request.Context(), userID)
+	if err == nil {
+		// cache hit, use cache data
+		c.Set(UserContextKey, *staffContext)
+		return nil
+	}
+
+	// cache miss or query failed, get data from database
+	if err != redis.Nil {
+		// do nothing
+	}
+
+	// get data from database
 	staff, err := db.GetStaffUserByID(c.Request.Context(), userID)
 	if err != nil {
 		return err
@@ -71,14 +87,18 @@ func validateStaffToken(c *gin.Context, db dbgen.Querier, claims *common.StaffJW
 	}
 
 	// Build StaffContext with fresh data from database
-	staffContext := common.StaffContext{
+	staffContext = &common.StaffContext{
 		UserID:    staff.ID,
 		Username:  staff.Username,
 		Role:      staff.Role,
 		StoreList: storeList,
 	}
 
-	c.Set(UserContextKey, staffContext)
+	if cacheErr := authCache.SetStaffContext(c.Request.Context(), userID, staffContext); cacheErr != nil {
+		// do nothing
+	}
+
+	c.Set(UserContextKey, *staffContext)
 	return nil
 }
 
@@ -135,7 +155,7 @@ func RequireNotSuperAdmin() gin.HandlerFunc {
 }
 
 // CustomerJWTAuth middleware for customer authentication
-func CustomerJWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
+func CustomerJWTAuth(cfg config.Config, db dbgen.Querier, authCache cache.AuthCacheInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -156,7 +176,7 @@ func CustomerJWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 			return
 		}
 
-		if err := validateCustomerToken(c, db, claims); err != nil {
+		if err := validateCustomerToken(c, db, authCache, claims); err != nil {
 			errorCodes.AbortWithError(c, errorCodes.AuthCustomerFailed, nil)
 			return
 		}
@@ -166,21 +186,42 @@ func CustomerJWTAuth(cfg config.Config, db dbgen.Querier) gin.HandlerFunc {
 }
 
 // validate customer is active with token claims
-func validateCustomerToken(c *gin.Context, db dbgen.Querier, claims *common.LineJWTClaims) error {
-	customer, err := db.GetCustomerByID(c.Request.Context(), claims.CustomerID)
+func validateCustomerToken(c *gin.Context, db dbgen.Querier, authCache cache.AuthCacheInterface, claims *common.LineJWTClaims) error {
+	customerID := claims.CustomerID
+
+	// get context from cache
+	customerContext, err := authCache.GetCustomerContext(c.Request.Context(), customerID)
+	if err == nil {
+		// cache hit, use cache data
+		c.Set(CustomerContextKey, *customerContext)
+		return nil
+	}
+
+	// cache miss or query failed, get data from database
+	if err != redis.Nil {
+		// do nothing
+	}
+
+	// get data from database
+	customer, err := db.GetCustomerByID(c.Request.Context(), customerID)
 	if err != nil {
 		return err
 	}
 
-	customerContext := common.CustomerContext{
-		CustomerID:    claims.CustomerID,
+	customerContext = &common.CustomerContext{
+		CustomerID:    customerID,
 		LineUID:       customer.LineUid,
 		Name:          customer.Name,
 		Level:         utils.PgTextToString(customer.Level),
 		IsBlacklisted: utils.PgBoolToBool(customer.IsBlacklisted),
 	}
 
-	c.Set(CustomerContextKey, customerContext)
+	// write data to cache (failed does not affect main process)
+	if cacheErr := authCache.SetCustomerContext(c.Request.Context(), customerID, customerContext); cacheErr != nil {
+		// do nothing
+	}
+
+	c.Set(CustomerContextKey, *customerContext)
 	return nil
 }
 

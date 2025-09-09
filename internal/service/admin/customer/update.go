@@ -2,23 +2,27 @@ package adminCustomer
 
 import (
 	"context"
+	"log"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminCustomerModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/customer"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	queries *dbgen.Queries
-	repo    *sqlxRepo.Repositories
+	queries   *dbgen.Queries
+	repo      *sqlxRepo.Repositories
+	authCache cache.AuthCacheInterface
 }
 
-func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, authCache cache.AuthCacheInterface) *Update {
 	return &Update{
-		queries: queries,
-		repo:    repo,
+		queries:   queries,
+		repo:      repo,
+		authCache: authCache,
 	}
 }
 
@@ -40,6 +44,10 @@ func (s *Update) Update(ctx context.Context, customerID int64, req adminCustomer
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update customer", err)
+	}
+
+	if cacheErr := s.authCache.DeleteCustomerContext(ctx, customerID); cacheErr != nil {
+		log.Println("failed to delete customer context from cache", cacheErr)
 	}
 
 	return &adminCustomerModel.UpdateResponse{

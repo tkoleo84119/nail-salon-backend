@@ -3,6 +3,7 @@ package adminStoreAccess
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 
@@ -10,16 +11,19 @@ import (
 	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Create struct {
-	queries *dbgen.Queries
+	queries   *dbgen.Queries
+	authCache cache.AuthCacheInterface
 }
 
-func NewCreate(queries *dbgen.Queries) *Create {
+func NewCreate(queries *dbgen.Queries, authCache cache.AuthCacheInterface) *Create {
 	return &Create{
-		queries: queries,
+		queries:   queries,
+		authCache: authCache,
 	}
 }
 
@@ -90,6 +94,13 @@ func (s *Create) Create(ctx context.Context, staffID int64, storeID int64, creat
 
 	response := &adminStoreAccessModel.CreateResponse{
 		StoreList: storeList,
+	}
+
+	// if newly created store access, delete staff context from cache
+	if isNewlyCreated {
+		if cacheErr := s.authCache.DeleteStaffContext(ctx, staffID); cacheErr != nil {
+			log.Println("failed to delete staff context from cache", cacheErr)
+		}
 	}
 
 	return response, isNewlyCreated, nil

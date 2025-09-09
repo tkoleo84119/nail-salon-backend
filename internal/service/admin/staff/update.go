@@ -3,6 +3,7 @@ package adminStaff
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 
@@ -11,18 +12,21 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	queries *dbgen.Queries
-	repo    *sqlxRepo.Repositories
+	queries   *dbgen.Queries
+	repo      *sqlxRepo.Repositories
+	authCache cache.AuthCacheInterface
 }
 
-func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, authCache cache.AuthCacheInterface) *Update {
 	return &Update{
-		queries: queries,
-		repo:    repo,
+		queries:   queries,
+		repo:      repo,
+		authCache: authCache,
 	}
 }
 
@@ -60,6 +64,11 @@ func (s *Update) Update(ctx context.Context, staffID int64, req adminStaffModel.
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update staff user", err)
+	}
+
+	// delete staff context from cache
+	if cacheErr := s.authCache.DeleteStaffContext(ctx, staffID); cacheErr != nil {
+		log.Println("failed to delete staff context from cache", cacheErr)
 	}
 
 	response := &adminStaffModel.UpdateResponse{

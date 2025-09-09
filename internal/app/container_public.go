@@ -4,6 +4,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 
 	// Public handlers
@@ -106,7 +107,7 @@ type PublicHandlers struct {
 }
 
 // NewPublicServices creates and initializes all public services
-func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, lineMessenger *utils.LineMessageClient) PublicServices {
+func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, lineMessenger *utils.LineMessageClient, authCache cache.AuthCacheInterface) PublicServices {
 	return PublicServices{
 		// Authentication services
 		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT),
@@ -116,7 +117,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 
 		// Customer services
 		CustomerGetMe:    customerService.NewGetMe(queries),
-		CustomerUpdateMe: customerService.NewUpdateMe(queries, repositories.SQLX),
+		CustomerUpdateMe: customerService.NewUpdateMe(queries, repositories.SQLX, authCache),
 
 		// CustomerCoupon services
 		CustomerCouponGetAll: customerCouponService.NewGetAll(queries, repositories.SQLX),

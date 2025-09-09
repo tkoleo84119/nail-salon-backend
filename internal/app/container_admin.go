@@ -4,6 +4,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 
 	// Admin handlers
@@ -344,7 +345,7 @@ type AdminHandlers struct {
 }
 
 // NewAdminServices creates and initializes all admin services
-func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, _ *utils.LineMessageClient) AdminServices {
+func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, _ *utils.LineMessageClient, authCache cache.AuthCacheInterface) AdminServices {
 	return AdminServices{
 		// Authentication services
 		AuthStaffLogin:        adminAuthService.NewLogin(queries, cfg.JWT),
@@ -354,15 +355,15 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 		// Staff management services
 		StaffCreate:                adminStaffService.NewCreate(queries, database.PgxPool),
-		StaffUpdate:                adminStaffService.NewUpdate(queries, repositories.SQLX),
+		StaffUpdate:                adminStaffService.NewUpdate(queries, repositories.SQLX, authCache),
 		StaffUpdateMe:              adminStaffService.NewUpdateMe(queries, repositories.SQLX),
 		StaffGet:                   adminStaffService.NewGet(queries),
 		StaffGetMe:                 adminStaffService.NewGetMe(queries),
 		StaffGetAll:                adminStaffService.NewGetAll(repositories.SQLX),
 		StaffGetStoreUsername:      adminStaffService.NewGetStoreUsername(repositories.SQLX),
 		StaffGetStoreAccess:        adminStoreAccessService.NewGet(queries),
-		StaffCreateStoreAccess:     adminStoreAccessService.NewCreate(queries),
-		StaffDeleteBulkStoreAccess: adminStoreAccessService.NewDeleteBulk(queries),
+		StaffCreateStoreAccess:     adminStoreAccessService.NewCreate(queries, authCache),
+		StaffDeleteBulkStoreAccess: adminStoreAccessService.NewDeleteBulk(queries, authCache),
 
 		// Store management services
 		StoreGetList: adminStoreService.NewGetAll(repositories.SQLX),
@@ -423,7 +424,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Customer management services
 		CustomerGetAll: adminCustomerService.NewGetAll(repositories.SQLX),
 		CustomerGet:    adminCustomerService.NewGet(queries),
-		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX),
+		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX, authCache),
 		// Booking management services
 		BookingCreate:          adminBookingService.NewCreate(queries, database.PgxPool),
 		BookingGetAll:          adminBookingService.NewGetAll(queries, repositories.SQLX),

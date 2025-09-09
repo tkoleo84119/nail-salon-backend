@@ -3,6 +3,7 @@ package adminStoreAccess
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 
@@ -10,16 +11,19 @@ import (
 	adminStoreAccessModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store_access"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type DeleteBulk struct {
-	queries *dbgen.Queries
+	queries   *dbgen.Queries
+	authCache cache.AuthCacheInterface
 }
 
-func NewDeleteBulk(queries *dbgen.Queries) *DeleteBulk {
+func NewDeleteBulk(queries *dbgen.Queries, authCache cache.AuthCacheInterface) *DeleteBulk {
 	return &DeleteBulk{
-		queries: queries,
+		queries:   queries,
+		authCache: authCache,
 	}
 }
 
@@ -69,6 +73,11 @@ func (s *DeleteBulk) DeleteBulk(ctx context.Context, targetID int64, storeIDs []
 
 	response := &adminStoreAccessModel.DeleteBulkResponse{
 		Deleted: deleted,
+	}
+
+	// delete staff context from cache
+	if cacheErr := s.authCache.DeleteStaffContext(ctx, targetID); cacheErr != nil {
+		log.Println("failed to delete staff context from cache", cacheErr)
 	}
 
 	return response, nil
