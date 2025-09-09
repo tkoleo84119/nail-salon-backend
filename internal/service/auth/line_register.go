@@ -10,6 +10,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -112,6 +113,20 @@ func (s *LineRegister) LineRegister(ctx context.Context, req auth.LineRegisterRe
 	refreshToken, err := s.generateRefreshToken(ctx, qtx, customerID, loginCtx)
 	if err != nil {
 		return nil, err
+	}
+
+	// Generate customer terms acceptance
+	customerTermsAcceptanceID := utils.GenerateID()
+	acceptedAt := time.Now()
+	acceptedAtPg := utils.TimePtrToPgTimestamptz(&acceptedAt)
+	err = qtx.CreateCustomerTermsAcceptance(ctx, dbgen.CreateCustomerTermsAcceptanceParams{
+		ID:           customerTermsAcceptanceID,
+		CustomerID:   customerID,
+		TermsVersion: common.CustomerTermsVersion1,
+		AcceptedAt:   acceptedAtPg,
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create customer terms acceptance", err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {

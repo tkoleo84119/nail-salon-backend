@@ -135,7 +135,7 @@
 
 1. 呼叫 LINE 驗證 `idToken` 合法性，取得 `providerUid`。
 2. 驗證該 `providerUid` 是否已註冊（重複則 409）。
-3. 建立 `customers` 資料與對應 `customer_tokens`。
+3. 建立 `customers` 資料與對應 `customer_tokens`和`customer_terms_acceptance`資料。
 4. 產生 `access token`、`refresh token`。
 5. 回傳 `access token`、`refresh token`。
 
