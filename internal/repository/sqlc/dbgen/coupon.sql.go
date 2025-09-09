@@ -113,7 +113,13 @@ func (q *Queries) CreateCoupon(ctx context.Context, arg CreateCouponParams) erro
 }
 
 const getCouponByIDs = `-- name: GetCouponByIDs :many
-SELECT id, display_name, code, discount_rate, discount_amount, is_active
+SELECT
+  id,
+  display_name,
+  code,
+  COALESCE(discount_rate, 0) AS discount_rate,
+  COALESCE(discount_amount, 0) AS discount_amount,
+  is_active
 FROM coupons
 WHERE id = ANY($1::bigint[])
 `
