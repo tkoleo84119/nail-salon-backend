@@ -20,6 +20,7 @@ type Container struct {
 	queries       *dbgen.Queries
 	lineMessenger *utils.LineMessageClient
 	authCache     cache.AuthCacheInterface
+	activityLog   cache.ActivityLogCacheInterface
 
 	repositories Repositories
 	services     Services
@@ -49,14 +50,15 @@ func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.
 	queries := dbgen.New(database.PgxPool)
 	lineMessenger := utils.NewLineMessenger(cfg.Line.MessageAccessToken)
 	authCache := cache.NewAuthCache(redisClient)
+	activityLog := cache.NewActivityLogCache(redisClient)
 
 	repositories := Repositories{
 		SQLX: sqlx.NewRepositories(database.Sqlx),
 	}
 
 	// Initialize services using separated containers
-	publicServices := NewPublicServices(queries, database, repositories, cfg, lineMessenger, authCache)
-	adminServices := NewAdminServices(queries, database, repositories, cfg, lineMessenger, authCache)
+	publicServices := NewPublicServices(queries, database, repositories, cfg, lineMessenger, authCache, activityLog)
+	adminServices := NewAdminServices(queries, database, repositories, cfg, lineMessenger, authCache, activityLog)
 
 	services := Services{
 		Public: publicServices,
@@ -89,6 +91,7 @@ func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.
 		queries:       queries,
 		lineMessenger: lineMessenger,
 		authCache:     authCache,
+		activityLog:   activityLog,
 		repositories:  repositories,
 		services:      services,
 		handlers:      handlers,

@@ -53,6 +53,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 			setupAdminCouponRoutes(admin, cfg, queries, authCache, handlers)
 			setupAdminCustomerCouponRoutes(admin, cfg, queries, authCache, handlers)
 			setupAdminReportRoutes(admin, cfg, queries, authCache, handlers)
+			setupAdminActivityLogRoutes(admin, cfg, queries, authCache, handlers)
 		}
 	}
 
@@ -353,5 +354,13 @@ func setupAdminReportRoutes(admin *gin.RouterGroup, cfg *config.Config, queries 
 		reports.GET("/performance/me", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireNotSuperAdmin(), handlers.Admin.ReportGetPerformanceMe.GetPerformanceMe)
 		// Store performance report - SUPER_ADMIN, ADMIN, and MANAGER can access
 		reports.GET("/performance/store/:storeId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireManagerOrAbove(), handlers.Admin.ReportGetStorePerformance.GetStorePerformance)
+	}
+}
+
+func setupAdminActivityLogRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, authCache cache.AuthCacheInterface, handlers Handlers) {
+	activityLogs := admin.Group("/activity-logs")
+	{
+		// Activity logs query - all staff can access
+		activityLogs.GET("", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.ActivityLogGetAll.GetAll)
 	}
 }

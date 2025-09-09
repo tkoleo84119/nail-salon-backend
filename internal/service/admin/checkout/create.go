@@ -2,6 +2,7 @@ package adminCheckout
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -12,13 +13,15 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Create struct {
-	queries *dbgen.Queries
-	db      *pgxpool.Pool
-	repo    *sqlxRepo.Repositories
+	queries     *dbgen.Queries
+	db          *pgxpool.Pool
+	repo        *sqlxRepo.Repositories
+	activityLog cache.ActivityLogCacheInterface
 }
 
 type CouponInfo struct {
@@ -27,15 +30,16 @@ type CouponInfo struct {
 	DiscountRate   *float64
 }
 
-func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *pgxpool.Pool) *Create {
+func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *pgxpool.Pool, activityLog cache.ActivityLogCacheInterface) *Create {
 	return &Create{
-		queries: queries,
-		repo:    repo,
-		db:      db,
+		queries:     queries,
+		repo:        repo,
+		db:          db,
+		activityLog: activityLog,
 	}
 }
 
-func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req adminCheckoutModel.CreateParsedRequest, creatorID int64, storeIDs []int64) (*adminCheckoutModel.CreateResponse, error) {
+func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req adminCheckoutModel.CreateParsedRequest, creatorID int64, staffName string, storeIDs []int64) (*adminCheckoutModel.CreateResponse, error) {
 	// check store access
 	if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
 		return nil, err
@@ -182,6 +186,17 @@ func (s *Create) Create(ctx context.Context, storeID int64, bookingID int64, req
 	if err := tx.Commit(ctx); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
+
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		customer, err := s.queries.GetCustomerByID(logCtx, booking.CustomerID)
+		if err == nil {
+			if err := s.activityLog.LogAdminBookingCompleted(logCtx, staffName, customer.Name); err != nil {
+				log.Printf("failed to log admin booking completed activity: %v", err)
+			}
+		}
+	}()
 
 	return &adminCheckoutModel.CreateResponse{
 		ID: utils.FormatID(bookingID),

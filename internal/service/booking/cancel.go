@@ -12,6 +12,7 @@ import (
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -19,13 +20,15 @@ type Cancel struct {
 	queries       *dbgen.Queries
 	db            *pgxpool.Pool
 	lineMessenger *utils.LineMessageClient
+	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewCancel(queries *dbgen.Queries, db *pgxpool.Pool, lineMessenger *utils.LineMessageClient) CancelInterface {
+func NewCancel(queries *dbgen.Queries, db *pgxpool.Pool, lineMessenger *utils.LineMessageClient, activityLog cache.ActivityLogCacheInterface) CancelInterface {
 	return &Cancel{
 		queries:       queries,
 		db:            db,
 		lineMessenger: lineMessenger,
+		activityLog:   activityLog,
 	}
 }
 
@@ -135,6 +138,14 @@ func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.C
 			log.Printf("failed to send line message: %v", err)
 		}
 	}
+
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		if err := s.activityLog.LogCustomerBookingCancel(logCtx, bookingInfo.CustomerName); err != nil {
+			log.Printf("failed to log customer booking cancel activity: %v", err)
+		}
+	}()
 
 	return response, nil
 }

@@ -3,6 +3,7 @@ package adminBooking
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -13,22 +14,25 @@ import (
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Create struct {
-	queries *dbgen.Queries
-	db      *pgxpool.Pool
+	queries     *dbgen.Queries
+	db          *pgxpool.Pool
+	activityLog cache.ActivityLogCacheInterface
 }
 
-func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, activityLog cache.ActivityLogCacheInterface) *Create {
 	return &Create{
-		queries: queries,
-		db:      db,
+		queries:     queries,
+		db:          db,
+		activityLog: activityLog,
 	}
 }
 
-func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingModel.CreateParsedRequest, role string, storeIds []int64) (*adminBookingModel.CreateResponse, error) {
+func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingModel.CreateParsedRequest, role string, storeIds []int64, staffID int64, staffName string) (*adminBookingModel.CreateResponse, error) {
 	// Verify store exists
 	store, err := s.queries.GetStoreByID(ctx, storeID)
 	if err != nil {
@@ -48,13 +52,13 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 		}
 	}
 
-	// Verify customer exists
-	exists, err := s.queries.CheckCustomerExistsByID(ctx, req.CustomerID)
+	// Verify customer exists and get customer info
+	customer, err := s.queries.GetCustomerByID(ctx, req.CustomerID)
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to check customer exists", err)
-	}
-	if !exists {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerNotFound)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerNotFound)
+		}
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get customer", err)
 	}
 
 	// Verify time slot exists, is available, and belongs to the stylist
@@ -173,6 +177,14 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 	response := &adminBookingModel.CreateResponse{
 		ID: utils.FormatID(booking.ID),
 	}
+
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		if err := s.activityLog.LogAdminBookingCreate(logCtx, staffName, customer.Name); err != nil {
+			log.Printf("failed to log admin booking create activity: %v", err)
+		}
+	}()
 
 	return response, nil
 }

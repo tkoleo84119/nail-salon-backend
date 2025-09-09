@@ -13,6 +13,7 @@ import (
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -20,13 +21,15 @@ type Create struct {
 	queries       *dbgen.Queries
 	db            *pgxpool.Pool
 	lineMessenger *utils.LineMessageClient
+	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, lineMessenger *utils.LineMessageClient) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, lineMessenger *utils.LineMessageClient, activityLog cache.ActivityLogCacheInterface) *Create {
 	return &Create{
 		queries:       queries,
 		db:            db,
 		lineMessenger: lineMessenger,
+		activityLog:   activityLog,
 	}
 }
 
@@ -235,6 +238,14 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 			log.Printf("failed to send line message: %v", err)
 		}
 	}
+
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		if err := s.activityLog.LogCustomerBooking(logCtx, customer.Name); err != nil {
+			log.Printf("failed to log customer booking activity: %v", err)
+		}
+	}()
 
 	return response, nil
 }

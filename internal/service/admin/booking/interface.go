@@ -7,7 +7,7 @@ import (
 )
 
 type CreateInterface interface {
-	Create(ctx context.Context, storeID int64, req adminBookingModel.CreateParsedRequest, role string, storeIds []int64) (*adminBookingModel.CreateResponse, error)
+	Create(ctx context.Context, storeID int64, req adminBookingModel.CreateParsedRequest, role string, storeIds []int64, staffID int64, staffName string) (*adminBookingModel.CreateResponse, error)
 }
 
 type GetAllInterface interface {

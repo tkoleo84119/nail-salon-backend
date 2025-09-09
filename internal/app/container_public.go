@@ -107,11 +107,11 @@ type PublicHandlers struct {
 }
 
 // NewPublicServices creates and initializes all public services
-func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, lineMessenger *utils.LineMessageClient, authCache cache.AuthCacheInterface) PublicServices {
+func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, lineMessenger *utils.LineMessageClient, authCache cache.AuthCacheInterface, activityLog cache.ActivityLogCacheInterface) PublicServices {
 	return PublicServices{
 		// Authentication services
 		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT),
-		AuthLineRegister: authService.NewLineRegister(queries, database.PgxPool, cfg.Line, cfg.JWT),
+		AuthLineRegister: authService.NewLineRegister(queries, database.PgxPool, cfg.Line, cfg.JWT, activityLog),
 		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT),
 		AuthAcceptTerm:   authService.NewAcceptTerm(queries),
 
@@ -123,9 +123,9 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		CustomerCouponGetAll: customerCouponService.NewGetAll(queries, repositories.SQLX),
 
 		// Booking services
-		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool, lineMessenger),
-		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx, lineMessenger),
-		BookingCancel:      bookingService.NewCancel(queries, database.PgxPool, lineMessenger),
+		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool, lineMessenger, activityLog),
+		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx, lineMessenger, activityLog),
+		BookingCancel:      bookingService.NewCancel(queries, database.PgxPool, lineMessenger, activityLog),
 		BookingGetAll:      bookingService.NewGetAll(repositories.SQLX),
 		BookingGetMySingle: bookingService.NewGet(queries),
 

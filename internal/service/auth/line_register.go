@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"log"
 	"net/netip"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -20,15 +22,17 @@ type LineRegister struct {
 	db            *pgxpool.Pool
 	lineValidator *utils.LineValidator
 	jwtConfig     config.JWTConfig
+	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewLineRegister(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineRegister {
+func NewLineRegister(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig, activityLog cache.ActivityLogCacheInterface) *LineRegister {
 	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineRegister{
 		queries:       queries,
 		db:            db,
 		lineValidator: lineValidator,
 		jwtConfig:     jwtConfig,
+		activityLog:   activityLog,
 	}
 }
 
@@ -132,6 +136,14 @@ func (s *LineRegister) LineRegister(ctx context.Context, req auth.LineRegisterRe
 	if err := tx.Commit(ctx); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to commit transaction", err)
 	}
+
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		if err := s.activityLog.LogCustomerRegister(logCtx, req.Name); err != nil {
+			log.Printf("failed to log customer register activity: %v", err)
+		}
+	}()
 
 	// Build response
 	response := &auth.LineRegisterResponse{

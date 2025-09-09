@@ -108,7 +108,7 @@ func (h *Create) Create(c *gin.Context) {
 		storeIds[i] = store.ID
 	}
 
-	response, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedBookingID, parsedRequest, staffContext.UserID, storeIds)
+	response, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedBookingID, parsedRequest, staffContext.UserID, staffContext.Username, storeIds)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

@@ -15,3 +15,17 @@ type AuthCacheInterface interface {
 	SetCustomerContext(ctx context.Context, customerID int64, customerContext *common.CustomerContext) error
 	DeleteCustomerContext(ctx context.Context, customerID int64) error
 }
+
+type ActivityLogCacheInterface interface {
+	LogActivity(ctx context.Context, activityType common.ActivityLogType, message string) error
+	GetRecentActivities(ctx context.Context, limit int) (*common.ActivityLogResponse, error)
+
+	LogCustomerRegister(ctx context.Context, customerName string) error
+	LogCustomerBooking(ctx context.Context, customerName string) error
+	LogCustomerBookingUpdate(ctx context.Context, customerName string) error
+	LogCustomerBookingCancel(ctx context.Context, customerName string) error
+	LogAdminBookingCreate(ctx context.Context, staffName string, customerName string) error
+	LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string) error
+	LogAdminBookingCancel(ctx context.Context, staffName string, customerName string) error
+	LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string) error
+}

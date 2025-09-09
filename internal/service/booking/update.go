@@ -14,6 +14,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -22,14 +23,16 @@ type Update struct {
 	repo          *sqlxRepo.Repositories
 	db            *sqlx.DB
 	lineMessenger *utils.LineMessageClient
+	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB, lineMessenger *utils.LineMessageClient) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB, lineMessenger *utils.LineMessageClient, activityLog cache.ActivityLogCacheInterface) *Update {
 	return &Update{
 		queries:       queries,
 		repo:          repo,
 		db:            db,
 		lineMessenger: lineMessenger,
+		activityLog:   activityLog,
 	}
 }
 
@@ -288,6 +291,14 @@ func (s *Update) buildResponse(ctx context.Context, bookingID int64, needSendLin
 			log.Printf("failed to send line message: %v", err)
 		}
 	}
+
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		if err := s.activityLog.LogCustomerBookingUpdate(logCtx, bookingInfo.CustomerName); err != nil {
+			log.Printf("failed to log customer booking update activity: %v", err)
+		}
+	}()
 
 	return response, nil
 }

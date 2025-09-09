@@ -103,7 +103,7 @@ func (h *Create) Create(c *gin.Context) {
 	}
 
 	// Call service
-	booking, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedRequest, staffContext.Role, storeIds)
+	booking, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedRequest, staffContext.Role, storeIds, staffContext.UserID, staffContext.Username)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

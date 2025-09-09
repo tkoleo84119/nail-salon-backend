@@ -10,6 +10,7 @@ import (
 	// Admin handlers
 	adminAccountHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/account"
 	adminAccountTransactionHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/account_transaction"
+	adminActivityLogHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/activity_log"
 	adminAuthHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/auth"
 	adminBookingHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking"
 	adminBookingProductHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/booking_product"
@@ -38,6 +39,7 @@ import (
 	// Admin services
 	adminAccountService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/account"
 	adminAccountTransactionService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/account_transaction"
+	adminActivityLogService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/activity_log"
 	adminAuthService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/auth"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
 	adminBookingProductService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking_product"
@@ -202,6 +204,9 @@ type AdminServices struct {
 	StockUsagesCreate       adminStockUsagesService.CreateInterface
 	StockUsagesGetAll       adminStockUsagesService.GetAllInterface
 	StockUsagesUpdateFinish adminStockUsagesService.UpdateFinishInterface
+
+	// Activity log services
+	ActivityLogGetAll adminActivityLogService.GetAllInterface
 }
 
 // AdminHandlers contains all admin-facing handlers
@@ -342,10 +347,13 @@ type AdminHandlers struct {
 	StockUsagesCreate       *adminStockUsagesHandler.Create
 	StockUsagesGetAll       *adminStockUsagesHandler.GetAll
 	StockUsagesUpdateFinish *adminStockUsagesHandler.UpdateFinish
+
+	// Activity log handlers
+	ActivityLogGetAll *adminActivityLogHandler.GetAll
 }
 
 // NewAdminServices creates and initializes all admin services
-func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, _ *utils.LineMessageClient, authCache cache.AuthCacheInterface) AdminServices {
+func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, _ *utils.LineMessageClient, authCache cache.AuthCacheInterface, activityLog cache.ActivityLogCacheInterface) AdminServices {
 	return AdminServices{
 		// Authentication services
 		AuthStaffLogin:        adminAuthService.NewLogin(queries, cfg.JWT),
@@ -426,7 +434,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CustomerGet:    adminCustomerService.NewGet(queries),
 		CustomerUpdate: adminCustomerService.NewUpdate(queries, repositories.SQLX, authCache),
 		// Booking management services
-		BookingCreate:          adminBookingService.NewCreate(queries, database.PgxPool),
+		BookingCreate:          adminBookingService.NewCreate(queries, database.PgxPool, activityLog),
 		BookingGetAll:          adminBookingService.NewGetAll(queries, repositories.SQLX),
 		BookingUpdate:          adminBookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
 		BookingCancel:          adminBookingService.NewCancel(queries, database.Sqlx, repositories.SQLX),
@@ -470,7 +478,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CustomerCouponCreate: adminCustomerCouponService.NewCreate(queries),
 
 		// Checkout services
-		CheckoutCreate: adminCheckoutService.NewCreate(queries, repositories.SQLX, database.PgxPool),
+		CheckoutCreate: adminCheckoutService.NewCreate(queries, repositories.SQLX, database.PgxPool, activityLog),
 
 		// Report services
 		ReportGetPerformanceMe:    adminReportService.NewGetPerformanceMe(queries),
@@ -480,6 +488,9 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		StockUsagesCreate:       adminStockUsagesService.NewCreate(queries, database.PgxPool),
 		StockUsagesGetAll:       adminStockUsagesService.NewGetAll(queries, repositories.SQLX),
 		StockUsagesUpdateFinish: adminStockUsagesService.NewUpdateFinish(queries),
+
+		// Activity log services
+		ActivityLogGetAll: adminActivityLogService.NewGetAll(activityLog),
 	}
 }
 
@@ -620,5 +631,8 @@ func NewAdminHandlers(services AdminServices) AdminHandlers {
 		StockUsagesCreate:       adminStockUsagesHandler.NewCreate(services.StockUsagesCreate),
 		StockUsagesGetAll:       adminStockUsagesHandler.NewGetAll(services.StockUsagesGetAll),
 		StockUsagesUpdateFinish: adminStockUsagesHandler.NewUpdateFinish(services.StockUsagesUpdateFinish),
+
+		// Activity log handlers
+		ActivityLogGetAll: adminActivityLogHandler.NewGetAll(services.ActivityLogGetAll),
 	}
 }
