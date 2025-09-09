@@ -57,6 +57,16 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check customer exists", err)
 	}
 
+	// check if customer has accepted the terms version 1
+	exist, err := s.queries.CheckCustomerTermsExistsByCustomerIDAndVersion(ctx, dbgen.CheckCustomerTermsExistsByCustomerIDAndVersionParams{
+		CustomerID:   customer.ID,
+		TermsVersion: common.CustomerTermsVersion1,
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check customer terms exists", err)
+	}
+	needCheckTerms := !exist
+
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
@@ -93,10 +103,11 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 
 	// Build response
 	response := &auth.LineLoginResponse{
-		NeedRegister: false,
-		AccessToken:  &accessToken,
-		RefreshToken: &refreshToken,
-		ExpiresIn:    &expiresIn,
+		NeedRegister:   false,
+		NeedCheckTerms: &needCheckTerms,
+		AccessToken:    &accessToken,
+		RefreshToken:   &refreshToken,
+		ExpiresIn:      &expiresIn,
 	}
 
 	return response, nil

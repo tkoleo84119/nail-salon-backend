@@ -134,6 +134,15 @@ type CustomerCoupon struct {
 	UpdatedAt  pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
+type CustomerTermsAcceptance struct {
+	ID           int64              `db:"id" json:"id"`
+	CustomerID   int64              `db:"customer_id" json:"customer_id"`
+	TermsVersion string             `db:"terms_version" json:"terms_version"`
+	AcceptedAt   pgtype.Timestamptz `db:"accepted_at" json:"accepted_at"`
+	CreatedAt    pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
 type CustomerToken struct {
 	ID           int64              `db:"id" json:"id"`
 	CustomerID   int64              `db:"customer_id" json:"customer_id"`

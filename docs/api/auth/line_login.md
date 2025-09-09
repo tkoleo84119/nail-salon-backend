@@ -56,6 +56,7 @@
 {
   "data": {
     "needRegister": false,
+    "needCheckTerms": false, // 是否需要使用者確認條款
     "accessToken": "1234567890",
     "refreshToken": "1234567890",
     "expiresIn": 3600

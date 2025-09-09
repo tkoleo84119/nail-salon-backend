@@ -91,6 +91,17 @@ Table customer_tokens {
 
 Ref: customer_tokens.customer_id > customers.id [delete: cascade]
 
+Table customer_terms_acceptance {
+  id bigint [pk]
+  customer_id bigint [not null]
+  terms_version varchar(50) [not null]
+  accepted_at timestamptz [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Ref: customer_terms_acceptance.customer_id > customers.id [delete: cascade]
+
 // ========== 美甲師與排班 ==========
 Table stylists {
   id bigint [pk]

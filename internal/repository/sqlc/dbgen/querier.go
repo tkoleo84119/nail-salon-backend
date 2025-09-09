@@ -28,6 +28,7 @@ type Querier interface {
 	CheckCouponNameExistsExcluding(ctx context.Context, arg CheckCouponNameExistsExcludingParams) (bool, error)
 	CheckCustomerExistsByID(ctx context.Context, id int64) (bool, error)
 	CheckCustomerExistsByLineUid(ctx context.Context, lineUid string) (bool, error)
+	CheckCustomerTermsExistsByCustomerIDAndVersion(ctx context.Context, arg CheckCustomerTermsExistsByCustomerIDAndVersionParams) (bool, error)
 	CheckExpenseItemsExistsByExpenseID(ctx context.Context, expenseID int64) (bool, error)
 	CheckProductCategoryExistByID(ctx context.Context, id int64) (bool, error)
 	CheckProductCategoryNameExists(ctx context.Context, name string) (bool, error)
@@ -68,6 +69,7 @@ type Querier interface {
 	CreateCoupon(ctx context.Context, arg CreateCouponParams) error
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
 	CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCouponParams) error
+	CreateCustomerTermsAcceptance(ctx context.Context, arg CreateCustomerTermsAcceptanceParams) error
 	CreateCustomerToken(ctx context.Context, arg CreateCustomerTokenParams) (CustomerToken, error)
 	CreateExpense(ctx context.Context, arg CreateExpenseParams) (int64, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) error
