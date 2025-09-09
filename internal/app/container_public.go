@@ -34,6 +34,7 @@ type PublicServices struct {
 	AuthLineLogin    authService.LineLoginInterface
 	AuthLineRegister authService.LineRegisterInterface
 	AuthRefreshToken authService.RefreshTokenInterface
+	AuthAcceptTerm   authService.AcceptTermInterface
 
 	// Customer services
 	CustomerGetMe    customerService.GetMeInterface
@@ -71,6 +72,7 @@ type PublicHandlers struct {
 	AuthLineLogin    *authHandler.LineLogin
 	AuthLineRegister *authHandler.LineRegister
 	AuthRefreshToken *authHandler.RefreshToken
+	AuthAcceptTerm   *authHandler.AcceptTerm
 
 	// Customer handlers
 	CustomerGetMe    *customerHandler.GetMe
@@ -109,6 +111,7 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT),
 		AuthLineRegister: authService.NewLineRegister(queries, database.PgxPool, cfg.Line, cfg.JWT),
 		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT),
+		AuthAcceptTerm:   authService.NewAcceptTerm(queries),
 
 		// Customer services
 		CustomerGetMe:    customerService.NewGetMe(queries),
@@ -148,6 +151,7 @@ func NewPublicHandlers(services PublicServices) PublicHandlers {
 		AuthLineLogin:    authHandler.NewLineLogin(services.AuthLineLogin),
 		AuthLineRegister: authHandler.NewLineRegister(services.AuthLineRegister),
 		AuthRefreshToken: authHandler.NewRefreshToken(services.AuthRefreshToken),
+		AuthAcceptTerm:   authHandler.NewAcceptTerm(services.AuthAcceptTerm),
 
 		// Customer handlers
 		CustomerGetMe:    customerHandler.NewGetMe(services.CustomerGetMe),

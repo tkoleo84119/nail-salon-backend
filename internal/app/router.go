@@ -25,7 +25,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 	api := router.Group("/api")
 	{
 		// Public/Customer routes
-		setupPublicAuthRoutes(api, handlers)
+		setupPublicAuthRoutes(api, cfg, queries, handlers)
 		setupPublicCustomerRoutes(api, cfg, queries, handlers)
 		setupPublicBookingRoutes(api, cfg, queries, handlers)
 		setupPublicStoreRoutes(api, cfg, queries, handlers)
@@ -58,7 +58,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 }
 
 // Public route setup functions
-func setupPublicAuthRoutes(api *gin.RouterGroup, handlers Handlers) {
+func setupPublicAuthRoutes(api *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, handlers Handlers) {
 	auth := api.Group("/auth")
 	{
 		line := auth.Group("/line")
@@ -71,6 +71,9 @@ func setupPublicAuthRoutes(api *gin.RouterGroup, handlers Handlers) {
 		{
 			token.POST("/refresh", handlers.Public.AuthRefreshToken.RefreshToken)
 		}
+
+		// Customer terms acceptance
+		auth.POST("/accept-term", middleware.CustomerJWTAuth(*cfg, queries), handlers.Public.AuthAcceptTerm.AcceptTerm)
 	}
 }
 

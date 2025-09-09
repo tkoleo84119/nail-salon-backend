@@ -51,3 +51,33 @@ func (q *Queries) CreateCustomerTermsAcceptance(ctx context.Context, arg CreateC
 	)
 	return err
 }
+
+const getCustomerTermsAcceptanceByCustomerIDAndVersion = `-- name: GetCustomerTermsAcceptanceByCustomerIDAndVersion :one
+SELECT id, customer_id, terms_version, accepted_at
+FROM customer_terms_acceptance
+WHERE customer_id = $1 AND terms_version = $2
+`
+
+type GetCustomerTermsAcceptanceByCustomerIDAndVersionParams struct {
+	CustomerID   int64  `db:"customer_id" json:"customer_id"`
+	TermsVersion string `db:"terms_version" json:"terms_version"`
+}
+
+type GetCustomerTermsAcceptanceByCustomerIDAndVersionRow struct {
+	ID           int64              `db:"id" json:"id"`
+	CustomerID   int64              `db:"customer_id" json:"customer_id"`
+	TermsVersion string             `db:"terms_version" json:"terms_version"`
+	AcceptedAt   pgtype.Timestamptz `db:"accepted_at" json:"accepted_at"`
+}
+
+func (q *Queries) GetCustomerTermsAcceptanceByCustomerIDAndVersion(ctx context.Context, arg GetCustomerTermsAcceptanceByCustomerIDAndVersionParams) (GetCustomerTermsAcceptanceByCustomerIDAndVersionRow, error) {
+	row := q.db.QueryRow(ctx, getCustomerTermsAcceptanceByCustomerIDAndVersion, arg.CustomerID, arg.TermsVersion)
+	var i GetCustomerTermsAcceptanceByCustomerIDAndVersionRow
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.TermsVersion,
+		&i.AcceptedAt,
+	)
+	return i, err
+}

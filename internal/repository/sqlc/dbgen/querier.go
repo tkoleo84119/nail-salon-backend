@@ -112,6 +112,7 @@ type Querier interface {
 	GetCustomerByIDs(ctx context.Context, dollar_1 []int64) ([]GetCustomerByIDsRow, error)
 	GetCustomerByLineUid(ctx context.Context, lineUid string) (GetCustomerByLineUidRow, error)
 	GetCustomerCouponPriceInfoByID(ctx context.Context, id int64) (GetCustomerCouponPriceInfoByIDRow, error)
+	GetCustomerTermsAcceptanceByCustomerIDAndVersion(ctx context.Context, arg GetCustomerTermsAcceptanceByCustomerIDAndVersionParams) (GetCustomerTermsAcceptanceByCustomerIDAndVersionRow, error)
 	GetProductByID(ctx context.Context, id int64) (GetProductByIDRow, error)
 	GetProductsStockInfoByIDs(ctx context.Context, dollar_1 []int64) ([]GetProductsStockInfoByIDsRow, error)
 	GetScheduleByID(ctx context.Context, id int64) (GetScheduleByIDRow, error)

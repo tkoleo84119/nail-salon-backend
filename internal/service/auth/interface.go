@@ -17,3 +17,7 @@ type LineLoginInterface interface {
 type RefreshTokenInterface interface {
 	RefreshToken(ctx context.Context, req auth.RefreshTokenRequest) (*auth.RefreshTokenResponse, error)
 }
+
+type AcceptTermInterface interface {
+	AcceptTerm(ctx context.Context, req auth.AcceptTermRequest, customerID int64) (*auth.AcceptTermResponse, error)
+}

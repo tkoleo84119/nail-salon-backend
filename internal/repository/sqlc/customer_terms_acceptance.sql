@@ -7,3 +7,8 @@ SELECT EXISTS(
   SELECT 1 FROM customer_terms_acceptance
   WHERE customer_id = $1 AND terms_version = $2
 ) as exists;
+
+-- name: GetCustomerTermsAcceptanceByCustomerIDAndVersion :one
+SELECT id, customer_id, terms_version, accepted_at
+FROM customer_terms_acceptance
+WHERE customer_id = $1 AND terms_version = $2;
