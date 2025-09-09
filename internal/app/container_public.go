@@ -4,6 +4,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 
 	// Public handlers
 	authHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/auth"
@@ -105,7 +106,7 @@ type PublicHandlers struct {
 }
 
 // NewPublicServices creates and initializes all public services
-func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config) PublicServices {
+func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, lineMessenger *utils.LineMessageClient) PublicServices {
 	return PublicServices{
 		// Authentication services
 		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT),
@@ -121,9 +122,9 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 		CustomerCouponGetAll: customerCouponService.NewGetAll(queries, repositories.SQLX),
 
 		// Booking services
-		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool, cfg.Line),
-		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx, cfg.Line),
-		BookingCancel:      bookingService.NewCancel(queries, database.PgxPool, cfg.Line),
+		BookingCreate:      bookingService.NewCreate(queries, database.PgxPool, lineMessenger),
+		BookingUpdate:      bookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx, lineMessenger),
+		BookingCancel:      bookingService.NewCancel(queries, database.PgxPool, lineMessenger),
 		BookingGetAll:      bookingService.NewGetAll(repositories.SQLX),
 		BookingGetMySingle: bookingService.NewGet(queries),
 

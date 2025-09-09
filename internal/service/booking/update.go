@@ -9,7 +9,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -25,8 +24,7 @@ type Update struct {
 	lineMessenger *utils.LineMessageClient
 }
 
-func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB, lineConfig config.LineConfig) *Update {
-	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB, lineMessenger *utils.LineMessageClient) *Update {
 	return &Update{
 		queries:       queries,
 		repo:          repo,

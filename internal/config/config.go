@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
 type DBConfig struct {
@@ -33,6 +35,17 @@ type LineConfig struct {
 	MessageAccessToken string
 }
 
+type RedisConfig struct {
+	Host     string
+	Port     int
+	Password string
+	DB       int
+}
+
+type SchedulerConfig struct {
+	LineReminderCron string
+}
+
 type CORSConfig struct {
 	AllowedOrigins   []string
 	AllowedMethods   []string
@@ -48,11 +61,13 @@ type ServerConfig struct {
 }
 
 type Config struct {
-	DB     DBConfig
-	JWT    JWTConfig
-	Line   LineConfig
-	Server ServerConfig
-	CORS   CORSConfig
+	DB        DBConfig
+	JWT       JWTConfig
+	Line      LineConfig
+	Redis     RedisConfig
+	Scheduler SchedulerConfig
+	Server    ServerConfig
+	CORS      CORSConfig
 }
 
 func Load() *Config {
@@ -84,6 +99,17 @@ func Load() *Config {
 		MessageAccessToken: getenvRequired("LINE_MESSAGING_ACCESS_TOKEN"),
 	}
 
+	redisConfig := RedisConfig{
+		Host:     getenvDefault("REDIS_HOST", "localhost"),
+		Port:     getenvIntDefault("REDIS_PORT", 6379),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       getenvIntDefault("REDIS_DB", 0),
+	}
+
+	schedulerConfig := SchedulerConfig{
+		LineReminderCron: getAndCheckCronExpression("LINE_REMINDER_CRON"),
+	}
+
 	serverConfig := ServerConfig{
 		Port:            getenvDefault("PORT", "3000"),
 		SnowflakeNodeId: int64(getenvIntDefault("SNOWFLAKE_NODE_ID", 1)),
@@ -99,11 +125,13 @@ func Load() *Config {
 	}
 
 	return &Config{
-		DB:     dbConfig,
-		JWT:    jwtConfig,
-		Line:   lineConfig,
-		Server: serverConfig,
-		CORS:   corsConfig,
+		DB:        dbConfig,
+		JWT:       jwtConfig,
+		Line:      lineConfig,
+		Redis:     redisConfig,
+		Scheduler: schedulerConfig,
+		Server:    serverConfig,
+		CORS:      corsConfig,
 	}
 }
 
@@ -197,4 +225,18 @@ func getenvBoolDefault(key string, defaultVal bool) bool {
 	}
 
 	return parsed
+}
+
+func getAndCheckCronExpression(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		log.Fatalf("Required environment variable %s is not set", key)
+	}
+
+	// verify cron expression is correct
+	if _, err := cron.ParseStandard(val); err != nil {
+		log.Fatalf("Invalid cron expression for %s: %v", key, err)
+	}
+
+	return val
 }

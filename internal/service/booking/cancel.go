@@ -8,7 +8,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -22,8 +21,7 @@ type Cancel struct {
 	lineMessenger *utils.LineMessageClient
 }
 
-func NewCancel(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig) CancelInterface {
-	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
+func NewCancel(queries *dbgen.Queries, db *pgxpool.Pool, lineMessenger *utils.LineMessageClient) CancelInterface {
 	return &Cancel{
 		queries:       queries,
 		db:            db,

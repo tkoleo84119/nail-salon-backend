@@ -348,6 +348,78 @@ func (q *Queries) GetStylistPerformanceGroupByStore(ctx context.Context, arg Get
 	return items, nil
 }
 
+const getTomorrowBookingsForReminder = `-- name: GetTomorrowBookingsForReminder :many
+SELECT
+    b.id,
+    b.store_id,
+    s.name as store_name,
+    s.address as store_address,
+    b.customer_id,
+    c.line_uid as customer_line_uid,
+    c.name as customer_name,
+    b.time_slot_id,
+    ts.start_time,
+    ts.end_time,
+    sch.work_date,
+    b.status
+FROM bookings b
+JOIN stores s ON b.store_id = s.id
+JOIN customers c ON b.customer_id = c.id
+JOIN time_slots ts ON b.time_slot_id = ts.id
+JOIN schedules sch ON ts.schedule_id = sch.id
+WHERE sch.work_date = $1
+    AND b.status = 'SCHEDULED'
+ORDER BY s.id, ts.start_time
+`
+
+type GetTomorrowBookingsForReminderRow struct {
+	ID              int64       `db:"id" json:"id"`
+	StoreID         int64       `db:"store_id" json:"store_id"`
+	StoreName       string      `db:"store_name" json:"store_name"`
+	StoreAddress    pgtype.Text `db:"store_address" json:"store_address"`
+	CustomerID      int64       `db:"customer_id" json:"customer_id"`
+	CustomerLineUid string      `db:"customer_line_uid" json:"customer_line_uid"`
+	CustomerName    string      `db:"customer_name" json:"customer_name"`
+	TimeSlotID      int64       `db:"time_slot_id" json:"time_slot_id"`
+	StartTime       pgtype.Time `db:"start_time" json:"start_time"`
+	EndTime         pgtype.Time `db:"end_time" json:"end_time"`
+	WorkDate        pgtype.Date `db:"work_date" json:"work_date"`
+	Status          string      `db:"status" json:"status"`
+}
+
+func (q *Queries) GetTomorrowBookingsForReminder(ctx context.Context, workDate pgtype.Date) ([]GetTomorrowBookingsForReminderRow, error) {
+	rows, err := q.db.Query(ctx, getTomorrowBookingsForReminder, workDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetTomorrowBookingsForReminderRow{}
+	for rows.Next() {
+		var i GetTomorrowBookingsForReminderRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.StoreID,
+			&i.StoreName,
+			&i.StoreAddress,
+			&i.CustomerID,
+			&i.CustomerLineUid,
+			&i.CustomerName,
+			&i.TimeSlotID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.WorkDate,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateBookingActualDuration = `-- name: UpdateBookingActualDuration :exec
 UPDATE bookings
 SET actual_duration = $2, updated_at = NOW()

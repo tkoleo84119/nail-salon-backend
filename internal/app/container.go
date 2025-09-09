@@ -1,19 +1,28 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
+	"github.com/tkoleo84119/nail-salon-backend/internal/infra/redis"
+	"github.com/tkoleo84119/nail-salon-backend/internal/job"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Container struct {
-	cfg      *config.Config
-	database *db.Database
+	cfg           *config.Config
+	database      *db.Database
+	redis         *redis.Client
+	queries       *dbgen.Queries
+	lineMessenger *utils.LineMessageClient
 
 	repositories Repositories
 	services     Services
 	handlers     Handlers
+	jobs         Jobs
 }
 
 type Repositories struct {
@@ -30,16 +39,21 @@ type Handlers struct {
 	Admin  AdminHandlers
 }
 
-func NewContainer(cfg *config.Config, database *db.Database) *Container {
+type Jobs struct {
+	LineReminderJob *job.LineReminderJob
+}
+
+func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.Client) (*Container, error) {
 	queries := dbgen.New(database.PgxPool)
+	lineMessenger := utils.NewLineMessenger(cfg.Line.MessageAccessToken)
 
 	repositories := Repositories{
 		SQLX: sqlx.NewRepositories(database.Sqlx),
 	}
 
 	// Initialize services using separated containers
-	publicServices := NewPublicServices(queries, database, repositories, cfg)
-	adminServices := NewAdminServices(queries, database, repositories, cfg)
+	publicServices := NewPublicServices(queries, database, repositories, cfg, lineMessenger)
+	adminServices := NewAdminServices(queries, database, repositories, cfg, lineMessenger)
 
 	services := Services{
 		Public: publicServices,
@@ -55,13 +69,27 @@ func NewContainer(cfg *config.Config, database *db.Database) *Container {
 		Admin:  adminHandlers,
 	}
 
-	return &Container{
-		cfg:          cfg,
-		database:     database,
-		repositories: repositories,
-		services:     services,
-		handlers:     handlers,
+	// Initialize jobs
+	lineReminderJob, err := job.NewLineReminderJob(cfg, queries, redisClient, lineMessenger)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create line reminder job: %w", err)
 	}
+
+	jobs := Jobs{
+		LineReminderJob: lineReminderJob,
+	}
+
+	return &Container{
+		cfg:           cfg,
+		database:      database,
+		redis:         redisClient,
+		queries:       queries,
+		lineMessenger: lineMessenger,
+		repositories:  repositories,
+		services:      services,
+		handlers:      handlers,
+		jobs:          jobs,
+	}, nil
 }
 
 func (c *Container) GetConfig() *config.Config {
@@ -82,4 +110,20 @@ func (c *Container) GetServices() Services {
 
 func (c *Container) GetHandlers() Handlers {
 	return c.handlers
+}
+
+func (c *Container) GetRedis() *redis.Client {
+	return c.redis
+}
+
+func (c *Container) GetQueries() *dbgen.Queries {
+	return c.queries
+}
+
+func (c *Container) GetJobs() Jobs {
+	return c.jobs
+}
+
+func (c *Container) GetLineMessenger() *utils.LineMessageClient {
+	return c.lineMessenger
 }

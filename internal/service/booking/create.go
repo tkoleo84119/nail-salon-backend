@@ -9,7 +9,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -23,8 +22,7 @@ type Create struct {
 	lineMessenger *utils.LineMessageClient
 }
 
-func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig) *Create {
-	lineMessenger := utils.NewLineMessenger(lineConfig.MessageAccessToken)
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, lineMessenger *utils.LineMessageClient) *Create {
 	return &Create{
 		queries:       queries,
 		db:            db,

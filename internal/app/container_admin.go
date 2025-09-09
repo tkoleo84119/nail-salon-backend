@@ -4,6 +4,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 
 	// Admin handlers
 	adminAccountHandler "github.com/tkoleo84119/nail-salon-backend/internal/handler/admin/account"
@@ -343,7 +344,7 @@ type AdminHandlers struct {
 }
 
 // NewAdminServices creates and initializes all admin services
-func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config) AdminServices {
+func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, _ *utils.LineMessageClient) AdminServices {
 	return AdminServices{
 		// Authentication services
 		AuthStaffLogin:        adminAuthService.NewLogin(queries, cfg.JWT),

@@ -57,6 +57,7 @@ type PushMessageRequest struct {
 
 type BookingData struct {
 	StoreName       string   `json:"storeName"`
+	StoreAddress    string   `json:"storeAddress"`
 	Date            string   `json:"date"`
 	StartTime       string   `json:"startTime"`
 	EndTime         string   `json:"endTime"`
@@ -239,7 +240,7 @@ func (c *LineMessageClient) getActionText(action common.BookingAction) string {
 }
 
 // buildBookingFlexContent is function to build booking flex content
-func (c *LineMessageClient) buildBookingFlexContent(bookingData *BookingData, action common.BookingAction, actionText string) map[string]interface{} {
+func (c *LineMessageClient) buildBookingFlexContent(bookingData *BookingData, _ common.BookingAction, actionText string) map[string]interface{} {
 	customerName := "顧客"
 	if bookingData.CustomerName != nil && *bookingData.CustomerName != "" {
 		customerName = *bookingData.CustomerName
@@ -417,4 +418,35 @@ func (c *LineMessageClient) buildBookingFlexContent(bookingData *BookingData, ac
 			},
 		},
 	}
+}
+
+// SendBookingReminderMessage sends a booking reminder text message to a user
+func (c *LineMessageClient) SendBookingReminderMessage(userID string, bookingData *BookingData) error {
+	customerName := "顧客"
+	if bookingData.CustomerName != nil && *bookingData.CustomerName != "" {
+		customerName = *bookingData.CustomerName
+	}
+
+	reminderText := fmt.Sprintf(`親愛的 %s，您好：
+
+貼心提醒您，您已預約明天 %s %s 的服務時段💅
+
+為了讓每位顧客都能享有完整的服務～
+請您準時抵達即可👌🏻
+
+🔸 遲到 10 分鐘，僅提供單色服務
+🔸 遲到 15 分鐘以上，視同取消，2 次將列入黑名單
+🔸 抵達後請傳訊息告知我一聲，我會下去迎接您～
+
+📍 工作室位於 %s
+❗ 若無故未到，將可能公開於相關社團名單中
+
+非常感謝您的配合，期待明天見到您☺️`,
+		customerName,
+		formatDateWithWeekday(bookingData.Date),
+		formatTimeRange(bookingData.StartTime, bookingData.EndTime),
+		bookingData.StoreAddress,
+	)
+
+	return c.SendTextMessage(userID, reminderText)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/infra/db"
+	"github.com/tkoleo84119/nail-salon-backend/internal/infra/redis"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -26,11 +27,17 @@ func init() {
 func main() {
 	cfg := config.Load()
 
-	database, cleanup, err := db.New(cfg.DB)
+	database, dbCleanup, err := db.New(cfg.DB)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	defer cleanup()
+	defer dbCleanup()
+
+	redisClient, redisCleanup, err := redis.NewClient(cfg.Redis.Host, cfg.Redis.Port, cfg.Redis.Password, cfg.Redis.DB)
+	if err != nil {
+		log.Fatalf("Failed to initialize redis: %v", err)
+	}
+	defer redisCleanup()
 
 	if err := utils.InitSnowflake(cfg.Server.SnowflakeNodeId); err != nil {
 		log.Fatalf("Failed to initialize snowflake: %v", err)
@@ -48,8 +55,18 @@ func main() {
 		v.RegisterValidation("taiwanphone", utils.ValidateTaiwanPhone)
 	}
 
-	container := app.NewContainer(cfg, database)
+	container, err := app.NewContainer(cfg, database, redisClient)
+	if err != nil {
+		log.Fatalf("Failed to create container: %v", err)
+	}
+
 	router := app.SetupRoutes(container)
+
+	// start line reminder job
+	if err := container.GetJobs().LineReminderJob.Start(); err != nil {
+		log.Fatalf("Failed to start line reminder job: %v", err)
+	}
+	defer container.GetJobs().LineReminderJob.Stop()
 
 	if err := router.Run(":" + cfg.Server.Port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
