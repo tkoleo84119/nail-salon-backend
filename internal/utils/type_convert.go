@@ -209,6 +209,9 @@ func Int64PtrToPgInt8(id *int64) pgtype.Int8 {
 	if id == nil {
 		return pgtype.Int8{Valid: false}
 	}
+	if *id == 0 {
+		return pgtype.Int8{Valid: false}
+	}
 	return pgtype.Int8{Int64: *id, Valid: true}
 }
 

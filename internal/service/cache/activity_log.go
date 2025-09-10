@@ -123,7 +123,7 @@ func (c *ActivityLogCache) LogAdminBookingCreate(ctx context.Context, staffName 
 
 // LogAdminBookingUpdate to Redis List
 func (c *ActivityLogCache) LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string) error {
-	message := fmt.Sprintf("員工 %s 為顾客 %s 修改預約", staffName, customerName)
+	message := fmt.Sprintf("員工 %s 為顧客 %s 修改預約", staffName, customerName)
 	return c.LogActivity(ctx, common.ActivityAdminBookingUpdate, message)
 }
 
@@ -135,6 +135,6 @@ func (c *ActivityLogCache) LogAdminBookingCancel(ctx context.Context, staffName 
 
 // LogAdminBookingCompleted to Redis List
 func (c *ActivityLogCache) LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string) error {
-	message := fmt.Sprintf("員工 %s 為預約完成結帳", staffName)
+	message := fmt.Sprintf("員工 %s 為顧客 %s 的預約完成結帳", staffName, customerName)
 	return c.LogActivity(ctx, common.ActivityAdminBookingCompleted, message)
 }

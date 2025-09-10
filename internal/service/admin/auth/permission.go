@@ -26,7 +26,7 @@ func (s *Permission) Permission(ctx context.Context, staffContext *common.StaffC
 
 	response := &adminAuthModel.PermissionResponse{
 		ID:          utils.FormatID(staffContext.UserID),
-		Name:        staffContext.Username,
+		Username:    staffContext.Username,
 		Role:        staffContext.Role,
 		StoreAccess: storeAccess,
 	}
