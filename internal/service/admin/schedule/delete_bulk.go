@@ -14,7 +14,7 @@ type DeleteBulk struct {
 	queries *dbgen.Queries
 }
 
-func NewDeleteBulk(queries *dbgen.Queries) *DeleteBulk {
+func NewDeleteBulk(queries *dbgen.Queries) DeleteBulkInterface {
 	return &DeleteBulk{
 		queries: queries,
 	}

@@ -13,7 +13,7 @@ type Update struct {
 	accountRepo *sqlx.AccountRepository
 }
 
-func NewUpdate(accountRepo *sqlx.AccountRepository) *Update {
+func NewUpdate(accountRepo *sqlx.AccountRepository) UpdateInterface {
 	return &Update{
 		accountRepo: accountRepo,
 	}

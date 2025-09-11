@@ -24,7 +24,7 @@ type Create struct {
 	activityLog cache.ActivityLogCacheInterface
 }
 
-func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, activityLog cache.ActivityLogCacheInterface) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, activityLog cache.ActivityLogCacheInterface) CreateInterface {
 	return &Create{
 		queries:     queries,
 		db:          db,

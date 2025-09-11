@@ -13,7 +13,7 @@ type Get struct {
 	queries *dbgen.Queries
 }
 
-func NewGet(queries *dbgen.Queries) *Get {
+func NewGet(queries *dbgen.Queries) GetInterface {
 	return &Get{
 		queries: queries,
 	}

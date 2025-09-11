@@ -10,7 +10,7 @@ import (
 
 type Permission struct{}
 
-func NewPermission() *Permission {
+func NewPermission() PermissionInterface {
 	return &Permission{}
 }
 

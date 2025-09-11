@@ -11,7 +11,7 @@ type GetAll struct {
 	activityLog cache.ActivityLogCacheInterface
 }
 
-func NewGetAll(activityLog cache.ActivityLogCacheInterface) *GetAll {
+func NewGetAll(activityLog cache.ActivityLogCacheInterface) GetAllInterface {
 	return &GetAll{
 		activityLog: activityLog,
 	}

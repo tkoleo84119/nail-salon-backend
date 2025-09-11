@@ -15,7 +15,7 @@ type GetStorePerformance struct {
 	queries *dbgen.Queries
 }
 
-func NewGetStorePerformance(queries *dbgen.Queries) *GetStorePerformance {
+func NewGetStorePerformance(queries *dbgen.Queries) GetStorePerformanceInterface {
 	return &GetStorePerformance{
 		queries: queries,
 	}

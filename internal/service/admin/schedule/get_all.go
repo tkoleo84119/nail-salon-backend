@@ -18,7 +18,7 @@ type GetAllService struct {
 	queries *dbgen.Queries
 }
 
-func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *GetAllService {
+func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) GetAllInterface {
 	return &GetAllService{
 		repo:    repo,
 		queries: queries,

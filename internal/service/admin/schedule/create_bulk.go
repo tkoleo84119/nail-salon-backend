@@ -19,7 +19,7 @@ type CreateBulk struct {
 	db      *pgxpool.Pool
 }
 
-func NewCreateBulk(queries *dbgen.Queries, db *pgxpool.Pool) *CreateBulk {
+func NewCreateBulk(queries *dbgen.Queries, db *pgxpool.Pool) CreateBulkInterface {
 	return &CreateBulk{
 		queries: queries,
 		db:      db,

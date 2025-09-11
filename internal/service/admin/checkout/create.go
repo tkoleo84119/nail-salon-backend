@@ -30,7 +30,7 @@ type CouponInfo struct {
 	DiscountRate   *float64
 }
 
-func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *pgxpool.Pool, activityLog cache.ActivityLogCacheInterface) *Create {
+func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *pgxpool.Pool, activityLog cache.ActivityLogCacheInterface) CreateInterface {
 	return &Create{
 		queries:     queries,
 		repo:        repo,

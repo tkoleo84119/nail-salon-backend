@@ -19,7 +19,7 @@ type GetAll struct {
 	repo    *sqlxRepo.Repositories
 }
 
-func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *GetAll {
+func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) GetAllInterface {
 	return &GetAll{
 		queries: queries,
 		repo:    repo,

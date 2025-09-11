@@ -17,7 +17,7 @@ type Login struct {
 	jwtConfig config.JWTConfig
 }
 
-func NewLogin(queries *dbgen.Queries, jwtConfig config.JWTConfig) *Login {
+func NewLogin(queries *dbgen.Queries, jwtConfig config.JWTConfig) LoginInterface {
 	return &Login{
 		queries:   queries,
 		jwtConfig: jwtConfig,

@@ -15,7 +15,7 @@ type UpdateMe struct {
 	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateMe(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *UpdateMe {
+func NewUpdateMe(queries *dbgen.Queries, repo *sqlxRepo.Repositories) UpdateMeInterface {
 	return &UpdateMe{
 		queries: queries,
 		repo:    repo,

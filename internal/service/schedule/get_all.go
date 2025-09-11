@@ -14,7 +14,7 @@ type GetAll struct {
 	queries *dbgen.Queries
 }
 
-func NewGetAll(queries *dbgen.Queries) *GetAll {
+func NewGetAll(queries *dbgen.Queries) GetAllInterface {
 	return &GetAll{
 		queries: queries,
 	}

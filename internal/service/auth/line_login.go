@@ -23,7 +23,7 @@ type LineLogin struct {
 	jwtConfig     config.JWTConfig
 }
 
-func NewLineLogin(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) *LineLogin {
+func NewLineLogin(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) LineLoginInterface {
 	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineLogin{
 		queries:       queries,

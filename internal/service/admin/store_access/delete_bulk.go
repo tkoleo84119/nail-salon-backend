@@ -20,7 +20,7 @@ type DeleteBulk struct {
 	authCache cache.AuthCacheInterface
 }
 
-func NewDeleteBulk(queries *dbgen.Queries, authCache cache.AuthCacheInterface) *DeleteBulk {
+func NewDeleteBulk(queries *dbgen.Queries, authCache cache.AuthCacheInterface) DeleteBulkInterface {
 	return &DeleteBulk{
 		queries:   queries,
 		authCache: authCache,

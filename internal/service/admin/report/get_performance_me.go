@@ -17,7 +17,7 @@ type GetPerformanceMe struct {
 	queries *dbgen.Queries
 }
 
-func NewGetPerformanceMe(queries *dbgen.Queries) *GetPerformanceMe {
+func NewGetPerformanceMe(queries *dbgen.Queries) GetPerformanceMeInterface {
 	return &GetPerformanceMe{
 		queries: queries,
 	}

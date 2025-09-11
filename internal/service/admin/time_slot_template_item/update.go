@@ -14,7 +14,7 @@ type Update struct {
 	queries *dbgen.Queries
 }
 
-func NewUpdate(queries *dbgen.Queries) *Update {
+func NewUpdate(queries *dbgen.Queries) UpdateInterface {
 	return &Update{
 		queries: queries,
 	}

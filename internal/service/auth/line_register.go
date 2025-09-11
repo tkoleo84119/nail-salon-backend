@@ -25,7 +25,7 @@ type LineRegister struct {
 	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewLineRegister(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig, activityLog cache.ActivityLogCacheInterface) *LineRegister {
+func NewLineRegister(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig, activityLog cache.ActivityLogCacheInterface) LineRegisterInterface {
 	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineRegister{
 		queries:       queries,

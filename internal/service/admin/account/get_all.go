@@ -12,7 +12,7 @@ type GetAll struct {
 	accountRepo *sqlx.AccountRepository
 }
 
-func NewGetAll(accountRepo *sqlx.AccountRepository) *GetAll {
+func NewGetAll(accountRepo *sqlx.AccountRepository) GetAllInterface {
 	return &GetAll{
 		accountRepo: accountRepo,
 	}

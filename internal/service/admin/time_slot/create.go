@@ -15,7 +15,7 @@ type Create struct {
 	queries *dbgen.Queries
 }
 
-func NewCreate(queries *dbgen.Queries) *Create {
+func NewCreate(queries *dbgen.Queries) CreateInterface {
 	return &Create{
 		queries: queries,
 	}

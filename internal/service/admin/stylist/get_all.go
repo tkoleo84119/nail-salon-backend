@@ -14,7 +14,7 @@ type GetAll struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewGetAll(repo *sqlxRepo.Repositories) *GetAll {
+func NewGetAll(repo *sqlxRepo.Repositories) GetAllInterface {
 	return &GetAll{
 		repo: repo,
 	}

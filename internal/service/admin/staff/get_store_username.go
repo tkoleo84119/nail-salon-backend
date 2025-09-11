@@ -13,7 +13,7 @@ type GetStoreUsername struct {
 	repo *sqlxRepo.Repositories
 }
 
-func NewGetStoreUsername(repo *sqlxRepo.Repositories) *GetStoreUsername {
+func NewGetStoreUsername(repo *sqlxRepo.Repositories) GetStoreUsernameInterface {
 	return &GetStoreUsername{
 		repo: repo,
 	}

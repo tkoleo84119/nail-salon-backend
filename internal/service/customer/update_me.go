@@ -18,7 +18,7 @@ type UpdateMe struct {
 	authCache cache.AuthCacheInterface
 }
 
-func NewUpdateMe(db *dbgen.Queries, repo *sqlxRepo.Repositories, authCache cache.AuthCacheInterface) *UpdateMe {
+func NewUpdateMe(db *dbgen.Queries, repo *sqlxRepo.Repositories, authCache cache.AuthCacheInterface) UpdateMeInterface {
 	return &UpdateMe{
 		repo:      repo,
 		db:        db,

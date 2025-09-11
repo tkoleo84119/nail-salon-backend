@@ -16,7 +16,7 @@ type GetMe struct {
 	queries *dbgen.Queries
 }
 
-func NewGetMe(queries *dbgen.Queries) *GetMe {
+func NewGetMe(queries *dbgen.Queries) GetMeInterface {
 	return &GetMe{
 		queries: queries,
 	}

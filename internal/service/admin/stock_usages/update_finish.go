@@ -16,7 +16,7 @@ type UpdateFinish struct {
 	queries *dbgen.Queries
 }
 
-func NewUpdateFinish(queries *dbgen.Queries) *UpdateFinish {
+func NewUpdateFinish(queries *dbgen.Queries) UpdateFinishInterface {
 	return &UpdateFinish{
 		queries: queries,
 	}

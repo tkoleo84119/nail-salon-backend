@@ -26,7 +26,7 @@ type Update struct {
 	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB, lineMessenger *utils.LineMessageClient, activityLog cache.ActivityLogCacheInterface) *Update {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB, lineMessenger *utils.LineMessageClient, activityLog cache.ActivityLogCacheInterface) UpdateInterface {
 	return &Update{
 		queries:       queries,
 		repo:          repo,

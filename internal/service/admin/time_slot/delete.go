@@ -14,7 +14,7 @@ type Delete struct {
 	queries *dbgen.Queries
 }
 
-func NewDelete(queries *dbgen.Queries) *Delete {
+func NewDelete(queries *dbgen.Queries) DeleteInterface {
 	return &Delete{
 		queries: queries,
 	}

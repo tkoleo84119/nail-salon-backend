@@ -18,7 +18,7 @@ type Create struct {
 	queries *dbgen.Queries
 }
 
-func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) *Create {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) CreateInterface {
 	return &Create{
 		db:      db,
 		queries: queries,

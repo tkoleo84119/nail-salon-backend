@@ -17,7 +17,7 @@ type RefreshToken struct {
 	jwtConfig config.JWTConfig
 }
 
-func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig) *RefreshToken {
+func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig) RefreshTokenInterface {
 	return &RefreshToken{
 		queries:   queries,
 		jwtConfig: jwtConfig,

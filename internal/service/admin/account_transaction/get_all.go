@@ -15,7 +15,7 @@ type GetAll struct {
 
 func NewGetAll(
 	repo *sqlxRepo.Repositories,
-) *GetAll {
+) GetAllInterface {
 	return &GetAll{
 		repo: repo,
 	}

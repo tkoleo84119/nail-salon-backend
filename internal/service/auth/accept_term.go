@@ -14,7 +14,7 @@ type AcceptTerm struct {
 	queries *dbgen.Queries
 }
 
-func NewAcceptTerm(queries *dbgen.Queries) *AcceptTerm {
+func NewAcceptTerm(queries *dbgen.Queries) AcceptTermInterface {
 	return &AcceptTerm{
 		queries: queries,
 	}

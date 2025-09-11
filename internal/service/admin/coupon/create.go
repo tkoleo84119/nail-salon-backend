@@ -15,7 +15,7 @@ type Create struct {
 	repo    *sqlxRepo.Repositories
 }
 
-func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) *Create {
+func NewCreate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) CreateInterface {
 	return &Create{
 		queries: queries,
 		repo:    repo,

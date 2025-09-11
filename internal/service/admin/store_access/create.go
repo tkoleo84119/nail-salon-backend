@@ -20,7 +20,7 @@ type Create struct {
 	authCache cache.AuthCacheInterface
 }
 
-func NewCreate(queries *dbgen.Queries, authCache cache.AuthCacheInterface) *Create {
+func NewCreate(queries *dbgen.Queries, authCache cache.AuthCacheInterface) CreateInterface {
 	return &Create{
 		queries:   queries,
 		authCache: authCache,
