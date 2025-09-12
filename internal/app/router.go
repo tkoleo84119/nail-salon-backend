@@ -181,9 +181,9 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 	stores := admin.Group("/stores")
 	{
 		stores.GET("", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.StoreGetList.GetAll)
-		stores.GET("/:storeId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.StoreGet.Get)
+		stores.GET("/:storeId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.StoreGet.Get)
 		stores.POST("", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.StoreCreate.Create)
-		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.StoreUpdate.Update)
+		stores.PATCH("/:storeId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireManagerOrAbove(), handlers.Admin.StoreUpdate.Update)
 
 		// Store stylists routes
 		stores.GET("/:storeId/stylists", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.StylistGetAll.GetAll)

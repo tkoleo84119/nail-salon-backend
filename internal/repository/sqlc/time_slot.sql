@@ -88,8 +88,8 @@ SELECT EXISTS(
     SELECT 1 FROM time_slots
     WHERE schedule_id = $1
     AND id != $2
-    AND start_time < $4
-    AND end_time > $3
+    AND start_time < $4::time
+    AND end_time > $3::time
 ) AS has_overlap;
 
 -- name: UpdateTimeSlot :one

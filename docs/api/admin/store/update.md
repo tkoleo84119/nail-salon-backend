@@ -21,7 +21,7 @@
 ## 權限
 
 - 需要登入才可使用。
-- 僅 `SUPER_ADMIN`、`ADMIN` 可操作。
+- 僅 `SUPER_ADMIN`、`ADMIN`、`MANAGER` 可操作。
 
 ---
 

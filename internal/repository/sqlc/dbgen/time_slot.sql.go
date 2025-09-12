@@ -48,24 +48,24 @@ SELECT EXISTS(
     SELECT 1 FROM time_slots
     WHERE schedule_id = $1
     AND id != $2
-    AND start_time < $4
-    AND end_time > $3
+    AND start_time < $4::time
+    AND end_time > $3::time
 ) AS has_overlap
 `
 
 type CheckTimeSlotOverlapExcludingParams struct {
 	ScheduleID int64       `db:"schedule_id" json:"schedule_id"`
 	ID         int64       `db:"id" json:"id"`
-	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
-	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
+	Column3    pgtype.Time `db:"column_3" json:"column_3"`
+	Column4    pgtype.Time `db:"column_4" json:"column_4"`
 }
 
 func (q *Queries) CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error) {
 	row := q.db.QueryRow(ctx, checkTimeSlotOverlapExcluding,
 		arg.ScheduleID,
 		arg.ID,
-		arg.EndTime,
-		arg.StartTime,
+		arg.Column3,
+		arg.Column4,
 	)
 	var has_overlap bool
 	err := row.Scan(&has_overlap)
