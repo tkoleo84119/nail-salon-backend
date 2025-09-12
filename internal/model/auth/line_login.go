@@ -10,7 +10,7 @@ type LineLoginResponse struct {
 	NeedRegister   bool                `json:"needRegister"`
 	NeedCheckTerms *bool               `json:"needCheckTerms,omitempty"`
 	AccessToken    *string             `json:"accessToken,omitempty"`
-	RefreshToken   *string             `json:"refreshToken,omitempty"`
+	RefreshToken   *string             `json:"-"`
 	ExpiresIn      *int                `json:"expiresIn,omitempty"`
 	LineProfile    *common.LineProfile `json:"lineProfile,omitempty"`
 }

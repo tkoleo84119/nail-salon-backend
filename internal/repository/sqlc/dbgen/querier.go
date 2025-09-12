@@ -139,6 +139,7 @@ type Querier interface {
 	GetTomorrowBookingsForReminder(ctx context.Context, workDate pgtype.Date) ([]GetTomorrowBookingsForReminderRow, error)
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (GetValidCustomerTokenRow, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error)
+	RevokeCustomerToken(ctx context.Context, refreshToken string) error
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
 	UpdateBookingActualDuration(ctx context.Context, arg UpdateBookingActualDurationParams) error
 	UpdateBookingDetailPriceInfo(ctx context.Context, arg UpdateBookingDetailPriceInfoParams) error

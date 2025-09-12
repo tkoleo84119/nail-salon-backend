@@ -7,3 +7,8 @@ RETURNING id, customer_id, refresh_token, user_agent, ip_address, expired_at, is
 SELECT id, customer_id
 FROM customer_tokens
 WHERE refresh_token = $1 AND expired_at > NOW() AND is_revoked = false;
+
+-- name: RevokeCustomerToken :exec
+UPDATE customer_tokens
+SET is_revoked = true
+WHERE refresh_token = $1;

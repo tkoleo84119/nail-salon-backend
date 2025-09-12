@@ -26,6 +26,6 @@ type LoginContext struct {
 
 type LineRegisterResponse struct {
 	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	RefreshToken string `json:"-"`
 	ExpiresIn    int    `json:"expiresIn"`
 }

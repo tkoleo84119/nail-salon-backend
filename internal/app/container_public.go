@@ -147,13 +147,13 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 }
 
 // NewPublicHandlers creates and initializes all public handlers
-func NewPublicHandlers(services PublicServices) PublicHandlers {
-	return PublicHandlers{
-		// Authentication handlers
-		AuthLineLogin:    authHandler.NewLineLogin(services.AuthLineLogin),
-		AuthLineRegister: authHandler.NewLineRegister(services.AuthLineRegister),
-		AuthRefreshToken: authHandler.NewRefreshToken(services.AuthRefreshToken),
-		AuthAcceptTerm:   authHandler.NewAcceptTerm(services.AuthAcceptTerm),
+func NewPublicHandlers(services PublicServices, cfg *config.Config) PublicHandlers {
+    return PublicHandlers{
+        // Authentication handlers
+        AuthLineLogin:    authHandler.NewLineLogin(services.AuthLineLogin, cfg),
+        AuthLineRegister: authHandler.NewLineRegister(services.AuthLineRegister, cfg),
+        AuthRefreshToken: authHandler.NewRefreshToken(services.AuthRefreshToken, cfg),
+        AuthAcceptTerm:   authHandler.NewAcceptTerm(services.AuthAcceptTerm),
 
 		// Customer handlers
 		CustomerGetMe:    customerHandler.NewGetMe(services.CustomerGetMe),

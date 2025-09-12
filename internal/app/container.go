@@ -66,7 +66,7 @@ func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.
 	}
 
 	// Initialize handlers using separated containers
-    publicHandlers := NewPublicHandlers(publicServices)
+    publicHandlers := NewPublicHandlers(publicServices, cfg)
     adminHandlers := NewAdminHandlers(adminServices, cfg)
 
 	handlers := Handlers{

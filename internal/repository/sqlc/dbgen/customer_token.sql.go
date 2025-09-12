@@ -68,3 +68,14 @@ func (q *Queries) GetValidCustomerToken(ctx context.Context, refreshToken string
 	err := row.Scan(&i.ID, &i.CustomerID)
 	return i, err
 }
+
+const revokeCustomerToken = `-- name: RevokeCustomerToken :exec
+UPDATE customer_tokens
+SET is_revoked = true
+WHERE refresh_token = $1
+`
+
+func (q *Queries) RevokeCustomerToken(ctx context.Context, refreshToken string) error {
+	_, err := q.db.Exec(ctx, revokeCustomerToken, refreshToken)
+	return err
+}

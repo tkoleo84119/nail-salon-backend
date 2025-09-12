@@ -35,3 +35,15 @@ func ClearAdminRefreshCookie(c *gin.Context, cfg config.CookieConfig) {
     c.SetCookie(cfg.AdminRefreshName, "", -1, cfg.Path, cfg.Domain, cfg.Secure, true)
 }
 
+// SetCustomerRefreshCookie sets the customer refresh token cookie based on config.Cookie settings.
+func SetCustomerRefreshCookie(c *gin.Context, cfg config.CookieConfig, token string) {
+    maxAge := cfg.CustomerRefreshMaxAgeDays * 24 * 60 * 60
+    c.SetSameSite(sameSiteMode(cfg.SameSite))
+    c.SetCookie(cfg.CustomerRefreshName, token, maxAge, cfg.Path, cfg.Domain, cfg.Secure, true)
+}
+
+// ClearCustomerRefreshCookie clears the customer refresh token cookie (MaxAge=-1)
+func ClearCustomerRefreshCookie(c *gin.Context, cfg config.CookieConfig) {
+    c.SetSameSite(sameSiteMode(cfg.SameSite))
+    c.SetCookie(cfg.CustomerRefreshName, "", -1, cfg.Path, cfg.Domain, cfg.Secure, true)
+}

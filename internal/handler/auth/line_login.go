@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	authModel "github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -16,12 +17,14 @@ import (
 
 type LineLogin struct {
 	service authService.LineLoginInterface
+	cfg     *config.Config
 }
 
 // NewCustomerLineLoginHandler creates a new LINE login handler
-func NewLineLogin(service authService.LineLoginInterface) *LineLogin {
+func NewLineLogin(service authService.LineLoginInterface, cfg *config.Config) *LineLogin {
 	return &LineLogin{
 		service: service,
+		cfg:     cfg,
 	}
 }
 
@@ -50,6 +53,11 @@ func (h *LineLogin) LineLogin(c *gin.Context) {
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
+	}
+
+	// If refresh token exists, set to HttpOnly cookie and hide from JSON
+	if response.RefreshToken != nil && strings.TrimSpace(*response.RefreshToken) != "" {
+		utils.SetCustomerRefreshCookie(c, h.cfg.Cookie, *response.RefreshToken)
 	}
 
 	c.JSON(http.StatusOK, common.SuccessResponse(response))

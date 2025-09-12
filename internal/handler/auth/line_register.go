@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	authModel "github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -16,11 +17,13 @@ import (
 
 type LineRegister struct {
 	service authService.LineRegisterInterface
+	cfg     *config.Config
 }
 
-func NewLineRegister(service authService.LineRegisterInterface) *LineRegister {
+func NewLineRegister(service authService.LineRegisterInterface, cfg *config.Config) *LineRegister {
 	return &LineRegister{
 		service: service,
+		cfg:     cfg,
 	}
 }
 
@@ -101,6 +104,11 @@ func (h *LineRegister) LineRegister(c *gin.Context) {
 		return
 	}
 
-	// Return successful response
+	// Set refresh token cookie and hide from JSON
+	if strings.TrimSpace(response.RefreshToken) != "" {
+		utils.SetCustomerRefreshCookie(c, h.cfg.Cookie, response.RefreshToken)
+	}
+
+	// Return successful response (no token case)
 	c.JSON(http.StatusCreated, common.SuccessResponse(response))
 }
