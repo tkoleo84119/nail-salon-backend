@@ -40,6 +40,35 @@ func (q *Queries) CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.C
 	return exists, err
 }
 
+const checkTimeSlotTemplateItemOverlap = `-- name: CheckTimeSlotTemplateItemOverlap :one
+SELECT EXISTS(
+    SELECT 1 FROM time_slot_template_items
+    WHERE template_id = $1
+    AND id != $2
+    AND start_time < $4::time
+    AND end_time > $3::time
+) AS has_overlap
+`
+
+type CheckTimeSlotTemplateItemOverlapParams struct {
+	TemplateID int64       `db:"template_id" json:"template_id"`
+	ID         int64       `db:"id" json:"id"`
+	Column3    pgtype.Time `db:"column_3" json:"column_3"`
+	Column4    pgtype.Time `db:"column_4" json:"column_4"`
+}
+
+func (q *Queries) CheckTimeSlotTemplateItemOverlap(ctx context.Context, arg CheckTimeSlotTemplateItemOverlapParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkTimeSlotTemplateItemOverlap,
+		arg.TemplateID,
+		arg.ID,
+		arg.Column3,
+		arg.Column4,
+	)
+	var has_overlap bool
+	err := row.Scan(&has_overlap)
+	return has_overlap, err
+}
+
 const createTimeSlotTemplateItem = `-- name: CreateTimeSlotTemplateItem :one
 INSERT INTO time_slot_template_items (
     id,
@@ -122,49 +151,6 @@ func (q *Queries) GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, temp
 	for rows.Next() {
 		var i GetTimeSlotTemplateItemsByTemplateIDRow
 		if err := rows.Scan(&i.StartTime, &i.EndTime); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getTimeSlotTemplateItemsByTemplateIDExcluding = `-- name: GetTimeSlotTemplateItemsByTemplateIDExcluding :many
-SELECT id, template_id, start_time, end_time
-FROM time_slot_template_items
-WHERE template_id = $1 AND id != $2
-`
-
-type GetTimeSlotTemplateItemsByTemplateIDExcludingParams struct {
-	TemplateID int64 `db:"template_id" json:"template_id"`
-	ID         int64 `db:"id" json:"id"`
-}
-
-type GetTimeSlotTemplateItemsByTemplateIDExcludingRow struct {
-	ID         int64       `db:"id" json:"id"`
-	TemplateID int64       `db:"template_id" json:"template_id"`
-	StartTime  pgtype.Time `db:"start_time" json:"start_time"`
-	EndTime    pgtype.Time `db:"end_time" json:"end_time"`
-}
-
-func (q *Queries) GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]GetTimeSlotTemplateItemsByTemplateIDExcludingRow, error) {
-	rows, err := q.db.Query(ctx, getTimeSlotTemplateItemsByTemplateIDExcluding, arg.TemplateID, arg.ID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetTimeSlotTemplateItemsByTemplateIDExcludingRow{}
-	for rows.Next() {
-		var i GetTimeSlotTemplateItemsByTemplateIDExcludingRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.TemplateID,
-			&i.StartTime,
-			&i.EndTime,
-		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

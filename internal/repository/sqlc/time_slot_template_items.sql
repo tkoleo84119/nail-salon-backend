@@ -34,10 +34,15 @@ FROM time_slot_template_items
 WHERE template_id = $1
 ORDER BY start_time;
 
--- name: GetTimeSlotTemplateItemsByTemplateIDExcluding :many
-SELECT id, template_id, start_time, end_time
-FROM time_slot_template_items
-WHERE template_id = $1 AND id != $2;
+
+-- name: CheckTimeSlotTemplateItemOverlap :one
+SELECT EXISTS(
+    SELECT 1 FROM time_slot_template_items
+    WHERE template_id = $1
+    AND id != $2
+    AND start_time < $4::time
+    AND end_time > $3::time
+) AS has_overlap;
 
 -- name: UpdateTimeSlotTemplateItem :one
 UPDATE time_slot_template_items

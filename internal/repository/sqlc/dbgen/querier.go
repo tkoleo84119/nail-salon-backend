@@ -58,6 +58,7 @@ type Querier interface {
 	CheckTimeSlotOverlapExcluding(ctx context.Context, arg CheckTimeSlotOverlapExcludingParams) (bool, error)
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
 	CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.Context, arg CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams) (bool, error)
+	CheckTimeSlotTemplateItemOverlap(ctx context.Context, arg CheckTimeSlotTemplateItemOverlapParams) (bool, error)
 	CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error)
 	CountProductsByIDs(ctx context.Context, arg CountProductsByIDsParams) (int64, error)
 	CreateAccount(ctx context.Context, arg CreateAccountParams) error
@@ -133,7 +134,6 @@ type Querier interface {
 	GetStylistPerformanceGroupByStore(ctx context.Context, arg GetStylistPerformanceGroupByStoreParams) ([]GetStylistPerformanceGroupByStoreRow, error)
 	GetTimeSlotByID(ctx context.Context, id int64) (TimeSlot, error)
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]GetTimeSlotTemplateItemsByTemplateIDRow, error)
-	GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx context.Context, arg GetTimeSlotTemplateItemsByTemplateIDExcludingParams) ([]GetTimeSlotTemplateItemsByTemplateIDExcludingRow, error)
 	GetTimeSlotTemplateWithItemsByID(ctx context.Context, id int64) ([]GetTimeSlotTemplateWithItemsByIDRow, error)
 	GetTimeSlotWithScheduleByID(ctx context.Context, id int64) (GetTimeSlotWithScheduleByIDRow, error)
 	GetTomorrowBookingsForReminder(ctx context.Context, workDate pgtype.Date) ([]GetTomorrowBookingsForReminderRow, error)

@@ -95,6 +95,7 @@ SELECT
 FROM time_slot_templates t
 LEFT JOIN time_slot_template_items ti ON t.id = ti.template_id
 WHERE t.id = $1
+ORDER BY ti.start_time
 `
 
 type GetTimeSlotTemplateWithItemsByIDRow struct {

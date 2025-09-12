@@ -2,7 +2,6 @@ package adminTimeSlotTemplateItem
 
 import (
 	"context"
-	"time"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminTimeSlotTemplateItemModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time_slot_template_item"
@@ -56,17 +55,17 @@ func (s *Update) Update(ctx context.Context, templateID int64, itemID int64, req
 	}
 
 	// Get other existing template items to check for conflicts (excluding current item)
-	otherItems, err := s.queries.GetTimeSlotTemplateItemsByTemplateIDExcluding(ctx, dbgen.GetTimeSlotTemplateItemsByTemplateIDExcludingParams{
+	hasOverlap, err := s.queries.CheckTimeSlotTemplateItemOverlap(ctx, dbgen.CheckTimeSlotTemplateItemOverlapParams{
 		TemplateID: templateID,
 		ID:         itemID,
+		Column3:    utils.TimePtrToPgTime(&startTime),
+		Column4:    utils.TimePtrToPgTime(&endTime),
 	})
 	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get existing template items", err)
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check if item overlaps with other items", err)
 	}
-
-	// Check for time conflicts with other existing items
-	if err := s.checkTimeConflicts(startTime, endTime, otherItems); err != nil {
-		return nil, err
+	if hasOverlap {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotConflict)
 	}
 
 	// Update time slot template item
@@ -85,25 +84,4 @@ func (s *Update) Update(ctx context.Context, templateID int64, itemID int64, req
 		StartTime:  utils.PgTimeToTimeString(updatedItem.StartTime),
 		EndTime:    utils.PgTimeToTimeString(updatedItem.EndTime),
 	}, nil
-}
-
-// checkTimeConflicts validates that the updated time slot doesn't overlap with other existing items
-func (s *Update) checkTimeConflicts(startTime, endTime time.Time, existingItems []dbgen.GetTimeSlotTemplateItemsByTemplateIDExcludingRow) error {
-	for _, item := range existingItems {
-		// Convert pgtype.Time to time.Time for comparison
-		existingStart, err := utils.PgTimeToTime(item.StartTime)
-		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
-		}
-		existingEnd, err := utils.PgTimeToTime(item.EndTime)
-		if err != nil {
-			return errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert time", err)
-		}
-
-		// Check if new slot overlaps with existing slot
-		if startTime.Before(existingEnd) && endTime.After(existingStart) {
-			return errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotConflict)
-		}
-	}
-	return nil
 }
