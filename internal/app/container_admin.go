@@ -498,14 +498,14 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 }
 
 // NewAdminHandlers creates and initializes all admin handlers
-func NewAdminHandlers(services AdminServices) AdminHandlers {
-	return AdminHandlers{
-		// Authentication handlers
-		AuthStaffLogin:        adminAuthHandler.NewLogin(services.AuthStaffLogin),
-		AuthStaffRefreshToken: adminAuthHandler.NewRefreshToken(services.AuthStaffRefreshToken),
-		AuthStaffLogout:       adminAuthHandler.NewLogout(services.AuthStaffLogout),
-		AuthStaffPermission:   adminAuthHandler.NewPermission(services.AuthStaffPermission),
-		AuthUpdatePassword:    adminAuthHandler.NewUpdatePassword(services.AuthUpdatePassword),
+func NewAdminHandlers(services AdminServices, cfg *config.Config) AdminHandlers {
+    return AdminHandlers{
+        // Authentication handlers
+        AuthStaffLogin:        adminAuthHandler.NewLogin(services.AuthStaffLogin, cfg),
+        AuthStaffRefreshToken: adminAuthHandler.NewRefreshToken(services.AuthStaffRefreshToken, cfg),
+        AuthStaffLogout:       adminAuthHandler.NewLogout(services.AuthStaffLogout, cfg),
+        AuthStaffPermission:   adminAuthHandler.NewPermission(services.AuthStaffPermission),
+        AuthUpdatePassword:    adminAuthHandler.NewUpdatePassword(services.AuthUpdatePassword),
 
 		// Staff management handlers
 		StaffCreate:                adminStaffHandler.NewCreate(services.StaffCreate),

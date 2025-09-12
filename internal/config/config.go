@@ -60,6 +60,22 @@ type ServerConfig struct {
 	SnowflakeNodeId int64
 }
 
+type CookieConfig struct {
+	// Cookie names
+	AdminRefreshName    string
+	CustomerRefreshName string
+
+	// Common attributes
+	Domain   string
+	Path     string
+	Secure   bool
+	SameSite string // one of: Lax, Strict, None, Default
+
+	// Expiration settings (in days)
+	AdminRefreshMaxAgeDays    int
+	CustomerRefreshMaxAgeDays int
+}
+
 type Config struct {
 	DB        DBConfig
 	JWT       JWTConfig
@@ -68,6 +84,7 @@ type Config struct {
 	Scheduler SchedulerConfig
 	Server    ServerConfig
 	CORS      CORSConfig
+	Cookie    CookieConfig
 }
 
 func Load() *Config {
@@ -124,6 +141,17 @@ func Load() *Config {
 		MaxAge:           getenvIntDefault("CORS_MAX_AGE", 300),
 	}
 
+	cookieConfig := CookieConfig{
+		AdminRefreshName:          getenvDefault("ADMIN_REFRESH_COOKIE_NAME", "admin_refresh_token"),
+		CustomerRefreshName:       getenvDefault("CUSTOMER_REFRESH_COOKIE_NAME", "customer_refresh_token"),
+		Domain:                    os.Getenv("COOKIE_DOMAIN"),
+		Path:                      getenvDefault("COOKIE_PATH", "/"),
+		Secure:                    getenvBoolDefault("COOKIE_SECURE", false),
+		SameSite:                  getenvDefault("COOKIE_SAMESITE", "Lax"),
+		AdminRefreshMaxAgeDays:    getenvIntDefault("ADMIN_REFRESH_COOKIE_MAX_AGE_DAYS", 7),
+		CustomerRefreshMaxAgeDays: getenvIntDefault("CUSTOMER_REFRESH_COOKIE_MAX_AGE_DAYS", 7),
+	}
+
 	return &Config{
 		DB:        dbConfig,
 		JWT:       jwtConfig,
@@ -132,6 +160,7 @@ func Load() *Config {
 		Scheduler: schedulerConfig,
 		Server:    serverConfig,
 		CORS:      corsConfig,
+		Cookie:    cookieConfig,
 	}
 }
 

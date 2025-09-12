@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/tkoleo84119/nail-salon-backend/internal/config"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminAuthModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -16,12 +17,14 @@ import (
 
 type Login struct {
 	service adminAuthService.LoginInterface
+	cfg     *config.Config
 }
 
 // NewStaffLoginHandler creates a new login handler
-func NewLogin(service adminAuthService.LoginInterface) *Login {
+func NewLogin(service adminAuthService.LoginInterface, cfg *config.Config) *Login {
 	return &Login{
 		service: service,
+		cfg:     cfg,
 	}
 }
 
@@ -50,6 +53,11 @@ func (h *Login) Login(c *gin.Context) {
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
+	}
+
+	// Set refresh token in HttpOnly cookie and do not return it in JSON
+	if strings.TrimSpace(response.RefreshToken) != "" {
+		utils.SetAdminRefreshCookie(c, h.cfg.Cookie, response.RefreshToken)
 	}
 
 	c.JSON(http.StatusOK, common.SuccessResponse(response))

@@ -13,7 +13,7 @@ type LoginRequest struct {
 // StaffLoginResponse represents the successful login response
 type LoginResponse struct {
 	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	RefreshToken string `json:"-"`
 	ExpiresIn    int    `json:"expiresIn"`
 }
 
