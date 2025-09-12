@@ -85,7 +85,7 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req adminAuthModel.Refr
 	// Build response with new refresh token (handler will set cookie, not JSON)
 	return &adminAuthModel.RefreshTokenResponse{
 		AccessToken:  accessToken,
-		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
+		ExpiresIn:    int(s.jwtConfig.ExpiryHours * 3600),
 		RefreshToken: newRefreshToken,
 	}, nil
 }

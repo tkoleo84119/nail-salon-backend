@@ -27,7 +27,7 @@ type DBConfig struct {
 
 type JWTConfig struct {
 	Secret      string
-	ExpiryHours int
+	ExpiryHours float64
 }
 
 type LineConfig struct {
@@ -108,7 +108,7 @@ func Load() *Config {
 
 	jwtConfig := JWTConfig{
 		Secret:      getenvRequired("JWT_SECRET"),
-		ExpiryHours: getenvIntDefault("JWT_EXPIRY_HOURS", 1),
+		ExpiryHours: getenvFloatDefault("JWT_EXPIRY_HOURS", 1.0),
 	}
 
 	lineConfig := LineConfig{
@@ -254,6 +254,17 @@ func getenvBoolDefault(key string, defaultVal bool) bool {
 	}
 
 	return parsed
+}
+
+func getenvFloatDefault(key string, defaultVal float64) float64 {
+	if val, exists := os.LookupEnv(key); exists {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return defaultVal
+		}
+		return parsed
+	}
+	return defaultVal
 }
 
 func getAndCheckCronExpression(key string) string {

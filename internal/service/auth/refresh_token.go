@@ -74,7 +74,7 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req auth.RefreshTokenRe
 	// Build response
 	return &auth.RefreshTokenResponse{
 		AccessToken:  accessToken,
-		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
+		ExpiresIn:    int(s.jwtConfig.ExpiryHours * 3600),
 		RefreshToken: newRefreshToken,
 	}, nil
 }

@@ -116,7 +116,7 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 // generateAccessToken generates a JWT access token for the customer
 func (s *LineLogin) generateAccessToken(customerID int64) (string, int, error) {
 	token, err := utils.GenerateCustomerJWT(s.jwtConfig, customerID)
-	expiresIn := s.jwtConfig.ExpiryHours * 3600
+	expiresIn := int(s.jwtConfig.ExpiryHours * 3600)
 
 	if err != nil {
 		return "", 0, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to generate access token", err)

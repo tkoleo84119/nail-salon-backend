@@ -149,7 +149,7 @@ func (s *LineRegister) LineRegister(ctx context.Context, req auth.LineRegisterRe
 	response := &auth.LineRegisterResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
+		ExpiresIn:    int(s.jwtConfig.ExpiryHours * 3600),
 	}
 
 	return response, nil

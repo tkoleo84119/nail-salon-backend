@@ -13,7 +13,7 @@ func GenerateJWT(jwtConfig config.JWTConfig, userID int64) (string, error) {
 	claims := common.StaffJWTClaims{
 		UserID: FormatID(userID),
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtConfig.ExpiryHours) * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtConfig.ExpiryHours * float64(time.Hour)))),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 		},
@@ -47,7 +47,7 @@ func GenerateCustomerJWT(jwtConfig config.JWTConfig, customerID int64) (string, 
 	claims := common.LineJWTClaims{
 		CustomerID: customerID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtConfig.ExpiryHours) * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtConfig.ExpiryHours * float64(time.Hour)))),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 		},

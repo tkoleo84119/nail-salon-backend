@@ -59,7 +59,7 @@ func (s *Login) Login(ctx context.Context, req adminAuthModel.LoginRequest, logi
 	response := &adminAuthModel.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    s.jwtConfig.ExpiryHours * 3600,
+		ExpiresIn:    int(s.jwtConfig.ExpiryHours * 3600),
 	}
 
 	return response, nil
