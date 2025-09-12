@@ -93,6 +93,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		CategoryID:          categoryID,
 		Name:                req.Name,
 		LessThanSafetyStock: req.LessThanSafetyStock,
+		IsActive:            req.IsActive,
 		Limit:               limit,
 		Offset:              offset,
 		Sort:                sort,

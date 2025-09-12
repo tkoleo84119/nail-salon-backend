@@ -5,6 +5,7 @@ type GetAllRequest struct {
 	CategoryID          *string `form:"categoryId" binding:"omitempty"`
 	Name                *string `form:"name" binding:"omitempty,noBlank,max=100"`
 	LessThanSafetyStock *bool   `form:"lessThanSafetyStock" binding:"omitempty"`
+	IsActive            *bool   `form:"isActive" binding:"omitempty"`
 	Limit               *int    `form:"limit" binding:"omitempty,min=1,max=100"`
 	Offset              *int    `form:"offset" binding:"omitempty,min=0,max=1000000"`
 	Sort                *string `form:"sort" binding:"omitempty"`
@@ -15,6 +16,7 @@ type GetAllParsedRequest struct {
 	CategoryID          *int64
 	Name                *string
 	LessThanSafetyStock *bool
+	IsActive            *bool
 	Limit               int
 	Offset              int
 	Sort                []string

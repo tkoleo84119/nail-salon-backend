@@ -28,6 +28,7 @@ type GetAllStoreProductsByFilterParams struct {
 	CategoryID          *int64
 	Name                *string
 	LessThanSafetyStock *bool
+	IsActive            *bool
 	Limit               *int
 	Offset              *int
 	Sort                *[]string
@@ -71,6 +72,11 @@ func (r *ProductRepository) GetAllStoreProductsByFilter(ctx context.Context, sto
 
 	if params.LessThanSafetyStock != nil && *params.LessThanSafetyStock {
 		whereConditions = append(whereConditions, "p.current_stock <= p.safety_stock")
+	}
+
+	if params.IsActive != nil {
+		whereConditions = append(whereConditions, fmt.Sprintf("p.is_active = $%d", len(args)+1))
+		args = append(args, *params.IsActive)
 	}
 
 	whereClause := "WHERE " + strings.Join(whereConditions, " AND ")

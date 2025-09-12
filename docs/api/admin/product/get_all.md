@@ -41,6 +41,7 @@
 | categoryId          | string | 否   |            | 查詢產品分類 ID                                  |
 | name                | string | 否   |            | 模糊查詢產品名稱                                 |
 | lessThanSafetyStock | bool   | 否   |            | 查詢庫存數量小於等於安全庫存數量的產品           |
+| isActive            | bool   | 否   |            | 查詢是否啟用                                     |
 | limit               | int    | 否   | 20         | 單頁筆數                                         |
 | offset              | int    | 否   | 0          | 起始筆數                                         |
 | sort                | string | 否   | -createdAt | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序) |
@@ -53,6 +54,7 @@
 | categoryId          | 否   |                                                                   |
 | name                | 否   | <li>不能為空字串<li>最大長度100字元                               |
 | lessThanSafetyStock | 否   |                                                                   |
+| isActive            | 否   |                                                                   |
 | limit               | 否   | <li>最小值1<li>最大值100                                          |
 | offset              | 否   | <li>最小值0<li>最大值1000000                                      |
 | sort                | 否   | <li>可以為 createdAt, updatedAt, brandId, categoryId (其餘會忽略) |
@@ -143,7 +145,7 @@
 
 ## Service 邏輯
 
-1. 根據 `name`（名稱）、`brandId`（品牌 ID）、`categoryId`（分類 ID）、`lessThanSafetyStock`（庫存數量小於等於安全庫存數量的產品）條件動態查詢。
+1. 根據 `name`（名稱）、`brandId`（品牌 ID）、`categoryId`（分類 ID）、`lessThanSafetyStock`（庫存數量小於等於安全庫存數量的產品）、`isActive`（是否啟用）條件動態查詢。
 2. 加入 `limit` 與 `offset` 處理分頁。
 3. 加入 `sort` 處理排序。
 4. 回傳總筆數與項目清單。

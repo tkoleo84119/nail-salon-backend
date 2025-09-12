@@ -29,6 +29,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminProductMode
 		CategoryID:          req.CategoryID,
 		Name:                req.Name,
 		LessThanSafetyStock: req.LessThanSafetyStock,
+		IsActive:            req.IsActive,
 		Limit:               &req.Limit,
 		Offset:              &req.Offset,
 		Sort:                &req.Sort,
