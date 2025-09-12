@@ -376,7 +376,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Store management services
 		StoreGetList: adminStoreService.NewGetAll(repositories.SQLX),
 		StoreGet:     adminStoreService.NewGet(queries),
-		StoreCreate:  adminStoreService.NewCreate(queries, database.PgxPool),
+		StoreCreate:  adminStoreService.NewCreate(queries, database.PgxPool, authCache),
 		StoreUpdate:  adminStoreService.NewUpdate(queries, repositories.SQLX),
 
 		// Account management services

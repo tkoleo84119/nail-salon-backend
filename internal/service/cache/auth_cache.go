@@ -75,6 +75,41 @@ func (c *AuthCache) DeleteStaffContext(ctx context.Context, userID int64) error 
 	return nil
 }
 
+// DeleteAllStaffContext from Redis
+func (c *AuthCache) DeleteAllStaffContext(ctx context.Context) error {
+	const (
+		batchSize = 1000
+		scanCount = 500
+	)
+
+	iter := c.redis.Scan(ctx, 0, staffCacheKeyPrefix+"*", scanCount).Iterator()
+	var batch []string
+
+	for iter.Next(ctx) {
+		batch = append(batch, iter.Val())
+
+		if len(batch) >= batchSize {
+			if err := c.redis.Unlink(ctx, batch...).Err(); err != nil {
+				return fmt.Errorf("failed to unlink staff context batch: %w", err)
+			}
+			batch = batch[:0] // clear slice, avoid rebuild
+		}
+	}
+
+	if len(batch) > 0 {
+		if err := c.redis.Unlink(ctx, batch...).Err(); err != nil {
+			return fmt.Errorf("failed to unlink remaining staff context: %w", err)
+		}
+	}
+
+	// check if iterator has error
+	if err := iter.Err(); err != nil {
+		return fmt.Errorf("failed to scan staff context keys: %w", err)
+	}
+
+	return nil
+}
+
 // GetCustomerContext from Redis
 func (c *AuthCache) GetCustomerContext(ctx context.Context, customerID int64) (*common.CustomerContext, error) {
 	key := fmt.Sprintf("%s%d", customerCacheKeyPrefix, customerID)

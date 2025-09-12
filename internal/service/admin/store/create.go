@@ -2,6 +2,7 @@ package adminStore
 
 import (
 	"context"
+	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -9,18 +10,21 @@ import (
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Create struct {
-	db      *pgxpool.Pool
-	queries *dbgen.Queries
+	db        *pgxpool.Pool
+	queries   *dbgen.Queries
+	authCache cache.AuthCacheInterface
 }
 
-func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) CreateInterface {
+func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool, authCache cache.AuthCacheInterface) CreateInterface {
 	return &Create{
-		db:      db,
-		queries: queries,
+		db:        db,
+		queries:   queries,
+		authCache: authCache,
 	}
 }
 
@@ -71,6 +75,11 @@ func (s *Create) Create(ctx context.Context, req adminStoreModel.CreateRequest, 
 	// Commit transaction
 	if err := tx.Commit(ctx); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
+	}
+
+	// delete all staff context from cache
+	if cacheErr := s.authCache.DeleteAllStaffContext(ctx); cacheErr != nil {
+		log.Println("failed to delete staff context from cache", cacheErr)
 	}
 
 	return &adminStoreModel.CreateResponse{
