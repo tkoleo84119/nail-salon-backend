@@ -50,3 +50,9 @@ INSERT INTO staff_users (
     is_active,
     created_at,
     updated_at;
+
+-- name: UpdateStaffUserPassword :one
+UPDATE staff_users
+SET password_hash = $2, updated_at = NOW()
+WHERE id = $1
+RETURNING id;

@@ -145,3 +145,22 @@ func (q *Queries) GetStaffUserByID(ctx context.Context, id int64) (StaffUser, er
 	)
 	return i, err
 }
+
+const updateStaffUserPassword = `-- name: UpdateStaffUserPassword :one
+UPDATE staff_users
+SET password_hash = $2, updated_at = NOW()
+WHERE id = $1
+RETURNING id
+`
+
+type UpdateStaffUserPasswordParams struct {
+	ID           int64  `db:"id" json:"id"`
+	PasswordHash string `db:"password_hash" json:"password_hash"`
+}
+
+func (q *Queries) UpdateStaffUserPassword(ctx context.Context, arg UpdateStaffUserPasswordParams) (int64, error) {
+	row := q.db.QueryRow(ctx, updateStaffUserPassword, arg.ID, arg.PasswordHash)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}

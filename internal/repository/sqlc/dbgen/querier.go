@@ -146,6 +146,7 @@ type Querier interface {
 	UpdateCustomerCouponUsed(ctx context.Context, id int64) error
 	UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error
 	UpdateProductCurrentStock(ctx context.Context, arg UpdateProductCurrentStockParams) error
+	UpdateStaffUserPassword(ctx context.Context, arg UpdateStaffUserPasswordParams) (int64, error)
 	UpdateStockUsageFinish(ctx context.Context, arg UpdateStockUsageFinishParams) error
 	UpdateStoreExpenseAmount(ctx context.Context, arg UpdateStoreExpenseAmountParams) error
 	UpdateTimeSlot(ctx context.Context, arg UpdateTimeSlotParams) (int64, error)

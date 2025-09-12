@@ -22,3 +22,7 @@ type RefreshTokenInterface interface {
 type PermissionInterface interface {
 	Permission(ctx context.Context, staffContext *common.StaffContext) (*adminAuthModel.PermissionResponse, error)
 }
+
+type UpdatePasswordInterface interface {
+	UpdatePassword(ctx context.Context, req adminAuthModel.UpdatePasswordParsedRequest, staffContext *common.StaffContext) (*adminAuthModel.UpdatePasswordResponse, error)
+}

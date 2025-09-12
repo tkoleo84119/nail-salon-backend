@@ -142,6 +142,7 @@ func setupAdminAuthRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *d
 	{
 		auth.POST("/login", handlers.Admin.AuthStaffLogin.Login)
 		auth.GET("/permission", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.AuthStaffPermission.GetPermission)
+		auth.POST("/update-password", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.AuthUpdatePassword.UpdatePassword)
 
 		token := auth.Group("/token")
 		{
