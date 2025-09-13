@@ -31,7 +31,7 @@ type GetAllAccountTransactionsByFilterParams struct {
 
 type GetAllAccountTransactionsByFilterItem struct {
 	ID              int64              `db:"id"`
-	TransactionDate pgtype.Timestamptz `db:"transaction_date"`
+	TransactionDate pgtype.Date        `db:"transaction_date"`
 	Type            string             `db:"type"`
 	Amount          pgtype.Numeric     `db:"amount"`
 	Balance         pgtype.Numeric     `db:"balance"`
@@ -61,10 +61,8 @@ func (r *AccountTransactionRepository) GetAllAccountTransactionsByFilter(ctx con
 
 	// Pagination + Sorting
 	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-	defaultSortArr := []string{"transaction_date DESC"}
-	sort := utils.HandleSortByMap(map[string]string{
-		"transactionDate": "transaction_date",
-	}, defaultSortArr, params.Sort)
+	defaultSortArr := []string{"created_at DESC"}
+	sort := utils.HandleSortByMap(map[string]string{}, defaultSortArr, params.Sort)
 
 	args = append(args, limit, offset)
 	limitIndex := len(args) - 1

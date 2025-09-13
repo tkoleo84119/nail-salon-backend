@@ -31,7 +31,6 @@ func (s *GetAll) GetAll(ctx context.Context, storeID, accountID int64, req admin
 	total, items, err := s.repo.AccountTransaction.GetAllAccountTransactionsByFilter(ctx, accountID, sqlxRepo.GetAllAccountTransactionsByFilterParams{
 		Limit:  &req.Limit,
 		Offset: &req.Offset,
-		Sort:   &req.Sort,
 	})
 	if err != nil {
 		return nil, err
@@ -52,7 +51,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID, accountID int64, req admin
 
 		responseItems[i] = adminAccountTransactionModel.GetAllItem{
 			ID:              utils.FormatID(item.ID),
-			TransactionDate: utils.PgTimestamptzToTimeString(item.TransactionDate),
+			TransactionDate: utils.PgDateToDateString(item.TransactionDate),
 			Type:            item.Type,
 			Amount:          amount,
 			Balance:         balance,

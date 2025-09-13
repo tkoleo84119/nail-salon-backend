@@ -66,12 +66,10 @@ func (h *GetAll) GetAll(c *gin.Context) {
 
 	// Set default values
 	limit, offset := utils.SetDefaultValuesOfPagination(req.Limit, req.Offset, 20, 0)
-	sort := utils.TransformSort(req.Sort)
 
 	parsedReq := adminAccountTransactionModel.GetAllParsedRequest{
 		Limit:  limit,
 		Offset: offset,
-		Sort:   sort,
 	}
 
 	// Get staff context from middleware
