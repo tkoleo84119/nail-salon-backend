@@ -28,5 +28,5 @@ type ActivityLogCacheInterface interface {
 	LogAdminBookingCreate(ctx context.Context, staffName string, customerName string) error
 	LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string) error
 	LogAdminBookingCancel(ctx context.Context, staffName string, customerName string) error
-	LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string) error
+	LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string, checkoutCount int, storeName string) error
 }

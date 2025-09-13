@@ -208,7 +208,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.PATCH("/:storeId/bookings/:bookingId/completed", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.BookingUpdateCompleted.UpdateCompleted)
 
 		// Store checkouts routes
-		stores.POST("/:storeId/bookings/:bookingId/checkouts", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.CheckoutCreate.Create)
+		stores.POST("/:storeId/bookings/checkouts/bulk", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.CheckoutCreateBulk.CreateBulk)
 
 		// Store booking products routes
 		stores.GET("/:storeId/bookings/:bookingId/products", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.BookingProductGetAll.GetAll)

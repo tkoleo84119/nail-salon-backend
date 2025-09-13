@@ -17,6 +17,7 @@ type Querier interface {
 	BatchCreateTimeSlotTemplateItems(ctx context.Context, arg []BatchCreateTimeSlotTemplateItemsParams) (int64, error)
 	BatchCreateTimeSlots(ctx context.Context, arg []BatchCreateTimeSlotsParams) (int64, error)
 	BulkCreateBookingProducts(ctx context.Context, arg []BulkCreateBookingProductsParams) (int64, error)
+	BulkCreateCheckout(ctx context.Context, arg []BulkCreateCheckoutParams) (int64, error)
 	BulkDeleteBookingProducts(ctx context.Context, arg BulkDeleteBookingProductsParams) error
 	CancelBooking(ctx context.Context, arg CancelBookingParams) (int64, error)
 	CheckBrandExistByID(ctx context.Context, id int64) (bool, error)
@@ -59,14 +60,12 @@ type Querier interface {
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
 	CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.Context, arg CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams) (bool, error)
 	CheckTimeSlotTemplateItemOverlap(ctx context.Context, arg CheckTimeSlotTemplateItemOverlapParams) (bool, error)
-	CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error)
 	CountProductsByIDs(ctx context.Context, arg CountProductsByIDsParams) (int64, error)
 	CreateAccount(ctx context.Context, arg CreateAccountParams) error
 	CreateAccountTransaction(ctx context.Context, arg CreateAccountTransactionParams) (int64, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
 	CreateBookingDetails(ctx context.Context, arg []CreateBookingDetailsParams) (int64, error)
 	CreateBrand(ctx context.Context, arg CreateBrandParams) (int64, error)
-	CreateCheckout(ctx context.Context, arg CreateCheckoutParams) error
 	CreateCoupon(ctx context.Context, arg CreateCouponParams) error
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
 	CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCouponParams) error
@@ -104,7 +103,7 @@ type Querier interface {
 	GetAvailableSchedules(ctx context.Context, arg GetAvailableSchedulesParams) ([]GetAvailableSchedulesRow, error)
 	GetAvailableTimeSlotsByScheduleID(ctx context.Context, scheduleID int64) ([]TimeSlot, error)
 	GetBookingDetailByID(ctx context.Context, id int64) (GetBookingDetailByIDRow, error)
-	GetBookingDetailPriceByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailPriceByBookingIDsRow, error)
+	GetBookingDetailPriceInfoByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailPriceInfoByBookingIDRow, error)
 	GetBookingDetailsByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailsByBookingIDRow, error)
 	GetBookingDetailsByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailsByBookingIDsRow, error)
 	GetBookingInfoWithDateByID(ctx context.Context, id int64) (GetBookingInfoWithDateByIDRow, error)
@@ -144,8 +143,9 @@ type Querier interface {
 	RevokeStaffUserToken(ctx context.Context, refreshToken string) error
 	UpdateBookingActualDuration(ctx context.Context, arg UpdateBookingActualDurationParams) error
 	UpdateBookingDetailPriceInfo(ctx context.Context, arg UpdateBookingDetailPriceInfoParams) error
-	UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error
+	UpdateBookingsStatus(ctx context.Context, arg UpdateBookingsStatusParams) error
 	UpdateCustomerCouponUsed(ctx context.Context, id int64) error
+	UpdateCustomerLastVisitAt(ctx context.Context, id int64) error
 	UpdateCustomerLineName(ctx context.Context, arg UpdateCustomerLineNameParams) error
 	UpdateProductCurrentStock(ctx context.Context, arg UpdateProductCurrentStockParams) error
 	UpdateStaffUserPassword(ctx context.Context, arg UpdateStaffUserPasswordParams) (int64, error)

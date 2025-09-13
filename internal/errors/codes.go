@@ -53,6 +53,7 @@ const (
 	BookingTimeSlotNotFound = "BookingTimeSlotNotFound"
 	BookingTimeSlotUnavailable = "BookingTimeSlotUnavailable"
 	BookingUpdateIncomplete = "BookingUpdateIncomplete"
+	BookingWithMultipleCustomersNotAllowedToCheckout = "BookingWithMultipleCustomersNotAllowedToCheckout"
 
 	// CUSTOMER - customer related errors
 	CustomerAlreadyExists = "CustomerAlreadyExists"
@@ -126,6 +127,7 @@ const (
 
 	// COUPON - coupon related errors
 	CouponCodeAlreadyExists = "CouponCodeAlreadyExists"
+	CouponDiscountAmountNotDivisibleByApplyCount = "CouponDiscountAmountNotDivisibleByApplyCount"
 	CouponDiscountExclusive = "CouponDiscountExclusive"
 	CouponDiscountRequired = "CouponDiscountRequired"
 	CouponNameAlreadyExists = "CouponNameAlreadyExists"

@@ -240,6 +240,11 @@
       "code": "E3BK009",
       "message": "未來預約不允許結帳",
       "status": 400
+    },
+    "BookingWithMultipleCustomersNotAllowedToCheckout": {
+      "code": "E3BK010",
+      "message": "不能同時結帳不同顧客的預約",
+      "status": 400
     }
   },
   "BOOKING_DETAIL": {
@@ -291,6 +296,11 @@
       "code": "E3COU006",
       "message": "優惠券代碼已存在，請使用其他代碼",
       "status": 409
+    },
+    "CouponDiscountAmountNotDivisibleByApplyCount": {
+      "code": "E3COU007",
+      "message": "折扣金額不能被應用數量整除",
+      "status": 400
     }
   },
   "CUSTOMER": {

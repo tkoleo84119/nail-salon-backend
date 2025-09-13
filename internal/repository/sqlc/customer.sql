@@ -25,6 +25,11 @@ UPDATE customers
 SET line_name = $2
 WHERE id = $1;
 
+-- name: UpdateCustomerLastVisitAt :exec
+UPDATE customers
+SET last_visit_at = NOW()
+WHERE id = $1;
+
 -- name: CheckCustomerExistsByID :one
 SELECT EXISTS (SELECT 1 FROM customers WHERE id = $1);
 

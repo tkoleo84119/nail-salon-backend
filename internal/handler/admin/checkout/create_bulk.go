@@ -13,17 +13,17 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
-type Create struct {
-	service adminCheckoutService.CreateInterface
+type CreateBulk struct {
+	service adminCheckoutService.CreateBulkInterface
 }
 
-func NewCreate(service adminCheckoutService.CreateInterface) *Create {
-	return &Create{
+func NewCreateBulk(service adminCheckoutService.CreateBulkInterface) *CreateBulk {
+	return &CreateBulk{
 		service: service,
 	}
 }
 
-func (h *Create) Create(c *gin.Context) {
+func (h *CreateBulk) CreateBulk(c *gin.Context) {
 	storeID := c.Param("storeId")
 	if storeID == "" {
 		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
@@ -39,22 +39,7 @@ func (h *Create) Create(c *gin.Context) {
 		return
 	}
 
-	bookingID := c.Param("bookingId")
-	if bookingID == "" {
-		errorCodes.AbortWithError(c, errorCodes.ValPathParamMissing, map[string]string{
-			"bookingID": "bookingID 為必填項目",
-		})
-		return
-	}
-	parsedBookingID, err := utils.ParseID(bookingID)
-	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-			"bookingID": "bookingID 類型轉換失敗",
-		})
-		return
-	}
-
-	var req adminCheckoutModel.CreateRequest
+	var req adminCheckoutModel.CreateBulkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		validationErrors := utils.ExtractValidationErrors(err)
 		errorCodes.RespondWithValidationErrors(c, validationErrors)
@@ -73,27 +58,53 @@ func (h *Create) Create(c *gin.Context) {
 		customerCouponID = &parsedCustomerCouponID
 	}
 
-	bookingDetails := make([]adminCheckoutModel.CreateBookingDetailParsed, len(req.BookingDetails))
-	for i, bookingDetail := range req.BookingDetails {
-		parsedBookingDetailID, err := utils.ParseID(bookingDetail.ID)
+	checkouts := make([]adminCheckoutModel.CreateBulkParsedCheckoutItems, len(req.Checkouts))
+	for i, checkout := range req.Checkouts {
+		parsedBookingID, err := utils.ParseID(checkout.BookingID)
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
-				"bookingDetailID": "bookingDetailID 類型轉換失敗",
+				"bookingID": "bookingID 類型轉換失敗",
 			})
 			return
 		}
-		bookingDetails[i] = adminCheckoutModel.CreateBookingDetailParsed{
-			ID:        parsedBookingDetailID,
-			Price:     bookingDetail.Price,
-			UseCoupon: bookingDetail.UseCoupon,
+
+		details := make([]adminCheckoutModel.CreateBulkParsedDetailItems, len(checkout.Details))
+		applyCount := 0
+		for j, detail := range checkout.Details {
+			parsedDetailID, err := utils.ParseID(detail.ID)
+			if err != nil {
+				errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+					"detailID": "detailID 類型轉換失敗",
+				})
+			}
+
+			useCoupon := false
+			if detail.UseCoupon != nil {
+				useCoupon = *detail.UseCoupon
+				if useCoupon {
+					applyCount++
+				}
+			}
+
+			details[j] = adminCheckoutModel.CreateBulkParsedDetailItems{
+				ID:        parsedDetailID,
+				Price:     detail.Price,
+				UseCoupon: useCoupon,
+			}
+		}
+
+		checkouts[i] = adminCheckoutModel.CreateBulkParsedCheckoutItems{
+			BookingID:  parsedBookingID,
+			PaidAmount: checkout.PaidAmount,
+			ApplyCount: int64(applyCount),
+			Details:    details,
 		}
 	}
 
-	parsedRequest := adminCheckoutModel.CreateParsedRequest{
+	parsedRequest := adminCheckoutModel.CreateBulkParsedRequest{
 		PaymentMethod:    req.PaymentMethod,
 		CustomerCouponID: customerCouponID,
-		PaidAmount:       req.PaidAmount,
-		BookingDetails:   bookingDetails,
+		Checkouts:        checkouts,
 	}
 
 	// Get staff context from JWT middleware
@@ -103,12 +114,7 @@ func (h *Create) Create(c *gin.Context) {
 		return
 	}
 
-	storeIds := make([]int64, len(staffContext.StoreList))
-	for i, store := range staffContext.StoreList {
-		storeIds[i] = store.ID
-	}
-
-	response, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedBookingID, parsedRequest, staffContext.UserID, staffContext.Username, storeIds)
+	response, err := h.service.CreateBulk(c.Request.Context(), parsedStoreID, parsedRequest, staffContext)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

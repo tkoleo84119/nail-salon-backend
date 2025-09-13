@@ -196,7 +196,7 @@ type AdminServices struct {
 	CustomerCouponCreate adminCustomerCouponService.CreateInterface
 
 	// Checkout services
-	CheckoutCreate adminCheckoutService.CreateInterface
+	CheckoutCreateBulk adminCheckoutService.CreateBulkInterface
 
 	// Report services
 	ReportGetPerformanceMe    adminReportService.GetPerformanceMeInterface
@@ -341,7 +341,7 @@ type AdminHandlers struct {
 	CustomerCouponCreate *adminCustomerCouponHandler.Create
 
 	// Checkout handlers
-	CheckoutCreate *adminCheckoutHandler.Create
+	CheckoutCreateBulk *adminCheckoutHandler.CreateBulk
 
 	// Report handlers
 	ReportGetPerformanceMe    *adminReportHandler.GetPerformanceMe
@@ -484,7 +484,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		CustomerCouponCreate: adminCustomerCouponService.NewCreate(queries),
 
 		// Checkout services
-		CheckoutCreate: adminCheckoutService.NewCreate(queries, repositories.SQLX, database.PgxPool, activityLog),
+		CheckoutCreateBulk: adminCheckoutService.NewCreateBulk(queries, repositories.SQLX, database.PgxPool, activityLog),
 
 		// Report services
 		ReportGetPerformanceMe:    adminReportService.NewGetPerformanceMe(queries),
@@ -629,7 +629,7 @@ func NewAdminHandlers(services AdminServices, cfg *config.Config) AdminHandlers 
 		CustomerCouponCreate: adminCustomerCouponHandler.NewCreate(services.CustomerCouponCreate),
 
 		// Checkout handlers
-		CheckoutCreate: adminCheckoutHandler.NewCreate(services.CheckoutCreate),
+		CheckoutCreateBulk: adminCheckoutHandler.NewCreateBulk(services.CheckoutCreateBulk),
 
 		// Report handlers
 		ReportGetPerformanceMe:    adminReportHandler.NewGetPerformanceMe(services.ReportGetPerformanceMe),

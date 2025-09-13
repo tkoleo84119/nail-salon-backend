@@ -53,10 +53,10 @@ JOIN time_slots ts ON b.time_slot_id = ts.id
 JOIN schedules sch ON ts.schedule_id = sch.id
 WHERE b.id = $1;
 
--- name: UpdateBookingStatus :exec
+-- name: UpdateBookingsStatus :exec
 UPDATE bookings
 SET status = $2, updated_at = NOW()
-WHERE id = $1;
+WHERE id = ANY($1::bigint[]);
 
 -- name: UpdateBookingActualDuration :exec
 UPDATE bookings

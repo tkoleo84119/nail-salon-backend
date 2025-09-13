@@ -234,6 +234,47 @@ func (q *Queries) BulkCreateBookingProducts(ctx context.Context, arg []BulkCreat
 	return q.db.CopyFrom(ctx, []string{"booking_products"}, []string{"booking_id", "product_id", "created_at"}, &iteratorForBulkCreateBookingProducts{rows: arg})
 }
 
+// iteratorForBulkCreateCheckout implements pgx.CopyFromSource.
+type iteratorForBulkCreateCheckout struct {
+	rows                 []BulkCreateCheckoutParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForBulkCreateCheckout) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForBulkCreateCheckout) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].ID,
+		r.rows[0].BookingID,
+		r.rows[0].TotalAmount,
+		r.rows[0].FinalAmount,
+		r.rows[0].PaidAmount,
+		r.rows[0].PaymentMethod,
+		r.rows[0].CouponID,
+		r.rows[0].CheckoutUser,
+		r.rows[0].CreatedAt,
+		r.rows[0].UpdatedAt,
+	}, nil
+}
+
+func (r iteratorForBulkCreateCheckout) Err() error {
+	return nil
+}
+
+func (q *Queries) BulkCreateCheckout(ctx context.Context, arg []BulkCreateCheckoutParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"checkouts"}, []string{"id", "booking_id", "total_amount", "final_amount", "paid_amount", "payment_method", "coupon_id", "checkout_user", "created_at", "updated_at"}, &iteratorForBulkCreateCheckout{rows: arg})
+}
+
 // iteratorForCreateBookingDetails implements pgx.CopyFromSource.
 type iteratorForCreateBookingDetails struct {
 	rows                 []CreateBookingDetailsParams

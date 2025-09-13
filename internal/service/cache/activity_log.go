@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	activityLogKey          = "activity_logs"
-	activityLogMaxEntries   = 50
-	activityLogExpiration   = 24 * time.Hour
+	activityLogKey        = "activity_logs"
+	activityLogMaxEntries = 50
+	activityLogExpiration = 24 * time.Hour
 )
 
 type ActivityLogCache struct {
@@ -134,7 +134,7 @@ func (c *ActivityLogCache) LogAdminBookingCancel(ctx context.Context, staffName 
 }
 
 // LogAdminBookingCompleted to Redis List
-func (c *ActivityLogCache) LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string) error {
-	message := fmt.Sprintf("員工 %s 為顧客 %s 的預約完成結帳", staffName, customerName)
+func (c *ActivityLogCache) LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string, checkoutCount int, storeName string) error {
+	message := fmt.Sprintf("員工 %s 為顧客 %s 的預約完成結帳 %d 筆 (門市：%s)", staffName, customerName, checkoutCount, storeName)
 	return c.LogActivity(ctx, common.ActivityAdminBookingCompleted, message)
 }

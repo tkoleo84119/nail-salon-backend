@@ -1,4 +1,4 @@
--- name: CreateCheckout :exec
+-- name: BulkCreateCheckout :copyfrom
 INSERT INTO checkouts (
   id,
   booking_id,
@@ -7,9 +7,11 @@ INSERT INTO checkouts (
   paid_amount,
   payment_method,
   coupon_id,
-  checkout_user
+  checkout_user,
+  created_at,
+  updated_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 );
 
 -- name: GetCheckoutByBookingID :one

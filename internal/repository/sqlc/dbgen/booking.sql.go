@@ -436,18 +436,18 @@ func (q *Queries) UpdateBookingActualDuration(ctx context.Context, arg UpdateBoo
 	return err
 }
 
-const updateBookingStatus = `-- name: UpdateBookingStatus :exec
+const updateBookingsStatus = `-- name: UpdateBookingsStatus :exec
 UPDATE bookings
 SET status = $2, updated_at = NOW()
-WHERE id = $1
+WHERE id = ANY($1::bigint[])
 `
 
-type UpdateBookingStatusParams struct {
-	ID     int64  `db:"id" json:"id"`
-	Status string `db:"status" json:"status"`
+type UpdateBookingsStatusParams struct {
+	Column1 []int64 `db:"column_1" json:"column_1"`
+	Status  string  `db:"status" json:"status"`
 }
 
-func (q *Queries) UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error {
-	_, err := q.db.Exec(ctx, updateBookingStatus, arg.ID, arg.Status)
+func (q *Queries) UpdateBookingsStatus(ctx context.Context, arg UpdateBookingsStatusParams) error {
+	_, err := q.db.Exec(ctx, updateBookingsStatus, arg.Column1, arg.Status)
 	return err
 }

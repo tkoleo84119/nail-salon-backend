@@ -11,22 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countBookingDetailsByIDsAndBookingID = `-- name: CountBookingDetailsByIDsAndBookingID :one
-SELECT COUNT(*) FROM booking_details WHERE id = ANY($1::bigint[]) AND booking_id = $2
-`
-
-type CountBookingDetailsByIDsAndBookingIDParams struct {
-	Column1   []int64 `db:"column_1" json:"column_1"`
-	BookingID int64   `db:"booking_id" json:"booking_id"`
-}
-
-func (q *Queries) CountBookingDetailsByIDsAndBookingID(ctx context.Context, arg CountBookingDetailsByIDsAndBookingIDParams) (int64, error) {
-	row := q.db.QueryRow(ctx, countBookingDetailsByIDsAndBookingID, arg.Column1, arg.BookingID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 type CreateBookingDetailsParams struct {
 	ID        int64              `db:"id" json:"id"`
 	BookingID int64              `db:"booking_id" json:"booking_id"`
@@ -36,30 +20,39 @@ type CreateBookingDetailsParams struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
-const getBookingDetailPriceByBookingIDs = `-- name: GetBookingDetailPriceByBookingIDs :many
+const getBookingDetailPriceInfoByBookingID = `-- name: GetBookingDetailPriceInfoByBookingID :many
 SELECT
     id,
-    price
+    price,
+    discount_rate,
+    discount_amount
 FROM booking_details
-WHERE booking_id = ANY($1::bigint[])
+WHERE booking_id = $1
 ORDER BY id ASC
 `
 
-type GetBookingDetailPriceByBookingIDsRow struct {
-	ID    int64          `db:"id" json:"id"`
-	Price pgtype.Numeric `db:"price" json:"price"`
+type GetBookingDetailPriceInfoByBookingIDRow struct {
+	ID             int64          `db:"id" json:"id"`
+	Price          pgtype.Numeric `db:"price" json:"price"`
+	DiscountRate   pgtype.Numeric `db:"discount_rate" json:"discount_rate"`
+	DiscountAmount pgtype.Numeric `db:"discount_amount" json:"discount_amount"`
 }
 
-func (q *Queries) GetBookingDetailPriceByBookingIDs(ctx context.Context, dollar_1 []int64) ([]GetBookingDetailPriceByBookingIDsRow, error) {
-	rows, err := q.db.Query(ctx, getBookingDetailPriceByBookingIDs, dollar_1)
+func (q *Queries) GetBookingDetailPriceInfoByBookingID(ctx context.Context, bookingID int64) ([]GetBookingDetailPriceInfoByBookingIDRow, error) {
+	rows, err := q.db.Query(ctx, getBookingDetailPriceInfoByBookingID, bookingID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetBookingDetailPriceByBookingIDsRow{}
+	items := []GetBookingDetailPriceInfoByBookingIDRow{}
 	for rows.Next() {
-		var i GetBookingDetailPriceByBookingIDsRow
-		if err := rows.Scan(&i.ID, &i.Price); err != nil {
+		var i GetBookingDetailPriceInfoByBookingIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Price,
+			&i.DiscountRate,
+			&i.DiscountAmount,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

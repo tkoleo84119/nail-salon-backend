@@ -11,44 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCheckout = `-- name: CreateCheckout :exec
-INSERT INTO checkouts (
-  id,
-  booking_id,
-  total_amount,
-  final_amount,
-  paid_amount,
-  payment_method,
-  coupon_id,
-  checkout_user
-) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8
-)
-`
-
-type CreateCheckoutParams struct {
-	ID            int64          `db:"id" json:"id"`
-	BookingID     int64          `db:"booking_id" json:"booking_id"`
-	TotalAmount   pgtype.Numeric `db:"total_amount" json:"total_amount"`
-	FinalAmount   pgtype.Numeric `db:"final_amount" json:"final_amount"`
-	PaidAmount    pgtype.Numeric `db:"paid_amount" json:"paid_amount"`
-	PaymentMethod string         `db:"payment_method" json:"payment_method"`
-	CouponID      pgtype.Int8    `db:"coupon_id" json:"coupon_id"`
-	CheckoutUser  pgtype.Int8    `db:"checkout_user" json:"checkout_user"`
-}
-
-func (q *Queries) CreateCheckout(ctx context.Context, arg CreateCheckoutParams) error {
-	_, err := q.db.Exec(ctx, createCheckout,
-		arg.ID,
-		arg.BookingID,
-		arg.TotalAmount,
-		arg.FinalAmount,
-		arg.PaidAmount,
-		arg.PaymentMethod,
-		arg.CouponID,
-		arg.CheckoutUser,
-	)
-	return err
+type BulkCreateCheckoutParams struct {
+	ID            int64              `db:"id" json:"id"`
+	BookingID     int64              `db:"booking_id" json:"booking_id"`
+	TotalAmount   pgtype.Numeric     `db:"total_amount" json:"total_amount"`
+	FinalAmount   pgtype.Numeric     `db:"final_amount" json:"final_amount"`
+	PaidAmount    pgtype.Numeric     `db:"paid_amount" json:"paid_amount"`
+	PaymentMethod string             `db:"payment_method" json:"payment_method"`
+	CouponID      pgtype.Int8        `db:"coupon_id" json:"coupon_id"`
+	CheckoutUser  pgtype.Int8        `db:"checkout_user" json:"checkout_user"`
+	CreatedAt     pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
 const getCheckoutByBookingID = `-- name: GetCheckoutByBookingID :one

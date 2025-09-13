@@ -197,6 +197,17 @@ func (q *Queries) GetCustomerByLineUid(ctx context.Context, lineUid string) (Get
 	return i, err
 }
 
+const updateCustomerLastVisitAt = `-- name: UpdateCustomerLastVisitAt :exec
+UPDATE customers
+SET last_visit_at = NOW()
+WHERE id = $1
+`
+
+func (q *Queries) UpdateCustomerLastVisitAt(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, updateCustomerLastVisitAt, id)
+	return err
+}
+
 const updateCustomerLineName = `-- name: UpdateCustomerLineName :exec
 UPDATE customers
 SET line_name = $2

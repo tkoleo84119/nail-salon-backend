@@ -46,13 +46,12 @@ JOIN services srv ON bd.service_id = srv.id
 WHERE bd.booking_id = ANY($1::bigint[])
 ORDER BY bd.booking_id ASC, srv.is_addon ASC, srv.name;
 
--- name: GetBookingDetailPriceByBookingIDs :many
+-- name: GetBookingDetailPriceInfoByBookingID :many
 SELECT
     id,
-    price
+    price,
+    discount_rate,
+    discount_amount
 FROM booking_details
-WHERE booking_id = ANY($1::bigint[])
+WHERE booking_id = $1
 ORDER BY id ASC;
-
--- name: CountBookingDetailsByIDsAndBookingID :one
-SELECT COUNT(*) FROM booking_details WHERE id = ANY($1::bigint[]) AND booking_id = $2;
