@@ -119,7 +119,7 @@ func (h *Update) Update(c *gin.Context) {
 			return
 		}
 		parsedReq.PayerID = &payerID
-	} else if *req.PayerID == "" {
+	} else if req.PayerID != nil && *req.PayerID == "" {
 		trueValue := true
 		parsedReq.PayerIDIsNone = &trueValue
 		parsedReq.PayerID = nil
