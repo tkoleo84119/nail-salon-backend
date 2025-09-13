@@ -25,3 +25,14 @@ SELECT COALESCE(
     LIMIT 1),
     0
 )::int as balance;
+
+-- name: DeleteLatestAccountTransaction :one
+DELETE FROM account_transactions
+WHERE id = (
+    SELECT t.id
+    FROM account_transactions t
+    WHERE t.account_id = $1
+    ORDER BY t.created_at DESC
+    LIMIT 1
+)
+RETURNING id;

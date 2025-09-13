@@ -232,6 +232,7 @@ func setupAdminStoreRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *
 		stores.GET("/:storeId/accounts/:accountId/transactions", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionGetAll.GetAll)
 		stores.POST("/:storeId/accounts/:accountId/transactions", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionCreate.Create)
 		stores.PATCH("/:storeId/accounts/:accountId/transactions/:transactionId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionUpdate.Update)
+		stores.DELETE("/:storeId/accounts/:accountId/transactions/latest", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.AccountTransactionDelete.Delete)
 	}
 }
 

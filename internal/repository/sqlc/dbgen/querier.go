@@ -87,6 +87,7 @@ type Querier interface {
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
 	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)
 	CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (CreateTimeSlotTemplateItemRow, error)
+	DeleteLatestAccountTransaction(ctx context.Context, accountID int64) (int64, error)
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	DeleteTimeSlotByID(ctx context.Context, id int64) error

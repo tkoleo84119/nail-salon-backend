@@ -50,6 +50,25 @@ func (q *Queries) CreateAccountTransaction(ctx context.Context, arg CreateAccoun
 	return id, err
 }
 
+const deleteLatestAccountTransaction = `-- name: DeleteLatestAccountTransaction :one
+DELETE FROM account_transactions
+WHERE id = (
+    SELECT t.id
+    FROM account_transactions t
+    WHERE t.account_id = $1
+    ORDER BY t.created_at DESC
+    LIMIT 1
+)
+RETURNING id
+`
+
+func (q *Queries) DeleteLatestAccountTransaction(ctx context.Context, accountID int64) (int64, error) {
+	row := q.db.QueryRow(ctx, deleteLatestAccountTransaction, accountID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getAccountTransactionByID = `-- name: GetAccountTransactionByID :one
 SELECT id, account_id, transaction_date, type, amount, balance, note
 FROM account_transactions

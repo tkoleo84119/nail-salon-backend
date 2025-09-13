@@ -104,6 +104,7 @@ type AdminServices struct {
 	AccountTransactionGetAll adminAccountTransactionService.GetAllInterface
 	AccountTransactionCreate adminAccountTransactionService.CreateInterface
 	AccountTransactionUpdate adminAccountTransactionService.UpdateInterface
+	AccountTransactionDelete adminAccountTransactionService.DeleteInterface
 
 	// Brand management services
 	BrandCreate adminBrandService.CreateInterface
@@ -248,6 +249,7 @@ type AdminHandlers struct {
 	AccountTransactionGetAll *adminAccountTransactionHandler.GetAll
 	AccountTransactionCreate *adminAccountTransactionHandler.Create
 	AccountTransactionUpdate *adminAccountTransactionHandler.Update
+	AccountTransactionDelete *adminAccountTransactionHandler.Delete
 
 	// Brand management handlers
 	BrandCreate *adminBrandHandler.Create
@@ -391,6 +393,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		AccountTransactionGetAll: adminAccountTransactionService.NewGetAll(repositories.SQLX),
 		AccountTransactionCreate: adminAccountTransactionService.NewCreate(queries),
 		AccountTransactionUpdate: adminAccountTransactionService.NewUpdate(queries, repositories.SQLX),
+		AccountTransactionDelete: adminAccountTransactionService.NewDelete(queries),
 
 		// Brand management services
 		BrandCreate: adminBrandService.NewCreate(queries),
@@ -499,13 +502,13 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 
 // NewAdminHandlers creates and initializes all admin handlers
 func NewAdminHandlers(services AdminServices, cfg *config.Config) AdminHandlers {
-    return AdminHandlers{
-        // Authentication handlers
-        AuthStaffLogin:        adminAuthHandler.NewLogin(services.AuthStaffLogin, cfg),
-        AuthStaffRefreshToken: adminAuthHandler.NewRefreshToken(services.AuthStaffRefreshToken, cfg),
-        AuthStaffLogout:       adminAuthHandler.NewLogout(services.AuthStaffLogout, cfg),
-        AuthStaffPermission:   adminAuthHandler.NewPermission(services.AuthStaffPermission),
-        AuthUpdatePassword:    adminAuthHandler.NewUpdatePassword(services.AuthUpdatePassword),
+	return AdminHandlers{
+		// Authentication handlers
+		AuthStaffLogin:        adminAuthHandler.NewLogin(services.AuthStaffLogin, cfg),
+		AuthStaffRefreshToken: adminAuthHandler.NewRefreshToken(services.AuthStaffRefreshToken, cfg),
+		AuthStaffLogout:       adminAuthHandler.NewLogout(services.AuthStaffLogout, cfg),
+		AuthStaffPermission:   adminAuthHandler.NewPermission(services.AuthStaffPermission),
+		AuthUpdatePassword:    adminAuthHandler.NewUpdatePassword(services.AuthUpdatePassword),
 
 		// Staff management handlers
 		StaffCreate:                adminStaffHandler.NewCreate(services.StaffCreate),
@@ -534,6 +537,7 @@ func NewAdminHandlers(services AdminServices, cfg *config.Config) AdminHandlers 
 		AccountTransactionGetAll: adminAccountTransactionHandler.NewGetAll(services.AccountTransactionGetAll),
 		AccountTransactionCreate: adminAccountTransactionHandler.NewCreate(services.AccountTransactionCreate),
 		AccountTransactionUpdate: adminAccountTransactionHandler.NewUpdate(services.AccountTransactionUpdate),
+		AccountTransactionDelete: adminAccountTransactionHandler.NewDelete(services.AccountTransactionDelete),
 
 		// Brand management handlers
 		BrandCreate: adminBrandHandler.NewCreate(services.BrandCreate),

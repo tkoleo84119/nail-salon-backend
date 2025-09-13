@@ -17,3 +17,7 @@ type CreateInterface interface {
 type UpdateInterface interface {
 	Update(ctx context.Context, storeID, accountID, transactionID int64, req adminAccountTransactionModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminAccountTransactionModel.UpdateResponse, error)
 }
+
+type DeleteInterface interface {
+	Delete(ctx context.Context, storeID, accountID int64, creatorStoreIDs []int64) (*adminAccountTransactionModel.DeleteResponse, error)
+}
