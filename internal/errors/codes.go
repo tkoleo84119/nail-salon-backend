@@ -135,6 +135,7 @@ const (
 	CouponNotFound = "CouponNotFound"
 
 	// CUSTOMER_COUPON - customer coupon related errors
+	CustomerCouponAlreadyExists = "CustomerCouponAlreadyExists"
 	CustomerCouponAlreadyUsed = "CustomerCouponAlreadyUsed"
 	CustomerCouponExpired = "CustomerCouponExpired"
 	CustomerCouponNotBelongToCustomer = "CustomerCouponNotBelongToCustomer"

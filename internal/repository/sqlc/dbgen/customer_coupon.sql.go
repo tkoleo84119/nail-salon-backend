@@ -11,6 +11,25 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkCustomerCouponExists = `-- name: CheckCustomerCouponExists :one
+SELECT EXISTS(
+  SELECT 1 FROM customer_coupons
+  WHERE customer_id = $1 AND coupon_id = $2
+)
+`
+
+type CheckCustomerCouponExistsParams struct {
+	CustomerID int64 `db:"customer_id" json:"customer_id"`
+	CouponID   int64 `db:"coupon_id" json:"coupon_id"`
+}
+
+func (q *Queries) CheckCustomerCouponExists(ctx context.Context, arg CheckCustomerCouponExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCustomerCouponExists, arg.CustomerID, arg.CouponID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createCustomerCoupon = `-- name: CreateCustomerCoupon :exec
 INSERT INTO customer_coupons (
   id,

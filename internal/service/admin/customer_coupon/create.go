@@ -38,6 +38,18 @@ func (s *Create) Create(ctx context.Context, req adminCustomerCouponModel.Create
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CouponNotFound)
 	}
 
+	// check customer coupon already exists
+	customerCouponExists, err := s.queries.CheckCustomerCouponExists(ctx, dbgen.CheckCustomerCouponExistsParams{
+		CustomerID: req.CustomerId,
+		CouponID:   req.CouponId,
+	})
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check customer coupon existence", err)
+	}
+	if customerCouponExists {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.CustomerCouponAlreadyExists)
+	}
+
 	validFrom, validTo, err := s.setValidFromAndTo(req.Period)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to set valid from and to", err)

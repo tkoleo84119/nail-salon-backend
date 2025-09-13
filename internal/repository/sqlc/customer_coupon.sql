@@ -27,3 +27,9 @@ UPDATE customer_coupons
 SET is_used = true,
   used_at = now()
 WHERE id = $1;
+
+-- name: CheckCustomerCouponExists :one
+SELECT EXISTS(
+  SELECT 1 FROM customer_coupons
+  WHERE customer_id = $1 AND coupon_id = $2
+);
