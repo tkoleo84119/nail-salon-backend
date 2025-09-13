@@ -66,7 +66,7 @@ func (s *Create) Create(ctx context.Context, storeID, accountID int64, req admin
 	_, err = s.queries.CreateAccountTransaction(ctx, dbgen.CreateAccountTransactionParams{
 		ID:              accountTransactionID,
 		AccountID:       accountID,
-		TransactionDate: utils.TimePtrToPgTimestamptz(&req.TransactionDate),
+		TransactionDate: utils.TimePtrToPgDate(&req.TransactionDate),
 		Type:            req.Type,
 		Amount:          amountNumeric,
 		Balance:         balanceNumeric,

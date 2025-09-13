@@ -26,13 +26,13 @@ INSERT INTO account_transactions (
 `
 
 type CreateAccountTransactionParams struct {
-	ID              int64              `db:"id" json:"id"`
-	AccountID       int64              `db:"account_id" json:"account_id"`
-	TransactionDate pgtype.Timestamptz `db:"transaction_date" json:"transaction_date"`
-	Type            string             `db:"type" json:"type"`
-	Amount          pgtype.Numeric     `db:"amount" json:"amount"`
-	Balance         pgtype.Numeric     `db:"balance" json:"balance"`
-	Note            pgtype.Text        `db:"note" json:"note"`
+	ID              int64          `db:"id" json:"id"`
+	AccountID       int64          `db:"account_id" json:"account_id"`
+	TransactionDate pgtype.Date    `db:"transaction_date" json:"transaction_date"`
+	Type            string         `db:"type" json:"type"`
+	Amount          pgtype.Numeric `db:"amount" json:"amount"`
+	Balance         pgtype.Numeric `db:"balance" json:"balance"`
+	Note            pgtype.Text    `db:"note" json:"note"`
 }
 
 func (q *Queries) CreateAccountTransaction(ctx context.Context, arg CreateAccountTransactionParams) (int64, error) {
@@ -57,13 +57,13 @@ WHERE id = $1
 `
 
 type GetAccountTransactionByIDRow struct {
-	ID              int64              `db:"id" json:"id"`
-	AccountID       int64              `db:"account_id" json:"account_id"`
-	TransactionDate pgtype.Timestamptz `db:"transaction_date" json:"transaction_date"`
-	Type            string             `db:"type" json:"type"`
-	Amount          pgtype.Numeric     `db:"amount" json:"amount"`
-	Balance         pgtype.Numeric     `db:"balance" json:"balance"`
-	Note            pgtype.Text        `db:"note" json:"note"`
+	ID              int64          `db:"id" json:"id"`
+	AccountID       int64          `db:"account_id" json:"account_id"`
+	TransactionDate pgtype.Date    `db:"transaction_date" json:"transaction_date"`
+	Type            string         `db:"type" json:"type"`
+	Amount          pgtype.Numeric `db:"amount" json:"amount"`
+	Balance         pgtype.Numeric `db:"balance" json:"balance"`
+	Note            pgtype.Text    `db:"note" json:"note"`
 }
 
 func (q *Queries) GetAccountTransactionByID(ctx context.Context, id int64) (GetAccountTransactionByIDRow, error) {

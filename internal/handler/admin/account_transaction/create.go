@@ -3,7 +3,6 @@ package adminAccountTransaction
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -71,10 +70,10 @@ func (h *Create) Create(c *gin.Context) {
 		*req.Note = strings.TrimSpace(*req.Note)
 	}
 
-	parsedTransactionDate, err := time.Parse(time.RFC3339, req.TransactionDate)
+	parsedTransactionDate, err := utils.DateStringToTime(req.TransactionDate)
 	if err != nil {
-		errorCodes.AbortWithError(c, errorCodes.ValFieldISO8601Format, map[string]string{
-			"transactionDate": "transactionDate 日期格式錯誤，應為 YYYY-MM-DDTHH:MM:SS+08:00",
+		errorCodes.AbortWithError(c, errorCodes.ValFieldDateFormat, map[string]string{
+			"transactionDate": "transactionDate 日期格式錯誤，應為 YYYY-MM-DD",
 		})
 		return
 	}
