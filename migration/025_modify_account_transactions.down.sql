@@ -1,0 +1,2 @@
+ALTER TABLE account_transactions
+ALTER COLUMN transaction_date TYPE timestamptz;

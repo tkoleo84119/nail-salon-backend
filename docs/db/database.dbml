@@ -401,7 +401,7 @@ Ref: accounts.store_id > stores.id [delete: cascade]
 Table account_transactions {
   id bigint [pk]
   account_id bigint [not null]
-  transaction_date timestamptz [not null, default: `now()`]
+  transaction_date date [not null]
   type varchar(50) [not null] // INCOME, EXPENSE
   amount numeric(12,2) [not null]
   balance numeric(12,2) [not null]  // 每筆交易後的帳戶餘額
