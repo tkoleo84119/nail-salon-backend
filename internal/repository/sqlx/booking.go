@@ -118,6 +118,7 @@ func (r *BookingRepository) GetAllCustomerBookingsByFilter(ctx context.Context, 
 
 type GetAllStoreBookingsByFilterParams struct {
 	StylistID *int64
+	CustomerID *int64
 	StartDate *time.Time
 	EndDate   *time.Time
 	Status    *string
@@ -150,6 +151,11 @@ func (r *BookingRepository) GetAllStoreBookingsByFilter(ctx context.Context, sto
 	if params.StylistID != nil {
 		whereConditions = append(whereConditions, fmt.Sprintf("b.stylist_id = $%d", len(args)+1))
 		args = append(args, *params.StylistID)
+	}
+
+	if params.CustomerID != nil {
+		whereConditions = append(whereConditions, fmt.Sprintf("b.customer_id = $%d", len(args)+1))
+		args = append(args, *params.CustomerID)
 	}
 
 	if params.StartDate != nil {

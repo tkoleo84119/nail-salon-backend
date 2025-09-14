@@ -3,23 +3,25 @@ package adminBooking
 import "time"
 
 type GetAllRequest struct {
-	StylistID *string `form:"stylistId" binding:"omitempty"`
-	StartDate *string `form:"startDate" binding:"omitempty"`
-	EndDate   *string `form:"endDate" binding:"omitempty"`
-	Status    *string `form:"status" binding:"omitempty,oneof=SCHEDULED CANCELLED COMPLETED NO_SHOW"`
-	Limit     *int    `form:"limit" binding:"omitempty,min=1,max=100"`
-	Offset    *int    `form:"offset" binding:"omitempty,min=0"`
-	Sort      *string `form:"sort" binding:"omitempty"`
+	StylistID  *string `form:"stylistId" binding:"omitempty"`
+	CustomerID *string `form:"customerId" binding:"omitempty"`
+	StartDate  *string `form:"startDate" binding:"omitempty"`
+	EndDate    *string `form:"endDate" binding:"omitempty"`
+	Status     *string `form:"status" binding:"omitempty,oneof=SCHEDULED CANCELLED COMPLETED NO_SHOW"`
+	Limit      *int    `form:"limit" binding:"omitempty,min=1,max=100"`
+	Offset     *int    `form:"offset" binding:"omitempty,min=0"`
+	Sort       *string `form:"sort" binding:"omitempty"`
 }
 
 type GetAllParsedRequest struct {
-	StylistID *int64
-	StartDate *time.Time
-	EndDate   *time.Time
-	Status    *string
-	Limit     int
-	Offset    int
-	Sort      []string
+	StylistID  *int64
+	CustomerID *int64
+	StartDate  *time.Time
+	EndDate    *time.Time
+	Status     *string
+	Limit      int
+	Offset     int
+	Sort       []string
 }
 
 type GetAllResponse struct {

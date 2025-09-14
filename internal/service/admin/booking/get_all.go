@@ -2,9 +2,6 @@ package adminBooking
 
 import (
 	"context"
-	"errors"
-
-	"github.com/jackc/pgx/v5"
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
@@ -27,15 +24,6 @@ func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) GetAllInterf
 }
 
 func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingModel.GetAllParsedRequest, role string, storeIds []int64) (*adminBookingModel.GetAllResponse, error) {
-	// Verify store exists
-	_, err := s.queries.GetStoreByID(ctx, storeID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
-		}
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get store", err)
-	}
-
 	// Check store access for staff (except SUPER_ADMIN)
 	if role != common.RoleSuperAdmin {
 		if err := utils.CheckStoreAccess(storeID, storeIds); err != nil {
@@ -46,6 +34,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingMode
 	// Get booking list from repository
 	total, bookings, err := s.repo.Booking.GetAllStoreBookingsByFilter(ctx, storeID, sqlxRepo.GetAllStoreBookingsByFilterParams{
 		StylistID: req.StylistID,
+		CustomerID: req.CustomerID,
 		StartDate: req.StartDate,
 		EndDate:   req.EndDate,
 		Status:    req.Status,

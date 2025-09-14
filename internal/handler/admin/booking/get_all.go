@@ -57,6 +57,16 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		stylistID = &parsedStylistID
 	}
 
+	var customerID *int64
+	if req.CustomerID != nil {
+		parsedCustomerID, err := utils.ParseID(*req.CustomerID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{"customerId": "customerId 轉換類型失敗"})
+			return
+		}
+		customerID = &parsedCustomerID
+	}
+
 	var startDate *time.Time
 	if req.StartDate != nil {
 		parsedStartDate, err := utils.DateStringToTime(*req.StartDate)
@@ -78,13 +88,14 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	}
 
 	parsedReq := adminBookingModel.GetAllParsedRequest{
-		StylistID: stylistID,
-		StartDate: startDate,
-		EndDate:   endDate,
-		Status:    req.Status,
-		Limit:     limit,
-		Offset:    offset,
-		Sort:      sort,
+		StylistID:  stylistID,
+		CustomerID: customerID,
+		StartDate:  startDate,
+		EndDate:    endDate,
+		Status:     req.Status,
+		Limit:      limit,
+		Offset:     offset,
+		Sort:       sort,
 	}
 
 	// Get staff context from JWT middleware
