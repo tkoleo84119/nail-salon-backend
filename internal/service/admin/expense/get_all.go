@@ -50,6 +50,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminExpenseMode
 			Amount:      amount,
 			ExpenseDate: utils.PgDateToDateString(expense.ExpenseDate),
 			Note:        utils.PgTextToString(expense.Note),
+			Updater:     expense.Updater,
 			CreatedAt:   utils.PgTimestamptzToTimeString(expense.CreatedAt),
 			UpdatedAt:   utils.PgTimestamptzToTimeString(expense.UpdatedAt),
 		}

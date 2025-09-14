@@ -47,6 +47,7 @@ type GetAllStoreExpensesByFilterItem struct {
 	Note         pgtype.Text        `db:"note"`
 	IsReimbursed pgtype.Bool        `db:"is_reimbursed"`
 	ReimbursedAt pgtype.Timestamptz `db:"reimbursed_at"`
+	Updater      string             `db:"updater"`
 	CreatedAt    pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
 }
@@ -95,7 +96,7 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 
 	// Pagination + Sorting
 	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-	defaultSortArr := []string{"e.created_at DESC"}
+	defaultSortArr := []string{"e.updatedAt DESC"}
 	sort := utils.HandleSortByMap(map[string]string{
 		"createdAt":    "e.created_at",
 		"updatedAt":    "e.updated_at",
@@ -124,11 +125,13 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 			e.note,
 			e.is_reimbursed,
 			e.reimbursed_at,
+			COALESCE(su2.username, '') AS updater,
 			e.created_at,
 			e.updated_at
 		FROM expenses e
 		LEFT JOIN suppliers s ON e.supplier_id = s.id
 		LEFT JOIN staff_users su ON e.payer_id = su.id
+		LEFT JOIN staff_users su2 ON e.updater = su2.id
 		%s
 		ORDER BY %s
 		LIMIT $%d OFFSET $%d
@@ -155,6 +158,7 @@ type UpdateStoreExpenseParams struct {
 	PayerIDIsNone *bool
 	IsReimbursed  *bool
 	ReimbursedAt  *time.Time
+	Updater       *int64
 }
 
 type UpdateStoreExpenseResponse struct {
@@ -165,6 +169,11 @@ func (r *ExpenseRepository) UpdateStoreExpense(ctx context.Context, storeID, exp
 	// Set conditions
 	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
+
+	if req.Updater != nil {
+		setParts = append(setParts, fmt.Sprintf("updater = $%d", len(args)+1))
+		args = append(args, utils.Int64PtrToPgInt8(req.Updater))
+	}
 
 	if req.SupplierID != nil {
 		setParts = append(setParts, fmt.Sprintf("supplier_id = $%d", len(args)+1))
@@ -255,21 +264,45 @@ func (r *ExpenseRepository) UpdateStoreExpense(ctx context.Context, storeID, exp
 // ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateStoreExpenseAmountTxParams struct {
-	Amount int64
+	Amount  int64
+	Updater int64
 }
 
 func (r *ExpenseRepository) UpdateStoreExpenseAmountTx(ctx context.Context, tx *sqlx.Tx, expenseID int64, params UpdateStoreExpenseAmountTxParams) error {
 	query := `
 		UPDATE expenses
-		SET amount = $1
-		WHERE id = $2
+		SET amount = $1, updater = $2, updated_at = NOW()
+		WHERE id = $3
 	`
 
-	args := []interface{}{params.Amount, expenseID}
+	args := []interface{}{params.Amount, params.Updater, expenseID}
 
 	_, err := tx.ExecContext(ctx, query, args...)
 	if err != nil {
 		return fmt.Errorf("failed to update expense amount: %w", err)
+	}
+
+	return nil
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateStoreExpenseUpdaterTxParams struct {
+	Updater int64
+}
+
+func (r *ExpenseRepository) UpdateStoreExpenseUpdaterTx(ctx context.Context, tx *sqlx.Tx, expenseID int64, params UpdateStoreExpenseUpdaterTxParams) error {
+	query := `
+		UPDATE expenses
+		SET updater = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+
+	args := []interface{}{params.Updater, expenseID}
+
+	_, err := tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update expense updater: %w", err)
 	}
 
 	return nil

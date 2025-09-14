@@ -163,7 +163,7 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	// Call service layer
-	response, err := h.service.Update(c.Request.Context(), storeID, expenseID, parsedReq, storeIDs)
+	response, err := h.service.Update(c.Request.Context(), storeID, expenseID, parsedReq, staff.UserID, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

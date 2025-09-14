@@ -11,6 +11,7 @@ type GetResponse struct {
 	Note         string              `json:"note"`
 	IsReimbursed *bool               `json:"isReimbursed,omitempty"`
 	ReimbursedAt *string             `json:"reimbursedAt,omitempty"`
+	Updater      string              `json:"updater"`
 	CreatedAt    string              `json:"createdAt"`
 	UpdatedAt    string              `json:"updatedAt"`
 	Items        []GetExpenseItem    `json:"items"`

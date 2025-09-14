@@ -12,9 +12,10 @@ INSERT INTO expenses (
     expense_date,
     note,
     payer_id,
-    is_reimbursed
+    is_reimbursed,
+    updater
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 ) RETURNING id;
 
 -- name: GetStoreExpenseByID :one
@@ -31,12 +32,14 @@ SELECT
     e.note,
     e.is_reimbursed,
     e.reimbursed_at,
+    COALESCE(su2.username, '') AS updater,
     e.created_at,
     e.updated_at
 FROM expenses e
 LEFT JOIN suppliers s ON e.supplier_id = s.id
 LEFT JOIN staff_users su ON e.payer_id = su.id
+LEFT JOIN staff_users su2 ON e.updater = su2.id
 WHERE e.id = $1 AND e.store_id = $2;
 
 -- name: UpdateStoreExpenseAmount :exec
-UPDATE expenses SET amount = $1, updated_at = NOW() WHERE id = $2;
+UPDATE expenses SET amount = $1, updater = $2, updated_at = NOW() WHERE id = $3;

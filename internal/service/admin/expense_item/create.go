@@ -24,7 +24,7 @@ func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) CreateInterface {
 	}
 }
 
-func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req adminExpenseItemModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminExpenseItemModel.CreateResponse, error) {
+func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req adminExpenseItemModel.CreateParsedRequest, creatorID int64, creatorStoreIDs []int64) (*adminExpenseItemModel.CreateResponse, error) {
 	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
 		return nil, err
 	}
@@ -93,6 +93,7 @@ func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req admin
 
 	err = qtx.UpdateStoreExpenseAmount(ctx, dbgen.UpdateStoreExpenseAmountParams{
 		Amount: newExpenseAmountNumeric,
+		Updater: utils.Int64PtrToPgInt8(&creatorID),
 		ID:     expenseID,
 	})
 	if err != nil {

@@ -57,6 +57,7 @@ func (s *Get) Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs
 		Amount:      amount,
 		ExpenseDate: utils.PgDateToDateString(expense.ExpenseDate),
 		Note:        utils.PgTextToString(expense.Note),
+		Updater:     expense.Updater,
 		CreatedAt:   utils.PgTimestamptzToTimeString(expense.CreatedAt),
 		UpdatedAt:   utils.PgTimestamptzToTimeString(expense.UpdatedAt),
 	}

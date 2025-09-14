@@ -7,7 +7,7 @@ import (
 )
 
 type CreateInterface interface {
-	Create(ctx context.Context, storeID int64, req adminExpenseModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminExpenseModel.CreateResponse, error)
+	Create(ctx context.Context, storeID int64, req adminExpenseModel.CreateParsedRequest, creatorID int64, creatorStoreIDs []int64) (*adminExpenseModel.CreateResponse, error)
 }
 
 type GetAllInterface interface {
@@ -19,5 +19,5 @@ type GetInterface interface {
 }
 
 type UpdateInterface interface {
-	Update(ctx context.Context, storeID, expenseID int64, req adminExpenseModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminExpenseModel.UpdateResponse, error)
+	Update(ctx context.Context, storeID, expenseID int64, req adminExpenseModel.UpdateParsedRequest, updaterID int64, creatorStoreIDs []int64) (*adminExpenseModel.UpdateResponse, error)
 }

@@ -33,9 +33,10 @@ INSERT INTO expenses (
     expense_date,
     note,
     payer_id,
-    is_reimbursed
+    is_reimbursed,
+    updater
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 ) RETURNING id
 `
 
@@ -50,6 +51,7 @@ type CreateExpenseParams struct {
 	Note         pgtype.Text    `db:"note" json:"note"`
 	PayerID      pgtype.Int8    `db:"payer_id" json:"payer_id"`
 	IsReimbursed pgtype.Bool    `db:"is_reimbursed" json:"is_reimbursed"`
+	Updater      pgtype.Int8    `db:"updater" json:"updater"`
 }
 
 func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (int64, error) {
@@ -64,6 +66,7 @@ func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (i
 		arg.Note,
 		arg.PayerID,
 		arg.IsReimbursed,
+		arg.Updater,
 	)
 	var id int64
 	err := row.Scan(&id)
@@ -84,11 +87,13 @@ SELECT
     e.note,
     e.is_reimbursed,
     e.reimbursed_at,
+    COALESCE(su2.username, '') AS updater,
     e.created_at,
     e.updated_at
 FROM expenses e
 LEFT JOIN suppliers s ON e.supplier_id = s.id
 LEFT JOIN staff_users su ON e.payer_id = su.id
+LEFT JOIN staff_users su2 ON e.updater = su2.id
 WHERE e.id = $1 AND e.store_id = $2
 `
 
@@ -110,6 +115,7 @@ type GetStoreExpenseByIDRow struct {
 	Note         pgtype.Text        `db:"note" json:"note"`
 	IsReimbursed pgtype.Bool        `db:"is_reimbursed" json:"is_reimbursed"`
 	ReimbursedAt pgtype.Timestamptz `db:"reimbursed_at" json:"reimbursed_at"`
+	Updater      string             `db:"updater" json:"updater"`
 	CreatedAt    pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
@@ -130,6 +136,7 @@ func (q *Queries) GetStoreExpenseByID(ctx context.Context, arg GetStoreExpenseBy
 		&i.Note,
 		&i.IsReimbursed,
 		&i.ReimbursedAt,
+		&i.Updater,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -137,15 +144,16 @@ func (q *Queries) GetStoreExpenseByID(ctx context.Context, arg GetStoreExpenseBy
 }
 
 const updateStoreExpenseAmount = `-- name: UpdateStoreExpenseAmount :exec
-UPDATE expenses SET amount = $1, updated_at = NOW() WHERE id = $2
+UPDATE expenses SET amount = $1, updater = $2, updated_at = NOW() WHERE id = $3
 `
 
 type UpdateStoreExpenseAmountParams struct {
-	Amount pgtype.Numeric `db:"amount" json:"amount"`
-	ID     int64          `db:"id" json:"id"`
+	Amount  pgtype.Numeric `db:"amount" json:"amount"`
+	Updater pgtype.Int8    `db:"updater" json:"updater"`
+	ID      int64          `db:"id" json:"id"`
 }
 
 func (q *Queries) UpdateStoreExpenseAmount(ctx context.Context, arg UpdateStoreExpenseAmountParams) error {
-	_, err := q.db.Exec(ctx, updateStoreExpenseAmount, arg.Amount, arg.ID)
+	_, err := q.db.Exec(ctx, updateStoreExpenseAmount, arg.Amount, arg.Updater, arg.ID)
 	return err
 }

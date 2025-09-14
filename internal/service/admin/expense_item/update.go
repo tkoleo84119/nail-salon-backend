@@ -27,7 +27,7 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB)
 	}
 }
 
-func (s *Update) Update(ctx context.Context, storeID, expenseID, expenseItemID int64, req adminExpenseItemModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminExpenseItemModel.UpdateResponse, error) {
+func (s *Update) Update(ctx context.Context, storeID, expenseID, expenseItemID int64, req adminExpenseItemModel.UpdateParsedRequest, updaterID int64, creatorStoreIDs []int64) (*adminExpenseItemModel.UpdateResponse, error) {
 	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
 		return nil, err
 	}
@@ -101,10 +101,18 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID, expenseItemID i
 
 		// Update expense amount
 		err = s.repo.Expense.UpdateStoreExpenseAmountTx(ctx, tx, expenseID, sqlxRepo.UpdateStoreExpenseAmountTxParams{
-			Amount: int64(newExpenseAmount),
+			Amount:  int64(newExpenseAmount),
+			Updater: updaterID,
 		})
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update expense amount", err)
+		}
+	} else {
+		err = s.repo.Expense.UpdateStoreExpenseUpdaterTx(ctx, tx, expenseID, sqlxRepo.UpdateStoreExpenseUpdaterTxParams{
+			Updater: updaterID,
+		})
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update expense updater", err)
 		}
 	}
 

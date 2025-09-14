@@ -183,7 +183,7 @@ func (h *Create) Create(c *gin.Context) {
 	}
 
 	// Call service layer
-	response, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedReq, creatorStoreIDs)
+	response, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedReq, staffContext.UserID, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

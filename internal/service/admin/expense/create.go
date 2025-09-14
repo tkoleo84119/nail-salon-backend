@@ -23,7 +23,7 @@ func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) CreateInterface {
 	}
 }
 
-func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminExpenseModel.CreateResponse, error) {
+func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseModel.CreateParsedRequest, creatorID int64, creatorStoreIDs []int64) (*adminExpenseModel.CreateResponse, error) {
 	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
 		return nil, err
 	}
@@ -90,6 +90,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 		Note:         utils.StringPtrToPgText(req.Note, true),
 		PayerID:      utils.Int64PtrToPgInt8(req.PayerID),
 		IsReimbursed: utils.BoolPtrToPgBool(isReimbursed),
+		Updater:      utils.Int64PtrToPgInt8(&creatorID),
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to create expense", err)

@@ -300,6 +300,7 @@ Table expenses {
   payer_id bigint // 代墊人Id (如果沒有代墊人就是null)
   is_reimbursed boolean // 是否已結清代墊款 (如果沒有代墊人就是null)
   reimbursed_at timestamptz // 結清日期 (如果沒有代墊人就是null)
+  updater bigint // 更新者Id
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }

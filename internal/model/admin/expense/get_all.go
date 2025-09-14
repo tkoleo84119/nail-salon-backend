@@ -37,6 +37,7 @@ type GetAllExpenseItem struct {
 	IsReimbursed *bool                      `json:"isReimbursed,omitempty"`
 	ReimbursedAt *string                    `json:"reimbursedAt,omitempty"`
 	CreatedAt    string                     `json:"createdAt"`
+	Updater      string                     `json:"updater"`
 	UpdatedAt    string                     `json:"updatedAt"`
 }
 

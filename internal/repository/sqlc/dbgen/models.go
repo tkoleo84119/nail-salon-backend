@@ -169,6 +169,7 @@ type Expense struct {
 	CreatedAt    pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 	OtherFee     pgtype.Numeric     `db:"other_fee" json:"other_fee"`
+	Updater      pgtype.Int8        `db:"updater" json:"updater"`
 }
 
 type ExpenseItem struct {
