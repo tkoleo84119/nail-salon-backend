@@ -113,6 +113,7 @@ const (
 	SysTimeout = "SysTimeout"
 
 	// ACCOUNT - account related errors
+	AccountBalanceNotEnough = "AccountBalanceNotEnough"
 	AccountNotBelongToStore = "AccountNotBelongToStore"
 	AccountNotFound = "AccountNotFound"
 	AccountTransactionNotBelongToAccount = "AccountTransactionNotBelongToAccount"

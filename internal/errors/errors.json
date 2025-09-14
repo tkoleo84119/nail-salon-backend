@@ -193,6 +193,11 @@
       "code": "E3ACC04",
       "message": "帳戶交易紀錄不屬於指定的帳戶",
       "status": 400
+    },
+    "AccountBalanceNotEnough": {
+      "code": "E3ACC05",
+      "message": "帳戶餘額不足",
+      "status": 400
     }
   },
   "BOOKING": {

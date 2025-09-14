@@ -49,6 +49,11 @@ func (s *Create) Create(ctx context.Context, storeID, accountID int64, req admin
 		balance -= int32(req.Amount)
 	}
 
+	// check if balance is less than 0
+	if balance < 0 {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.AccountBalanceNotEnough)
+	}
+
 	int64Balance := int64(balance)
 	balanceNumeric, err := utils.Int64PtrToPgNumeric(&int64Balance)
 	if err != nil {
