@@ -21,6 +21,7 @@ type GetPerformanceMeResponse struct {
 	NoShowBookings    int                     `json:"noShowBookings"`
 	LinePayRevenue    float64                 `json:"linePayRevenue"`
 	CashRevenue       float64                 `json:"cashRevenue"`
+	TransferRevenue   float64                 `json:"transferRevenue"`
 	TotalPaidAmount   float64                 `json:"totalPaidAmount"`
 	TotalServiceTime  int                     `json:"totalServiceTime"`
 	Stores            []GetPerformanceMeStore `json:"stores"`
@@ -35,6 +36,7 @@ type GetPerformanceMeStore struct {
 	NoShowBookings    int     `json:"noShowBookings"`
 	LinePayRevenue    float64 `json:"linePayRevenue"`
 	CashRevenue       float64 `json:"cashRevenue"`
+	TransferRevenue   float64 `json:"transferRevenue"`
 	TotalPaidAmount   float64 `json:"totalPaidAmount"`
 	TotalServiceTime  int     `json:"totalServiceTime"`
 }

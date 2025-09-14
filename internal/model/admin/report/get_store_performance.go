@@ -21,6 +21,7 @@ type GetStorePerformanceResponse struct {
 	NoShowBookings    int                          `json:"noShowBookings"`
 	LinePayRevenue    float64                      `json:"linePayRevenue"`
 	CashRevenue       float64                      `json:"cashRevenue"`
+	TransferRevenue   float64                      `json:"transferRevenue"`
 	TotalPaidAmount   float64                      `json:"totalPaidAmount"`
 	TotalServiceTime  int                          `json:"totalServiceTime"`
 	Stylists          []GetStorePerformanceStylist `json:"stylists"`
@@ -35,6 +36,7 @@ type GetStorePerformanceStylist struct {
 	NoShowBookings    int     `json:"noShowBookings"`
 	LinePayRevenue    float64 `json:"linePayRevenue"`
 	CashRevenue       float64 `json:"cashRevenue"`
+	TransferRevenue   float64 `json:"transferRevenue"`
 	TotalPaidAmount   float64 `json:"totalPaidAmount"`
 	TotalServiceTime  int     `json:"totalServiceTime"`
 }

@@ -55,6 +55,7 @@ func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID i
 			NoShowBookings:    0,
 			LinePayRevenue:    0,
 			CashRevenue:       0,
+			TransferRevenue:   0,
 			TotalPaidAmount:   0,
 			TotalServiceTime:  0,
 			Stylists:          make([]adminReportModel.GetStorePerformanceStylist, 0),
@@ -62,7 +63,7 @@ func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID i
 	}
 
 	var totalBookings, completedBookings, cancelledBookings, noShowBookings, totalServiceTime int
-	var totalLinePayRevenue, totalCashRevenue, totalPaidAmount float64
+	var totalLinePayRevenue, totalCashRevenue, totalTransferRevenue, totalPaidAmount float64
 
 	stylists := make([]adminReportModel.GetStorePerformanceStylist, len(stylistPerformances))
 	// Process stylist performances and calculate totals
@@ -71,6 +72,7 @@ func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID i
 		stylistTotalBookings := stylist.CompletedBookings + stylist.CancelledBookings + stylist.NoShowBookings
 		stylistTotalLinePayRevenue := stylist.LinePayRevenue
 		stylistTotalCashRevenue := stylist.CashRevenue
+		stylistTotalTransferRevenue := stylist.TransferRevenue
 		stylistTotalPaidAmount := stylist.TotalPaidAmount
 		stylistTotalServiceTime := stylist.TotalServiceTime
 
@@ -81,6 +83,10 @@ func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID i
 		stylistTotalCashRevenueFloat, err := utils.PgNumericToFloat64(stylistTotalCashRevenue)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert stylist total cash revenue to float64", err)
+		}
+		stylistTotalTransferRevenueFloat, err := utils.PgNumericToFloat64(stylistTotalTransferRevenue)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert stylist total transfer revenue to float64", err)
 		}
 		stylistTotalPaidAmountFloat, err := utils.PgNumericToFloat64(stylistTotalPaidAmount)
 		if err != nil {
@@ -96,6 +102,7 @@ func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID i
 			NoShowBookings:    int(stylist.NoShowBookings),
 			LinePayRevenue:    stylistTotalLinePayRevenueFloat,
 			CashRevenue:       stylistTotalCashRevenueFloat,
+			TransferRevenue:   stylistTotalTransferRevenueFloat,
 			TotalPaidAmount:   stylistTotalPaidAmountFloat,
 			TotalServiceTime:  int(stylistTotalServiceTime),
 		}
@@ -107,6 +114,7 @@ func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID i
 		noShowBookings += int(stylist.NoShowBookings)
 		totalLinePayRevenue += stylistTotalLinePayRevenueFloat
 		totalCashRevenue += stylistTotalCashRevenueFloat
+		totalTransferRevenue += stylistTotalTransferRevenueFloat
 		totalPaidAmount += stylistTotalPaidAmountFloat
 		totalServiceTime += int(stylistTotalServiceTime)
 	}
@@ -120,6 +128,7 @@ func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID i
 		NoShowBookings:    noShowBookings,
 		LinePayRevenue:    totalLinePayRevenue,
 		CashRevenue:       totalCashRevenue,
+		TransferRevenue:   totalTransferRevenue,
 		TotalPaidAmount:   totalPaidAmount,
 		TotalServiceTime:  totalServiceTime,
 		Stylists:          stylists,

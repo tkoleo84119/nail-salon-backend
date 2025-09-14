@@ -79,6 +79,7 @@ SELECT
     SUM(CASE WHEN b.status = 'NO_SHOW' THEN 1 ELSE 0 END) as no_show_bookings,
     COALESCE(SUM(CASE WHEN c.payment_method = 'LINE_PAY' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as line_pay_revenue,
     COALESCE(SUM(CASE WHEN c.payment_method = 'CASH' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as cash_revenue,
+    COALESCE(SUM(CASE WHEN c.payment_method = 'TRANSFER' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as transfer_revenue,
     COALESCE(SUM(CASE WHEN b.status = 'COMPLETED' THEN COALESCE(c.paid_amount, 0) ELSE 0 END), 0)::numeric(12,2) as total_paid_amount,
     SUM(COALESCE(b.actual_duration, 0)) as total_service_time
 FROM bookings b
@@ -102,6 +103,7 @@ SELECT
     SUM(CASE WHEN b.status = 'NO_SHOW' THEN 1 ELSE 0 END) as no_show_bookings,
     COALESCE(SUM(CASE WHEN c.payment_method = 'LINE_PAY' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as line_pay_revenue,
     COALESCE(SUM(CASE WHEN c.payment_method = 'CASH' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as cash_revenue,
+    COALESCE(SUM(CASE WHEN c.payment_method = 'TRANSFER' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as transfer_revenue,
     COALESCE(SUM(CASE WHEN b.status = 'COMPLETED' THEN COALESCE(c.paid_amount, 0) ELSE 0 END), 0)::numeric(12,2) as total_paid_amount,
     SUM(COALESCE(b.actual_duration, 0)) as total_service_time
 FROM bookings b
