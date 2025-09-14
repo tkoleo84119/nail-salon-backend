@@ -1,7 +1,7 @@
 package adminCheckout
 
 type CreateBulkRequest struct {
-	PaymentMethod    string                    `json:"paymentMethod" binding:"required,oneof=cash linePay"`
+	PaymentMethod    string                    `json:"paymentMethod" binding:"required,oneof=CASH LINE_PAY"`
 	CustomerCouponID *string                   `json:"customerCouponId" binding:"omitempty"`
 	Checkouts        []CreateBulkCheckoutItems `json:"checkouts" binding:"required,min=1,max=10"`
 }
