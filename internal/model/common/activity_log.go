@@ -7,6 +7,7 @@ type ActivityLogType string
 const (
 	ActivityCustomerRegister        ActivityLogType = "CUSTOMER_REGISTER"
 	ActivityCustomerBooking         ActivityLogType = "CUSTOMER_BOOKING"
+	ActivityCustomerBrowse          ActivityLogType = "CUSTOMER_BROWSE"
 	ActivityCustomerBookingUpdate   ActivityLogType = "CUSTOMER_BOOKING_UPDATE"
 	ActivityCustomerBookingCancel   ActivityLogType = "CUSTOMER_BOOKING_CANCEL"
 	ActivityAdminBookingCreate      ActivityLogType = "ADMIN_BOOKING_CREATE"

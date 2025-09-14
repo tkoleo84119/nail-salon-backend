@@ -295,8 +295,11 @@ func (s *Update) buildResponse(ctx context.Context, bookingID int64, needSendLin
 	// Log activity
 	go func() {
 		logCtx := context.Background()
-		if err := s.activityLog.LogCustomerBookingUpdate(logCtx, bookingInfo.CustomerName, bookingInfo.StoreName); err != nil {
-			log.Printf("failed to log customer booking update activity: %v", err)
+		customer, err := s.queries.GetCustomerByID(logCtx, bookingInfo.CustomerID)
+		if err == nil {
+			if err := s.activityLog.LogCustomerBookingUpdate(logCtx, customer.Name, utils.PgTextToString(customer.LineName), bookingInfo.StoreName); err != nil {
+				log.Printf("failed to log customer booking update activity: %v", err)
+			}
 		}
 	}()
 

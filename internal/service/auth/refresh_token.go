@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"log"
 	"net/netip"
 	"time"
 
@@ -11,18 +12,21 @@ import (
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type RefreshToken struct {
-	queries   *dbgen.Queries
-	jwtConfig config.JWTConfig
+	queries     *dbgen.Queries
+	jwtConfig   config.JWTConfig
+	activityLog cache.ActivityLogCacheInterface
 }
 
-func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig) RefreshTokenInterface {
+func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig, activityLog cache.ActivityLogCacheInterface) RefreshTokenInterface {
 	return &RefreshToken{
-		queries:   queries,
-		jwtConfig: jwtConfig,
+		queries:     queries,
+		jwtConfig:   jwtConfig,
+		activityLog: activityLog,
 	}
 }
 
@@ -70,6 +74,16 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req auth.RefreshTokenRe
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to store refresh token", err)
 	}
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		customer, err := s.queries.GetCustomerByID(ctx, tokenRecord.CustomerID)
+		if err == nil {
+			if err := s.activityLog.LogCustomerRegister(logCtx, customer.Name, utils.PgTextToString(customer.LineName)); err != nil {
+				log.Printf("failed to log customer register activity: %v", err)
+			}
+		}
+	}()
 
 	// Build response
 	return &auth.RefreshTokenResponse{

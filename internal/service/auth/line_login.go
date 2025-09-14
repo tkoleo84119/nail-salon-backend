@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"log"
 	"net/netip"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/auth"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
@@ -21,15 +23,17 @@ type LineLogin struct {
 	db            *pgxpool.Pool
 	lineValidator *utils.LineValidator
 	jwtConfig     config.JWTConfig
+	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewLineLogin(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig) LineLoginInterface {
+func NewLineLogin(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig, activityLog cache.ActivityLogCacheInterface) LineLoginInterface {
 	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineLogin{
 		queries:       queries,
 		db:            db,
 		lineValidator: lineValidator,
 		jwtConfig:     jwtConfig,
+		activityLog:   activityLog,
 	}
 }
 
@@ -109,6 +113,14 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 		RefreshToken:   &refreshToken,
 		ExpiresIn:      &expiresIn,
 	}
+
+	// Log activity
+	go func() {
+		logCtx := context.Background()
+		if err := s.activityLog.LogCustomerBrowse(logCtx, customer.Name, utils.PgTextToString(customer.LineName)); err != nil {
+			log.Printf("failed to log customer register activity: %v", err)
+		}
+	}()
 
 	return response, nil
 }

@@ -142,8 +142,11 @@ func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.C
 	// Log activity
 	go func() {
 		logCtx := context.Background()
-		if err := s.activityLog.LogCustomerBookingCancel(logCtx, bookingInfo.CustomerName, bookingInfo.StoreName); err != nil {
-			log.Printf("failed to log customer booking cancel activity: %v", err)
+		customer, err := s.queries.GetCustomerByID(logCtx, customerID)
+		if err == nil {
+			if err := s.activityLog.LogCustomerBookingCancel(logCtx, customer.Name, utils.PgTextToString(customer.LineName), bookingInfo.StoreName); err != nil {
+				log.Printf("failed to log customer booking cancel activity: %v", err)
+			}
 		}
 	}()
 

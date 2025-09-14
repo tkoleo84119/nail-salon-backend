@@ -16,7 +16,7 @@ FROM customers
 WHERE id = ANY($1::bigint[]);
 
 -- name: GetCustomerByLineUid :one
-SELECT id, line_name
+SELECT id, line_name, name
 FROM customers
 WHERE line_uid = $1;
 

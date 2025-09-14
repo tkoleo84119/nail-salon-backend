@@ -110,9 +110,9 @@ type PublicHandlers struct {
 func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, lineMessenger *utils.LineMessageClient, authCache cache.AuthCacheInterface, activityLog cache.ActivityLogCacheInterface) PublicServices {
 	return PublicServices{
 		// Authentication services
-		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT),
+		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT, activityLog),
 		AuthLineRegister: authService.NewLineRegister(queries, database.PgxPool, cfg.Line, cfg.JWT, activityLog),
-		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT),
+		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT, activityLog),
 		AuthAcceptTerm:   authService.NewAcceptTerm(queries),
 
 		// Customer services
@@ -148,12 +148,12 @@ func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositori
 
 // NewPublicHandlers creates and initializes all public handlers
 func NewPublicHandlers(services PublicServices, cfg *config.Config) PublicHandlers {
-    return PublicHandlers{
-        // Authentication handlers
-        AuthLineLogin:    authHandler.NewLineLogin(services.AuthLineLogin, cfg),
-        AuthLineRegister: authHandler.NewLineRegister(services.AuthLineRegister, cfg),
-        AuthRefreshToken: authHandler.NewRefreshToken(services.AuthRefreshToken, cfg),
-        AuthAcceptTerm:   authHandler.NewAcceptTerm(services.AuthAcceptTerm),
+	return PublicHandlers{
+		// Authentication handlers
+		AuthLineLogin:    authHandler.NewLineLogin(services.AuthLineLogin, cfg),
+		AuthLineRegister: authHandler.NewLineRegister(services.AuthLineRegister, cfg),
+		AuthRefreshToken: authHandler.NewRefreshToken(services.AuthRefreshToken, cfg),
+		AuthAcceptTerm:   authHandler.NewAcceptTerm(services.AuthAcceptTerm),
 
 		// Customer handlers
 		CustomerGetMe:    customerHandler.NewGetMe(services.CustomerGetMe),

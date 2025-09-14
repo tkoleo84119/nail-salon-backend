@@ -21,12 +21,13 @@ type ActivityLogCacheInterface interface {
 	LogActivity(ctx context.Context, activityType common.ActivityLogType, message string) error
 	GetRecentActivities(ctx context.Context, limit int) (*common.ActivityLogResponse, error)
 
-	LogCustomerRegister(ctx context.Context, customerName string) error
-	LogCustomerBooking(ctx context.Context, customerName string, storeName string) error
-	LogCustomerBookingUpdate(ctx context.Context, customerName string, storeName string) error
-	LogCustomerBookingCancel(ctx context.Context, customerName string, storeName string) error
-	LogAdminBookingCreate(ctx context.Context, staffName string, customerName string, storeName string) error
-	LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string, storeName string) error
-	LogAdminBookingCancel(ctx context.Context, staffName string, customerName string, storeName string) error
-	LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string, checkoutCount int, storeName string) error
+	LogCustomerRegister(ctx context.Context, customerName string, lineName string) error
+	LogCustomerBrowse(ctx context.Context, customerName string, lineName string) error
+	LogCustomerBooking(ctx context.Context, customerName string, lineName string, storeName string) error
+	LogCustomerBookingUpdate(ctx context.Context, customerName string, lineName string, storeName string) error
+	LogCustomerBookingCancel(ctx context.Context, customerName string, lineName string, storeName string) error
+	LogAdminBookingCreate(ctx context.Context, staffName string, customerName string, lineName string, storeName string) error
+	LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string, lineName string, storeName string) error
+	LogAdminBookingCancel(ctx context.Context, staffName string, customerName string, lineName string, storeName string) error
+	LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string, lineName string, checkoutCount int, storeName string) error
 }

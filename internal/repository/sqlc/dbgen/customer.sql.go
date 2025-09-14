@@ -180,7 +180,7 @@ func (q *Queries) GetCustomerByIDs(ctx context.Context, dollar_1 []int64) ([]Get
 }
 
 const getCustomerByLineUid = `-- name: GetCustomerByLineUid :one
-SELECT id, line_name
+SELECT id, line_name, name
 FROM customers
 WHERE line_uid = $1
 `
@@ -188,12 +188,13 @@ WHERE line_uid = $1
 type GetCustomerByLineUidRow struct {
 	ID       int64       `db:"id" json:"id"`
 	LineName pgtype.Text `db:"line_name" json:"line_name"`
+	Name     string      `db:"name" json:"name"`
 }
 
 func (q *Queries) GetCustomerByLineUid(ctx context.Context, lineUid string) (GetCustomerByLineUidRow, error) {
 	row := q.db.QueryRow(ctx, getCustomerByLineUid, lineUid)
 	var i GetCustomerByLineUidRow
-	err := row.Scan(&i.ID, &i.LineName)
+	err := row.Scan(&i.ID, &i.LineName, &i.Name)
 	return i, err
 }
 

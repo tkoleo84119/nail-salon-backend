@@ -140,7 +140,7 @@ func (s *LineRegister) LineRegister(ctx context.Context, req auth.LineRegisterRe
 	// Log activity
 	go func() {
 		logCtx := context.Background()
-		if err := s.activityLog.LogCustomerRegister(logCtx, req.Name); err != nil {
+		if err := s.activityLog.LogCustomerRegister(logCtx, req.Name, profile.Name); err != nil {
 			log.Printf("failed to log customer register activity: %v", err)
 		}
 	}()

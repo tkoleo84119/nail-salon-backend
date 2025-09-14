@@ -206,7 +206,7 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminChe
 		logCtx := context.Background()
 		customer, err := s.queries.GetCustomerByID(logCtx, customerID)
 		if err == nil {
-			if err := s.activityLog.LogAdminBookingCompleted(logCtx, staffContext.Username, customer.Name, len(newCheckouts), storeName); err != nil {
+			if err := s.activityLog.LogAdminBookingCompleted(logCtx, staffContext.Username, customer.Name, utils.PgTextToString(customer.LineName), len(newCheckouts), storeName); err != nil {
 				log.Printf("failed to log admin booking completed activity: %v", err)
 			}
 		}
