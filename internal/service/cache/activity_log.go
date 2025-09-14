@@ -98,38 +98,38 @@ func (c *ActivityLogCache) LogCustomerRegister(ctx context.Context, customerName
 }
 
 // LogCustomerBooking to Redis List
-func (c *ActivityLogCache) LogCustomerBooking(ctx context.Context, customerName string) error {
-	message := fmt.Sprintf("顧客 %s 建立預約", customerName)
+func (c *ActivityLogCache) LogCustomerBooking(ctx context.Context, customerName string, storeName string) error {
+	message := fmt.Sprintf("顧客 %s 建立預約 (門市：%s)", customerName, storeName)
 	return c.LogActivity(ctx, common.ActivityCustomerBooking, message)
 }
 
 // LogCustomerBookingUpdate to Redis List
-func (c *ActivityLogCache) LogCustomerBookingUpdate(ctx context.Context, customerName string) error {
-	message := fmt.Sprintf("顧客 %s 修改預約", customerName)
+func (c *ActivityLogCache) LogCustomerBookingUpdate(ctx context.Context, customerName string, storeName string) error {
+	message := fmt.Sprintf("顧客 %s 修改預約 (門市：%s)", customerName, storeName)
 	return c.LogActivity(ctx, common.ActivityCustomerBookingUpdate, message)
 }
 
 // LogCustomerBookingCancel to Redis List
-func (c *ActivityLogCache) LogCustomerBookingCancel(ctx context.Context, customerName string) error {
-	message := fmt.Sprintf("顧客 %s 取消預約", customerName)
+func (c *ActivityLogCache) LogCustomerBookingCancel(ctx context.Context, customerName string, storeName string) error {
+	message := fmt.Sprintf("顧客 %s 取消預約 (門市：%s)", customerName, storeName)
 	return c.LogActivity(ctx, common.ActivityCustomerBookingCancel, message)
 }
 
 // LogAdminBookingCreate to Redis List
-func (c *ActivityLogCache) LogAdminBookingCreate(ctx context.Context, staffName string, customerName string) error {
-	message := fmt.Sprintf("員工 %s 為顧客 %s 建立預約", staffName, customerName)
+func (c *ActivityLogCache) LogAdminBookingCreate(ctx context.Context, staffName string, customerName string, storeName string) error {
+	message := fmt.Sprintf("員工 %s 為顧客 %s 建立預約 (門市：%s)", staffName, customerName, storeName)
 	return c.LogActivity(ctx, common.ActivityAdminBookingCreate, message)
 }
 
 // LogAdminBookingUpdate to Redis List
-func (c *ActivityLogCache) LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string) error {
-	message := fmt.Sprintf("員工 %s 為顧客 %s 修改預約", staffName, customerName)
+func (c *ActivityLogCache) LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string, storeName string) error {
+	message := fmt.Sprintf("員工 %s 為顧客 %s 修改預約 (門市：%s)", staffName, customerName, storeName)
 	return c.LogActivity(ctx, common.ActivityAdminBookingUpdate, message)
 }
 
 // LogAdminBookingCancel to Redis List
-func (c *ActivityLogCache) LogAdminBookingCancel(ctx context.Context, staffName string, customerName string) error {
-	message := fmt.Sprintf("員工 %s 為顧客 %s 取消預約", staffName, customerName)
+func (c *ActivityLogCache) LogAdminBookingCancel(ctx context.Context, staffName string, customerName string, storeName string) error {
+	message := fmt.Sprintf("員工 %s 為顧客 %s 取消預約 (門市：%s)", staffName, customerName, storeName)
 	return c.LogActivity(ctx, common.ActivityAdminBookingCancel, message)
 }
 

@@ -181,7 +181,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 	// Log activity
 	go func() {
 		logCtx := context.Background()
-		if err := s.activityLog.LogAdminBookingCreate(logCtx, staffName, customer.Name); err != nil {
+		if err := s.activityLog.LogAdminBookingCreate(logCtx, staffName, customer.Name, store.Name); err != nil {
 			log.Printf("failed to log admin booking create activity: %v", err)
 		}
 	}()

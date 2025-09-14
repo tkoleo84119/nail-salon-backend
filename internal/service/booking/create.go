@@ -242,7 +242,7 @@ func (s *Create) Create(ctx context.Context, req bookingModel.CreateParsedReques
 	// Log activity
 	go func() {
 		logCtx := context.Background()
-		if err := s.activityLog.LogCustomerBooking(logCtx, customer.Name); err != nil {
+		if err := s.activityLog.LogCustomerBooking(logCtx, customer.Name, store.Name); err != nil {
 			log.Printf("failed to log customer booking activity: %v", err)
 		}
 	}()

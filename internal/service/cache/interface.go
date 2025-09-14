@@ -22,11 +22,11 @@ type ActivityLogCacheInterface interface {
 	GetRecentActivities(ctx context.Context, limit int) (*common.ActivityLogResponse, error)
 
 	LogCustomerRegister(ctx context.Context, customerName string) error
-	LogCustomerBooking(ctx context.Context, customerName string) error
-	LogCustomerBookingUpdate(ctx context.Context, customerName string) error
-	LogCustomerBookingCancel(ctx context.Context, customerName string) error
-	LogAdminBookingCreate(ctx context.Context, staffName string, customerName string) error
-	LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string) error
-	LogAdminBookingCancel(ctx context.Context, staffName string, customerName string) error
+	LogCustomerBooking(ctx context.Context, customerName string, storeName string) error
+	LogCustomerBookingUpdate(ctx context.Context, customerName string, storeName string) error
+	LogCustomerBookingCancel(ctx context.Context, customerName string, storeName string) error
+	LogAdminBookingCreate(ctx context.Context, staffName string, customerName string, storeName string) error
+	LogAdminBookingUpdate(ctx context.Context, staffName string, customerName string, storeName string) error
+	LogAdminBookingCancel(ctx context.Context, staffName string, customerName string, storeName string) error
 	LogAdminBookingCompleted(ctx context.Context, staffName string, customerName string, checkoutCount int, storeName string) error
 }
