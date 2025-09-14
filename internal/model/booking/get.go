@@ -17,9 +17,24 @@ type GetResponse struct {
 	Status        string           `json:"status"`
 	CreatedAt     string           `json:"createdAt"`
 	UpdatedAt     string           `json:"updatedAt"`
+	Checkout      *GetCheckout     `json:"checkout"`
 }
 
 type GetServiceItem struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type GetCheckout struct {
+	ID            string     `json:"id"`
+	PaymentMethod string     `json:"paymentMethod"`
+	TotalAmount   int64      `json:"totalAmount"`
+	FinalAmount   int64      `json:"finalAmount"`
+	CreatedAt     string     `json:"createdAt"`
+	Coupon        *GetCoupon `json:"coupon"`
+}
+
+type GetCoupon struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName"`
 }

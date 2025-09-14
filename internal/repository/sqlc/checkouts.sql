@@ -23,8 +23,10 @@ SELECT
   ck.payment_method,
   ck.coupon_id,
   c.name as coupon_name,
+  c.display_name as coupon_display_name,
   c.code as coupon_code,
-  su.username as checkout_user
+  su.username as checkout_user,
+  ck.created_at
 FROM checkouts ck
 LEFT JOIN coupons c ON c.id = ck.coupon_id
 LEFT JOIN staff_users su ON su.id = ck.checkout_user

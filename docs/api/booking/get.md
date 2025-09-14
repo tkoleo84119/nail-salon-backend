@@ -70,6 +70,17 @@
     "isChatEnabled": true,
     "note": "這次想做奶茶色",
     "status": "SCHEDULED",
+    "checkout": {
+      "id": "9000000001",
+      "paymentMethod": "CASH",
+      "totalAmount": 1300, // 原價總額
+      "finalAmount": 1100, // 實際應付 (折扣後)
+      "createdAt": "2025-01-01T00:00:00+08:00",
+      "coupon": {
+        "id": "1000000001",
+        "displayName": "優惠券"
+      }
+    }, // 如果狀態非 COMPLETED 則不會有該欄位 (null)
     "createdAt": "2025-01-01T00:00:00+08:00",
     "updatedAt": "2025-01-01T00:00:00+08:00"
   }
@@ -98,17 +109,17 @@
   - message: 中文錯誤訊息（可參照錯誤總覽）
   - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-| 狀態碼 | 錯誤碼  | 常數名稱               | 說明                             |
-| ------ | ------- | ---------------------- | -------------------------------- |
-| 401    | E1002  | AuthTokenInvalid       | 無效的 accessToken，請重新登入   |
-| 401    | E1003   | AuthTokenMissing       | accessToken 缺失，請重新登入     |
-| 401    | E1004   | AuthTokenFormatError   | accessToken 格式錯誤，請重新登入 |
-| 401    | E1006   | AuthContextMissing     | 未找到使用者認證資訊，請重新登入 |
-| 401    | E1011   | AuthCustomerFailed     | 未找到有效的顧客資訊，請重新登入 |
-| 400    | E2002   | ValPathParamMissing    | 路徑參數缺失，請檢查             |
-| 404    | E3BK001 | BookingNotFound        | 預約不存在或已被取消             |
-| 500    | E9001   | SysInternalError       | 系統發生錯誤，請稍後再試         |
-| 500    | E9002   | SysDatabaseError       | 資料庫操作失敗                   |
+| 狀態碼 | 錯誤碼  | 常數名稱             | 說明                             |
+| ------ | ------- | -------------------- | -------------------------------- |
+| 401    | E1002   | AuthTokenInvalid     | 無效的 accessToken，請重新登入   |
+| 401    | E1003   | AuthTokenMissing     | accessToken 缺失，請重新登入     |
+| 401    | E1004   | AuthTokenFormatError | accessToken 格式錯誤，請重新登入 |
+| 401    | E1006   | AuthContextMissing   | 未找到使用者認證資訊，請重新登入 |
+| 401    | E1011   | AuthCustomerFailed   | 未找到有效的顧客資訊，請重新登入 |
+| 400    | E2002   | ValPathParamMissing  | 路徑參數缺失，請檢查             |
+| 404    | E3BK001 | BookingNotFound      | 預約不存在或已被取消             |
+| 500    | E9001   | SysInternalError     | 系統發生錯誤，請稍後再試         |
+| 500    | E9002   | SysDatabaseError     | 資料庫操作失敗                   |
 
 ---
 

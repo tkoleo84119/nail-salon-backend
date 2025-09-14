@@ -33,8 +33,10 @@ SELECT
   ck.payment_method,
   ck.coupon_id,
   c.name as coupon_name,
+  c.display_name as coupon_display_name,
   c.code as coupon_code,
-  su.username as checkout_user
+  su.username as checkout_user,
+  ck.created_at
 FROM checkouts ck
 LEFT JOIN coupons c ON c.id = ck.coupon_id
 LEFT JOIN staff_users su ON su.id = ck.checkout_user
@@ -42,15 +44,17 @@ WHERE ck.booking_id = $1
 `
 
 type GetCheckoutByBookingIDRow struct {
-	ID            int64          `db:"id" json:"id"`
-	TotalAmount   pgtype.Numeric `db:"total_amount" json:"total_amount"`
-	FinalAmount   pgtype.Numeric `db:"final_amount" json:"final_amount"`
-	PaidAmount    pgtype.Numeric `db:"paid_amount" json:"paid_amount"`
-	PaymentMethod string         `db:"payment_method" json:"payment_method"`
-	CouponID      pgtype.Int8    `db:"coupon_id" json:"coupon_id"`
-	CouponName    pgtype.Text    `db:"coupon_name" json:"coupon_name"`
-	CouponCode    pgtype.Text    `db:"coupon_code" json:"coupon_code"`
-	CheckoutUser  pgtype.Text    `db:"checkout_user" json:"checkout_user"`
+	ID                int64              `db:"id" json:"id"`
+	TotalAmount       pgtype.Numeric     `db:"total_amount" json:"total_amount"`
+	FinalAmount       pgtype.Numeric     `db:"final_amount" json:"final_amount"`
+	PaidAmount        pgtype.Numeric     `db:"paid_amount" json:"paid_amount"`
+	PaymentMethod     string             `db:"payment_method" json:"payment_method"`
+	CouponID          pgtype.Int8        `db:"coupon_id" json:"coupon_id"`
+	CouponName        pgtype.Text        `db:"coupon_name" json:"coupon_name"`
+	CouponDisplayName pgtype.Text        `db:"coupon_display_name" json:"coupon_display_name"`
+	CouponCode        pgtype.Text        `db:"coupon_code" json:"coupon_code"`
+	CheckoutUser      pgtype.Text        `db:"checkout_user" json:"checkout_user"`
+	CreatedAt         pgtype.Timestamptz `db:"created_at" json:"created_at"`
 }
 
 func (q *Queries) GetCheckoutByBookingID(ctx context.Context, bookingID int64) (GetCheckoutByBookingIDRow, error) {
@@ -64,8 +68,10 @@ func (q *Queries) GetCheckoutByBookingID(ctx context.Context, bookingID int64) (
 		&i.PaymentMethod,
 		&i.CouponID,
 		&i.CouponName,
+		&i.CouponDisplayName,
 		&i.CouponCode,
 		&i.CheckoutUser,
+		&i.CreatedAt,
 	)
 	return i, err
 }

@@ -8,6 +8,7 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	bookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/booking"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -72,8 +73,40 @@ func (s *Get) Get(ctx context.Context, bookingID int64, customerID int64) (*book
 		IsChatEnabled: utils.PgBoolToBool(booking.IsChatEnabled),
 		Note:          utils.PgTextToString(booking.Note),
 		Status:        booking.Status,
+		Checkout:      nil, // default is nil
 		CreatedAt:     utils.PgTimestamptzToTimeString(booking.CreatedAt),
 		UpdatedAt:     utils.PgTimestamptzToTimeString(booking.UpdatedAt),
+	}
+
+	if booking.Status == common.BookingStatusCompleted {
+		checkout, err := s.queries.GetCheckoutByBookingID(ctx, bookingID)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get checkout", err)
+		}
+
+		totalAmount, err := utils.PgNumericToInt64(checkout.TotalAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert total amount to int64", err)
+		}
+		finalAmount, err := utils.PgNumericToInt64(checkout.FinalAmount)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.ValTypeConversionFailed, "failed to convert final amount to int64", err)
+		}
+
+		response.Checkout = &bookingModel.GetCheckout{
+			ID:            utils.FormatID(checkout.ID),
+			PaymentMethod: checkout.PaymentMethod,
+			TotalAmount:   totalAmount,
+			FinalAmount:   finalAmount,
+			CreatedAt:     utils.PgTimestamptzToTimeString(checkout.CreatedAt),
+		}
+
+		if checkout.CouponID.Valid {
+			response.Checkout.Coupon = &bookingModel.GetCoupon{
+				ID:          utils.PgInt8ToIDString(checkout.CouponID),
+				DisplayName: utils.PgTextToString(checkout.CouponDisplayName),
+			}
+		}
 	}
 
 	return response, nil
