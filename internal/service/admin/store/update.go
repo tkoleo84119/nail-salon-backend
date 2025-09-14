@@ -8,18 +8,21 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	queries *dbgen.Queries
-	repo    *sqlxRepo.Repositories
+	queries   *dbgen.Queries
+	repo      *sqlxRepo.Repositories
+	authCache cache.AuthCacheInterface
 }
 
-func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) UpdateInterface {
+func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, authCache cache.AuthCacheInterface) UpdateInterface {
 	return &Update{
-		queries: queries,
-		repo:    repo,
+		queries:   queries,
+		repo:      repo,
+		authCache: authCache,
 	}
 }
 
@@ -54,6 +57,13 @@ func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update store", err)
+	}
+
+	// if update store isActive, delete all staff context from cache
+	if req.IsActive != nil {
+		if err := s.authCache.DeleteAllStaffContext(ctx); err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to delete all staff context from cache", err)
+		}
 	}
 
 	response := &adminStoreModel.UpdateResponse{

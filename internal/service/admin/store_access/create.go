@@ -55,6 +55,15 @@ func (s *Create) Create(ctx context.Context, staffID int64, storeID int64, creat
 		}
 	}
 
+	// Check if store is active
+	store, err := s.queries.GetStoreByID(ctx, storeID)
+	if err != nil {
+		return nil, false, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store", err)
+	}
+	if !store.IsActive.Bool {
+		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
+	}
+
 	// Check if access already exists
 	exists, err := s.queries.CheckStoreAccessExists(ctx, dbgen.CheckStoreAccessExistsParams{
 		StaffUserID: staffID,
