@@ -33,3 +33,18 @@ SELECT EXISTS(
   SELECT 1 FROM customer_coupons
   WHERE customer_id = $1 AND coupon_id = $2
 );
+
+-- name: GetCustomerCouponForDelete :one
+SELECT
+  id,
+  customer_id,
+  coupon_id,
+  valid_to,
+  is_used,
+  used_at
+FROM customer_coupons
+WHERE id = $1;
+
+-- name: DeleteCustomerCoupon :exec
+DELETE FROM customer_coupons
+WHERE id = $1;

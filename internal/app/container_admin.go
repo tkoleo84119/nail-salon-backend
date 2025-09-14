@@ -194,6 +194,7 @@ type AdminServices struct {
 	// Customer coupon services
 	CustomerCouponGetAll adminCustomerCouponService.GetAllInterface
 	CustomerCouponCreate adminCustomerCouponService.CreateInterface
+	CustomerCouponDelete adminCustomerCouponService.DeleteInterface
 
 	// Checkout services
 	CheckoutCreateBulk adminCheckoutService.CreateBulkInterface
@@ -339,6 +340,7 @@ type AdminHandlers struct {
 	// Customer coupon handlers
 	CustomerCouponGetAll *adminCustomerCouponHandler.GetAll
 	CustomerCouponCreate *adminCustomerCouponHandler.Create
+	CustomerCouponDelete *adminCustomerCouponHandler.Delete
 
 	// Checkout handlers
 	CheckoutCreateBulk *adminCheckoutHandler.CreateBulk
@@ -482,6 +484,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Customer coupon services
 		CustomerCouponGetAll: adminCustomerCouponService.NewGetAll(queries, repositories.SQLX),
 		CustomerCouponCreate: adminCustomerCouponService.NewCreate(queries),
+		CustomerCouponDelete: adminCustomerCouponService.NewDelete(queries),
 
 		// Checkout services
 		CheckoutCreateBulk: adminCheckoutService.NewCreateBulk(queries, repositories.SQLX, database.PgxPool, activityLog),
@@ -627,6 +630,7 @@ func NewAdminHandlers(services AdminServices, cfg *config.Config) AdminHandlers 
 		// Customer coupon handlers
 		CustomerCouponGetAll: adminCustomerCouponHandler.NewGetAll(services.CustomerCouponGetAll),
 		CustomerCouponCreate: adminCustomerCouponHandler.NewCreate(services.CustomerCouponCreate),
+		CustomerCouponDelete: adminCustomerCouponHandler.NewDelete(services.CustomerCouponDelete),
 
 		// Checkout handlers
 		CheckoutCreateBulk: adminCheckoutHandler.NewCreateBulk(services.CheckoutCreateBulk),

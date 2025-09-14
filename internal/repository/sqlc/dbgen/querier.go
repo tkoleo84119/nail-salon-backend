@@ -87,6 +87,7 @@ type Querier interface {
 	CreateTimeSlot(ctx context.Context, arg CreateTimeSlotParams) (TimeSlot, error)
 	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)
 	CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (CreateTimeSlotTemplateItemRow, error)
+	DeleteCustomerCoupon(ctx context.Context, id int64) error
 	DeleteLatestAccountTransaction(ctx context.Context, accountID int64) (int64, error)
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
@@ -113,6 +114,7 @@ type Querier interface {
 	GetCustomerByID(ctx context.Context, id int64) (GetCustomerByIDRow, error)
 	GetCustomerByIDs(ctx context.Context, dollar_1 []int64) ([]GetCustomerByIDsRow, error)
 	GetCustomerByLineUid(ctx context.Context, lineUid string) (GetCustomerByLineUidRow, error)
+	GetCustomerCouponForDelete(ctx context.Context, id int64) (GetCustomerCouponForDeleteRow, error)
 	GetCustomerCouponPriceInfoByID(ctx context.Context, id int64) (GetCustomerCouponPriceInfoByIDRow, error)
 	GetCustomerTermsAcceptanceByCustomerIDAndVersion(ctx context.Context, arg GetCustomerTermsAcceptanceByCustomerIDAndVersionParams) (GetCustomerTermsAcceptanceByCustomerIDAndVersionRow, error)
 	GetProductByID(ctx context.Context, id int64) (GetProductByIDRow, error)

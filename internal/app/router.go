@@ -297,6 +297,7 @@ func setupAdminCustomerCouponRoutes(admin *gin.RouterGroup, cfg *config.Config, 
 	{
 		customerCoupons.GET("", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponGetAll.GetAll)
 		customerCoupons.POST("", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponCreate.Create)
+		customerCoupons.DELETE("/:customerCouponId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAnyStaffRole(), handlers.Admin.CustomerCouponDelete.Delete)
 	}
 }
 

@@ -13,3 +13,7 @@ type GetAllInterface interface {
 type CreateInterface interface {
 	Create(ctx context.Context, req adminCustomerCouponModel.CreateParsedRequest) (*adminCustomerCouponModel.CreateResponse, error)
 }
+
+type DeleteInterface interface {
+	Delete(ctx context.Context, customerCouponID int64) (*adminCustomerCouponModel.DeleteResponse, error)
+}

@@ -61,6 +61,51 @@ func (q *Queries) CreateCustomerCoupon(ctx context.Context, arg CreateCustomerCo
 	return err
 }
 
+const deleteCustomerCoupon = `-- name: DeleteCustomerCoupon :exec
+DELETE FROM customer_coupons
+WHERE id = $1
+`
+
+func (q *Queries) DeleteCustomerCoupon(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteCustomerCoupon, id)
+	return err
+}
+
+const getCustomerCouponForDelete = `-- name: GetCustomerCouponForDelete :one
+SELECT
+  id,
+  customer_id,
+  coupon_id,
+  valid_to,
+  is_used,
+  used_at
+FROM customer_coupons
+WHERE id = $1
+`
+
+type GetCustomerCouponForDeleteRow struct {
+	ID         int64              `db:"id" json:"id"`
+	CustomerID int64              `db:"customer_id" json:"customer_id"`
+	CouponID   int64              `db:"coupon_id" json:"coupon_id"`
+	ValidTo    pgtype.Timestamptz `db:"valid_to" json:"valid_to"`
+	IsUsed     pgtype.Bool        `db:"is_used" json:"is_used"`
+	UsedAt     pgtype.Timestamptz `db:"used_at" json:"used_at"`
+}
+
+func (q *Queries) GetCustomerCouponForDelete(ctx context.Context, id int64) (GetCustomerCouponForDeleteRow, error) {
+	row := q.db.QueryRow(ctx, getCustomerCouponForDelete, id)
+	var i GetCustomerCouponForDeleteRow
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.CouponID,
+		&i.ValidTo,
+		&i.IsUsed,
+		&i.UsedAt,
+	)
+	return i, err
+}
+
 const getCustomerCouponPriceInfoByID = `-- name: GetCustomerCouponPriceInfoByID :one
 SELECT
   cc.coupon_id,
