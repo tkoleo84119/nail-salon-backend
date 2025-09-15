@@ -117,14 +117,14 @@ func (r *BookingRepository) GetAllCustomerBookingsByFilter(ctx context.Context, 
 // ---------------------------------------------------------------------------------------------------------------------
 
 type GetAllStoreBookingsByFilterParams struct {
-	StylistID *int64
+	StylistID  *int64
 	CustomerID *int64
-	StartDate *time.Time
-	EndDate   *time.Time
-	Status    *string
-	Limit     *int
-	Offset    *int
-	Sort      *[]string
+	StartDate  *time.Time
+	EndDate    *time.Time
+	Status     *string
+	Limit      *int
+	Offset     *int
+	Sort       *[]string
 }
 
 type GetAllStoreBookingsByFilterItem struct {
@@ -196,10 +196,11 @@ func (r *BookingRepository) GetAllStoreBookingsByFilter(ctx context.Context, sto
 	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
 	defaultSortArr := []string{"sch.work_date DESC"}
 	sort := utils.HandleSortByMap(map[string]string{
-		"date":     "sch.work_date",
-		"status":   "b.status",
-		"customer": "c.name",
-		"stylist":  "st.name",
+		"date":      "sch.work_date",
+		"status":    "b.status",
+		"customer":  "c.name",
+		"stylist":   "st.name",
+		"startTime": "ts.start_time",
 	}, defaultSortArr, params.Sort)
 
 	args = append(args, limit, offset)

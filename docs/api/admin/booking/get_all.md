@@ -40,28 +40,28 @@
 
 ### Query Parameters
 
-| 參數       | 型別   | 必填 | 預設值      | 說明                                                 |
-| ---------- | ------ | ---- | ----------- | ---------------------------------------------------- |
-| stylistId  | string | 否   |             | 篩選指定美甲師的預約                                 |
-| customerId | string | 否   |             | 篩選指定顧客的預約                                   |
-| startDate  | string | 否   |             | 起始日期（YYYY-MM-DD）                               |
-| endDate    | string | 否   |             | 結束日期（YYYY-MM-DD）                               |
-| status     | string | 否   |             | 預約狀態（SCHEDULED, CANCELLED, COMPLETED, NO_SHOW） |
-| limit      | int    | 否   | 20          | 單頁筆數                                             |
-| offset     | int    | 否   | 0           | 起始筆數                                             |
-| sort       | string | 否   | -created_at | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序)     |
+| 參數       | 型別   | 必填 | 預設值 | 說明                                                 |
+| ---------- | ------ | ---- | ------ | ---------------------------------------------------- |
+| stylistId  | string | 否   |        | 篩選指定美甲師的預約                                 |
+| customerId | string | 否   |        | 篩選指定顧客的預約                                   |
+| startDate  | string | 否   |        | 起始日期（YYYY-MM-DD）                               |
+| endDate    | string | 否   |        | 結束日期（YYYY-MM-DD）                               |
+| status     | string | 否   |        | 預約狀態（SCHEDULED, CANCELLED, COMPLETED, NO_SHOW） |
+| limit      | int    | 否   | 20     | 單頁筆數                                             |
+| offset     | int    | 否   | 0      | 起始筆數                                             |
+| sort       | string | 否   | -date  | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序)     |
 
 ### 驗證規則
-| 欄位       | 必填 | 其他規則                                                   |
-| ---------- | ---- | ---------------------------------------------------------- |
-| stylistId  | 否   |                                                            |
-| customerId | 否   |                                                            |
-| startDate  | 否   |                                                            |
-| endDate    | 否   |                                                            |
-| status     | 否   | <li>只能為 SCHEDULED, CANCELLED, COMPLETED, NO_SHOW        |
-| limit      | 否   | <li>最小值1<li>最大值100                                   |
-| offset     | 否   | <li>最小值0<li>最大值1000000                               |
-| sort       | 否   | <li>可以為 createdAt, updatedAt, status, date (其餘會忽略) |
+| 欄位       | 必填 | 其他規則                                                              |
+| ---------- | ---- | --------------------------------------------------------------------- |
+| stylistId  | 否   |                                                                       |
+| customerId | 否   |                                                                       |
+| startDate  | 否   |                                                                       |
+| endDate    | 否   |                                                                       |
+| status     | 否   | <li>只能為 SCHEDULED, CANCELLED, COMPLETED, NO_SHOW                   |
+| limit      | 否   | <li>最小值1<li>最大值100                                              |
+| offset     | 否   | <li>最小值0<li>最大值1000000                                          |
+| sort       | 否   | <li>可以為 createdAt, updatedAt, status, date, startTime (其餘會忽略) |
 
 ---
 
