@@ -38,6 +38,8 @@ type GetAllItem struct {
 	SubServices    []GetAllSubService `json:"subServices"`
 	ActualDuration *int32             `json:"actualDuration,omitempty"`
 	Status         string             `json:"status"`
+	CreatedAt      string             `json:"createdAt"`
+	UpdatedAt      string             `json:"updatedAt"`
 }
 
 type GetAllCustomer struct {

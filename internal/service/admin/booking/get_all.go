@@ -117,6 +117,8 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingMode
 			SubServices:    subServices,
 			ActualDuration: utils.PgInt4ToInt32Ptr(booking.ActualDuration),
 			Status:         booking.Status,
+			CreatedAt:      utils.PgTimestamptzToTimeString(booking.CreatedAt),
+			UpdatedAt:      utils.PgTimestamptzToTimeString(booking.UpdatedAt),
 		}
 
 		items[i] = item

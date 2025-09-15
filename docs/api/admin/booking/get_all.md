@@ -102,7 +102,9 @@
             "name": "跳色"
           }
         ],
-        "status": "SCHEDULED"
+        "status": "SCHEDULED",
+        "createdAt": "2025-01-01T00:00:00+08:00",
+        "updatedAt": "2025-01-01T00:00:00+08:00"
       }
     ]
   }
