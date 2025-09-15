@@ -25,9 +25,9 @@ func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) GetAllInterf
 	}
 }
 
-func (s *GetAll) GetAll(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.GetAllParsedRequest, staffStoreIDs []int64) (*adminBookingProductModel.GetAllResponse, error) {
+func (s *GetAll) GetAll(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.GetAllParsedRequest, role string, staffStoreIDs []int64) (*adminBookingProductModel.GetAllResponse, error) {
 	// Check store access permission
-	if err := utils.CheckStoreAccess(storeID, staffStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(storeID, staffStoreIDs, role); err != nil {
 		return nil, err
 	}
 

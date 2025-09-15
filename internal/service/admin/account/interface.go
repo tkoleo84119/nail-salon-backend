@@ -7,13 +7,13 @@ import (
 )
 
 type CreateInterface interface {
-	Create(ctx context.Context, req adminAccountModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminAccountModel.CreateResponse, error)
+	Create(ctx context.Context, req adminAccountModel.CreateParsedRequest, role string, creatorStoreIDs []int64) (*adminAccountModel.CreateResponse, error)
 }
 
 type GetAllInterface interface {
-	GetAll(ctx context.Context, storeID int64, req adminAccountModel.GetAllParsedRequest, creatorStoreIDs []int64) (*adminAccountModel.GetAllResponse, error)
+	GetAll(ctx context.Context, storeID int64, req adminAccountModel.GetAllParsedRequest, role string, creatorStoreIDs []int64) (*adminAccountModel.GetAllResponse, error)
 }
 
 type UpdateInterface interface {
-	Update(ctx context.Context, accountID int64, req adminAccountModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminAccountModel.UpdateResponse, error)
+	Update(ctx context.Context, accountID int64, req adminAccountModel.UpdateParsedRequest, role string, creatorStoreIDs []int64) (*adminAccountModel.UpdateResponse, error)
 }

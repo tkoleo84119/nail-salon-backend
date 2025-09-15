@@ -78,7 +78,7 @@ func (h *UpdateCompleted) UpdateCompleted(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.UpdateCompleted(c.Request.Context(), parsedStoreID, parsedBookingID, req, updaterStoreIDs)
+	response, err := h.service.UpdateCompleted(c.Request.Context(), parsedStoreID, parsedBookingID, req, staffContext.Role, updaterStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

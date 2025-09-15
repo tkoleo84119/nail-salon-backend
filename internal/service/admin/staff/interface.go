@@ -23,7 +23,7 @@ type GetMeInterface interface {
 }
 
 type GetStoreUsernameInterface interface {
-	GetStoreUsername(ctx context.Context, storeID int64, req adminStaffModel.GetStoreUsernameParsedRequest, storeIDs []int64) (*adminStaffModel.GetStoreUsernameResponse, error)
+	GetStoreUsername(ctx context.Context, storeID int64, req adminStaffModel.GetStoreUsernameParsedRequest, role string, storeIDs []int64) (*adminStaffModel.GetStoreUsernameResponse, error)
 }
 
 type UpdateInterface interface {

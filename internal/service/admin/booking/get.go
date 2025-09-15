@@ -23,11 +23,9 @@ func NewGet(queries *dbgen.Queries) GetInterface {
 }
 
 func (s *Get) Get(ctx context.Context, storeID, bookingID int64, role string, storeIds []int64) (*adminBookingModel.GetResponse, error) {
-	// Check store access for staff (except SUPER_ADMIN)
-	if role != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIds); err != nil {
-			return nil, err
-		}
+	// Check store access for staff
+	if err := utils.CheckStoreAccess(storeID, storeIds, role); err != nil {
+		return nil, err
 	}
 
 	booking, err := s.queries.GetBookingDetailByID(ctx, bookingID)

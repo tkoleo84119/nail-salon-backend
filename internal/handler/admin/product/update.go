@@ -129,7 +129,7 @@ func (h *Update) Update(c *gin.Context) {
 		creatorStoreIDs[i] = store.ID
 	}
 
-	response, err := h.service.Update(c.Request.Context(), storeID, productID, parsedReq, creatorStoreIDs)
+	response, err := h.service.Update(c.Request.Context(), storeID, productID, parsedReq, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

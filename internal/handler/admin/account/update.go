@@ -66,9 +66,9 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	parsedReq := adminAccountModel.UpdateParsedRequest{
-		Name:      req.Name,
-		Note:      req.Note,
-		IsActive:  req.IsActive,
+		Name:     req.Name,
+		Note:     req.Note,
+		IsActive: req.IsActive,
 	}
 
 	// Get staff context from middleware
@@ -84,7 +84,7 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.Update(c.Request.Context(), accountID, parsedReq, creatorStoreIDs)
+	response, err := h.service.Update(c.Request.Context(), accountID, parsedReq, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

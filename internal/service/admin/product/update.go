@@ -24,8 +24,8 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) UpdateInterf
 	}
 }
 
-func (s *Update) Update(ctx context.Context, storeID, productID int64, req adminProductModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminProductModel.UpdateResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+func (s *Update) Update(ctx context.Context, storeID, productID int64, req adminProductModel.UpdateParsedRequest, role string, creatorStoreIDs []int64) (*adminProductModel.UpdateResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

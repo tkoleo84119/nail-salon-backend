@@ -51,7 +51,7 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminChe
 	}
 
 	// check store access
-	if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
+	if err := utils.CheckStoreAccess(storeID, storeIDs, staffContext.Role); err != nil {
 		return nil, err
 	}
 

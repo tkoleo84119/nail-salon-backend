@@ -27,5 +27,5 @@ type CancelInterface interface {
 }
 
 type UpdateCompletedInterface interface {
-	UpdateCompleted(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateCompletedRequest, updaterStoreIDs []int64) (*adminBookingModel.UpdateCompletedResponse, error)
+	UpdateCompleted(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateCompletedRequest, role string, updaterStoreIDs []int64) (*adminBookingModel.UpdateCompletedResponse, error)
 }

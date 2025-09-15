@@ -109,7 +109,7 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.Update(c.Request.Context(), parsedStoreID, parsedAccountID, parsedTransactionID, parsedReq, creatorStoreIDs)
+	response, err := h.service.Update(c.Request.Context(), parsedStoreID, parsedAccountID, parsedTransactionID, parsedReq, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

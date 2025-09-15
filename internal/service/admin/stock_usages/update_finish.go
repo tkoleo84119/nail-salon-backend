@@ -22,8 +22,8 @@ func NewUpdateFinish(queries *dbgen.Queries) UpdateFinishInterface {
 	}
 }
 
-func (s *UpdateFinish) UpdateFinish(ctx context.Context, storeID int64, stockUsageID int64, req adminStockUsagesModel.UpdateFinishParsedRequest, staffStoreIDs []int64) (*adminStockUsagesModel.UpdateFinishResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, staffStoreIDs); err != nil {
+func (s *UpdateFinish) UpdateFinish(ctx context.Context, storeID int64, stockUsageID int64, req adminStockUsagesModel.UpdateFinishParsedRequest, role string, staffStoreIDs []int64) (*adminStockUsagesModel.UpdateFinishResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, staffStoreIDs, role); err != nil {
 		return nil, err
 	}
 

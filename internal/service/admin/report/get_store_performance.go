@@ -23,7 +23,7 @@ func NewGetStorePerformance(queries *dbgen.Queries) GetStorePerformanceInterface
 
 func (s *GetStorePerformance) GetStorePerformance(ctx context.Context, storeID int64, req adminReportModel.GetStorePerformanceParsedRequest, staffRole string, storeIDs []int64) (*adminReportModel.GetStorePerformanceResponse, error) {
 	if staffRole != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
+		if err := utils.CheckStoreAccess(storeID, storeIDs, staffRole); err != nil {
 			return nil, err
 		}
 	}

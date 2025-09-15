@@ -24,8 +24,8 @@ func NewBulkDelete(queries *dbgen.Queries) BulkDeleteInterface {
 	}
 }
 
-func (s *BulkDelete) BulkDelete(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.BulkDeleteParsedRequest, staffStoreIDs []int64) (*adminBookingProductModel.BulkDeleteResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, staffStoreIDs); err != nil {
+func (s *BulkDelete) BulkDelete(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.BulkDeleteParsedRequest, role string, staffStoreIDs []int64) (*adminBookingProductModel.BulkDeleteResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, staffStoreIDs, role); err != nil {
 		return nil, err
 	}
 

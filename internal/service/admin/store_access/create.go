@@ -49,19 +49,8 @@ func (s *Create) Create(ctx context.Context, staffID int64, storeID int64, creat
 	}
 
 	// Check if creator has access to this store (except SUPER_ADMIN)
-	if creatorRole != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
-			return nil, false, err
-		}
-	}
-
-	// Check if store is active
-	store, err := s.queries.GetStoreByID(ctx, storeID)
-	if err != nil {
-		return nil, false, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get store", err)
-	}
-	if !store.IsActive.Bool {
-		return nil, false, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotActive)
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, creatorRole); err != nil {
+		return nil, false, err
 	}
 
 	// Check if access already exists

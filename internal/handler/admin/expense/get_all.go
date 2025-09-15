@@ -98,7 +98,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		Sort:         sort,
 	}
 
-	response, err := h.service.GetAll(c.Request.Context(), storeID, parsedReq, storeIDs)
+	response, err := h.service.GetAll(c.Request.Context(), storeID, parsedReq, staff.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

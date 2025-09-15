@@ -19,8 +19,8 @@ func NewCreate(queries *dbgen.Queries) CreateInterface {
 	}
 }
 
-func (s *Create) Create(ctx context.Context, req adminAccountModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminAccountModel.CreateResponse, error) {
-	if err := utils.CheckStoreAccess(req.StoreID, creatorStoreIDs); err != nil {
+func (s *Create) Create(ctx context.Context, req adminAccountModel.CreateParsedRequest, role string, creatorStoreIDs []int64) (*adminAccountModel.CreateResponse, error) {
+	if err := utils.CheckStoreAccess(req.StoreID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

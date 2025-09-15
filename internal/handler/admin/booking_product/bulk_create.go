@@ -88,7 +88,7 @@ func (h *BulkCreate) BulkCreate(c *gin.Context) {
 		staffStoreIDs[i] = store.ID
 	}
 
-	response, err := h.service.BulkCreate(c.Request.Context(), parsedStoreID, parsedBookingID, parsedRequest, staffStoreIDs)
+	response, err := h.service.BulkCreate(c.Request.Context(), parsedStoreID, parsedBookingID, parsedRequest, staffContext.Role, staffStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

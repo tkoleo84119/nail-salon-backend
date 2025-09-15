@@ -5,7 +5,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStylistModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/stylist"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -21,11 +20,9 @@ func NewGetAll(repo *sqlxRepo.Repositories) GetAllInterface {
 }
 
 func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminStylistModel.GetAllParsedRequest, role string, storeIds []int64) (*adminStylistModel.GetAllResponse, error) {
-	// Check store access for the staff member (except SUPER_ADMIN)
-	if role != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIds); err != nil {
-			return nil, err
-		}
+	// Check store access for the staff member
+	if err := utils.CheckStoreAccess(storeID, storeIds, role); err != nil {
+		return nil, err
 	}
 
 	// Get stylists from repository with dynamic filtering

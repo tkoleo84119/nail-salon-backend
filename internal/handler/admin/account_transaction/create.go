@@ -98,7 +98,7 @@ func (h *Create) Create(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedAccountID, parsedReq, creatorStoreIDs)
+	response, err := h.service.Create(c.Request.Context(), parsedStoreID, parsedAccountID, parsedReq, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

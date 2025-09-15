@@ -5,7 +5,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -24,23 +23,21 @@ func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) GetAllInterf
 }
 
 func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingModel.GetAllParsedRequest, role string, storeIds []int64) (*adminBookingModel.GetAllResponse, error) {
-	// Check store access for staff (except SUPER_ADMIN)
-	if role != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIds); err != nil {
-			return nil, err
-		}
+	// Check store access for staff
+	if err := utils.CheckStoreAccess(storeID, storeIds, role); err != nil {
+		return nil, err
 	}
 
 	// Get booking list from repository
 	total, bookings, err := s.repo.Booking.GetAllStoreBookingsByFilter(ctx, storeID, sqlxRepo.GetAllStoreBookingsByFilterParams{
-		StylistID: req.StylistID,
+		StylistID:  req.StylistID,
 		CustomerID: req.CustomerID,
-		StartDate: req.StartDate,
-		EndDate:   req.EndDate,
-		Status:    req.Status,
-		Limit:     &req.Limit,
-		Offset:    &req.Offset,
-		Sort:      &req.Sort,
+		StartDate:  req.StartDate,
+		EndDate:    req.EndDate,
+		Status:     req.Status,
+		Limit:      &req.Limit,
+		Offset:     &req.Offset,
+		Sort:       &req.Sort,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get bookings", err)

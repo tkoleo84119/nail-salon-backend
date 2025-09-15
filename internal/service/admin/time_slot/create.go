@@ -71,7 +71,7 @@ func (s *Create) Create(ctx context.Context, scheduleID int64, req adminTimeSlot
 	}
 
 	// Check if staff has access to this store
-	if err := utils.CheckStoreAccess(store.ID, creatorStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(store.ID, creatorStoreIDs, creatorRole); err != nil {
 		return nil, err
 	}
 

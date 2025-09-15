@@ -69,7 +69,7 @@ func (h *Get) Get(c *gin.Context) {
 	}
 
 	// Call service layer
-	response, err := h.service.Get(c.Request.Context(), storeID, expenseID, storeIDs)
+	response, err := h.service.Get(c.Request.Context(), storeID, expenseID, staff.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

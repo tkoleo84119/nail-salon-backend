@@ -25,8 +25,8 @@ func NewBulkCreate(queries *dbgen.Queries) BulkCreateInterface {
 	}
 }
 
-func (s *BulkCreate) BulkCreate(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.BulkCreateParsedRequest, staffStoreIDs []int64) (*adminBookingProductModel.BulkCreateResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, staffStoreIDs); err != nil {
+func (s *BulkCreate) BulkCreate(ctx context.Context, storeID int64, bookingID int64, req adminBookingProductModel.BulkCreateParsedRequest, role string, staffStoreIDs []int64) (*adminBookingProductModel.BulkCreateResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, staffStoreIDs, role); err != nil {
 		return nil, err
 	}
 

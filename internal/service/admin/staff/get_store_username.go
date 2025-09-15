@@ -19,8 +19,8 @@ func NewGetStoreUsername(repo *sqlxRepo.Repositories) GetStoreUsernameInterface 
 	}
 }
 
-func (s *GetStoreUsername) GetStoreUsername(ctx context.Context, storeID int64, req adminStaffModel.GetStoreUsernameParsedRequest, storeIDs []int64) (*adminStaffModel.GetStoreUsernameResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
+func (s *GetStoreUsername) GetStoreUsername(ctx context.Context, storeID int64, req adminStaffModel.GetStoreUsernameParsedRequest, role string, storeIDs []int64) (*adminStaffModel.GetStoreUsernameResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, storeIDs, role); err != nil {
 		return nil, err
 	}
 

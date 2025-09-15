@@ -68,7 +68,7 @@ func (h *Delete) Delete(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.Delete(c.Request.Context(), parsedStoreID, parsedAccountID, creatorStoreIDs)
+	response, err := h.service.Delete(c.Request.Context(), parsedStoreID, parsedAccountID, staffContext.Role, creatorStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

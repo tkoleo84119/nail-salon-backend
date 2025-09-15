@@ -5,7 +5,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminStoreModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/store"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
@@ -28,10 +27,8 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, authCache ca
 
 func (s *Update) Update(ctx context.Context, storeID int64, req adminStoreModel.UpdateRequest, role string, storeIDs []int64) (*adminStoreModel.UpdateResponse, error) {
 	// For ADMIN role, check store access permission
-	if role == common.RoleAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
-			return nil, err
-		}
+	if err := utils.CheckStoreAccess(storeID, storeIDs, role); err != nil {
+		return nil, err
 	}
 
 	// Check if name is unique (excluding current store)

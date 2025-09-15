@@ -28,11 +28,9 @@ func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories) UpdateInterf
 }
 
 func (s *Update) Update(ctx context.Context, storeID int64, scheduleID int64, req adminScheduleModel.UpdateParsedRequest, updaterID int64, updaterRole string, updaterStoreIDs []int64) (*adminScheduleModel.UpdateResponse, error) {
-	// Check store access for the updater (except SUPER_ADMIN)
-	if updaterRole != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, updaterStoreIDs); err != nil {
-			return nil, err
-		}
+	// Check store access for the updater
+	if err := utils.CheckStoreAccess(storeID, updaterStoreIDs, updaterRole); err != nil {
+		return nil, err
 	}
 
 	// Verify stylist exists

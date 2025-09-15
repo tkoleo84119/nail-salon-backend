@@ -67,7 +67,7 @@ func (h *GetStoreUsername) GetStoreUsername(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetStoreUsername(c.Request.Context(), parsedStoreID, parsedRequest, storeIDs)
+	response, err := h.service.GetStoreUsername(c.Request.Context(), parsedStoreID, parsedRequest, staffContext.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

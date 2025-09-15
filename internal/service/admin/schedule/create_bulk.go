@@ -46,7 +46,7 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminSch
 	}
 
 	// Check if staff has access to this store
-	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, creatorRole); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to check store access", err)
 	}
 

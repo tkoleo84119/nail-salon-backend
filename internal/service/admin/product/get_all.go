@@ -19,8 +19,8 @@ func NewGetAll(repo *sqlxRepo.Repositories) GetAllInterface {
 	}
 }
 
-func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminProductModel.GetAllParsedRequest, creatorStoreIDs []int64) (*adminProductModel.GetAllResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminProductModel.GetAllParsedRequest, role string, creatorStoreIDs []int64) (*adminProductModel.GetAllResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

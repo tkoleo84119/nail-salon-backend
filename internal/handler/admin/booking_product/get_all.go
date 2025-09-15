@@ -89,7 +89,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedBookingID, parsedRequest, staffStoreIDs)
+	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedBookingID, parsedRequest, staffContext.Role, staffStoreIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

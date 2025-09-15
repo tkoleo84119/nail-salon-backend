@@ -8,7 +8,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -43,11 +42,9 @@ func (s *GetAllService) GetAll(ctx context.Context, storeID int64, req adminSche
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StoreNotFound)
 	}
 
-	// Check store access for the staff member (except SUPER_ADMIN)
-	if role != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
-			return nil, err
-		}
+	// Check store access for the staff member
+	if err := utils.CheckStoreAccess(storeID, storeIDs, role); err != nil {
+		return nil, err
 	}
 
 	// Get schedules from repository with dynamic filtering

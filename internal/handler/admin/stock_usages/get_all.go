@@ -79,7 +79,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedReq, storeIds)
+	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedReq, staffContext.Role, storeIds)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

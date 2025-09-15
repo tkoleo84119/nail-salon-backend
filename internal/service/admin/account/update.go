@@ -19,14 +19,14 @@ func NewUpdate(accountRepo *sqlx.AccountRepository) UpdateInterface {
 	}
 }
 
-func (s *Update) Update(ctx context.Context, accountID int64, req adminAccountModel.UpdateParsedRequest, creatorStoreIDs []int64) (*adminAccountModel.UpdateResponse, error) {
+func (s *Update) Update(ctx context.Context, accountID int64, req adminAccountModel.UpdateParsedRequest, role string, creatorStoreIDs []int64) (*adminAccountModel.UpdateResponse, error) {
 	// Check if account exists and validate store access
 	account, err := s.accountRepo.GetAccountByID(ctx, accountID)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.AccountNotFound, "帳戶不存在或已被刪除", err)
 	}
 
-	if err := utils.CheckStoreAccess(account.StoreID, creatorStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(account.StoreID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

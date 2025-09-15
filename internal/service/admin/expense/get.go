@@ -21,9 +21,9 @@ func NewGet(queries *dbgen.Queries) GetInterface {
 	}
 }
 
-func (s *Get) Get(ctx context.Context, storeID, expenseID int64, creatorStoreIDs []int64) (*adminExpenseModel.GetResponse, error) {
+func (s *Get) Get(ctx context.Context, storeID, expenseID int64, role string, creatorStoreIDs []int64) (*adminExpenseModel.GetResponse, error) {
 	// Check store access permission
-	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

@@ -8,7 +8,6 @@ import (
 
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminScheduleModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/schedule"
-	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -24,11 +23,9 @@ func NewGet(queries *dbgen.Queries) GetInterface {
 }
 
 func (s *Get) Get(ctx context.Context, storeID int64, scheduleID int64, role string, storeIDs []int64) (*adminScheduleModel.GetResponse, error) {
-	// Check store access for the staff member (except SUPER_ADMIN)
-	if role != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIDs); err != nil {
-			return nil, err
-		}
+	// Check store access for the staff member
+	if err := utils.CheckStoreAccess(storeID, storeIDs, role); err != nil {
+		return nil, err
 	}
 
 	// Get schedule by ID using SQLC (then validate store ID)

@@ -7,9 +7,9 @@ import (
 )
 
 type CreateInterface interface {
-	Create(ctx context.Context, storeID, expenseID int64, req adminExpenseItemModel.CreateParsedRequest, creatorID int64, creatorStoreIDs []int64) (*adminExpenseItemModel.CreateResponse, error)
+	Create(ctx context.Context, storeID, expenseID int64, req adminExpenseItemModel.CreateParsedRequest, creatorID int64, role string, creatorStoreIDs []int64) (*adminExpenseItemModel.CreateResponse, error)
 }
 
 type UpdateInterface interface {
-	Update(ctx context.Context, storeID, expenseID, expenseItemID int64, req adminExpenseItemModel.UpdateParsedRequest, updaterID int64, creatorStoreIDs []int64) (*adminExpenseItemModel.UpdateResponse, error)
+	Update(ctx context.Context, storeID, expenseID, expenseItemID int64, req adminExpenseItemModel.UpdateParsedRequest, updaterID int64, role string, creatorStoreIDs []int64) (*adminExpenseItemModel.UpdateResponse, error)
 }

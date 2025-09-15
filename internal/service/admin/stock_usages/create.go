@@ -26,8 +26,8 @@ func NewCreate(queries *dbgen.Queries, db *pgxpool.Pool) CreateInterface {
 	}
 }
 
-func (s *Create) Create(ctx context.Context, storeID int64, req adminStockUsagesModel.CreateParsedRequest, creatorStoreIDs []int64) (*adminStockUsagesModel.CreateResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+func (s *Create) Create(ctx context.Context, storeID int64, req adminStockUsagesModel.CreateParsedRequest, role string, creatorStoreIDs []int64) (*adminStockUsagesModel.CreateResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

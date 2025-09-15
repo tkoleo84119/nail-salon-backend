@@ -21,9 +21,9 @@ func NewGetAll(
 	}
 }
 
-func (s *GetAll) GetAll(ctx context.Context, storeID, accountID int64, req adminAccountTransactionModel.GetAllParsedRequest, creatorStoreIDs []int64) (*adminAccountTransactionModel.GetAllResponse, error) {
+func (s *GetAll) GetAll(ctx context.Context, storeID, accountID int64, req adminAccountTransactionModel.GetAllParsedRequest, role string, creatorStoreIDs []int64) (*adminAccountTransactionModel.GetAllResponse, error) {
 	// Check store access
-	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

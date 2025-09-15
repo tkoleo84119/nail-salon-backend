@@ -35,7 +35,7 @@ func (s *DeleteBulk) DeleteBulk(ctx context.Context, storeID int64, req adminSch
 	}
 
 	// Check if staff has access to this store
-	if err := utils.CheckStoreAccess(storeID, updaterStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(storeID, updaterStoreIDs, updaterRole); err != nil {
 		return nil, err
 	}
 

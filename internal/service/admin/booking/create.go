@@ -46,10 +46,8 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 	}
 
 	// Check store access for staff (except SUPER_ADMIN)
-	if role != common.RoleSuperAdmin {
-		if err := utils.CheckStoreAccess(storeID, storeIds); err != nil {
-			return nil, err
-		}
+	if err := utils.CheckStoreAccess(storeID, storeIds, role); err != nil {
+		return nil, err
 	}
 
 	// Verify customer exists and get customer info

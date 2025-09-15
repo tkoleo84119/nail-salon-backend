@@ -64,7 +64,7 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 	}
 
 	// Check if staff has access to this store
-	if err := utils.CheckStoreAccess(scheduleInfo.StoreID, updaterStoreIDs); err != nil {
+	if err := utils.CheckStoreAccess(scheduleInfo.StoreID, updaterStoreIDs, updaterRole); err != nil {
 		return nil, err
 	}
 

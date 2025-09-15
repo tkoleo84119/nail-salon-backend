@@ -88,7 +88,7 @@ func (h *UpdateFinish) UpdateFinish(c *gin.Context) {
 	}
 
 	// Service layer call
-	response, err := h.service.UpdateFinish(c.Request.Context(), parsedStoreID, parsedStockUsageID, parsedReq, storeIds)
+	response, err := h.service.UpdateFinish(c.Request.Context(), parsedStoreID, parsedStockUsageID, parsedReq, staffContext.Role, storeIds)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

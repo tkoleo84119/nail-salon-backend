@@ -85,7 +85,7 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	}
 
 	// Call service
-	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedAccountID, parsedReq, storeIDs)
+	response, err := h.service.GetAll(c.Request.Context(), parsedStoreID, parsedAccountID, parsedReq, staffContext.Role, storeIDs)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

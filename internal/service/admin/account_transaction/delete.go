@@ -22,8 +22,8 @@ func NewDelete(queries *dbgen.Queries) DeleteInterface {
 	}
 }
 
-func (s *Delete) Delete(ctx context.Context, storeID, accountID int64, creatorStoreIDs []int64) (*adminAccountTransactionModel.DeleteResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs); err != nil {
+func (s *Delete) Delete(ctx context.Context, storeID, accountID int64, role string, creatorStoreIDs []int64) (*adminAccountTransactionModel.DeleteResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, role); err != nil {
 		return nil, err
 	}
 

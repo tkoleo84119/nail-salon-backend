@@ -22,9 +22,9 @@ func NewGetAll(queries *dbgen.Queries, repo *sqlxRepo.Repositories) GetAllInterf
 	}
 }
 
-func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminStockUsagesModel.GetAllParsedRequest, staffStoreIDs []int64) (*adminStockUsagesModel.GetAllResponse, error) {
-	// Check store access for staff (except SUPER_ADMIN)
-	if err := utils.CheckStoreAccess(storeID, staffStoreIDs); err != nil {
+func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminStockUsagesModel.GetAllParsedRequest, role string, staffStoreIDs []int64) (*adminStockUsagesModel.GetAllResponse, error) {
+	// Check store access for staff
+	if err := utils.CheckStoreAccess(storeID, staffStoreIDs, role); err != nil {
 		return nil, err
 	}
 

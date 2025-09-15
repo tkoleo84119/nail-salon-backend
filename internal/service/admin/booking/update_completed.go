@@ -22,8 +22,8 @@ func NewUpdateCompleted(queries *dbgen.Queries) UpdateCompletedInterface {
 	}
 }
 
-func (s *UpdateCompleted) UpdateCompleted(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateCompletedRequest, updaterStoreIDs []int64) (*adminBookingModel.UpdateCompletedResponse, error) {
-	if err := utils.CheckStoreAccess(storeID, updaterStoreIDs); err != nil {
+func (s *UpdateCompleted) UpdateCompleted(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateCompletedRequest, role string, updaterStoreIDs []int64) (*adminBookingModel.UpdateCompletedResponse, error) {
+	if err := utils.CheckStoreAccess(storeID, updaterStoreIDs, role); err != nil {
 		return nil, err
 	}
 
