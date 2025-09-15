@@ -41,8 +41,9 @@ type GetAllItem struct {
 }
 
 type GetAllCustomer struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	LineName string `json:"lineName"`
 }
 
 type GetAllStylist struct {

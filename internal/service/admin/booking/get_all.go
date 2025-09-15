@@ -99,8 +99,9 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminBookingMode
 		item := adminBookingModel.GetAllItem{
 			ID: utils.FormatID(booking.ID),
 			Customer: adminBookingModel.GetAllCustomer{
-				ID:   utils.FormatID(booking.CustomerID),
-				Name: booking.CustomerName,
+				ID:       utils.FormatID(booking.CustomerID),
+				Name:     booking.CustomerName,
+				LineName: booking.CustomerLineName,
 			},
 			Stylist: adminBookingModel.GetAllStylist{
 				ID:   utils.FormatID(booking.StylistID),

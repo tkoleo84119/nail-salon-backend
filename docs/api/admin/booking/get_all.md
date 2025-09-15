@@ -79,7 +79,8 @@
         "actualDuration": 120, // 如果非 "COMPLETED" 則不會有該欄位
         "customer": {
           "id": "2000000001",
-          "name": "小美"
+          "name": "小美",
+          "lineName": "小美" // 沒有會為 ""
         },
         "stylist": {
           "id": "7000000001",
