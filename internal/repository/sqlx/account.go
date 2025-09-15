@@ -40,10 +40,10 @@ type GetAllAccountsByFilterItem struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
 
-func (r *AccountRepository) GetAllAccountsByFilter(ctx context.Context, params GetAllAccountsByFilterParams) (int, []GetAllAccountsByFilterItem, error) {
+func (r *AccountRepository) GetAllAccountsByFilter(ctx context.Context, storeID int64, params GetAllAccountsByFilterParams) (int, []GetAllAccountsByFilterItem, error) {
 	// where conditions
-	whereConditions := []string{}
-	args := []interface{}{}
+	whereConditions := []string{"store_id = $1"}
+	args := []interface{}{storeID}
 
 	if params.Name != nil && *params.Name != "" {
 		whereConditions = append(whereConditions, fmt.Sprintf("name ILIKE $%d", len(args)+1))
@@ -141,7 +141,7 @@ type UpdateAccountParams struct {
 }
 
 type UpdateAccountResponse struct {
-	ID        int64              `db:"id"`
+	ID int64 `db:"id"`
 }
 
 func (r *AccountRepository) UpdateAccount(ctx context.Context, accountID int64, params UpdateAccountParams) (UpdateAccountResponse, error) {

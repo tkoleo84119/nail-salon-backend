@@ -24,7 +24,7 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminAccountMode
 	}
 
 	// Call repository
-	total, items, err := s.accountRepo.GetAllAccountsByFilter(ctx, sqlx.GetAllAccountsByFilterParams{
+	total, items, err := s.accountRepo.GetAllAccountsByFilter(ctx, storeID, sqlx.GetAllAccountsByFilterParams{
 		Name:     req.Name,
 		IsActive: req.IsActive,
 		Limit:    &req.Limit,
