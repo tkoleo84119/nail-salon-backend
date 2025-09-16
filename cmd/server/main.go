@@ -62,12 +62,6 @@ func main() {
 
 	router := app.SetupRoutes(container)
 
-	// start line reminder job
-	if err := container.GetJobs().LineReminderJob.Start(); err != nil {
-		log.Fatalf("Failed to start line reminder job: %v", err)
-	}
-	defer container.GetJobs().LineReminderJob.Stop()
-
 	// start refresh revoke job
 	if err := container.GetJobs().RefreshRevokeJob.Start(); err != nil {
 		log.Fatalf("Failed to start refresh revoke job: %v", err)
