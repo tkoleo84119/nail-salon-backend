@@ -1,0 +1,4 @@
+DROP INDEX IF EXISTS idx_staff_user_tokens_on_revoked_expired;
+DROP INDEX IF EXISTS idx_customer_tokens_on_revoked_expired;
+DROP INDEX IF EXISTS idx_staff_user_tokens_on_staff_user_id;
+DROP INDEX IF EXISTS idx_customer_tokens_on_customer_id;

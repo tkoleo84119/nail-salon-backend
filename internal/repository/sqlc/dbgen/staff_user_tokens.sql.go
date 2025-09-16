@@ -12,6 +12,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countExpiredOrRevokedStaffUserTokens = `-- name: CountExpiredOrRevokedStaffUserTokens :one
+SELECT COUNT(*) FROM staff_user_tokens
+WHERE is_revoked = true OR expired_at < NOW()
+`
+
+func (q *Queries) CountExpiredOrRevokedStaffUserTokens(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countExpiredOrRevokedStaffUserTokens)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createStaffUserToken = `-- name: CreateStaffUserToken :one
 INSERT INTO staff_user_tokens (
     id,
@@ -51,6 +63,21 @@ func (q *Queries) CreateStaffUserToken(ctx context.Context, arg CreateStaffUserT
 	var i CreateStaffUserTokenRow
 	err := row.Scan(&i.ID, &i.CreatedAt)
 	return i, err
+}
+
+const deleteStaffUserTokensBatch = `-- name: DeleteStaffUserTokensBatch :exec
+DELETE FROM staff_user_tokens
+WHERE id IN (
+    SELECT id
+    FROM staff_user_tokens
+    WHERE is_revoked = true OR expired_at < NOW()
+    LIMIT $1
+)
+`
+
+func (q *Queries) DeleteStaffUserTokensBatch(ctx context.Context, limit int32) error {
+	_, err := q.db.Exec(ctx, deleteStaffUserTokensBatch, limit)
+	return err
 }
 
 const getValidStaffUserToken = `-- name: GetValidStaffUserToken :one

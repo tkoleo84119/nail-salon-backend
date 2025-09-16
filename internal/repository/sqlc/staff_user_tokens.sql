@@ -19,3 +19,16 @@ WHERE refresh_token = $1 AND expired_at > NOW() AND is_revoked = false;
 UPDATE staff_user_tokens
 SET is_revoked = true
 WHERE refresh_token = $1;
+
+-- name: CountExpiredOrRevokedStaffUserTokens :one
+SELECT COUNT(*) FROM staff_user_tokens
+WHERE is_revoked = true OR expired_at < NOW();
+
+-- name: DeleteStaffUserTokensBatch :exec
+DELETE FROM staff_user_tokens
+WHERE id IN (
+    SELECT id
+    FROM staff_user_tokens
+    WHERE is_revoked = true OR expired_at < NOW()
+    LIMIT $1
+);

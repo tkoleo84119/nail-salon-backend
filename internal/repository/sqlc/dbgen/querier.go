@@ -61,6 +61,8 @@ type Querier interface {
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
 	CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.Context, arg CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams) (bool, error)
 	CheckTimeSlotTemplateItemOverlap(ctx context.Context, arg CheckTimeSlotTemplateItemOverlapParams) (bool, error)
+	CountExpiredOrRevokedCustomerTokens(ctx context.Context) (int64, error)
+	CountExpiredOrRevokedStaffUserTokens(ctx context.Context) (int64, error)
 	CountProductsByIDs(ctx context.Context, arg CountProductsByIDsParams) (int64, error)
 	CreateAccount(ctx context.Context, arg CreateAccountParams) error
 	CreateAccountTransaction(ctx context.Context, arg CreateAccountTransactionParams) (int64, error)
@@ -88,9 +90,11 @@ type Querier interface {
 	CreateTimeSlotTemplate(ctx context.Context, arg CreateTimeSlotTemplateParams) (TimeSlotTemplate, error)
 	CreateTimeSlotTemplateItem(ctx context.Context, arg CreateTimeSlotTemplateItemParams) (CreateTimeSlotTemplateItemRow, error)
 	DeleteCustomerCoupon(ctx context.Context, id int64) error
+	DeleteCustomerTokensBatch(ctx context.Context, limit int32) error
 	DeleteLatestAccountTransaction(ctx context.Context, accountID int64) (int64, error)
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
+	DeleteStaffUserTokensBatch(ctx context.Context, limit int32) error
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplate(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error

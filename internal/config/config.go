@@ -43,7 +43,8 @@ type RedisConfig struct {
 }
 
 type SchedulerConfig struct {
-	LineReminderCron string
+	LineReminderCron  string
+	RefreshRevokeCron string
 }
 
 type CORSConfig struct {
@@ -124,7 +125,8 @@ func Load() *Config {
 	}
 
 	schedulerConfig := SchedulerConfig{
-		LineReminderCron: getAndCheckCronExpression("LINE_REMINDER_CRON"),
+		LineReminderCron:  getAndCheckCronExpression("LINE_REMINDER_CRON"),
+		RefreshRevokeCron: getAndCheckCronExpression("REFRESH_REVOKE_CRON"),
 	}
 
 	serverConfig := ServerConfig{

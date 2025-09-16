@@ -43,7 +43,8 @@ type Handlers struct {
 }
 
 type Jobs struct {
-	LineReminderJob *job.LineReminderJob
+	LineReminderJob  *job.LineReminderJob
+	RefreshRevokeJob *job.RefreshRevokeJob
 }
 
 func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.Client) (*Container, error) {
@@ -66,8 +67,8 @@ func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.
 	}
 
 	// Initialize handlers using separated containers
-    publicHandlers := NewPublicHandlers(publicServices, cfg)
-    adminHandlers := NewAdminHandlers(adminServices, cfg)
+	publicHandlers := NewPublicHandlers(publicServices, cfg)
+	adminHandlers := NewAdminHandlers(adminServices, cfg)
 
 	handlers := Handlers{
 		Public: publicHandlers,
@@ -80,8 +81,14 @@ func NewContainer(cfg *config.Config, database *db.Database, redisClient *redis.
 		return nil, fmt.Errorf("failed to create line reminder job: %w", err)
 	}
 
+	refreshRevokeJob, err := job.NewRefreshRevokeJob(cfg, queries, redisClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create refresh revoke job: %w", err)
+	}
+
 	jobs := Jobs{
-		LineReminderJob: lineReminderJob,
+		LineReminderJob:  lineReminderJob,
+		RefreshRevokeJob: refreshRevokeJob,
 	}
 
 	return &Container{

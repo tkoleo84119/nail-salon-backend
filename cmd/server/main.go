@@ -68,6 +68,12 @@ func main() {
 	}
 	defer container.GetJobs().LineReminderJob.Stop()
 
+	// start refresh revoke job
+	if err := container.GetJobs().RefreshRevokeJob.Start(); err != nil {
+		log.Fatalf("Failed to start refresh revoke job: %v", err)
+	}
+	defer container.GetJobs().RefreshRevokeJob.Stop()
+
 	if err := router.Run(":" + cfg.Server.Port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

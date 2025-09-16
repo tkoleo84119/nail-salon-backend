@@ -12,6 +12,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countExpiredOrRevokedCustomerTokens = `-- name: CountExpiredOrRevokedCustomerTokens :one
+SELECT COUNT(*) FROM customer_tokens
+WHERE is_revoked = true OR expired_at < NOW()
+`
+
+func (q *Queries) CountExpiredOrRevokedCustomerTokens(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countExpiredOrRevokedCustomerTokens)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCustomerToken = `-- name: CreateCustomerToken :one
 INSERT INTO customer_tokens (id, customer_id, refresh_token, user_agent, ip_address, expired_at)
 VALUES ($1, $2, $3, $4, $5, $6)
@@ -49,6 +61,21 @@ func (q *Queries) CreateCustomerToken(ctx context.Context, arg CreateCustomerTok
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const deleteCustomerTokensBatch = `-- name: DeleteCustomerTokensBatch :exec
+DELETE FROM customer_tokens
+WHERE id IN (
+  SELECT id
+  FROM customer_tokens
+  WHERE is_revoked = true OR expired_at < NOW()
+  LIMIT $1
+)
+`
+
+func (q *Queries) DeleteCustomerTokensBatch(ctx context.Context, limit int32) error {
+	_, err := q.db.Exec(ctx, deleteCustomerTokensBatch, limit)
+	return err
 }
 
 const getValidCustomerToken = `-- name: GetValidCustomerToken :one
