@@ -210,6 +210,7 @@ SELECT
     COALESCE(SUM(CASE WHEN c.payment_method = 'LINE_PAY' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as line_pay_revenue,
     COALESCE(SUM(CASE WHEN c.payment_method = 'CASH' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as cash_revenue,
     COALESCE(SUM(CASE WHEN c.payment_method = 'TRANSFER' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as transfer_revenue,
+    COALESCE(SUM(CASE WHEN b.status = 'COMPLETED' THEN COALESCE(c.total_amount, 0) ELSE 0 END), 0)::numeric(12,2) as total_amount,
     COALESCE(SUM(CASE WHEN b.status = 'COMPLETED' THEN COALESCE(c.paid_amount, 0) ELSE 0 END), 0)::numeric(12,2) as total_paid_amount,
     SUM(COALESCE(b.actual_duration, 0)) as total_service_time
 FROM bookings b
@@ -241,6 +242,7 @@ type GetStorePerformanceGroupByStylistRow struct {
 	LinePayRevenue    pgtype.Numeric `db:"line_pay_revenue" json:"line_pay_revenue"`
 	CashRevenue       pgtype.Numeric `db:"cash_revenue" json:"cash_revenue"`
 	TransferRevenue   pgtype.Numeric `db:"transfer_revenue" json:"transfer_revenue"`
+	TotalAmount       pgtype.Numeric `db:"total_amount" json:"total_amount"`
 	TotalPaidAmount   pgtype.Numeric `db:"total_paid_amount" json:"total_paid_amount"`
 	TotalServiceTime  int64          `db:"total_service_time" json:"total_service_time"`
 }
@@ -264,6 +266,7 @@ func (q *Queries) GetStorePerformanceGroupByStylist(ctx context.Context, arg Get
 			&i.LinePayRevenue,
 			&i.CashRevenue,
 			&i.TransferRevenue,
+			&i.TotalAmount,
 			&i.TotalPaidAmount,
 			&i.TotalServiceTime,
 		); err != nil {
@@ -343,78 +346,6 @@ func (q *Queries) GetStylistPerformanceGroupByStore(ctx context.Context, arg Get
 			&i.TransferRevenue,
 			&i.TotalPaidAmount,
 			&i.TotalServiceTime,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getTomorrowBookingsForReminder = `-- name: GetTomorrowBookingsForReminder :many
-SELECT
-    b.id,
-    b.store_id,
-    s.name as store_name,
-    s.address as store_address,
-    b.customer_id,
-    c.line_uid as customer_line_uid,
-    c.name as customer_name,
-    b.time_slot_id,
-    ts.start_time,
-    ts.end_time,
-    sch.work_date,
-    b.status
-FROM bookings b
-JOIN stores s ON b.store_id = s.id
-JOIN customers c ON b.customer_id = c.id
-JOIN time_slots ts ON b.time_slot_id = ts.id
-JOIN schedules sch ON ts.schedule_id = sch.id
-WHERE sch.work_date = $1
-    AND b.status = 'SCHEDULED'
-ORDER BY s.id, ts.start_time
-`
-
-type GetTomorrowBookingsForReminderRow struct {
-	ID              int64       `db:"id" json:"id"`
-	StoreID         int64       `db:"store_id" json:"store_id"`
-	StoreName       string      `db:"store_name" json:"store_name"`
-	StoreAddress    pgtype.Text `db:"store_address" json:"store_address"`
-	CustomerID      int64       `db:"customer_id" json:"customer_id"`
-	CustomerLineUid string      `db:"customer_line_uid" json:"customer_line_uid"`
-	CustomerName    string      `db:"customer_name" json:"customer_name"`
-	TimeSlotID      int64       `db:"time_slot_id" json:"time_slot_id"`
-	StartTime       pgtype.Time `db:"start_time" json:"start_time"`
-	EndTime         pgtype.Time `db:"end_time" json:"end_time"`
-	WorkDate        pgtype.Date `db:"work_date" json:"work_date"`
-	Status          string      `db:"status" json:"status"`
-}
-
-func (q *Queries) GetTomorrowBookingsForReminder(ctx context.Context, workDate pgtype.Date) ([]GetTomorrowBookingsForReminderRow, error) {
-	rows, err := q.db.Query(ctx, getTomorrowBookingsForReminder, workDate)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetTomorrowBookingsForReminderRow{}
-	for rows.Next() {
-		var i GetTomorrowBookingsForReminderRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.StoreID,
-			&i.StoreName,
-			&i.StoreAddress,
-			&i.CustomerID,
-			&i.CustomerLineUid,
-			&i.CustomerName,
-			&i.TimeSlotID,
-			&i.StartTime,
-			&i.EndTime,
-			&i.WorkDate,
-			&i.Status,
 		); err != nil {
 			return nil, err
 		}

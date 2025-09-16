@@ -104,6 +104,7 @@ SELECT
     COALESCE(SUM(CASE WHEN c.payment_method = 'LINE_PAY' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as line_pay_revenue,
     COALESCE(SUM(CASE WHEN c.payment_method = 'CASH' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as cash_revenue,
     COALESCE(SUM(CASE WHEN c.payment_method = 'TRANSFER' AND b.status = 'COMPLETED' THEN COALESCE(c.final_amount, 0) ELSE 0 END), 0)::numeric(12,2) as transfer_revenue,
+    COALESCE(SUM(CASE WHEN b.status = 'COMPLETED' THEN COALESCE(c.total_amount, 0) ELSE 0 END), 0)::numeric(12,2) as total_amount,
     COALESCE(SUM(CASE WHEN b.status = 'COMPLETED' THEN COALESCE(c.paid_amount, 0) ELSE 0 END), 0)::numeric(12,2) as total_paid_amount,
     SUM(COALESCE(b.actual_duration, 0)) as total_service_time
 FROM bookings b
@@ -117,26 +118,3 @@ WHERE b.store_id = $1
     AND sch.work_date BETWEEN $2 AND $3
 GROUP BY b.stylist_id, st.name
 ORDER BY b.stylist_id;
-
--- name: GetTomorrowBookingsForReminder :many
-SELECT
-    b.id,
-    b.store_id,
-    s.name as store_name,
-    s.address as store_address,
-    b.customer_id,
-    c.line_uid as customer_line_uid,
-    c.name as customer_name,
-    b.time_slot_id,
-    ts.start_time,
-    ts.end_time,
-    sch.work_date,
-    b.status
-FROM bookings b
-JOIN stores s ON b.store_id = s.id
-JOIN customers c ON b.customer_id = c.id
-JOIN time_slots ts ON b.time_slot_id = ts.id
-JOIN schedules sch ON ts.schedule_id = sch.id
-WHERE sch.work_date = $1
-    AND b.status = 'SCHEDULED'
-ORDER BY s.id, ts.start_time;

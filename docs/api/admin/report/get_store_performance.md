@@ -62,6 +62,7 @@
     "linePayRevenue": 50000, // 總Line Pay業績
     "cashRevenue": 50000, // 總現金業績
     "transferRevenue": 50000, // 總轉帳業績
+    "totalAmount": 160000, // 原始金額 (未扣折扣)
     "totalPaidAmount": 150000, // 總實際收款
     "totalServiceTime": 1000, // 總服務時間
     "stylists": [
@@ -75,6 +76,7 @@
         "linePayRevenue": 50000,
         "cashRevenue": 50000,
         "transferRevenue": 50000,
+        "totalAmount": 160000,
         "totalPaidAmount": 150000,
         "totalServiceTime": 1000
       }

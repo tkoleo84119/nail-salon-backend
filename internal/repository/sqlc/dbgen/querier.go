@@ -143,7 +143,6 @@ type Querier interface {
 	GetTimeSlotTemplateItemsByTemplateID(ctx context.Context, templateID int64) ([]GetTimeSlotTemplateItemsByTemplateIDRow, error)
 	GetTimeSlotTemplateWithItemsByID(ctx context.Context, id int64) ([]GetTimeSlotTemplateWithItemsByIDRow, error)
 	GetTimeSlotWithScheduleByID(ctx context.Context, id int64) (GetTimeSlotWithScheduleByIDRow, error)
-	GetTomorrowBookingsForReminder(ctx context.Context, workDate pgtype.Date) ([]GetTomorrowBookingsForReminderRow, error)
 	GetValidCustomerToken(ctx context.Context, refreshToken string) (GetValidCustomerTokenRow, error)
 	GetValidStaffUserToken(ctx context.Context, refreshToken string) (GetValidStaffUserTokenRow, error)
 	RevokeCustomerToken(ctx context.Context, refreshToken string) error
