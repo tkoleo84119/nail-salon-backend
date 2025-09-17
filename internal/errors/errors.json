@@ -412,6 +412,16 @@
       "code": "E3EXP011",
       "message": "已到貨的產品明細不能沒有到貨日期",
       "status": 400
+    },
+    "ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt": {
+      "code": "E3EXP012",
+      "message": "沒有結清日期，無法更新結清資訊",
+      "status": 400
+    },
+    "ExpenseNotUpdateReimbursedInfo": {
+      "code": "E3EXP013",
+      "message": "結清的支出不能更新結清資訊",
+      "status": 400
     }
   },
   "PRODUCT_CATEGORY": {

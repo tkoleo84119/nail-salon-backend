@@ -30,6 +30,11 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID int64, req admin
 		return nil, err
 	}
 
+	// when pass isReimbursed is true, but not pass reimbursedAt
+	if req.IsReimbursed != nil && *req.IsReimbursed && req.ReimbursedAt == nil {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt)
+	}
+
 	// Verify expense exists and belongs to the store
 	expense, err := s.queries.GetStoreExpenseByID(ctx, dbgen.GetStoreExpenseByIDParams{
 		ID:      expenseID,
@@ -40,6 +45,13 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID int64, req admin
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotFound)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get expense", err)
+	}
+
+	// if expense is reimbursed, not allow to update reimbursed info (isReimbursed or reimbursedAt or payerID)
+	if expense.IsReimbursed.Valid && expense.IsReimbursed.Bool {
+		if req.IsReimbursed != nil || req.ReimbursedAt != nil || req.PayerID != nil {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotUpdateReimbursedInfo)
+		}
 	}
 
 	// Validate supplier if provided

@@ -152,7 +152,9 @@ const (
 	ExpenseItemQuantityRequired = "ExpenseItemQuantityRequired"
 	ExpenseNotFound = "ExpenseNotFound"
 	ExpenseNotUpdateAmountWithExpenseItems = "ExpenseNotUpdateAmountWithExpenseItems"
+	ExpenseNotUpdateReimbursedInfo = "ExpenseNotUpdateReimbursedInfo"
 	ExpenseNotUpdateReimbursedInfoWithoutPayerID = "ExpenseNotUpdateReimbursedInfoWithoutPayerID"
+	ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt = "ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt"
 	ExpenseReimbursedNotAllowToCreateItem = "ExpenseReimbursedNotAllowToCreateItem"
 
 	// PRODUCT - product related errors
