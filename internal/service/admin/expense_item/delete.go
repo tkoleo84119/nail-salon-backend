@@ -24,7 +24,7 @@ func NewDelete(queries *dbgen.Queries, db *pgxpool.Pool) DeleteInterface {
 	}
 }
 
-func (s *Delete) Delete(ctx context.Context, storeID, expenseID, expenseItemID int64, role string, creatorID int64,creatorStoreIDs []int64) (*adminExpenseItemModel.DeleteResponse, error) {
+func (s *Delete) Delete(ctx context.Context, storeID, expenseID, expenseItemID int64, role string, creatorID int64, creatorStoreIDs []int64) (*adminExpenseItemModel.DeleteResponse, error) {
 	// Check store access permission
 	if err := utils.CheckStoreAccess(storeID, creatorStoreIDs, role); err != nil {
 		return nil, err
@@ -104,6 +104,11 @@ func (s *Delete) Delete(ctx context.Context, storeID, expenseID, expenseItemID i
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update expense amount", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
 
 	return &adminExpenseItemModel.DeleteResponse{
