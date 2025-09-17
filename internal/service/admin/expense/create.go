@@ -128,6 +128,10 @@ func (s *Create) checkAndPrepareBatchData(ctx context.Context, storeID int64, it
 		return 0, nil, nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get products stock info by ids", err)
 	}
 
+	if len(products) != len(productIDs) {
+		return 0, nil, nil, errorCodes.NewServiceErrorWithCode(errorCodes.ProductNotFound)
+	}
+
 	productMap := make(map[int64]dbgen.GetProductsStockInfoByIDsRow)
 	for _, product := range products {
 		productMap[product.ID] = product
@@ -170,10 +174,13 @@ func (s *Create) checkAndPrepareBatchData(ctx context.Context, storeID int64, it
 			UpdatedAt:       nowPg,
 		})
 
-		updateProductStockRows = append(updateProductStockRows, dbgen.UpdateProductCurrentStockParams{
-			ID:           item.ProductID,
-			CurrentStock: product.CurrentStock + int32(item.Quantity),
-		})
+		// only isArrived is true, update product current stock
+		if item.IsArrived {
+			updateProductStockRows = append(updateProductStockRows, dbgen.UpdateProductCurrentStockParams{
+				ID:           item.ProductID,
+				CurrentStock: product.CurrentStock + int32(item.Quantity),
+			})
+		}
 	}
 
 	return expenseID, itemRows, updateProductStockRows, nil
