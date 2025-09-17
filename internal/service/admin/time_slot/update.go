@@ -44,6 +44,17 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotUpdate)
 	}
 
+	// if isAvailable is false and req.IsAvailable is true, check if there is any valid booking exists
+	if !timeSlot.IsAvailable.Bool && req.IsAvailable != nil && *req.IsAvailable {
+		validBookingExists, err := s.queries.CheckValidBookingExistsByTimeSlotID(ctx, timeSlotID)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check valid booking exists", err)
+		}
+		if validBookingExists {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotUpdate)
+		}
+	}
+
 	// Get schedule information
 	scheduleInfo, err := s.queries.GetScheduleByID(ctx, scheduleID)
 	if err != nil {

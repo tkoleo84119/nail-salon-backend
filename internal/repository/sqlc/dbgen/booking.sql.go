@@ -31,6 +31,36 @@ func (q *Queries) CancelBooking(ctx context.Context, arg CancelBookingParams) (i
 	return id, err
 }
 
+const checkAllBookingExistsByTimeSlotID = `-- name: CheckAllBookingExistsByTimeSlotID :one
+SELECT EXISTS(
+    SELECT 1 FROM bookings
+    WHERE time_slot_id = $1
+    AND status IN ('SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW')
+) as exists
+`
+
+func (q *Queries) CheckAllBookingExistsByTimeSlotID(ctx context.Context, timeSlotID int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkAllBookingExistsByTimeSlotID, timeSlotID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const checkValidBookingExistsByTimeSlotID = `-- name: CheckValidBookingExistsByTimeSlotID :one
+SELECT EXISTS(
+    SELECT 1 FROM bookings
+    WHERE time_slot_id = $1
+    AND status IN ('SCHEDULED', 'COMPLETED')
+) as exists
+`
+
+func (q *Queries) CheckValidBookingExistsByTimeSlotID(ctx context.Context, timeSlotID int64) (bool, error) {
+	row := q.db.QueryRow(ctx, checkValidBookingExistsByTimeSlotID, timeSlotID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createBooking = `-- name: CreateBooking :one
 INSERT INTO bookings (
     id,
@@ -220,7 +250,7 @@ INNER JOIN time_slots ts ON b.time_slot_id = ts.id
 INNER JOIN schedules sch ON ts.schedule_id = sch.id
 LEFT JOIN checkouts c ON b.id = c.booking_id
 WHERE b.store_id = $1
-    AND b.status != 'SCHEDULE'
+    AND b.status != 'SCHEDULED'
     AND sch.work_date BETWEEN $2 AND $3
 GROUP BY b.stylist_id, st.name
 ORDER BY b.stylist_id
@@ -299,7 +329,7 @@ INNER JOIN time_slots ts ON b.time_slot_id = ts.id
 INNER JOIN schedules sch ON ts.schedule_id = sch.id
 LEFT JOIN checkouts c ON b.id = c.booking_id
 WHERE b.stylist_id = $1
-    AND b.status != 'SCHEDULE'
+    AND b.status != 'SCHEDULED'
     AND sch.work_date BETWEEN $2 AND $3
 GROUP BY b.store_id, s.name
 ORDER BY b.store_id

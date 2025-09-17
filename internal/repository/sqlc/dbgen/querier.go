@@ -20,6 +20,7 @@ type Querier interface {
 	BulkCreateCheckout(ctx context.Context, arg []BulkCreateCheckoutParams) (int64, error)
 	BulkDeleteBookingProducts(ctx context.Context, arg BulkDeleteBookingProductsParams) error
 	CancelBooking(ctx context.Context, arg CancelBookingParams) (int64, error)
+	CheckAllBookingExistsByTimeSlotID(ctx context.Context, timeSlotID int64) (bool, error)
 	CheckBrandExistByID(ctx context.Context, id int64) (bool, error)
 	CheckBrandNameExists(ctx context.Context, name string) (bool, error)
 	CheckBrandNameExistsExcludeSelf(ctx context.Context, arg CheckBrandNameExistsExcludeSelfParams) (bool, error)
@@ -61,6 +62,7 @@ type Querier interface {
 	CheckTimeSlotTemplateExists(ctx context.Context, id int64) (bool, error)
 	CheckTimeSlotTemplateItemExistsByIDAndTemplateID(ctx context.Context, arg CheckTimeSlotTemplateItemExistsByIDAndTemplateIDParams) (bool, error)
 	CheckTimeSlotTemplateItemOverlap(ctx context.Context, arg CheckTimeSlotTemplateItemOverlapParams) (bool, error)
+	CheckValidBookingExistsByTimeSlotID(ctx context.Context, timeSlotID int64) (bool, error)
 	CountExpiredOrRevokedCustomerTokens(ctx context.Context) (int64, error)
 	CountExpiredOrRevokedStaffUserTokens(ctx context.Context) (int64, error)
 	CountProductsByIDs(ctx context.Context, arg CountProductsByIDsParams) (int64, error)

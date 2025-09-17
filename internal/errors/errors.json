@@ -408,7 +408,7 @@
       "status": 400
     }
   },
-  "SCHEDULE": {
+  "SCHEDULED": {
     "ScheduleAlreadyBookedDoNotUpdateDate": {
       "code": "E3SCH001",
       "message": "部分時段已被預約或取消，更新日期會造成問題",

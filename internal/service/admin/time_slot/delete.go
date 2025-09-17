@@ -31,7 +31,11 @@ func (s *Delete) Delete(ctx context.Context, scheduleID int64, timeSlotID int64,
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotBelongToSchedule)
 	}
 	// Check if time slot is booked (cannot delete booked time slots)
-	if !timeSlot.IsAvailable.Bool {
+	bookingExists, err := s.queries.CheckAllBookingExistsByTimeSlotID(ctx, timeSlotID)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check booking exists", err)
+	}
+	if bookingExists {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotDelete)
 	}
 

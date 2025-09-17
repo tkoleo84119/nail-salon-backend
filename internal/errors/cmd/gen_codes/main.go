@@ -41,7 +41,7 @@ func main() {
 
 	// Preferred category order to keep file stable
 	preferredOrder := []string{
-		"AUTH", "VAL", "BOOKING", "CUSTOMER", "SCHEDULE", "SERVICE", "STAFF", "STORE", "STYLIST", "TIME_SLOT", "SYS",
+		"AUTH", "VAL", "BOOKING", "CUSTOMER", "SCHEDULED", "SERVICE", "STAFF", "STORE", "STYLIST", "TIME_SLOT", "SYS",
 	}
 
 	// Collect actual categories

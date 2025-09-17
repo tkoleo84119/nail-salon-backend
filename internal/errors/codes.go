@@ -61,18 +61,6 @@ const (
 	CustomerIsBlacklisted = "CustomerIsBlacklisted"
 	CustomerNotFound = "CustomerNotFound"
 
-	// SCHEDULE - schedule related errors
-	ScheduleAlreadyBookedDoNotDelete = "ScheduleAlreadyBookedDoNotDelete"
-	ScheduleAlreadyBookedDoNotUpdateDate = "ScheduleAlreadyBookedDoNotUpdateDate"
-	ScheduleAlreadyExists = "ScheduleAlreadyExists"
-	ScheduleCannotCreateBeforeToday = "ScheduleCannotCreateBeforeToday"
-	ScheduleDateRangeExceed31Days = "ScheduleDateRangeExceed31Days"
-	ScheduleDuplicateWorkDateInput = "ScheduleDuplicateWorkDateInput"
-	ScheduleEndBeforeStart = "ScheduleEndBeforeStart"
-	ScheduleNotBelongToStore = "ScheduleNotBelongToStore"
-	ScheduleNotBelongToStylist = "ScheduleNotBelongToStylist"
-	ScheduleNotFound = "ScheduleNotFound"
-
 	// SERVICE - service related errors
 	ServiceAlreadyExists = "ServiceAlreadyExists"
 	ServiceNotActive = "ServiceNotActive"
@@ -159,6 +147,18 @@ const (
 
 	// REPORT - report related errors
 	ReportDateRangeExceed1Year = "ReportDateRangeExceed1Year"
+
+	// SCHEDULED - scheduled related errors
+	ScheduleAlreadyBookedDoNotDelete = "ScheduleAlreadyBookedDoNotDelete"
+	ScheduleAlreadyBookedDoNotUpdateDate = "ScheduleAlreadyBookedDoNotUpdateDate"
+	ScheduleAlreadyExists = "ScheduleAlreadyExists"
+	ScheduleCannotCreateBeforeToday = "ScheduleCannotCreateBeforeToday"
+	ScheduleDateRangeExceed31Days = "ScheduleDateRangeExceed31Days"
+	ScheduleDuplicateWorkDateInput = "ScheduleDuplicateWorkDateInput"
+	ScheduleEndBeforeStart = "ScheduleEndBeforeStart"
+	ScheduleNotBelongToStore = "ScheduleNotBelongToStore"
+	ScheduleNotBelongToStylist = "ScheduleNotBelongToStylist"
+	ScheduleNotFound = "ScheduleNotFound"
 
 	// STOCK_USAGE - stock usage related errors
 	StockUsageNotFound = "StockUsageNotFound"

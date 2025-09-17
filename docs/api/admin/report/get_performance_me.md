@@ -131,7 +131,7 @@
 
 ## Service 邏輯
 
-1. 查詢區段內的非 `SCHEDULE` 狀態的 `BOOKING`，使用 `storeId` 分組。
+1. 查詢區段內的非 `SCHEDULED` 狀態的 `BOOKING`，使用 `storeId` 分組。
 2. 整理資料，並計算總和。
 3. 回傳統計報表資料。
 
