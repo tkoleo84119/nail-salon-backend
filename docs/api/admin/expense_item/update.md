@@ -131,11 +131,15 @@
 ## Service 邏輯
 
 1. 確認門市存取權限。
-3. 確認 `expense_item` 是否存在。
 2. 確認 `expense` 是否存在。
-3. 確認 `expense_item` 是否屬於指定的支出。
-4. 如果有傳入`productId`，則確認 `productId` 是否存在，並且屬於指定的門市。
-5. 更新 `expenses_items` 資料。
-6. 如果有更新 `price` 或 `quantity`，則更新 `expenses` 的總金額。
-7. 如果有更新 `quantity`，則更新 `products` 的庫存數量 (扣掉原本的 `quantity`，加上新的 `quantity`)。
-8. 回傳更新結果。
+3. 確認 `expense_item` 是否存在。
+4. 確認 `expense_item` 是否已到貨，如果`已到貨`，則確認是否符合更新限制。
+   - 不允許改回未到貨狀態
+   - 不允許更改產品
+   - 不允許更改數量
+   - 不允許更改價格
+5. 如果有傳入`productId`，則確認 `productId` 是否存在，並且屬於指定的門市。
+6. 更新 `expenses_items` 資料。
+7. 如果有更新 `price` 或 `quantity`，則更新 `expenses` 的總金額，若無則單純更新 `updater`。
+8. 如果有更新 `isArrived`，則更新 `products` 的庫存數量。
+9. 回傳更新結果。

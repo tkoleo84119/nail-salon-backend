@@ -372,6 +372,46 @@
       "code": "E3EXP003",
       "message": "有產品明細，無法單獨更新金額",
       "status": 400
+    },
+    "ExpenseItemQuantityRequired": {
+      "code": "E3EXP004",
+      "message": "產品明細數量為必填項目",
+      "status": 400
+    },
+    "ExpenseItemArrivedNotAllowToTurnBack": {
+      "code": "E3EXP005",
+      "message": "已到貨的產品明細不能轉為未到貨",
+      "status": 400
+    },
+    "ExpenseItemArrivedNotAllowToChangeProductID": {
+      "code": "E3EXP006",
+      "message": "已到貨的產品明細不能更改產品",
+      "status": 400
+    },
+    "ExpenseItemArrivedNotAllowToChangeQuantity": {
+      "code": "E3EXP007",
+      "message": "已到貨的產品明細不能更改數量",
+      "status": 400
+    },
+    "ExpenseItemArrivedNotAllowToChangePrice": {
+      "code": "E3EXP008",
+      "message": "已到貨的產品明細不能更改價格",
+      "status": 400
+    },
+    "ExpenseReimbursedNotAllowToCreateItem": {
+      "code": "E3EXP009",
+      "message": "結清的支出不能新增產品明細",
+      "status": 400
+    },
+    "ExpenseItemAllArrivedNotAllowToCreateItem": {
+      "code": "E3EXP010",
+      "message": "所有產品明細都已到貨，不能新增產品明細",
+      "status": 400
+    },
+    "ExpenseItemNotAllowPassIsArrivedTrueWithoutArrivalDate": {
+      "code": "E3EXP011",
+      "message": "已到貨的產品明細不能沒有到貨日期",
+      "status": 400
     }
   },
   "PRODUCT_CATEGORY": {

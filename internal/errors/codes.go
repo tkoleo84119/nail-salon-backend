@@ -61,6 +61,18 @@ const (
 	CustomerIsBlacklisted = "CustomerIsBlacklisted"
 	CustomerNotFound = "CustomerNotFound"
 
+	// SCHEDULED - scheduled related errors
+	ScheduleAlreadyBookedDoNotDelete = "ScheduleAlreadyBookedDoNotDelete"
+	ScheduleAlreadyBookedDoNotUpdateDate = "ScheduleAlreadyBookedDoNotUpdateDate"
+	ScheduleAlreadyExists = "ScheduleAlreadyExists"
+	ScheduleCannotCreateBeforeToday = "ScheduleCannotCreateBeforeToday"
+	ScheduleDateRangeExceed31Days = "ScheduleDateRangeExceed31Days"
+	ScheduleDuplicateWorkDateInput = "ScheduleDuplicateWorkDateInput"
+	ScheduleEndBeforeStart = "ScheduleEndBeforeStart"
+	ScheduleNotBelongToStore = "ScheduleNotBelongToStore"
+	ScheduleNotBelongToStylist = "ScheduleNotBelongToStylist"
+	ScheduleNotFound = "ScheduleNotFound"
+
 	// SERVICE - service related errors
 	ServiceAlreadyExists = "ServiceAlreadyExists"
 	ServiceNotActive = "ServiceNotActive"
@@ -131,9 +143,17 @@ const (
 	CustomerCouponNotFound = "CustomerCouponNotFound"
 
 	// EXPENSE - expense related errors
+	ExpenseItemAllArrivedNotAllowToCreateItem = "ExpenseItemAllArrivedNotAllowToCreateItem"
+	ExpenseItemArrivedNotAllowToChangePrice = "ExpenseItemArrivedNotAllowToChangePrice"
+	ExpenseItemArrivedNotAllowToChangeProductID = "ExpenseItemArrivedNotAllowToChangeProductID"
+	ExpenseItemArrivedNotAllowToChangeQuantity = "ExpenseItemArrivedNotAllowToChangeQuantity"
+	ExpenseItemArrivedNotAllowToTurnBack = "ExpenseItemArrivedNotAllowToTurnBack"
+	ExpenseItemNotAllowPassIsArrivedTrueWithoutArrivalDate = "ExpenseItemNotAllowPassIsArrivedTrueWithoutArrivalDate"
+	ExpenseItemQuantityRequired = "ExpenseItemQuantityRequired"
 	ExpenseNotFound = "ExpenseNotFound"
 	ExpenseNotUpdateAmountWithExpenseItems = "ExpenseNotUpdateAmountWithExpenseItems"
 	ExpenseNotUpdateReimbursedInfoWithoutPayerID = "ExpenseNotUpdateReimbursedInfoWithoutPayerID"
+	ExpenseReimbursedNotAllowToCreateItem = "ExpenseReimbursedNotAllowToCreateItem"
 
 	// PRODUCT - product related errors
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"
@@ -147,18 +167,6 @@ const (
 
 	// REPORT - report related errors
 	ReportDateRangeExceed1Year = "ReportDateRangeExceed1Year"
-
-	// SCHEDULED - scheduled related errors
-	ScheduleAlreadyBookedDoNotDelete = "ScheduleAlreadyBookedDoNotDelete"
-	ScheduleAlreadyBookedDoNotUpdateDate = "ScheduleAlreadyBookedDoNotUpdateDate"
-	ScheduleAlreadyExists = "ScheduleAlreadyExists"
-	ScheduleCannotCreateBeforeToday = "ScheduleCannotCreateBeforeToday"
-	ScheduleDateRangeExceed31Days = "ScheduleDateRangeExceed31Days"
-	ScheduleDuplicateWorkDateInput = "ScheduleDuplicateWorkDateInput"
-	ScheduleEndBeforeStart = "ScheduleEndBeforeStart"
-	ScheduleNotBelongToStore = "ScheduleNotBelongToStore"
-	ScheduleNotBelongToStylist = "ScheduleNotBelongToStylist"
-	ScheduleNotFound = "ScheduleNotFound"
 
 	// STOCK_USAGE - stock usage related errors
 	StockUsageNotFound = "StockUsageNotFound"
