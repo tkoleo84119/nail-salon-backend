@@ -98,6 +98,7 @@ type Querier interface {
 	DeleteSchedulesByIDs(ctx context.Context, dollar_1 []int64) error
 	DeleteStaffUserStoreAccess(ctx context.Context, arg DeleteStaffUserStoreAccessParams) error
 	DeleteStaffUserTokensBatch(ctx context.Context, limit int32) error
+	DeleteStoreExpenseItem(ctx context.Context, arg DeleteStoreExpenseItemParams) error
 	DeleteTimeSlotByID(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplate(ctx context.Context, id int64) error
 	DeleteTimeSlotTemplateItem(ctx context.Context, id int64) error

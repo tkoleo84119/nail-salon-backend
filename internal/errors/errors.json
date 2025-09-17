@@ -422,6 +422,21 @@
       "code": "E3EXP013",
       "message": "結清的支出不能更新結清資訊",
       "status": 400
+    },
+    "ExpenseItemNotFound": {
+      "code": "E3EXP014",
+      "message": "支出明細不存在或已被刪除",
+      "status": 404
+    },
+    "ExpenseItemArrivedNotAllowToDelete": {
+      "code": "E3EXP015",
+      "message": "已到貨的產品明細不能刪除",
+      "status": 400
+    },
+    "ExpenseReimbursedNotAllowToDeleteItem": {
+      "code": "E3EXP016",
+      "message": "結清的支出不能刪除產品明細",
+      "status": 400
     }
   },
   "PRODUCT_CATEGORY": {

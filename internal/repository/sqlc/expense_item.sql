@@ -71,3 +71,8 @@ SELECT EXISTS(SELECT 1 FROM expense_items WHERE expense_id = $1);
 SELECT NOT EXISTS(
     SELECT 1 FROM expense_items WHERE expense_id = $1 AND is_arrived = false
 ) AS all_arrived;
+
+-- name: DeleteStoreExpenseItem :exec
+DELETE FROM expense_items
+WHERE id = $1
+AND expense_id = $2;

@@ -125,6 +125,7 @@ type AdminServices struct {
 	// Expense item management services
 	ExpenseItemCreate adminExpenseItemService.CreateInterface
 	ExpenseItemUpdate adminExpenseItemService.UpdateInterface
+	ExpenseItemDelete adminExpenseItemService.DeleteInterface
 
 	// Product management services
 	ProductCreate adminProductService.CreateInterface
@@ -271,6 +272,7 @@ type AdminHandlers struct {
 	// Expense item management handlers
 	ExpenseItemCreate *adminExpenseItemHandler.Create
 	ExpenseItemUpdate *adminExpenseItemHandler.Update
+	ExpenseItemDelete *adminExpenseItemHandler.Delete
 
 	// Product management handlers
 	ProductCreate *adminProductHandler.Create
@@ -416,6 +418,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Expense item management services
 		ExpenseItemCreate: adminExpenseItemService.NewCreate(queries, database.PgxPool),
 		ExpenseItemUpdate: adminExpenseItemService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
+		ExpenseItemDelete: adminExpenseItemService.NewDelete(queries, database.PgxPool),
 
 		// Product management services
 		ProductCreate: adminProductService.NewCreate(queries),
@@ -561,6 +564,7 @@ func NewAdminHandlers(services AdminServices, cfg *config.Config) AdminHandlers 
 		// Expense item management handlers
 		ExpenseItemCreate: adminExpenseItemHandler.NewCreate(services.ExpenseItemCreate),
 		ExpenseItemUpdate: adminExpenseItemHandler.NewUpdate(services.ExpenseItemUpdate),
+		ExpenseItemDelete: adminExpenseItemHandler.NewDelete(services.ExpenseItemDelete),
 
 		// Product management handlers
 		ProductCreate: adminProductHandler.NewCreate(services.ProductCreate),

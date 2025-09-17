@@ -96,6 +96,22 @@ func (q *Queries) CreateStoreExpenseItem(ctx context.Context, arg CreateStoreExp
 	return err
 }
 
+const deleteStoreExpenseItem = `-- name: DeleteStoreExpenseItem :exec
+DELETE FROM expense_items
+WHERE id = $1
+AND expense_id = $2
+`
+
+type DeleteStoreExpenseItemParams struct {
+	ID        int64 `db:"id" json:"id"`
+	ExpenseID int64 `db:"expense_id" json:"expense_id"`
+}
+
+func (q *Queries) DeleteStoreExpenseItem(ctx context.Context, arg DeleteStoreExpenseItemParams) error {
+	_, err := q.db.Exec(ctx, deleteStoreExpenseItem, arg.ID, arg.ExpenseID)
+	return err
+}
+
 const getStoreExpenseItemByID = `-- name: GetStoreExpenseItemByID :one
 SELECT
     id,

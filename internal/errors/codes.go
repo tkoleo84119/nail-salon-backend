@@ -147,8 +147,10 @@ const (
 	ExpenseItemArrivedNotAllowToChangePrice = "ExpenseItemArrivedNotAllowToChangePrice"
 	ExpenseItemArrivedNotAllowToChangeProductID = "ExpenseItemArrivedNotAllowToChangeProductID"
 	ExpenseItemArrivedNotAllowToChangeQuantity = "ExpenseItemArrivedNotAllowToChangeQuantity"
+	ExpenseItemArrivedNotAllowToDelete = "ExpenseItemArrivedNotAllowToDelete"
 	ExpenseItemArrivedNotAllowToTurnBack = "ExpenseItemArrivedNotAllowToTurnBack"
 	ExpenseItemNotAllowPassIsArrivedTrueWithoutArrivalDate = "ExpenseItemNotAllowPassIsArrivedTrueWithoutArrivalDate"
+	ExpenseItemNotFound = "ExpenseItemNotFound"
 	ExpenseItemQuantityRequired = "ExpenseItemQuantityRequired"
 	ExpenseNotFound = "ExpenseNotFound"
 	ExpenseNotUpdateAmountWithExpenseItems = "ExpenseNotUpdateAmountWithExpenseItems"
@@ -156,6 +158,7 @@ const (
 	ExpenseNotUpdateReimbursedInfoWithoutPayerID = "ExpenseNotUpdateReimbursedInfoWithoutPayerID"
 	ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt = "ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt"
 	ExpenseReimbursedNotAllowToCreateItem = "ExpenseReimbursedNotAllowToCreateItem"
+	ExpenseReimbursedNotAllowToDeleteItem = "ExpenseReimbursedNotAllowToDeleteItem"
 
 	// PRODUCT - product related errors
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"

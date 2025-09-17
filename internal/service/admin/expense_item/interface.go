@@ -13,3 +13,7 @@ type CreateInterface interface {
 type UpdateInterface interface {
 	Update(ctx context.Context, storeID, expenseID, expenseItemID int64, req adminExpenseItemModel.UpdateParsedRequest, updaterID int64, role string, creatorStoreIDs []int64) (*adminExpenseItemModel.UpdateResponse, error)
 }
+
+type DeleteInterface interface {
+	Delete(ctx context.Context, storeID, expenseID, expenseItemID int64, role string, creatorID int64, creatorStoreIDs []int64) (*adminExpenseItemModel.DeleteResponse, error)
+}

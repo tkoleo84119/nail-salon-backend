@@ -330,6 +330,7 @@ func setupAdminExpenseRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 		// Expense items routes
 		stores.POST("/:storeId/expenses/:expenseId/items", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseItemCreate.Create)
 		stores.PATCH("/:storeId/expenses/:expenseId/items/:expenseItemId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseItemUpdate.Update)
+		stores.DELETE("/:storeId/expenses/:expenseId/items/:expenseItemId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireManagerOrAbove(), handlers.Admin.ExpenseItemDelete.Delete)
 	}
 }
 
