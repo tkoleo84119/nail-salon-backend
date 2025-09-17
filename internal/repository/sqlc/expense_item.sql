@@ -66,3 +66,8 @@ AND expense_id = $2;
 
 -- name: CheckExpenseItemsExistsByExpenseID :one
 SELECT EXISTS(SELECT 1 FROM expense_items WHERE expense_id = $1);
+
+-- name: CheckAllExpenseItemsAreArrived :one
+SELECT NOT EXISTS(
+    SELECT 1 FROM expense_items WHERE expense_id = $1 AND is_arrived = false
+) AS all_arrived;

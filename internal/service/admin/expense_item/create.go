@@ -29,6 +29,11 @@ func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req admin
 		return nil, err
 	}
 
+	// when pass isArrived is true, but not pass arrivalDate
+	if req.IsArrived && req.ArrivalDate == nil {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseItemNotAllowPassIsArrivedTrueWithoutArrivalDate)
+	}
+
 	expense, err := s.queries.GetStoreExpenseByID(ctx, dbgen.GetStoreExpenseByIDParams{
 		ID:      expenseID,
 		StoreID: storeID,
@@ -38,6 +43,20 @@ func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req admin
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotFound)
 		}
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get expense", err)
+	}
+
+	// if expense is reimbursed, not allow to create expense item
+	if expense.IsReimbursed.Valid && expense.IsReimbursed.Bool {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseReimbursedNotAllowToCreateItem)
+	}
+
+	// if all expense items are arrived, not allow to create expense item
+	allArrived, err := s.queries.CheckAllExpenseItemsAreArrived(ctx, expenseID)
+	if err != nil {
+		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check all expense items are arrived", err)
+	}
+	if allArrived {
+		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseItemAllArrivedNotAllowToCreateItem)
 	}
 
 	product, err := s.queries.GetProductByID(ctx, req.ProductID)
@@ -92,21 +111,24 @@ func (s *Create) Create(ctx context.Context, storeID, expenseID int64, req admin
 	}
 
 	err = qtx.UpdateStoreExpenseAmount(ctx, dbgen.UpdateStoreExpenseAmountParams{
-		Amount: newExpenseAmountNumeric,
+		Amount:  newExpenseAmountNumeric,
 		Updater: utils.Int64PtrToPgInt8(&creatorID),
-		ID:     expenseID,
+		ID:      expenseID,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update expense amount", err)
 	}
 
-	newProductStock := int64(product.CurrentStock) + req.Quantity
-	err = qtx.UpdateProductCurrentStock(ctx, dbgen.UpdateProductCurrentStockParams{
-		ID:           req.ProductID,
-		CurrentStock: int32(newProductStock),
-	})
-	if err != nil {
-		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update product stock", err)
+	// if isArrived is true, update product current stock
+	if req.IsArrived {
+		newProductStock := int64(product.CurrentStock) + req.Quantity
+		err = qtx.UpdateProductCurrentStock(ctx, dbgen.UpdateProductCurrentStockParams{
+			ID:           req.ProductID,
+			CurrentStock: int32(newProductStock),
+		})
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update product stock", err)
+		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {

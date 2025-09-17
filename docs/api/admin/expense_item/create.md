@@ -94,26 +94,29 @@
   - message: 中文錯誤訊息（可參照錯誤總覽）
   - field: 參數欄位名稱（僅部分驗證錯誤有）
 
-| 狀態碼 | 錯誤碼   | 常數名稱                | 說明                                                |
-| ------ | -------- | ----------------------- | --------------------------------------------------- |
-| 401    | E1002    | AuthTokenInvalid        | 無效的 accessToken，請重新登入                      |
-| 401    | E1003    | AuthTokenMissing        | accessToken 缺失，請重新登入                        |
-| 401    | E1004    | AuthTokenFormatError    | accessToken 格式錯誤，請重新登入                    |
-| 401    | E1005    | AuthStaffFailed         | 未找到有效的員工資訊，請重新登入                    |
-| 401    | E1006    | AuthContextMissing      | 未找到使用者認證資訊，請重新登入                    |
-| 403    | E1010    | AuthPermissionDenied    | 權限不足，無法執行此操作                            |
-| 400    | E2001    | ValJsonFormat           | JSON 格式錯誤，請檢查                               |
-| 400    | E2002    | ValPathParamMissing     | 路徑參數缺失，請檢查                                |
-| 400    | E2004    | ValTypeConversionFailed | 參數類型轉換失敗                                    |
-| 400    | E2020    | ValFieldRequired        | {field} 為必填項目                                  |
-| 400    | E2024    | ValFieldStringMaxLength | {field} 長度最多只能有 {param} 個字元               |
-| 400    | E2033    | ValFieldDateFormat      | {field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD) |
-| 400    | E2036    | ValFieldNoBlank         | {field} 不能為空字串                                |
-| 400    | E3PRO003 | ProductNotBelongToStore | 產品不屬於指定的門市                                |
-| 404    | E3PRO002 | ProductNotFound         | 產品不存在或已被刪除                                |
-| 404    | E3EXP001 | ExpenseNotFound         | 支出不存在或已被刪除                                |
-| 500    | E9001    | SysInternalError        | 系統發生錯誤，請稍後再試                            |
-| 500    | E9002    | SysDatabaseError        | 資料庫操作失敗                                      |
+| 狀態碼 | 錯誤碼   | 常數名稱                                               | 說明                                                |
+| ------ | -------- | ------------------------------------------------------ | --------------------------------------------------- |
+| 401    | E1002    | AuthTokenInvalid                                       | 無效的 accessToken，請重新登入                      |
+| 401    | E1003    | AuthTokenMissing                                       | accessToken 缺失，請重新登入                        |
+| 401    | E1004    | AuthTokenFormatError                                   | accessToken 格式錯誤，請重新登入                    |
+| 401    | E1005    | AuthStaffFailed                                        | 未找到有效的員工資訊，請重新登入                    |
+| 401    | E1006    | AuthContextMissing                                     | 未找到使用者認證資訊，請重新登入                    |
+| 403    | E1010    | AuthPermissionDenied                                   | 權限不足，無法執行此操作                            |
+| 400    | E2001    | ValJsonFormat                                          | JSON 格式錯誤，請檢查                               |
+| 400    | E2002    | ValPathParamMissing                                    | 路徑參數缺失，請檢查                                |
+| 400    | E2004    | ValTypeConversionFailed                                | 參數類型轉換失敗                                    |
+| 400    | E2020    | ValFieldRequired                                       | {field} 為必填項目                                  |
+| 400    | E2024    | ValFieldStringMaxLength                                | {field} 長度最多只能有 {param} 個字元               |
+| 400    | E2033    | ValFieldDateFormat                                     | {field} 格式錯誤，請使用正確的日期格式 (YYYY-MM-DD) |
+| 400    | E2036    | ValFieldNoBlank                                        | {field} 不能為空字串                                |
+| 400    | E3PRO003 | ProductNotBelongToStore                                | 產品不屬於指定的門市                                |
+| 400    | E3EXP011 | ExpenseItemNotAllowPassIsArrivedTrueWithoutArrivalDate | 已到貨的產品明細不能沒有到貨日期                    |
+| 400    | E3EXP009 | ExpenseReimbursedNotAllowToCreateItem                  | 結清的支出不能新增產品明細                          |
+| 400    | E3EXP010 | ExpenseItemAllArrivedNotAllowToCreateItem              | 所有產品明細都已到貨，不能新增產品明細              |
+| 404    | E3PRO002 | ProductNotFound                                        | 產品不存在或已被刪除                                |
+| 404    | E3EXP001 | ExpenseNotFound                                        | 支出不存在或已被刪除                                |
+| 500    | E9001    | SysInternalError                                       | 系統發生錯誤，請稍後再試                            |
+| 500    | E9002    | SysDatabaseError                                       | 資料庫操作失敗                                      |
 
 ---
 
@@ -128,9 +131,12 @@
 ## Service 邏輯
 
 1. 確認門市存取權限。
-2. 確認 `expense` 是否存在。
-3. 確認 `productId` 是否存在，並且屬於指定的門市。
-4. 建立 `expense_items` 資料。
-5. 更新 `expenses` 的總金額。
-6. 更新產品庫存。
-7. 回傳新增結果。
+2. 若 `isArrived` 為 `true`，則確認 `arrivalDate` 是否存在。
+3. 確認 `expense` 是否存在。
+4. 確認 `expense` 是否已結清，如果已結清，則不允許新增產品明細。
+5. 確認所有隸屬於 `expense` 的產品明細是否都已到貨，如果都已到貨，則不允許新增產品明細。
+6. 確認 `productId` 是否存在，並且屬於指定的門市。
+7. 建立 `expense_items` 資料。
+8. 更新 `expenses` 的總金額。
+9. 更新產品庫存。
+10. 回傳新增結果。

@@ -21,6 +21,7 @@ type Querier interface {
 	BulkDeleteBookingProducts(ctx context.Context, arg BulkDeleteBookingProductsParams) error
 	CancelBooking(ctx context.Context, arg CancelBookingParams) (int64, error)
 	CheckAllBookingExistsByTimeSlotID(ctx context.Context, timeSlotID int64) (bool, error)
+	CheckAllExpenseItemsAreArrived(ctx context.Context, expenseID int64) (bool, error)
 	CheckBrandExistByID(ctx context.Context, id int64) (bool, error)
 	CheckBrandNameExists(ctx context.Context, name string) (bool, error)
 	CheckBrandNameExistsExcludeSelf(ctx context.Context, arg CheckBrandNameExistsExcludeSelfParams) (bool, error)
