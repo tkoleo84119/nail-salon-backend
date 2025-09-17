@@ -368,9 +368,9 @@
       "message": "沒有代墊人，無法更新結清資訊",
       "status": 400
     },
-    "ExpenseNotUpdateAmountWithExpenseItems": {
+    "ExpenseNotUpdateAmountOrCategoryWithExpenseItems": {
       "code": "E3EXP003",
-      "message": "有產品明細，無法單獨更新金額",
+      "message": "有產品明細，無法單獨更新金額或類別",
       "status": 400
     },
     "ExpenseItemQuantityRequired": {
@@ -436,6 +436,11 @@
     "ExpenseReimbursedNotAllowToDeleteItem": {
       "code": "E3EXP016",
       "message": "結清的支出不能刪除產品明細",
+      "status": 400
+    },
+    "ExpenseReimbursedNotAllowToUpdateProductInfo": {
+      "code": "E3EXP017",
+      "message": "結清的支出不能更新產品資訊",
       "status": 400
     }
   },

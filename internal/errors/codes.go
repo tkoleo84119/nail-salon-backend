@@ -153,12 +153,13 @@ const (
 	ExpenseItemNotFound = "ExpenseItemNotFound"
 	ExpenseItemQuantityRequired = "ExpenseItemQuantityRequired"
 	ExpenseNotFound = "ExpenseNotFound"
-	ExpenseNotUpdateAmountWithExpenseItems = "ExpenseNotUpdateAmountWithExpenseItems"
+	ExpenseNotUpdateAmountOrCategoryWithExpenseItems = "ExpenseNotUpdateAmountOrCategoryWithExpenseItems"
 	ExpenseNotUpdateReimbursedInfo = "ExpenseNotUpdateReimbursedInfo"
 	ExpenseNotUpdateReimbursedInfoWithoutPayerID = "ExpenseNotUpdateReimbursedInfoWithoutPayerID"
 	ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt = "ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt"
 	ExpenseReimbursedNotAllowToCreateItem = "ExpenseReimbursedNotAllowToCreateItem"
 	ExpenseReimbursedNotAllowToDeleteItem = "ExpenseReimbursedNotAllowToDeleteItem"
+	ExpenseReimbursedNotAllowToUpdateProductInfo = "ExpenseReimbursedNotAllowToUpdateProductInfo"
 
 	// PRODUCT - product related errors
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"

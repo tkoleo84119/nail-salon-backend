@@ -48,6 +48,13 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID, expenseItemID i
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get expense", err)
 	}
 
+	// if expense is reimbursed, not allow to update product id, quantity, price
+	if expense.IsReimbursed.Valid && expense.IsReimbursed.Bool {
+		if req.ProductID != nil || req.Quantity != nil || req.Price != nil {
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseReimbursedNotAllowToUpdateProductInfo)
+		}
+	}
+
 	oldExpenseItem, err := s.queries.GetStoreExpenseItemByID(ctx, dbgen.GetStoreExpenseItemByIDParams{
 		ID:        expenseItemID,
 		ExpenseID: expenseID,

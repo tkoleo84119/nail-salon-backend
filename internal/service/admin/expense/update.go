@@ -47,9 +47,9 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID int64, req admin
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to get expense", err)
 	}
 
-	// if expense is reimbursed, not allow to update reimbursed info (isReimbursed or reimbursedAt or payerID)
+	// if expense is reimbursed, only allow to update note
 	if expense.IsReimbursed.Valid && expense.IsReimbursed.Bool {
-		if req.IsReimbursed != nil || req.ReimbursedAt != nil || req.PayerID != nil {
+		if req.IsReimbursed != nil || req.ReimbursedAt != nil || req.PayerID != nil || req.SupplierID != nil || req.ExpenseDate != nil || req.OtherFee != nil {
 			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotUpdateReimbursedInfo)
 		}
 	}
@@ -85,14 +85,14 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID int64, req admin
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotUpdateReimbursedInfoWithoutPayerID)
 	}
 
-	// Check if amount is being modified and there are expense items
-	if req.Amount != nil {
+	// if amount or category is being modified and there are expense items exist, not allow to update
+	if req.Amount != nil || req.Category != nil {
 		expenseItemsExists, err := s.queries.CheckExpenseItemsExistsByExpenseID(ctx, expenseID)
 		if err != nil {
 			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check expense items existence", err)
 		}
 		if expenseItemsExists {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotUpdateAmountWithExpenseItems)
+			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseNotUpdateAmountOrCategoryWithExpenseItems)
 		}
 	}
 
