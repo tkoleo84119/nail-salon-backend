@@ -90,12 +90,14 @@ func (s *GetAllService) GetAll(ctx context.Context, storeID int64, req adminSche
 			sMap[workID] = schedule
 		}
 
-		schedule.TimeSlots = append(schedule.TimeSlots, adminScheduleModel.GetAllTimeSlotInfo{
-			ID:          utils.FormatID(row.TimeSlotID),
-			StartTime:   utils.PgTimeToTimeString(row.StartTime),
-			EndTime:     utils.PgTimeToTimeString(row.EndTime),
-			IsAvailable: utils.PgBoolToBool(row.IsAvailable),
-		})
+		if row.TimeSlotID != nil {
+			schedule.TimeSlots = append(schedule.TimeSlots, adminScheduleModel.GetAllTimeSlotInfo{
+				ID:          utils.FormatID(*row.TimeSlotID),
+				StartTime:   utils.PgTimeToTimeString(row.StartTime),
+				EndTime:     utils.PgTimeToTimeString(row.EndTime),
+				IsAvailable: utils.PgBoolToBool(row.IsAvailable),
+			})
+		}
 	}
 
 	response := adminScheduleModel.GetAllResponse{

@@ -33,7 +33,7 @@ type GetStoreSchedulesByDateRangeItem struct {
 	WorkDate    pgtype.Date `db:"work_date"`
 	Note        pgtype.Text `db:"note"`
 	StylistName pgtype.Text `db:"stylist_name"`
-	TimeSlotID  int64       `db:"time_slot_id"`
+	TimeSlotID  *int64      `db:"time_slot_id"`
 	StartTime   pgtype.Time `db:"start_time"`
 	EndTime     pgtype.Time `db:"end_time"`
 	IsAvailable pgtype.Bool `db:"is_available"`
