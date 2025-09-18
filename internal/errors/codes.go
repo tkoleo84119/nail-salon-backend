@@ -66,6 +66,7 @@ const (
 	ScheduleAlreadyBookedDoNotUpdateDate = "ScheduleAlreadyBookedDoNotUpdateDate"
 	ScheduleAlreadyExists = "ScheduleAlreadyExists"
 	ScheduleCannotCreateBeforeToday = "ScheduleCannotCreateBeforeToday"
+	ScheduleCannotUpdateBeforeToday = "ScheduleCannotUpdateBeforeToday"
 	ScheduleDateRangeExceed31Days = "ScheduleDateRangeExceed31Days"
 	ScheduleDuplicateWorkDateInput = "ScheduleDuplicateWorkDateInput"
 	ScheduleEndBeforeStart = "ScheduleEndBeforeStart"

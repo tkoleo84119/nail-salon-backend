@@ -2,7 +2,9 @@ package adminTimeSlot
 
 import (
 	"context"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminTimeSlotModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/time_slot"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
@@ -39,26 +41,16 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 	if timeSlot.ScheduleID != scheduleID {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotNotBelongToSchedule)
 	}
-	// Check if time slot is booked (cannot update booked time slots, unless isAvailable is set to true)
-	if !timeSlot.IsAvailable.Bool && req.IsAvailable == nil {
-		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotUpdate)
-	}
-
-	// if isAvailable is false and req.IsAvailable is true, check if there is any valid booking exists
-	if !timeSlot.IsAvailable.Bool && req.IsAvailable != nil && *req.IsAvailable {
-		validBookingExists, err := s.queries.CheckValidBookingExistsByTimeSlotID(ctx, timeSlotID)
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check valid booking exists", err)
-		}
-		if validBookingExists {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.TimeSlotAlreadyBookedDoNotUpdate)
-		}
-	}
 
 	// Get schedule information
 	scheduleInfo, err := s.queries.GetScheduleByID(ctx, scheduleID)
 	if err != nil {
 		return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleNotFound)
+	}
+
+	// check if schedule is past date
+	if err := s.checkScheduleIsNotPastDate(scheduleInfo.WorkDate); err != nil {
+		return nil, err
 	}
 
 	// Get stylist information
@@ -125,4 +117,19 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 		EndTime:     utils.PgTimeToTimeString(response.EndTime),
 		IsAvailable: utils.PgBoolToBool(response.IsAvailable),
 	}, nil
+}
+
+func (s *Update) checkScheduleIsNotPastDate(workDatePg pgtype.Date) error {
+	workDate := workDatePg.Time
+	loc, err := time.LoadLocation("Asia/Taipei")
+	if err != nil {
+		return errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to load location", err)
+	}
+
+	now := time.Now().In(loc)
+	if workDate.Before(now) {
+		return errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotUpdateBeforeToday)
+	}
+
+	return nil
 }

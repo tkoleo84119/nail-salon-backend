@@ -528,6 +528,11 @@
       "code": "E3SCH010",
       "message": "不能創建過去的班表",
       "status": 400
+    },
+    "ScheduleCannotUpdateBeforeToday": {
+      "code": "E3SCH011",
+      "message": "不能更新過去的班表",
+      "status": 400
     }
   },
   "SERVICE": {
