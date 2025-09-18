@@ -62,6 +62,13 @@ func main() {
 
 	router := app.SetupRoutes(container)
 
+	// set trusted proxies
+	if len(cfg.Proxy.TrustedProxies) > 0 {
+		if err := router.SetTrustedProxies(cfg.Proxy.TrustedProxies); err != nil {
+			log.Fatalf("Failed to set trusted proxies: %v", err)
+		}
+	}
+
 	// start refresh revoke job
 	if err := container.GetJobs().RefreshRevokeJob.Start(); err != nil {
 		log.Fatalf("Failed to start refresh revoke job: %v", err)

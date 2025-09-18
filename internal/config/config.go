@@ -60,6 +60,10 @@ type ServerConfig struct {
 	SnowflakeNodeId int64
 }
 
+type ProxyConfig struct {
+	TrustedProxies []string
+}
+
 type CookieConfig struct {
 	// Cookie names
 	AdminRefreshName    string
@@ -85,6 +89,7 @@ type Config struct {
 	Server    ServerConfig
 	CORS      CORSConfig
 	Cookie    CookieConfig
+	Proxy     ProxyConfig
 }
 
 func Load() *Config {
@@ -152,6 +157,10 @@ func Load() *Config {
 		CustomerRefreshMaxAgeDays: getenvIntDefault("CUSTOMER_REFRESH_COOKIE_MAX_AGE_DAYS", 7),
 	}
 
+	proxyConfig := ProxyConfig{
+		TrustedProxies: getenvSlice("TRUSTED_PROXIES", []string{}),
+	}
+
 	return &Config{
 		DB:        dbConfig,
 		JWT:       jwtConfig,
@@ -161,6 +170,7 @@ func Load() *Config {
 		Server:    serverConfig,
 		CORS:      corsConfig,
 		Cookie:    cookieConfig,
+		Proxy:     proxyConfig,
 	}
 }
 
