@@ -44,7 +44,7 @@ ENV GIN_MODE=release
 USER nonroot:nonroot
 
 # Expose the port that the app runs on
-EXPOSE 13200
+EXPOSE 8080
 
 # Run the binary
 ENTRYPOINT ["/app/main"]
