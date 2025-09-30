@@ -23,16 +23,25 @@ type LineLogin struct {
 	db            *pgxpool.Pool
 	lineValidator *utils.LineValidator
 	jwtConfig     config.JWTConfig
+	cookieConfig  config.CookieConfig
 	activityLog   cache.ActivityLogCacheInterface
 }
 
-func NewLineLogin(queries *dbgen.Queries, db *pgxpool.Pool, lineConfig config.LineConfig, jwtConfig config.JWTConfig, activityLog cache.ActivityLogCacheInterface) LineLoginInterface {
+func NewLineLogin(
+	queries *dbgen.Queries,
+	db *pgxpool.Pool,
+	lineConfig config.LineConfig,
+	jwtConfig config.JWTConfig,
+	cookieConfig config.CookieConfig,
+	activityLog cache.ActivityLogCacheInterface,
+) LineLoginInterface {
 	lineValidator := utils.NewLineValidator(lineConfig.LiffChannelID)
 	return &LineLogin{
 		queries:       queries,
 		db:            db,
 		lineValidator: lineValidator,
 		jwtConfig:     jwtConfig,
+		cookieConfig:  cookieConfig,
 		activityLog:   activityLog,
 	}
 }
@@ -71,6 +80,12 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 	}
 	needCheckTerms := !exist
 
+	// Customer exists, generate tokens
+	accessToken, expiresIn, err := s.generateAccessToken(customer.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to begin transaction", err)
@@ -78,12 +93,6 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 	defer tx.Rollback(ctx)
 
 	qtx := dbgen.New(tx)
-
-	// Customer exists, generate tokens
-	accessToken, expiresIn, err := s.generateAccessToken(customer.ID)
-	if err != nil {
-		return nil, err
-	}
 
 	refreshToken, err := s.generateRefreshToken(ctx, qtx, customer.ID, loginCtx)
 	if err != nil {
@@ -149,7 +158,7 @@ func (s *LineLogin) generateRefreshToken(ctx context.Context, qtx dbgen.Querier,
 	tokenID := utils.GenerateID()
 
 	// Store refresh token in database
-	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+	expiresAt := time.Now().Add(time.Duration(s.cookieConfig.CustomerRefreshMaxAgeDays) * 24 * time.Hour)
 	expiresAtPg := utils.TimePtrToPgTimestamptz(&expiresAt)
 	userAgent := utils.StringPtrToPgText(&loginCtx.UserAgent, false)
 

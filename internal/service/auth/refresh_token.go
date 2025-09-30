@@ -17,16 +17,23 @@ import (
 )
 
 type RefreshToken struct {
-	queries     *dbgen.Queries
-	jwtConfig   config.JWTConfig
-	activityLog cache.ActivityLogCacheInterface
+	queries      *dbgen.Queries
+	jwtConfig    config.JWTConfig
+	activityLog  cache.ActivityLogCacheInterface
+	cookieConfig config.CookieConfig
 }
 
-func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig, activityLog cache.ActivityLogCacheInterface) RefreshTokenInterface {
+func NewRefreshToken(
+	queries *dbgen.Queries,
+	jwtConfig config.JWTConfig,
+	activityLog cache.ActivityLogCacheInterface,
+	cookieConfig config.CookieConfig,
+) RefreshTokenInterface {
 	return &RefreshToken{
-		queries:     queries,
-		jwtConfig:   jwtConfig,
-		activityLog: activityLog,
+		queries:      queries,
+		jwtConfig:    jwtConfig,
+		activityLog:  activityLog,
+		cookieConfig: cookieConfig,
 	}
 }
 
@@ -62,7 +69,7 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req auth.RefreshTokenRe
 	// best-effort revoke old token; ignore error to not block issuance
 	_ = s.queries.RevokeCustomerToken(ctx, req.RefreshToken)
 
-	exp := time.Now().Add(7 * 24 * time.Hour)
+	exp := time.Now().Add(time.Duration(s.cookieConfig.CustomerRefreshMaxAgeDays) * 24 * time.Hour)
 	_, err = s.queries.CreateCustomerToken(ctx, dbgen.CreateCustomerTokenParams{
 		ID:           utils.GenerateID(),
 		CustomerID:   tokenRecord.CustomerID,

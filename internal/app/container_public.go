@@ -110,9 +110,9 @@ type PublicHandlers struct {
 func NewPublicServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, lineMessenger *utils.LineMessageClient, authCache cache.AuthCacheInterface, activityLog cache.ActivityLogCacheInterface) PublicServices {
 	return PublicServices{
 		// Authentication services
-		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT, activityLog),
+		AuthLineLogin:    authService.NewLineLogin(queries, database.PgxPool, cfg.Line, cfg.JWT, cfg.Cookie, activityLog),
 		AuthLineRegister: authService.NewLineRegister(queries, database.PgxPool, cfg.Line, cfg.JWT, activityLog),
-		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT, activityLog),
+		AuthRefreshToken: authService.NewRefreshToken(queries, cfg.JWT, activityLog, cfg.Cookie),
 		AuthAcceptTerm:   authService.NewAcceptTerm(queries),
 
 		// Customer services
