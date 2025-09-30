@@ -364,8 +364,8 @@ type AdminHandlers struct {
 func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositories Repositories, cfg *config.Config, _ *utils.LineMessageClient, authCache cache.AuthCacheInterface, activityLog cache.ActivityLogCacheInterface) AdminServices {
 	return AdminServices{
 		// Authentication services
-		AuthStaffLogin:        adminAuthService.NewLogin(queries, cfg.JWT),
-		AuthStaffRefreshToken: adminAuthService.NewRefreshToken(queries, cfg.JWT),
+		AuthStaffLogin:        adminAuthService.NewLogin(queries, cfg.JWT, cfg.Cookie),
+		AuthStaffRefreshToken: adminAuthService.NewRefreshToken(queries, cfg.JWT, cfg.Cookie),
 		AuthStaffLogout:       adminAuthService.NewLogout(queries),
 		AuthStaffPermission:   adminAuthService.NewPermission(),
 		AuthUpdatePassword:    adminAuthService.NewUpdatePassword(queries, authCache),

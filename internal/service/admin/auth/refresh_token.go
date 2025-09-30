@@ -15,14 +15,20 @@ import (
 )
 
 type RefreshToken struct {
-	queries   *dbgen.Queries
-	jwtConfig config.JWTConfig
+	queries      *dbgen.Queries
+	jwtConfig    config.JWTConfig
+	cookieConfig config.CookieConfig
 }
 
-func NewRefreshToken(queries *dbgen.Queries, jwtConfig config.JWTConfig) RefreshTokenInterface {
+func NewRefreshToken(
+	queries *dbgen.Queries,
+	jwtConfig config.JWTConfig,
+	cookieConfig config.CookieConfig,
+) RefreshTokenInterface {
 	return &RefreshToken{
-		queries:   queries,
-		jwtConfig: jwtConfig,
+		queries:      queries,
+		jwtConfig:    jwtConfig,
+		cookieConfig: cookieConfig,
 	}
 }
 
@@ -64,7 +70,7 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req adminAuthModel.Refr
 	_ = s.queries.RevokeStaffUserToken(ctx, req.RefreshToken)
 
 	// store new refresh token with 7-day expiry (same policy as login)
-	exp := time.Now().Add(7 * 24 * time.Hour)
+	exp := time.Now().Add(time.Duration(s.cookieConfig.AdminRefreshMaxAgeDays) * 24 * time.Hour)
 	var ipAddr *netip.Addr
 	if addr, err := netip.ParseAddr(refreshTokenCtx.IPAddress); err == nil {
 		ipAddr = &addr

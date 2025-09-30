@@ -13,14 +13,20 @@ import (
 )
 
 type Login struct {
-	queries   *dbgen.Queries
-	jwtConfig config.JWTConfig
+	queries      *dbgen.Queries
+	jwtConfig    config.JWTConfig
+	cookieConfig config.CookieConfig
 }
 
-func NewLogin(queries *dbgen.Queries, jwtConfig config.JWTConfig) LoginInterface {
+func NewLogin(
+	queries *dbgen.Queries,
+	jwtConfig config.JWTConfig,
+	cookieConfig config.CookieConfig,
+) LoginInterface {
 	return &Login{
-		queries:   queries,
-		jwtConfig: jwtConfig,
+		queries:      queries,
+		jwtConfig:    jwtConfig,
+		cookieConfig: cookieConfig,
 	}
 }
 
@@ -49,7 +55,7 @@ func (s *Login) Login(ctx context.Context, req adminAuthModel.LoginRequest, logi
 		StaffUserID:  staffUser.ID,
 		RefreshToken: refreshToken,
 		Context:      loginCtx,
-		ExpiresAt:    time.Now().Add(7 * 24 * time.Hour),
+		ExpiresAt:    time.Now().Add(time.Duration(s.cookieConfig.AdminRefreshMaxAgeDays) * 24 * time.Hour),
 	}
 
 	if err := s.storeRefreshToken(ctx, tokenInfo); err != nil {
