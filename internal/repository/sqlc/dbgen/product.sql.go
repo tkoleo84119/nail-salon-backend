@@ -156,6 +156,70 @@ func (q *Queries) GetProductByID(ctx context.Context, id int64) (GetProductByIDR
 	return i, err
 }
 
+const getProductWithDetailsByID = `-- name: GetProductWithDetailsByID :one
+SELECT
+    p.id,
+    p.store_id,
+    p.name,
+    p.brand_id,
+    b.name AS brand_name,
+    p.category_id,
+    pc.name AS category_name,
+    p.current_stock,
+    p.safety_stock,
+    p.unit,
+    p.storage_location,
+    p.note,
+    p.is_active,
+    p.created_at,
+    p.updated_at
+FROM products p
+INNER JOIN brands b ON p.brand_id = b.id
+INNER JOIN product_categories pc ON p.category_id = pc.id
+WHERE p.id = $1
+`
+
+type GetProductWithDetailsByIDRow struct {
+	ID              int64              `db:"id" json:"id"`
+	StoreID         int64              `db:"store_id" json:"store_id"`
+	Name            string             `db:"name" json:"name"`
+	BrandID         int64              `db:"brand_id" json:"brand_id"`
+	BrandName       string             `db:"brand_name" json:"brand_name"`
+	CategoryID      int64              `db:"category_id" json:"category_id"`
+	CategoryName    string             `db:"category_name" json:"category_name"`
+	CurrentStock    int32              `db:"current_stock" json:"current_stock"`
+	SafetyStock     pgtype.Int4        `db:"safety_stock" json:"safety_stock"`
+	Unit            pgtype.Text        `db:"unit" json:"unit"`
+	StorageLocation pgtype.Text        `db:"storage_location" json:"storage_location"`
+	Note            pgtype.Text        `db:"note" json:"note"`
+	IsActive        pgtype.Bool        `db:"is_active" json:"is_active"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) GetProductWithDetailsByID(ctx context.Context, id int64) (GetProductWithDetailsByIDRow, error) {
+	row := q.db.QueryRow(ctx, getProductWithDetailsByID, id)
+	var i GetProductWithDetailsByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.StoreID,
+		&i.Name,
+		&i.BrandID,
+		&i.BrandName,
+		&i.CategoryID,
+		&i.CategoryName,
+		&i.CurrentStock,
+		&i.SafetyStock,
+		&i.Unit,
+		&i.StorageLocation,
+		&i.Note,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getProductsStockInfoByIDs = `-- name: GetProductsStockInfoByIDs :many
 SELECT
     id,

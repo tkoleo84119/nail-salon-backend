@@ -14,6 +14,10 @@ type GetAllInterface interface {
 	GetAll(ctx context.Context, storeID int64, req adminProductModel.GetAllParsedRequest, role string, creatorStoreIDs []int64) (*adminProductModel.GetAllResponse, error)
 }
 
+type GetInterface interface {
+	Get(ctx context.Context, storeID, productID int64, role string, creatorStoreIDs []int64) (*adminProductModel.GetResponse, error)
+}
+
 type UpdateInterface interface {
 	Update(ctx context.Context, storeID, productID int64, req adminProductModel.UpdateParsedRequest, role string, creatorStoreIDs []int64) (*adminProductModel.UpdateResponse, error)
 }

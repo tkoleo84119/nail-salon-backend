@@ -55,3 +55,25 @@ SELECT EXISTS(
     SELECT 1 FROM products
     WHERE store_id = $1 AND name = $2 AND brand_id = $3 AND id != $4
 );
+
+-- name: GetProductWithDetailsByID :one
+SELECT
+    p.id,
+    p.store_id,
+    p.name,
+    p.brand_id,
+    b.name AS brand_name,
+    p.category_id,
+    pc.name AS category_name,
+    p.current_stock,
+    p.safety_stock,
+    p.unit,
+    p.storage_location,
+    p.note,
+    p.is_active,
+    p.created_at,
+    p.updated_at
+FROM products p
+INNER JOIN brands b ON p.brand_id = b.id
+INNER JOIN product_categories pc ON p.category_id = pc.id
+WHERE p.id = $1;
