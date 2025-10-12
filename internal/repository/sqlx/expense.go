@@ -96,7 +96,7 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 
 	// Pagination + Sorting
 	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-	defaultSortArr := []string{"e.updatedAt DESC"}
+	defaultSortArr := []string{"e.updated_at DESC"}
 	sort := utils.HandleSortByMap(map[string]string{
 		"createdAt":    "e.created_at",
 		"updatedAt":    "e.updated_at",
@@ -104,6 +104,8 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 		"supplierId":   "e.supplier_id",
 		"payerId":      "e.payer_id",
 		"isReimbursed": "e.is_reimbursed",
+		"expenseDate":  "e.expense_date",
+		"updater":      "e.updater",
 	}, defaultSortArr, params.Sort)
 
 	args = append(args, limit, offset)

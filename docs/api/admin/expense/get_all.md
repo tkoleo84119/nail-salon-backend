@@ -47,15 +47,15 @@
 
 ### 驗證規則
 
-| 欄位         | 必填 | 其他規則                                                                                 |
-| ------------ | ---- | ---------------------------------------------------------------------------------------- |
-| category     | 否   | <li>不能為空字串<li>最大長度100字元                                                      |
-| supplierId   | 否   |                                                                                          |
-| payerId      | 否   |                                                                                          |
-| isReimbursed | 否   |                                                                                          |
-| limit        | 否   | <li>最小值1<li>最大值100                                                                 |
-| offset       | 否   | <li>最小值0<li>最大值1000000                                                             |
-| sort         | 否   | <li>可以為 createdAt, updatedAt, category, supplierId, payerId,isReimbursed (其餘會忽略) |
+| 欄位         | 必填 | 其他規則                                                                                                        |
+| ------------ | ---- | --------------------------------------------------------------------------------------------------------------- |
+| category     | 否   | <li>不能為空字串<li>最大長度100字元                                                                             |
+| supplierId   | 否   |                                                                                                                 |
+| payerId      | 否   |                                                                                                                 |
+| isReimbursed | 否   |                                                                                                                 |
+| limit        | 否   | <li>最小值1<li>最大值100                                                                                        |
+| offset       | 否   | <li>最小值0<li>最大值1000000                                                                                    |
+| sort         | 否   | <li>可以為 createdAt, updatedAt, expenseDate, category, supplierId, payerId, isReimbursed, updater (其餘會忽略) |
 
 ---
 
