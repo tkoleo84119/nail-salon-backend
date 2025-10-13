@@ -204,6 +204,7 @@ type AdminServices struct {
 	// Report services
 	ReportGetPerformanceMe    adminReportService.GetPerformanceMeInterface
 	ReportGetStorePerformance adminReportService.GetStorePerformanceInterface
+	ReportGetStoreExpense     adminReportService.GetStoreExpenseInterface
 
 	// Stock usages services
 	StockUsagesCreate       adminStockUsagesService.CreateInterface
@@ -352,6 +353,7 @@ type AdminHandlers struct {
 	// Report handlers
 	ReportGetPerformanceMe    *adminReportHandler.GetPerformanceMe
 	ReportGetStorePerformance *adminReportHandler.GetStorePerformance
+	ReportGetStoreExpense     *adminReportHandler.GetStoreExpense
 
 	// Stock usages handlers
 	StockUsagesCreate       *adminStockUsagesHandler.Create
@@ -498,6 +500,7 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Report services
 		ReportGetPerformanceMe:    adminReportService.NewGetPerformanceMe(queries),
 		ReportGetStorePerformance: adminReportService.NewGetStorePerformance(queries),
+		ReportGetStoreExpense:     adminReportService.NewGetStoreExpense(queries),
 
 		// Stock usages services
 		StockUsagesCreate:       adminStockUsagesService.NewCreate(queries, database.PgxPool),
@@ -646,6 +649,7 @@ func NewAdminHandlers(services AdminServices, cfg *config.Config) AdminHandlers 
 		// Report handlers
 		ReportGetPerformanceMe:    adminReportHandler.NewGetPerformanceMe(services.ReportGetPerformanceMe),
 		ReportGetStorePerformance: adminReportHandler.NewGetStorePerformance(services.ReportGetStorePerformance),
+		ReportGetStoreExpense:     adminReportHandler.NewGetStoreExpense(services.ReportGetStoreExpense),
 
 		// Stock usages handlers
 		StockUsagesCreate:       adminStockUsagesHandler.NewCreate(services.StockUsagesCreate),

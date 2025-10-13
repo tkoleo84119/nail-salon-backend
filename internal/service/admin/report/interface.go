@@ -13,3 +13,7 @@ type GetPerformanceMeInterface interface {
 type GetStorePerformanceInterface interface {
 	GetStorePerformance(ctx context.Context, storeID int64, req adminReportModel.GetStorePerformanceParsedRequest, staffRole string, storeIDs []int64) (*adminReportModel.GetStorePerformanceResponse, error)
 }
+
+type GetStoreExpenseInterface interface {
+	GetStoreExpense(ctx context.Context, storeID int64, req adminReportModel.GetStoreExpenseParsedRequest, staffRole string, storeIDs []int64) (*adminReportModel.GetStoreExpenseResponse, error)
+}

@@ -682,6 +682,11 @@
       "code": "E3REP001",
       "message": "日期範圍不能超過一年",
       "status": 400
+    },
+    "ReportDateRangeExceed3Years": {
+      "code": "E3REP002",
+      "message": "日期範圍不能超過三年",
+      "status": 400
     }
   },
   "SUPPLIER": {

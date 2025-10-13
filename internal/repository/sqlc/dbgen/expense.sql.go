@@ -73,6 +73,192 @@ func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) (i
 	return id, err
 }
 
+const getExpenseReportByCategory = `-- name: GetExpenseReportByCategory :many
+SELECT
+    COALESCE(category, '未分類') as category,
+    COUNT(*) as count,
+    COALESCE(SUM(amount + COALESCE(other_fee, 0)), 0)::numeric(12,2) as amount
+FROM expenses
+WHERE store_id = $1
+    AND expense_date BETWEEN $2 AND $3
+GROUP BY category
+`
+
+type GetExpenseReportByCategoryParams struct {
+	StoreID       int64       `db:"store_id" json:"store_id"`
+	ExpenseDate   pgtype.Date `db:"expense_date" json:"expense_date"`
+	ExpenseDate_2 pgtype.Date `db:"expense_date_2" json:"expense_date_2"`
+}
+
+type GetExpenseReportByCategoryRow struct {
+	Category string         `db:"category" json:"category"`
+	Count    int64          `db:"count" json:"count"`
+	Amount   pgtype.Numeric `db:"amount" json:"amount"`
+}
+
+func (q *Queries) GetExpenseReportByCategory(ctx context.Context, arg GetExpenseReportByCategoryParams) ([]GetExpenseReportByCategoryRow, error) {
+	rows, err := q.db.Query(ctx, getExpenseReportByCategory, arg.StoreID, arg.ExpenseDate, arg.ExpenseDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetExpenseReportByCategoryRow{}
+	for rows.Next() {
+		var i GetExpenseReportByCategoryRow
+		if err := rows.Scan(&i.Category, &i.Count, &i.Amount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getExpenseReportByPayer = `-- name: GetExpenseReportByPayer :many
+SELECT
+    e.payer_id,
+    su.username as payer_name,
+    COUNT(*) as advance_count,
+    COALESCE(SUM(e.amount + COALESCE(e.other_fee, 0)), 0)::numeric(12,2) as advance_amount,
+    COALESCE(SUM(CASE WHEN e.is_reimbursed = true THEN e.amount + COALESCE(e.other_fee, 0) ELSE 0 END), 0)::numeric(12,2) as reimbursed_amount
+FROM expenses e
+LEFT JOIN staff_users su ON e.payer_id = su.id
+WHERE e.store_id = $1
+    AND e.expense_date BETWEEN $2 AND $3
+    AND e.payer_id IS NOT NULL
+GROUP BY e.payer_id, su.username
+`
+
+type GetExpenseReportByPayerParams struct {
+	StoreID       int64       `db:"store_id" json:"store_id"`
+	ExpenseDate   pgtype.Date `db:"expense_date" json:"expense_date"`
+	ExpenseDate_2 pgtype.Date `db:"expense_date_2" json:"expense_date_2"`
+}
+
+type GetExpenseReportByPayerRow struct {
+	PayerID          pgtype.Int8    `db:"payer_id" json:"payer_id"`
+	PayerName        pgtype.Text    `db:"payer_name" json:"payer_name"`
+	AdvanceCount     int64          `db:"advance_count" json:"advance_count"`
+	AdvanceAmount    pgtype.Numeric `db:"advance_amount" json:"advance_amount"`
+	ReimbursedAmount pgtype.Numeric `db:"reimbursed_amount" json:"reimbursed_amount"`
+}
+
+func (q *Queries) GetExpenseReportByPayer(ctx context.Context, arg GetExpenseReportByPayerParams) ([]GetExpenseReportByPayerRow, error) {
+	rows, err := q.db.Query(ctx, getExpenseReportByPayer, arg.StoreID, arg.ExpenseDate, arg.ExpenseDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetExpenseReportByPayerRow{}
+	for rows.Next() {
+		var i GetExpenseReportByPayerRow
+		if err := rows.Scan(
+			&i.PayerID,
+			&i.PayerName,
+			&i.AdvanceCount,
+			&i.AdvanceAmount,
+			&i.ReimbursedAmount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getExpenseReportBySupplier = `-- name: GetExpenseReportBySupplier :many
+SELECT
+    e.supplier_id,
+    s.name as supplier_name,
+    COUNT(*) as count,
+    COALESCE(SUM(e.amount + COALESCE(e.other_fee, 0)), 0)::numeric(12,2) as amount
+FROM expenses e
+LEFT JOIN suppliers s ON e.supplier_id = s.id
+WHERE e.store_id = $1
+    AND e.expense_date BETWEEN $2 AND $3
+    AND e.supplier_id IS NOT NULL
+GROUP BY e.supplier_id, s.name
+`
+
+type GetExpenseReportBySupplierParams struct {
+	StoreID       int64       `db:"store_id" json:"store_id"`
+	ExpenseDate   pgtype.Date `db:"expense_date" json:"expense_date"`
+	ExpenseDate_2 pgtype.Date `db:"expense_date_2" json:"expense_date_2"`
+}
+
+type GetExpenseReportBySupplierRow struct {
+	SupplierID   pgtype.Int8    `db:"supplier_id" json:"supplier_id"`
+	SupplierName pgtype.Text    `db:"supplier_name" json:"supplier_name"`
+	Count        int64          `db:"count" json:"count"`
+	Amount       pgtype.Numeric `db:"amount" json:"amount"`
+}
+
+func (q *Queries) GetExpenseReportBySupplier(ctx context.Context, arg GetExpenseReportBySupplierParams) ([]GetExpenseReportBySupplierRow, error) {
+	rows, err := q.db.Query(ctx, getExpenseReportBySupplier, arg.StoreID, arg.ExpenseDate, arg.ExpenseDate_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetExpenseReportBySupplierRow{}
+	for rows.Next() {
+		var i GetExpenseReportBySupplierRow
+		if err := rows.Scan(
+			&i.SupplierID,
+			&i.SupplierName,
+			&i.Count,
+			&i.Amount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getExpenseReportSummary = `-- name: GetExpenseReportSummary :one
+SELECT
+    COUNT(*) as total_count,
+    COALESCE(SUM(amount + COALESCE(other_fee, 0)), 0)::numeric(12,2) as total_amount,
+    COALESCE(SUM(CASE WHEN payer_id IS NOT NULL THEN amount + COALESCE(other_fee, 0) ELSE 0 END), 0)::numeric(12,2) as advance_amount,
+    COALESCE(SUM(CASE WHEN payer_id IS NOT NULL AND is_reimbursed = true THEN amount + COALESCE(other_fee, 0) ELSE 0 END), 0)::numeric(12,2) as reimbursed_amount
+FROM expenses
+WHERE store_id = $1
+    AND expense_date BETWEEN $2 AND $3
+`
+
+type GetExpenseReportSummaryParams struct {
+	StoreID       int64       `db:"store_id" json:"store_id"`
+	ExpenseDate   pgtype.Date `db:"expense_date" json:"expense_date"`
+	ExpenseDate_2 pgtype.Date `db:"expense_date_2" json:"expense_date_2"`
+}
+
+type GetExpenseReportSummaryRow struct {
+	TotalCount       int64          `db:"total_count" json:"total_count"`
+	TotalAmount      pgtype.Numeric `db:"total_amount" json:"total_amount"`
+	AdvanceAmount    pgtype.Numeric `db:"advance_amount" json:"advance_amount"`
+	ReimbursedAmount pgtype.Numeric `db:"reimbursed_amount" json:"reimbursed_amount"`
+}
+
+func (q *Queries) GetExpenseReportSummary(ctx context.Context, arg GetExpenseReportSummaryParams) (GetExpenseReportSummaryRow, error) {
+	row := q.db.QueryRow(ctx, getExpenseReportSummary, arg.StoreID, arg.ExpenseDate, arg.ExpenseDate_2)
+	var i GetExpenseReportSummaryRow
+	err := row.Scan(
+		&i.TotalCount,
+		&i.TotalAmount,
+		&i.AdvanceAmount,
+		&i.ReimbursedAmount,
+	)
+	return i, err
+}
+
 const getStoreExpenseByID = `-- name: GetStoreExpenseByID :one
 SELECT
     e.id,

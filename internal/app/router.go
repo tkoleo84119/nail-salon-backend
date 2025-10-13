@@ -355,10 +355,9 @@ func setupAdminAccountRoutes(admin *gin.RouterGroup, cfg *config.Config, queries
 func setupAdminReportRoutes(admin *gin.RouterGroup, cfg *config.Config, queries *dbgen.Queries, authCache cache.AuthCacheInterface, handlers Handlers) {
 	reports := admin.Group("/reports")
 	{
-		// Performance report - all staff except SUPER_ADMIN can access
 		reports.GET("/performance/me", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireNotSuperAdmin(), handlers.Admin.ReportGetPerformanceMe.GetPerformanceMe)
-		// Store performance report - SUPER_ADMIN, ADMIN, and MANAGER can access
 		reports.GET("/performance/store/:storeId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireManagerOrAbove(), handlers.Admin.ReportGetStorePerformance.GetStorePerformance)
+		reports.GET("/expense/store/:storeId", middleware.JWTAuth(*cfg, queries, authCache), middleware.RequireAdminRoles(), handlers.Admin.ReportGetStoreExpense.GetStoreExpense)
 	}
 }
 
