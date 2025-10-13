@@ -442,6 +442,11 @@
       "code": "E3EXP017",
       "message": "結清的支出不能更新產品資訊",
       "status": 400
+    },
+    "ExpenseReimbursementNotAllowItemNotArrived": {
+      "code": "E3EXP018",
+      "message": "欲結清的支出不能有未到貨的產品明細",
+      "status": 400
     }
   },
   "PRODUCT_CATEGORY": {

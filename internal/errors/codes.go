@@ -161,6 +161,7 @@ const (
 	ExpenseReimbursedNotAllowToCreateItem = "ExpenseReimbursedNotAllowToCreateItem"
 	ExpenseReimbursedNotAllowToDeleteItem = "ExpenseReimbursedNotAllowToDeleteItem"
 	ExpenseReimbursedNotAllowToUpdateProductInfo = "ExpenseReimbursedNotAllowToUpdateProductInfo"
+	ExpenseReimbursementNotAllowItemNotArrived = "ExpenseReimbursementNotAllowItemNotArrived"
 
 	// PRODUCT - product related errors
 	ProductNameBrandAlreadyExistsInStore = "ProductNameBrandAlreadyExistsInStore"

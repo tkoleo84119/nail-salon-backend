@@ -96,6 +96,24 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID int64, req admin
 		}
 	}
 
+	// if isReimbursed is true, and expense items exist, check all expense items are arrived
+	if req.IsReimbursed != nil && *req.IsReimbursed {
+		expenseItemsExists, err := s.queries.CheckExpenseItemsExistsByExpenseID(ctx, expenseID)
+		if err != nil {
+			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check expense items existence", err)
+		}
+
+		if expenseItemsExists {
+			allArrived, err := s.queries.CheckAllExpenseItemsAreArrived(ctx, expenseID)
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check all expense items are arrived", err)
+			}
+			if !allArrived {
+				return nil, errorCodes.NewServiceErrorWithCode(errorCodes.ExpenseReimbursementNotAllowItemNotArrived)
+			}
+		}
+	}
+
 	// Update expense
 	updateParams := sqlxRepo.UpdateStoreExpenseParams{
 		SupplierID:   req.SupplierID,

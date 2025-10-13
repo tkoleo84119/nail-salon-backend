@@ -118,6 +118,7 @@
 | 400    | E3EXP003 | ExpenseNotUpdateAmountWithExpenseItems            | 有產品明細，無法單獨更新金額                        |
 | 400    | E3EXP012 | ExpenseNotUpdateReimbursedInfoWithoutReimbursedAt | 沒有結清日期，無法更新結清資訊                      |
 | 400    | E3EXP013 | ExpenseNotUpdateReimbursedInfo                    | 結清的支出不能更新結清資訊                          |
+| 400    | E3EXP018 | ExpenseReimbursementNotAllowItemNotArrived        | 欲結清的支出不能有未到貨的產品明細                  |
 | 404    | E3SUP002 | SupplierNotFound                                  | 供應商不存在或已被刪除                              |
 | 404    | E3STA004 | StaffNotFound                                     | 員工帳號不存在                                      |
 | 404    | E3EXP001 | ExpenseNotFound                                   | 支出不存在或已被刪除                                |
@@ -146,5 +147,6 @@
 7. 如果有傳入`isReimbursed` 或 `reimbursedAt`，則確認 `payerId` 是否存在。
 8. 如果有修改 `amount`，則確認是否有 `expense_items` 資料，有的話不允許透過該 API 修改。
 9. 如果有傳入`payerId` 且為空字串，則將 `payerId` 和 `isReimbursed` 和 `reimbursedAt` 設為 `null`。
-10. 更新 `expenses` 資料。
-11. 回傳更新結果。
+10. 如果有傳入`isReimbursed` 且為 `true`，則確認 `expense_items` 是否存在，並且確認所有 `expense_items` 是否都已到貨(沒有 `expense_items` 的話，則不需確認)。
+11. 更新 `expenses` 資料。
+12. 回傳更新結果。
