@@ -125,7 +125,9 @@ func (s *LineLogin) LineLogin(ctx context.Context, req auth.LineLoginRequest, lo
 
 	// Log activity
 	go func() {
-		logCtx := context.Background()
+		logCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
 		if err := s.activityLog.LogCustomerBrowse(logCtx, customer.Name, utils.PgTextToString(customer.LineName)); err != nil {
 			log.Printf("failed to log customer register activity: %v", err)
 		}

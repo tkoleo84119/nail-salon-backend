@@ -294,7 +294,9 @@ func (s *Update) buildResponse(ctx context.Context, bookingID int64, needSendLin
 
 	// Log activity
 	go func() {
-		logCtx := context.Background()
+		logCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
 		customer, err := s.queries.GetCustomerByID(logCtx, bookingInfo.CustomerID)
 		if err == nil {
 			if err := s.activityLog.LogCustomerBookingUpdate(logCtx, customer.Name, utils.PgTextToString(customer.LineName), bookingInfo.StoreName); err != nil {

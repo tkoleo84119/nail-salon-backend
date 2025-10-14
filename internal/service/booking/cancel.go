@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -141,7 +142,9 @@ func (s *Cancel) Cancel(ctx context.Context, bookingID int64, req bookingModel.C
 
 	// Log activity
 	go func() {
-		logCtx := context.Background()
+		logCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
 		customer, err := s.queries.GetCustomerByID(logCtx, customerID)
 		if err == nil {
 			if err := s.activityLog.LogCustomerBookingCancel(logCtx, customer.Name, utils.PgTextToString(customer.LineName), bookingInfo.StoreName); err != nil {

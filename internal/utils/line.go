@@ -74,6 +74,11 @@ func NewLineValidator(channelID string) *LineValidator {
 		verifyEndpoint: "https://api.line.me/oauth2/v2.1/verify",
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
+			Transport: &http.Transport{
+				MaxIdleConns:        100,
+				MaxIdleConnsPerHost: 10,
+				IdleConnTimeout:     90 * time.Second,
+			},
 		},
 	}
 }
@@ -153,6 +158,11 @@ func NewLineMessenger(channelAccessToken string) *LineMessageClient {
 		messageEndpoint:    "https://api.line.me/v2/bot/message/push",
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
+			Transport: &http.Transport{
+				MaxIdleConns:        100,
+				MaxIdleConnsPerHost: 10,
+				IdleConnTimeout:     90 * time.Second,
+			},
 		},
 	}
 }

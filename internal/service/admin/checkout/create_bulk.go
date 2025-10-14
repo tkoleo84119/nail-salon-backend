@@ -203,7 +203,9 @@ func (s *CreateBulk) CreateBulk(ctx context.Context, storeID int64, req adminChe
 
 	// Log activity
 	go func() {
-		logCtx := context.Background()
+		logCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
 		customer, err := s.queries.GetCustomerByID(logCtx, customerID)
 		if err == nil {
 			if err := s.activityLog.LogAdminBookingCompleted(logCtx, staffContext.Username, customer.Name, utils.PgTextToString(customer.LineName), len(newCheckouts), storeName); err != nil {
