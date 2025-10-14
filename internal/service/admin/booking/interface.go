@@ -19,11 +19,11 @@ type GetInterface interface {
 }
 
 type UpdateInterface interface {
-	Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest) (*adminBookingModel.UpdateResponse, error)
+	Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest, staffName string) (*adminBookingModel.UpdateResponse, error)
 }
 
 type CancelInterface interface {
-	Cancel(ctx context.Context, storeID, bookingID int64, req adminBookingModel.CancelRequest) (*adminBookingModel.CancelResponse, error)
+	Cancel(ctx context.Context, storeID, bookingID int64, req adminBookingModel.CancelRequest, staffName string) (*adminBookingModel.CancelResponse, error)
 }
 
 type UpdateCompletedInterface interface {

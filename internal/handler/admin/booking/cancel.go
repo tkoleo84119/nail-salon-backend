@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
+	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
@@ -59,8 +60,14 @@ func (h *Cancel) Cancel(c *gin.Context) {
 		*req.CancelReason = strings.TrimSpace(*req.CancelReason)
 	}
 
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		return
+	}
+
 	// Call service
-	result, err := h.service.Cancel(c.Request.Context(), parsedStoreID, parsedBookingID, req)
+	result, err := h.service.Cancel(c.Request.Context(), parsedStoreID, parsedBookingID, req, staffContext.Username)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return

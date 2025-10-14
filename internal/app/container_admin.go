@@ -452,8 +452,8 @@ func NewAdminServices(queries *dbgen.Queries, database *db.Database, repositorie
 		// Booking management services
 		BookingCreate:          adminBookingService.NewCreate(queries, database.PgxPool, activityLog),
 		BookingGetAll:          adminBookingService.NewGetAll(queries, repositories.SQLX),
-		BookingUpdate:          adminBookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx),
-		BookingCancel:          adminBookingService.NewCancel(queries, database.Sqlx, repositories.SQLX),
+		BookingUpdate:          adminBookingService.NewUpdate(queries, repositories.SQLX, database.Sqlx, activityLog),
+		BookingCancel:          adminBookingService.NewCancel(queries, database.Sqlx, repositories.SQLX, activityLog),
 		BookingGet:             adminBookingService.NewGet(queries),
 		BookingUpdateCompleted: adminBookingService.NewUpdateCompleted(queries),
 

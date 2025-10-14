@@ -3,6 +3,8 @@ package adminBooking
 import (
 	"context"
 	"errors"
+	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jmoiron/sqlx"
@@ -11,24 +13,31 @@ import (
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
+	"github.com/tkoleo84119/nail-salon-backend/internal/service/cache"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type Update struct {
-	queries *dbgen.Queries
-	db      *sqlx.DB
-	repo    *sqlxRepo.Repositories
+	queries     *dbgen.Queries
+	db          *sqlx.DB
+	repo        *sqlxRepo.Repositories
+	activityLog cache.ActivityLogCacheInterface
 }
 
-func NewUpdate(queries *dbgen.Queries, repo *sqlxRepo.Repositories, db *sqlx.DB) UpdateInterface {
+func NewUpdate(
+	queries *dbgen.Queries,
+	repo *sqlxRepo.Repositories,
+	db *sqlx.DB,
+	activityLog cache.ActivityLogCacheInterface) UpdateInterface {
 	return &Update{
-		queries: queries,
-		repo:    repo,
-		db:      db,
+		queries:     queries,
+		repo:        repo,
+		db:          db,
+		activityLog: activityLog,
 	}
 }
 
-func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest) (*adminBookingModel.UpdateResponse, error) {
+func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req adminBookingModel.UpdateParsedRequest, staffName string) (*adminBookingModel.UpdateResponse, error) {
 	// Get existing booking to verify it exists and is in SCHEDULED status
 	existingBooking, err := s.queries.GetBookingDetailByID(ctx, bookingID)
 	if err != nil {
@@ -96,6 +105,15 @@ func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req admin
 	if err := tx.Commit(); err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to commit transaction", err)
 	}
+
+	// Log activity
+	go func() {
+		logCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.activityLog.LogAdminBookingUpdate(logCtx, staffName, existingBooking.CustomerName, utils.PgTextToString(existingBooking.CustomerLineName), existingBooking.StoreName); err != nil {
+			log.Printf("failed to log admin booking update activity: %v", err)
+		}
+	}()
 
 	return &adminBookingModel.UpdateResponse{
 		ID: utils.FormatID(bookingID),

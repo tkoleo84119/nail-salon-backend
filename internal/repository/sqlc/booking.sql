@@ -19,6 +19,7 @@ SELECT
     s.name as store_name,
     b.customer_id,
     c.line_uid as customer_line_uid,
+    c.line_name as customer_line_name,
     c.name as customer_name,
     c.phone as customer_phone,
     b.stylist_id,

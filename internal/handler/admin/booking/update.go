@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
+	"github.com/tkoleo84119/nail-salon-backend/internal/middleware"
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	adminBookingService "github.com/tkoleo84119/nail-salon-backend/internal/service/admin/booking"
@@ -127,8 +128,14 @@ func (h *Update) Update(c *gin.Context) {
 		Note:          req.Note,
 	}
 
+	staffContext, exists := middleware.GetStaffFromContext(c)
+	if !exists {
+		errorCodes.AbortWithError(c, errorCodes.AuthContextMissing, nil)
+		return
+	}
+
 	// Call service
-	response, err := h.service.Update(c.Request.Context(), parsedStoreID, parsedBookingID, parsedReq)
+	response, err := h.service.Update(c.Request.Context(), parsedStoreID, parsedBookingID, parsedReq, staffContext.Username)
 	if err != nil {
 		errorCodes.RespondWithServiceError(c, err)
 		return
