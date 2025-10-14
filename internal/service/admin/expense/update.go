@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminExpenseModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/expense"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
@@ -67,16 +68,20 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID int64, req admin
 
 	// Validate payer and check store access if provided
 	if req.PayerID != nil {
-		// Check if staff exists and has access to the store
-		payerHasAccess, err := s.queries.CheckStaffHasStoreAccess(ctx, dbgen.CheckStaffHasStoreAccessParams{
-			StaffUserID: *req.PayerID,
-			StoreID:     storeID,
-		})
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check payer store access", err)
-		}
-		if !payerHasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
+		if role == common.RoleSuperAdmin && *req.PayerID == updaterID {
+			// do nothing
+		} else {
+			// Check if staff exists and has access to the store
+			payerHasAccess, err := s.queries.CheckStaffHasStoreAccess(ctx, dbgen.CheckStaffHasStoreAccessParams{
+				StaffUserID: *req.PayerID,
+				StoreID:     storeID,
+			})
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check payer store access", err)
+			}
+			if !payerHasAccess {
+				return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
+			}
 		}
 	}
 

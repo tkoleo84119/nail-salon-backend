@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
 	adminExpenseModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/expense"
+	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
@@ -41,16 +42,21 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminExpenseMode
 
 	var isReimbursed *bool
 	if req.PayerID != nil {
-		payerHasAccess, err := s.queries.CheckStaffHasStoreAccess(ctx, dbgen.CheckStaffHasStoreAccessParams{
-			StaffUserID: *req.PayerID,
-			StoreID:     storeID,
-		})
-		if err != nil {
-			return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check payer store access", err)
+		if role == common.RoleSuperAdmin && *req.PayerID == creatorID {
+			// do nothing
+		} else {
+			payerHasAccess, err := s.queries.CheckStaffHasStoreAccess(ctx, dbgen.CheckStaffHasStoreAccessParams{
+				StaffUserID: *req.PayerID,
+				StoreID:     storeID,
+			})
+			if err != nil {
+				return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to check payer store access", err)
+			}
+			if !payerHasAccess {
+				return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
+			}
 		}
-		if !payerHasAccess {
-			return nil, errorCodes.NewServiceErrorWithCode(errorCodes.StaffNotFound)
-		}
+
 		// if there is a payer, is_reimbursed is set to false
 		falseValue := false
 		isReimbursed = &falseValue
