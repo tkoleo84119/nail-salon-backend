@@ -104,14 +104,20 @@ func (r *CustomerRepository) GetAllCustomersByFilter(ctx context.Context, params
 
 	// Pagination + Sorting
 	limit, offset := utils.SetDefaultValuesOfPagination(params.Limit, params.Offset, 20, 0)
-	defaultSortArr := []string{"last_visit_at DESC"}
-	sort := utils.HandleSortByMap(map[string]string{
-		"level":         "level",
-		"isBlacklisted": "is_blacklisted",
-		"lastVisitAt":   "last_visit_at",
-		"createdAt":     "created_at",
-		"updatedAt":     "updated_at",
-	}, defaultSortArr, params.Sort)
+	defaultSortArr := []string{"updated_at DESC"}
+	sort := utils.HandleSortByMapWithNulls(
+		map[string]string{
+			"level":         "level",
+			"isBlacklisted": "is_blacklisted",
+			"lastVisitAt":   "last_visit_at",
+			"createdAt":     "created_at",
+			"updatedAt":     "updated_at",
+		},
+		map[string]bool{
+			"lastVisitAt": true,
+		},
+		defaultSortArr,
+		params.Sort)
 
 	args = append(args, limit, offset)
 	limitIndex := len(args) - 1

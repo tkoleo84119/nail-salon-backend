@@ -31,3 +31,36 @@ func HandleSortByMap(allowedFields map[string]string, defaultSortArr []string, s
 
 	return strings.Join(sortParts, ", ")
 }
+
+// HandleSortByMapWithNulls handles the sort parameter with NULLS LAST support
+func HandleSortByMapWithNulls(allowedFields map[string]string, nullsLastFields map[string]bool, defaultSortArr []string, sort *[]string) string {
+	var sortParts []string
+
+	if sort != nil && len(*sort) > 0 {
+		for _, s := range *sort {
+			// if start with -, order by desc
+			rowField := strings.TrimPrefix(s, "-")
+			column, ok := allowedFields[rowField]
+			if !ok {
+				continue
+			}
+
+			nullsClause := ""
+			if nullsLastFields[rowField] {
+				nullsClause = " NULLS LAST"
+			}
+
+			if strings.HasPrefix(s, "-") {
+				sortParts = append(sortParts, column+" DESC"+nullsClause)
+			} else {
+				sortParts = append(sortParts, column+" ASC"+nullsClause)
+			}
+		}
+	}
+
+	if len(sortParts) == 0 {
+		sortParts = append(sortParts, defaultSortArr...)
+	}
+
+	return strings.Join(sortParts, ", ")
+}

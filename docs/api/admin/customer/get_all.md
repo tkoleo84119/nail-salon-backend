@@ -34,17 +34,17 @@
 
 ### Query Parameters
 
-| 參數          | 型別   | 必填 | 預設值       | 說明                                             |
-| ------------- | ------ | ---- | ------------ | ------------------------------------------------ |
-| name          | string | 否   |              | 模糊查詢顧客名稱                                 |
-| lineName      | string | 否   |              | 模糊查詢 LINE 名稱                               |
-| phone         | string | 否   |              | 模糊查詢電話                                     |
-| level         | string | 否   |              | 顧客等級（NORMAL, VIP, VVIP）                    |
-| isBlacklisted | bool   | 否   |              | 顧客是否被列入黑名單                             |
-| minPastDays   | int    | 否   |              | 距離上次拜訪天數                                 |
-| limit         | int    | 否   | 20           | 單頁筆數                                         |
-| offset        | int    | 否   | 0            | 起始筆數                                         |
-| sort          | string | 否   | -lastVisitAt | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序) |
+| 參數          | 型別   | 必填 | 預設值     | 說明                                             |
+| ------------- | ------ | ---- | ---------- | ------------------------------------------------ |
+| name          | string | 否   |            | 模糊查詢顧客名稱                                 |
+| lineName      | string | 否   |            | 模糊查詢 LINE 名稱                               |
+| phone         | string | 否   |            | 模糊查詢電話                                     |
+| level         | string | 否   |            | 顧客等級（NORMAL, VIP, VVIP）                    |
+| isBlacklisted | bool   | 否   |            | 顧客是否被列入黑名單                             |
+| minPastDays   | int    | 否   |            | 距離上次拜訪天數                                 |
+| limit         | int    | 否   | 20         | 單頁筆數                                         |
+| offset        | int    | 否   | 0          | 起始筆數                                         |
+| sort          | string | 否   | -updatedAt | 排序欄位 (可以逗號串接，有 `-` 表示 `DESC` 排序) |
 
 ### 驗證規則
 
