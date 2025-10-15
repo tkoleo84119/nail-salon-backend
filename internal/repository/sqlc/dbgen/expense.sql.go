@@ -82,6 +82,7 @@ FROM expenses
 WHERE store_id = $1
     AND expense_date BETWEEN $2 AND $3
 GROUP BY category
+ORDER BY amount DESC
 `
 
 type GetExpenseReportByCategoryParams struct {
@@ -129,6 +130,7 @@ WHERE e.store_id = $1
     AND e.expense_date BETWEEN $2 AND $3
     AND e.payer_id IS NOT NULL
 GROUP BY e.payer_id, su.username
+ORDER BY advance_amount DESC
 `
 
 type GetExpenseReportByPayerParams struct {
@@ -183,6 +185,7 @@ WHERE e.store_id = $1
     AND e.expense_date BETWEEN $2 AND $3
     AND e.supplier_id IS NOT NULL
 GROUP BY e.supplier_id, s.name
+ORDER BY amount DESC
 `
 
 type GetExpenseReportBySupplierParams struct {

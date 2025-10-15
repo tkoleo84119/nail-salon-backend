@@ -62,7 +62,8 @@ SELECT
 FROM expenses
 WHERE store_id = $1
     AND expense_date BETWEEN $2 AND $3
-GROUP BY category;
+GROUP BY category
+ORDER BY amount DESC;
 
 -- name: GetExpenseReportBySupplier :many
 SELECT
@@ -75,7 +76,8 @@ LEFT JOIN suppliers s ON e.supplier_id = s.id
 WHERE e.store_id = $1
     AND e.expense_date BETWEEN $2 AND $3
     AND e.supplier_id IS NOT NULL
-GROUP BY e.supplier_id, s.name;
+GROUP BY e.supplier_id, s.name
+ORDER BY amount DESC;
 
 -- name: GetExpenseReportByPayer :many
 SELECT
@@ -89,4 +91,5 @@ LEFT JOIN staff_users su ON e.payer_id = su.id
 WHERE e.store_id = $1
     AND e.expense_date BETWEEN $2 AND $3
     AND e.payer_id IS NOT NULL
-GROUP BY e.payer_id, su.username;
+GROUP BY e.payer_id, su.username
+ORDER BY advance_amount DESC;
