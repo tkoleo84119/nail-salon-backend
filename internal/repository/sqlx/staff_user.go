@@ -205,23 +205,29 @@ type GetAllStaffUsernameByStoreFilterResponse struct {
 // GetAllStaffUsernameByStoreFilter retrieves staff usernames for a specific store with dynamic filtering and pagination
 func (r *StaffUserRepository) GetAllStaffUsernameByStoreFilter(ctx context.Context, storeID int64, params GetAllStaffUsernameByStoreFilterParams) (int, []GetAllStaffUsernameByStoreFilterResponse, error) {
 	// where conditions
-	whereConditions := []string{"sa.store_id = $1"}
+	activeCondition := ""
 	args := []interface{}{storeID}
 
 	if params.IsActive != nil {
-		whereConditions = append(whereConditions, fmt.Sprintf("su.is_active = $%d", len(args)+1))
+		activeCondition = "AND su.is_active = $2"
 		args = append(args, *params.IsActive)
 	}
 
-	whereClause := "WHERE " + strings.Join(whereConditions, " AND ")
-
 	// Count query
 	countQuery := fmt.Sprintf(`
-		SELECT COUNT(*)
-		FROM staff_users su
-		JOIN staff_user_store_access sa ON su.id = sa.staff_user_id
-		%s
-	`, whereClause)
+			SELECT COUNT(*) FROM (
+				SELECT su.id
+				FROM staff_users su
+				JOIN staff_user_store_access sa ON su.id = sa.staff_user_id
+				WHERE sa.store_id = $1 %s
+
+				UNION
+
+				SELECT su.id
+				FROM staff_users su
+				WHERE su.role = 'SUPER_ADMIN' %s
+			) AS combined_staff
+    `, activeCondition, activeCondition)
 
 	var total int
 	if err := r.db.GetContext(ctx, &total, countQuery, args...); err != nil {
@@ -246,16 +252,22 @@ func (r *StaffUserRepository) GetAllStaffUsernameByStoreFilter(ctx context.Conte
 
 	// Data query
 	query := fmt.Sprintf(`
-		SELECT
-			su.id,
-			su.username,
-			su.is_active
-		FROM staff_users su
-		JOIN staff_user_store_access sa ON su.id = sa.staff_user_id
-		%s
+		SELECT su.id, su.username, su.is_active
+		FROM (
+			SELECT su.id, su.username, su.is_active, su.created_at, su.updated_at
+			FROM staff_users su
+			JOIN staff_user_store_access sa ON su.id = sa.staff_user_id
+			WHERE sa.store_id = $1 %s
+
+			UNION
+
+			SELECT su.id, su.username, su.is_active, su.created_at, su.updated_at
+			FROM staff_users su
+			WHERE su.role = 'SUPER_ADMIN' %s
+		) AS su
 		ORDER BY %s
 		LIMIT $%d OFFSET $%d
-	`, whereClause, sort, limitIndex, offsetIndex)
+	`, activeCondition, activeCondition, sort, limitIndex, offsetIndex)
 
 	var result []GetAllStaffUsernameByStoreFilterResponse
 	if err := r.db.SelectContext(ctx, &result, query, args...); err != nil {
