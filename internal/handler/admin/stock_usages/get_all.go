@@ -49,6 +49,18 @@ func (h *GetAll) GetAll(c *gin.Context) {
 		return
 	}
 
+	var parsedProductID *int64
+	if req.ProductID != nil {
+		parsed, err := utils.ParseID(*req.ProductID)
+		if err != nil {
+			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
+				"productId": "productId 類型轉換失敗",
+			})
+			return
+		}
+		parsedProductID = &parsed
+	}
+
 	// trim name
 	if req.Name != nil {
 		*req.Name = strings.TrimSpace(*req.Name)
@@ -59,11 +71,12 @@ func (h *GetAll) GetAll(c *gin.Context) {
 	sort := utils.TransformSort(req.Sort)
 
 	parsedReq := adminStockUsagesModel.GetAllParsedRequest{
-		Name:    req.Name,
-		IsInUse: req.IsInUse,
-		Limit:   limit,
-		Offset:  offset,
-		Sort:    sort,
+		ProductID: parsedProductID,
+		Name:      req.Name,
+		IsInUse:   req.IsInUse,
+		Limit:     limit,
+		Offset:    offset,
+		Sort:      sort,
 	}
 
 	// Get staff context from JWT middleware

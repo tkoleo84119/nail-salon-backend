@@ -30,11 +30,12 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminStockUsages
 
 	// Get stock usages from repository
 	total, results, err := s.repo.StockUsage.GetAllStockUsagesByFilter(ctx, storeID, sqlxRepo.GetAllStockUsagesByFilterParams{
-		Name:    req.Name,
-		IsInUse: req.IsInUse,
-		Limit:   &req.Limit,
-		Offset:  &req.Offset,
-		Sort:    &req.Sort,
+		ProductID: req.ProductID,
+		Name:      req.Name,
+		IsInUse:   req.IsInUse,
+		Limit:     &req.Limit,
+		Offset:    &req.Offset,
+		Sort:      &req.Sort,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "Failed to get stock usages", err)
