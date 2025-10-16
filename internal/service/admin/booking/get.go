@@ -100,8 +100,8 @@ func (s *Get) Get(ctx context.Context, storeID, bookingID int64, role string, st
 				Name:    detail.ServiceName,
 				IsAddon: utils.PgBoolToBool(detail.IsAddon),
 			},
-			RawPrice: int(rawPrice),
-			Price:    int(price),
+			RawPrice: rawPrice,
+			Price:    price,
 		}
 	}
 

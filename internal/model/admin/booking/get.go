@@ -35,8 +35,8 @@ type GetTimeSlot struct {
 type GetBookingDetailItem struct {
 	ID       string     `json:"id"`
 	Service  GetService `json:"service"`
-	RawPrice int        `json:"rawPrice"`
-	Price    int        `json:"price"`
+	RawPrice float64    `json:"rawPrice"`
+	Price    float64    `json:"price"`
 }
 
 type GetService struct {
