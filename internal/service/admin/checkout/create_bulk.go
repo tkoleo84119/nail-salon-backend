@@ -3,6 +3,7 @@ package adminCheckout
 import (
 	"context"
 	"log"
+	"math"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -385,6 +386,8 @@ func (s *CreateBulk) prepareUpdateBookingDetail(
 			})
 		}
 	}
+
+	finalAmount = math.Round(finalAmount)
 
 	return bookingDetailPriceInfo, totalAmount, finalAmount, nil
 }
