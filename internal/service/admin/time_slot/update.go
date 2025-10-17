@@ -120,14 +120,19 @@ func (s *Update) Update(ctx context.Context, scheduleID int64, timeSlotID int64,
 }
 
 func (s *Update) checkScheduleIsNotPastDate(workDatePg pgtype.Date) error {
-	workDate := workDatePg.Time
+
 	loc, err := time.LoadLocation("Asia/Taipei")
 	if err != nil {
 		return errorCodes.NewServiceError(errorCodes.SysInternalError, "failed to load location", err)
 	}
 
+	workDate := workDatePg.Time.In(loc)
 	now := time.Now().In(loc)
-	if workDate.Before(now) {
+
+	workDateOnly := time.Date(workDate.Year(), workDate.Month(), workDate.Day(), 0, 0, 0, 0, loc)
+	todayOnly := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+
+	if workDateOnly.Before(todayOnly) {
 		return errorCodes.NewServiceErrorWithCode(errorCodes.ScheduleCannotUpdateBeforeToday)
 	}
 
