@@ -45,6 +45,7 @@ type Booking struct {
 	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 	CancelReason   pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
+	StoreNote      pgtype.Text        `db:"store_note" json:"store_note"`
 }
 
 type BookingDetail struct {

@@ -44,8 +44,8 @@ func (h *Create) Create(c *gin.Context) {
 	}
 
 	// trim note
-	if req.Note != nil {
-		*req.Note = strings.TrimSpace(*req.Note)
+	if req.StoreNote != nil {
+		*req.StoreNote = strings.TrimSpace(*req.StoreNote)
 	}
 
 	parsedCustomerID, err := utils.ParseID(req.CustomerID)
@@ -87,7 +87,7 @@ func (h *Create) Create(c *gin.Context) {
 		MainServiceID: parsedMainServiceID,
 		SubServiceIDs: parsedSubServiceIDs,
 		IsChatEnabled: isChatEnabled,
-		Note:          req.Note,
+		StoreNote:     req.StoreNote,
 	}
 
 	// Get staff context from JWT middleware

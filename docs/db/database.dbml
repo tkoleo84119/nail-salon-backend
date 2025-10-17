@@ -191,6 +191,7 @@ Table bookings {
   is_chat_enabled boolean [default: true] // 是否要聊天
   actual_duration int // 實際完成時間(分)
   note text // 客人備註(當次指甲狀況)
+  store_note text // 店家備註
   used_products text[] // 使用的產品
   cancel_reason text // 取消原因
   status varchar(30) [not null] // SCHEDULED, CANCELLED, COMPLETED, NO_SHOW

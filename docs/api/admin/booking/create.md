@@ -47,7 +47,7 @@
   "mainServiceId": "9000000010",
   "subServiceIds": ["9000000010", "9000000012"],
   "isChatEnabled": true,
-  "note": "顧客想做法式+跳色"
+  "storeNote": "顧客想做法式+跳色"
 }
 ```
 
@@ -61,7 +61,7 @@
 | mainServiceId | 是   |                 | 主服務 ID  |
 | subServiceIds | 是   | <li>最大10筆    | 子服務 IDs |
 | isChatEnabled | 是   |                 | 是否要聊天 |
-| note          | 選填 | <li>最大長度255 | 備註       |
+| storeNote     | 否   | <li>最大長度255 | 店家備註   |
 
 ---
 

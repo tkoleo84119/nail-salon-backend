@@ -6,7 +6,7 @@ type CreateRequest struct {
 	MainServiceID string    `json:"mainServiceId" binding:"required"`
 	SubServiceIDs *[]string `json:"subServiceIds" binding:"omitempty,max=10"`
 	IsChatEnabled *bool     `json:"isChatEnabled" binding:"omitempty"`
-	Note          *string   `json:"note" binding:"omitempty,max=255"`
+	StoreNote     *string   `json:"storeNote" binding:"omitempty,max=255"`
 }
 
 type CreateParsedRequest struct {
@@ -15,7 +15,7 @@ type CreateParsedRequest struct {
 	MainServiceID int64
 	SubServiceIDs []int64
 	IsChatEnabled bool
-	Note          *string
+	StoreNote     *string
 }
 
 type CreateResponse struct {

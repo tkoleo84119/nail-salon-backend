@@ -7,9 +7,10 @@ INSERT INTO bookings (
     time_slot_id,
     is_chat_enabled,
     note,
+    store_note,
     status
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 ) RETURNING *;
 
 -- name: GetBookingDetailByID :one
@@ -30,6 +31,7 @@ SELECT
     sch.work_date,
     b.is_chat_enabled,
     b.note,
+    b.store_note,
     b.actual_duration,
     b.status,
     b.created_at,

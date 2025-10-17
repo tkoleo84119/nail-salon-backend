@@ -70,10 +70,11 @@ INSERT INTO bookings (
     time_slot_id,
     is_chat_enabled,
     note,
+    store_note,
     status
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
-) RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, actual_duration, note, status, created_at, updated_at, cancel_reason
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
+) RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, actual_duration, note, status, created_at, updated_at, cancel_reason, store_note
 `
 
 type CreateBookingParams struct {
@@ -84,6 +85,7 @@ type CreateBookingParams struct {
 	TimeSlotID    int64       `db:"time_slot_id" json:"time_slot_id"`
 	IsChatEnabled pgtype.Bool `db:"is_chat_enabled" json:"is_chat_enabled"`
 	Note          pgtype.Text `db:"note" json:"note"`
+	StoreNote     pgtype.Text `db:"store_note" json:"store_note"`
 	Status        string      `db:"status" json:"status"`
 }
 
@@ -96,6 +98,7 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 		arg.TimeSlotID,
 		arg.IsChatEnabled,
 		arg.Note,
+		arg.StoreNote,
 		arg.Status,
 	)
 	var i Booking
@@ -112,6 +115,7 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CancelReason,
+		&i.StoreNote,
 	)
 	return i, err
 }
@@ -134,6 +138,7 @@ SELECT
     sch.work_date,
     b.is_chat_enabled,
     b.note,
+    b.store_note,
     b.actual_duration,
     b.status,
     b.created_at,
@@ -164,6 +169,7 @@ type GetBookingDetailByIDRow struct {
 	WorkDate         pgtype.Date        `db:"work_date" json:"work_date"`
 	IsChatEnabled    pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
 	Note             pgtype.Text        `db:"note" json:"note"`
+	StoreNote        pgtype.Text        `db:"store_note" json:"store_note"`
 	ActualDuration   pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
 	Status           string             `db:"status" json:"status"`
 	CreatedAt        pgtype.Timestamptz `db:"created_at" json:"created_at"`
@@ -190,6 +196,7 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 		&i.WorkDate,
 		&i.IsChatEnabled,
 		&i.Note,
+		&i.StoreNote,
 		&i.ActualDuration,
 		&i.Status,
 		&i.CreatedAt,

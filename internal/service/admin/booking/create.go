@@ -143,7 +143,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 		StylistID:     schedule.StylistID,
 		TimeSlotID:    req.TimeSlotID,
 		IsChatEnabled: utils.BoolPtrToPgBool(&req.IsChatEnabled),
-		Note:          utils.StringPtrToPgText(req.Note, true),
+		StoreNote:     utils.StringPtrToPgText(req.StoreNote, true),
 		Status:        common.BookingStatusScheduled,
 	})
 	if err != nil {
