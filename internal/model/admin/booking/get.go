@@ -9,6 +9,7 @@ type GetResponse struct {
 	Status         string                 `json:"status"`
 	IsChatEnabled  bool                   `json:"isChatEnabled"`
 	Note           string                 `json:"note"`
+	StoreNote      string                 `json:"storeNote"`
 	CreatedAt      string                 `json:"createdAt"`
 	UpdatedAt      string                 `json:"updatedAt"`
 	BookingDetails []GetBookingDetailItem `json:"bookingDetails"`

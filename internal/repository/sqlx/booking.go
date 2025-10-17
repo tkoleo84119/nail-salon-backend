@@ -254,6 +254,7 @@ type UpdateBookingTxParams struct {
 	TimeSlotID    *int64
 	IsChatEnabled *bool
 	Note          *string
+	StoreNote     *string
 }
 
 // UpdateBooking updates a booking dynamically based on provided fields
@@ -285,6 +286,11 @@ func (r *BookingRepository) UpdateBookingTx(ctx context.Context, tx *sqlx.Tx, bo
 	if params.Note != nil {
 		setParts = append(setParts, fmt.Sprintf("note = $%d", len(args)+1))
 		args = append(args, *params.Note)
+	}
+
+	if params.StoreNote != nil {
+		setParts = append(setParts, fmt.Sprintf("store_note = $%d", len(args)+1))
+		args = append(args, *params.StoreNote)
 	}
 
 	// Check if there are any fields to update

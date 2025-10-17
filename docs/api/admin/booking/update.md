@@ -48,7 +48,7 @@
   "mainServiceId": "9000000010",
   "subServiceIds": ["9000000011", "9000000012"],
   "isChatEnabled": false,
-  "note": "顧客改約下午並不開啟聊天"
+  "storeNote": "顧客想做法式+跳色"
 }
 ```
 
@@ -61,7 +61,7 @@
 | mainServiceId | 否   |               | 主服務項目ID  |
 | subServiceIds | 否   | <li>最多10項  | 副服務項目IDs |
 | isChatEnabled | 否   | <li>布林值    | 是否要聊天    |
-| note          | 否   | <li>最長255字 | 備註說明      |
+| storeNote     | 否   | <li>最長255字 | 店家備註      |
 
 
 - stylistId、timeSlotId、mainServiceId、subServiceIds 必須一起傳入

@@ -72,38 +72,41 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	// trim note
-	if req.Note != nil {
-		*req.Note = strings.TrimSpace(*req.Note)
+	if req.StoreNote != nil {
+		*req.StoreNote = strings.TrimSpace(*req.StoreNote)
 	}
 
-	var stylistId int64
+	var stylistId *int64
 	if req.StylistID != nil {
-		stylistId, err = utils.ParseID(*req.StylistID)
+		parsed, err := utils.ParseID(*req.StylistID)
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
 				"stylistId": "stylistId 類型轉換失敗",
 			})
 		}
+		stylistId = &parsed
 	}
 
-	var timeSlotId int64
+	var timeSlotId *int64
 	if req.TimeSlotID != nil {
-		timeSlotId, err = utils.ParseID(*req.TimeSlotID)
+		parsed, err := utils.ParseID(*req.TimeSlotID)
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
 				"timeSlotId": "timeSlotId 類型轉換失敗",
 			})
 		}
+		timeSlotId = &parsed
 	}
 
-	var mainServiceId int64
+	var mainServiceId *int64
 	if req.MainServiceID != nil {
-		mainServiceId, err = utils.ParseID(*req.MainServiceID)
+		parsed, err := utils.ParseID(*req.MainServiceID)
 		if err != nil {
 			errorCodes.AbortWithError(c, errorCodes.ValTypeConversionFailed, map[string]string{
 				"mainServiceId": "mainServiceId 類型轉換失敗",
 			})
 		}
+		mainServiceId = &parsed
 	}
 
 	var subServiceIds []int64
@@ -120,12 +123,12 @@ func (h *Update) Update(c *gin.Context) {
 	}
 
 	parsedReq := adminBookingModel.UpdateParsedRequest{
-		StylistID:     &stylistId,
-		TimeSlotID:    &timeSlotId,
-		MainServiceID: &mainServiceId,
+		StylistID:     stylistId,
+		TimeSlotID:    timeSlotId,
+		MainServiceID: mainServiceId,
 		SubServiceIDs: subServiceIds,
 		IsChatEnabled: req.IsChatEnabled,
-		Note:          req.Note,
+		StoreNote:     req.StoreNote,
 	}
 
 	staffContext, exists := middleware.GetStaffFromContext(c)

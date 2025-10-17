@@ -57,6 +57,7 @@ func (s *Get) Get(ctx context.Context, storeID, bookingID int64, role string, st
 		},
 		IsChatEnabled:  utils.PgBoolToBool(booking.IsChatEnabled),
 		Note:           utils.PgTextToString(booking.Note),
+		StoreNote:      utils.PgTextToString(booking.StoreNote),
 		ActualDuration: utils.PgInt4ToInt32Ptr(booking.ActualDuration),
 		Status:         booking.Status,
 		CreatedAt:      utils.PgTimestamptzToTimeString(booking.CreatedAt),

@@ -8,7 +8,7 @@ type UpdateRequest struct {
 	MainServiceID *string   `json:"mainServiceId"`
 	SubServiceIDs *[]string `json:"subServiceIds" binding:"omitempty,max=10"`
 	IsChatEnabled *bool     `json:"isChatEnabled" binding:"omitempty"`
-	Note          *string   `json:"note" binding:"omitempty,max=255"`
+	StoreNote     *string   `json:"storeNote" binding:"omitempty,max=255"`
 }
 
 type UpdateParsedRequest struct {
@@ -17,7 +17,7 @@ type UpdateParsedRequest struct {
 	MainServiceID *int64
 	SubServiceIDs []int64
 	IsChatEnabled *bool
-	Note          *string
+	StoreNote     *string
 }
 
 type UpdateBookingServiceInfo struct {
@@ -32,7 +32,7 @@ type UpdateResponse struct {
 }
 
 func (r UpdateRequest) HasUpdates() bool {
-	return r.TimeSlotID != nil || r.MainServiceID != nil || r.SubServiceIDs != nil || r.IsChatEnabled != nil || r.Note != nil
+	return r.TimeSlotID != nil || r.MainServiceID != nil || r.SubServiceIDs != nil || r.IsChatEnabled != nil || r.StoreNote != nil
 }
 
 func (r UpdateRequest) HasTimeSlotUpdate() bool {
@@ -41,7 +41,7 @@ func (r UpdateRequest) HasTimeSlotUpdate() bool {
 
 func (r UpdateRequest) IsTimeSlotUpdateComplete() bool {
 	if !r.HasTimeSlotUpdate() {
-		return false
+		return true
 	}
 
 	if r.StylistID == nil || r.TimeSlotID == nil || r.MainServiceID == nil || r.SubServiceIDs == nil {
@@ -52,15 +52,15 @@ func (r UpdateRequest) IsTimeSlotUpdateComplete() bool {
 }
 
 func (r UpdateParsedRequest) HasTimeSlotUpdate() bool {
-	return r.StylistID != nil || r.TimeSlotID != nil || r.MainServiceID != nil || r.SubServiceIDs != nil
+	return r.StylistID != nil || r.TimeSlotID != nil || r.MainServiceID != nil || len(r.SubServiceIDs) > 0
 }
 
 func (r UpdateParsedRequest) IsTimeSlotUpdateComplete() bool {
 	if !r.HasTimeSlotUpdate() {
-		return false
+		return true
 	}
 
-	if r.StylistID == nil || r.TimeSlotID == nil || r.MainServiceID == nil || r.SubServiceIDs == nil {
+	if r.StylistID == nil || r.TimeSlotID == nil || r.MainServiceID == nil || len(r.SubServiceIDs) == 0 {
 		return false
 	}
 

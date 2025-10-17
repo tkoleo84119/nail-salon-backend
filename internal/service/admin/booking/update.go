@@ -77,7 +77,7 @@ func (s *Update) Update(ctx context.Context, storeID, bookingID int64, req admin
 		StylistID:     req.StylistID,
 		TimeSlotID:    req.TimeSlotID,
 		IsChatEnabled: req.IsChatEnabled,
-		Note:          req.Note,
+		StoreNote:     req.StoreNote,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update booking", err)
