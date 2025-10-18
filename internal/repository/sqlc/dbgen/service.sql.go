@@ -78,7 +78,20 @@ type CreateServiceParams struct {
 	Note            pgtype.Text    `db:"note" json:"note"`
 }
 
-func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (Service, error) {
+type CreateServiceRow struct {
+	ID              int64              `db:"id" json:"id"`
+	Name            string             `db:"name" json:"name"`
+	Price           pgtype.Numeric     `db:"price" json:"price"`
+	DurationMinutes int32              `db:"duration_minutes" json:"duration_minutes"`
+	IsAddon         pgtype.Bool        `db:"is_addon" json:"is_addon"`
+	IsVisible       pgtype.Bool        `db:"is_visible" json:"is_visible"`
+	IsActive        pgtype.Bool        `db:"is_active" json:"is_active"`
+	Note            pgtype.Text        `db:"note" json:"note"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (CreateServiceRow, error) {
 	row := q.db.QueryRow(ctx, createService,
 		arg.ID,
 		arg.Name,
@@ -88,7 +101,7 @@ func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (S
 		arg.IsVisible,
 		arg.Note,
 	)
-	var i Service
+	var i CreateServiceRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -107,6 +120,7 @@ func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (S
 const getServiceByID = `-- name: GetServiceByID :one
 SELECT
     id,
+    sort_order,
     name,
     price,
     duration_minutes,
@@ -120,11 +134,26 @@ FROM services
 WHERE id = $1
 `
 
-func (q *Queries) GetServiceByID(ctx context.Context, id int64) (Service, error) {
+type GetServiceByIDRow struct {
+	ID              int64              `db:"id" json:"id"`
+	SortOrder       pgtype.Int4        `db:"sort_order" json:"sort_order"`
+	Name            string             `db:"name" json:"name"`
+	Price           pgtype.Numeric     `db:"price" json:"price"`
+	DurationMinutes int32              `db:"duration_minutes" json:"duration_minutes"`
+	IsAddon         pgtype.Bool        `db:"is_addon" json:"is_addon"`
+	IsVisible       pgtype.Bool        `db:"is_visible" json:"is_visible"`
+	IsActive        pgtype.Bool        `db:"is_active" json:"is_active"`
+	Note            pgtype.Text        `db:"note" json:"note"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+}
+
+func (q *Queries) GetServiceByID(ctx context.Context, id int64) (GetServiceByIDRow, error) {
 	row := q.db.QueryRow(ctx, getServiceByID, id)
-	var i Service
+	var i GetServiceByIDRow
 	err := row.Scan(
 		&i.ID,
+		&i.SortOrder,
 		&i.Name,
 		&i.Price,
 		&i.DurationMinutes,

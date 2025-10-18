@@ -91,7 +91,7 @@ func (s *Create) Create(ctx context.Context, storeID int64, req adminBookingMode
 	}
 
 	// Verify sub services exist (services are global, not store-specific)
-	var subServices []dbgen.Service
+	var subServices []dbgen.GetServiceByIDRow
 	for _, subServiceIDInt := range req.SubServiceIDs {
 		subService, err := s.queries.GetServiceByID(ctx, subServiceIDInt)
 		if err != nil {

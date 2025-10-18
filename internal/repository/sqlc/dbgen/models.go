@@ -233,6 +233,7 @@ type Service struct {
 	Note            pgtype.Text        `db:"note" json:"note"`
 	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	SortOrder       pgtype.Int4        `db:"sort_order" json:"sort_order"`
 }
 
 type StaffUser struct {

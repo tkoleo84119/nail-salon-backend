@@ -24,6 +24,7 @@ INSERT INTO services (
 -- name: GetServiceByID :one
 SELECT
     id,
+    sort_order,
     name,
     price,
     duration_minutes,

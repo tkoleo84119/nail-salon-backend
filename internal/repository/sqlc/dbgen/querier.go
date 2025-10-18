@@ -80,7 +80,7 @@ type Querier interface {
 	CreateExpense(ctx context.Context, arg CreateExpenseParams) (int64, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) error
 	CreateProductCategory(ctx context.Context, arg CreateProductCategoryParams) (int64, error)
-	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
+	CreateService(ctx context.Context, arg CreateServiceParams) (CreateServiceRow, error)
 	CreateStaffUser(ctx context.Context, arg CreateStaffUserParams) (CreateStaffUserRow, error)
 	CreateStaffUserStoreAccess(ctx context.Context, arg CreateStaffUserStoreAccessParams) error
 	CreateStaffUserToken(ctx context.Context, arg CreateStaffUserTokenParams) (CreateStaffUserTokenRow, error)
@@ -134,7 +134,7 @@ type Querier interface {
 	GetProductsStockInfoByIDs(ctx context.Context, dollar_1 []int64) ([]GetProductsStockInfoByIDsRow, error)
 	GetScheduleByID(ctx context.Context, id int64) (GetScheduleByIDRow, error)
 	GetScheduleWithTimeSlotsByID(ctx context.Context, id int64) ([]GetScheduleWithTimeSlotsByIDRow, error)
-	GetServiceByID(ctx context.Context, id int64) (Service, error)
+	GetServiceByID(ctx context.Context, id int64) (GetServiceByIDRow, error)
 	GetServiceByIds(ctx context.Context, dollar_1 []int64) ([]GetServiceByIdsRow, error)
 	GetStaffUserByID(ctx context.Context, id int64) (StaffUser, error)
 	GetStockUsageByID(ctx context.Context, id int64) (StockUsage, error)

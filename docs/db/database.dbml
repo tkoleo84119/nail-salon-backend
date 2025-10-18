@@ -171,6 +171,7 @@ Ref: time_slot_template_items.template_id > time_slot_templates.id [delete: casc
 // ========== 預約與服務 ==========
 Table services {
   id bigint [pk]
+  sort_order int [default: 0]
   name varchar(150) [not null, unique]
   price numeric(10,2) [not null]
   duration_minutes int [not null] // 操作時間(分)
