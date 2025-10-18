@@ -30,6 +30,7 @@ type GetAllResponse struct {
 // ServiceListItemDTO represents a single service item in the list
 type GetAllServiceListItemDTO struct {
 	ID              string `json:"id"`
+	SortOrder       int    `json:"sortOrder"`
 	Name            string `json:"name"`
 	Price           int64  `json:"price"`
 	DurationMinutes int32  `json:"durationMinutes"`

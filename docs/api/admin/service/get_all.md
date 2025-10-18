@@ -47,15 +47,15 @@
 
 ### 驗證規則
 
-| 欄位      | 必填 | 其他規則                                                                   |
-| --------- | ---- | -------------------------------------------------------------------------- |
-| name      | 否   | <li>不能為空字串<li>最大長度100字元                                        |
-| isAddon   | 否   |                                                                            |
-| isActive  | 否   |                                                                            |
-| isVisible | 否   |                                                                            |
-| limit     | 否   | <li>最小值1<li>最大值100                                                   |
-| offset    | 否   | <li>最小值0<li>最大值1000000                                               |
-| sort      | 否   | <li>可以為 createdAt, updatedAt, isActive, isVisible, isAddon (其餘會忽略) |
+| 欄位      | 必填 | 其他規則                                                                              |
+| --------- | ---- | ------------------------------------------------------------------------------------- |
+| name      | 否   | <li>不能為空字串<li>最大長度100字元                                                   |
+| isAddon   | 否   |                                                                                       |
+| isActive  | 否   |                                                                                       |
+| isVisible | 否   |                                                                                       |
+| limit     | 否   | <li>最小值1<li>最大值100                                                              |
+| offset    | 否   | <li>最小值0<li>最大值1000000                                                          |
+| sort      | 否   | <li>可以為 createdAt, updatedAt, isActive, isVisible, isAddon, sortOrder (其餘會忽略) |
 
 ---
 
@@ -70,6 +70,7 @@
     "items": [
       {
         "id": "9000000001",
+        "sortOrder": 1,
         "name": "手部單色",
         "price": 1200,
         "durationMinutes": 60,

@@ -40,6 +40,7 @@ func (s *Get) Get(ctx context.Context, serviceID int64) (*adminServiceModel.GetR
 	// Build response
 	response := &adminServiceModel.GetResponse{
 		ID:              utils.FormatID(service.ID),
+		SortOrder:       int(utils.PgInt4ToInt32(service.SortOrder)),
 		Name:            service.Name,
 		DurationMinutes: service.DurationMinutes,
 		Price:           price,

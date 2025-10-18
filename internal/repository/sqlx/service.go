@@ -34,6 +34,7 @@ type GetAllServicesByFilterParams struct {
 
 type GetAllServicesByFilterItem struct {
 	ID              int64              `db:"id"`
+	SortOrder       pgtype.Int4        `db:"sort_order"`
 	Name            string             `db:"name"`
 	Price           pgtype.Numeric     `db:"price"`
 	DurationMinutes int32              `db:"duration_minutes"`
@@ -98,6 +99,10 @@ func (r *ServiceRepository) GetAllServicesByFilter(ctx context.Context, params G
 	sort := utils.HandleSortByMap(map[string]string{
 		"createdAt": "created_at",
 		"updatedAt": "updated_at",
+		"isActive":  "is_active",
+		"isVisible": "is_visible",
+		"isAddon":   "is_addon",
+		"sortOrder": "sort_order",
 	}, defaultSortArr, params.Sort)
 
 	args = append(args, limit, offset)
@@ -108,6 +113,7 @@ func (r *ServiceRepository) GetAllServicesByFilter(ctx context.Context, params G
 	query := fmt.Sprintf(`
 		SELECT
 			id,
+			sort_order,
 			name,
 			price,
 			duration_minutes,
@@ -134,6 +140,7 @@ func (r *ServiceRepository) GetAllServicesByFilter(ctx context.Context, params G
 // ---------------------------------------------------------------------------------------------------------------------
 
 type UpdateServiceParams struct {
+	SortOrder       *int
 	Name            *string
 	Price           *int64
 	DurationMinutes *int32
@@ -145,6 +152,7 @@ type UpdateServiceParams struct {
 
 type UpdateServiceResponse struct {
 	ID              int64              `db:"id"`
+	SortOrder       pgtype.Int4        `db:"sort_order"`
 	Name            string             `db:"name"`
 	Price           pgtype.Numeric     `db:"price"`
 	DurationMinutes int32              `db:"duration_minutes"`
@@ -160,6 +168,11 @@ func (r *ServiceRepository) UpdateService(ctx context.Context, serviceID int64, 
 	// set conditions
 	setParts := []string{"updated_at = NOW()"}
 	args := []interface{}{}
+
+	if params.SortOrder != nil {
+		setParts = append(setParts, fmt.Sprintf("sort_order = $%d", len(args)+1))
+		args = append(args, *params.SortOrder)
+	}
 
 	if params.Name != nil && *params.Name != "" {
 		setParts = append(setParts, fmt.Sprintf("name = $%d", len(args)+1))

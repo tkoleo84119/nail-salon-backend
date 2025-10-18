@@ -46,6 +46,7 @@
 {
   "data": {
     "id": "9000000001",
+    "sortOrder": 1,
     "name": "手部單色",
     "durationMinutes": 60,
     "price": 1200,

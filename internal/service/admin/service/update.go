@@ -50,6 +50,7 @@ func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceMo
 	}
 
 	updatedService, err := s.repo.Service.UpdateService(ctx, serviceID, sqlx.UpdateServiceParams{
+		SortOrder:       req.SortOrder,
 		Name:            req.Name,
 		Price:           req.Price,
 		DurationMinutes: req.DurationMinutes,
@@ -69,6 +70,7 @@ func (s *Update) Update(ctx context.Context, serviceID int64, req adminServiceMo
 
 	response := adminServiceModel.UpdateResponse{
 		ID:              utils.FormatID(updatedService.ID),
+		SortOrder:       int(utils.PgInt4ToInt32(updatedService.SortOrder)),
 		Name:            updatedService.Name,
 		Price:           price,
 		DurationMinutes: updatedService.DurationMinutes,

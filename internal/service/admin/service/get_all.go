@@ -43,6 +43,7 @@ func (s *GetAll) GetAll(ctx context.Context, req adminServiceModel.GetAllParsedR
 
 		items[i] = adminServiceModel.GetAllServiceListItemDTO{
 			ID:              utils.FormatID(result.ID),
+			SortOrder:       int(utils.PgInt4ToInt32(result.SortOrder)),
 			Name:            result.Name,
 			Price:           price,
 			DurationMinutes: result.DurationMinutes,
