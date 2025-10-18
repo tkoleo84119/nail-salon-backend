@@ -139,6 +139,7 @@ SELECT
     b.is_chat_enabled,
     b.note,
     b.store_note,
+    b.cancel_reason,
     b.actual_duration,
     b.status,
     b.created_at,
@@ -170,6 +171,7 @@ type GetBookingDetailByIDRow struct {
 	IsChatEnabled    pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
 	Note             pgtype.Text        `db:"note" json:"note"`
 	StoreNote        pgtype.Text        `db:"store_note" json:"store_note"`
+	CancelReason     pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
 	ActualDuration   pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
 	Status           string             `db:"status" json:"status"`
 	CreatedAt        pgtype.Timestamptz `db:"created_at" json:"created_at"`
@@ -197,6 +199,7 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 		&i.IsChatEnabled,
 		&i.Note,
 		&i.StoreNote,
+		&i.CancelReason,
 		&i.ActualDuration,
 		&i.Status,
 		&i.CreatedAt,

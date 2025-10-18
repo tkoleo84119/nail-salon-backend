@@ -32,6 +32,7 @@ SELECT
     b.is_chat_enabled,
     b.note,
     b.store_note,
+    b.cancel_reason,
     b.actual_duration,
     b.status,
     b.created_at,
