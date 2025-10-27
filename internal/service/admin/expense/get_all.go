@@ -55,6 +55,11 @@ func (s *GetAll) GetAll(ctx context.Context, storeID int64, req adminExpenseMode
 			UpdatedAt:   utils.PgTimestamptzToTimeString(expense.UpdatedAt),
 		}
 
+		if expense.HasPendingItems.Valid {
+			hasPending := utils.PgBoolToBool(expense.HasPendingItems)
+			item.HasPendingItems = &hasPending
+		}
+
 		if expense.SupplierID.Valid {
 			item.Supplier = &adminExpenseModel.GetAllExpenseSupplierItem{
 				ID:   utils.FormatID(expense.SupplierID.Int64),

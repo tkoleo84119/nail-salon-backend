@@ -35,21 +35,22 @@ type GetAllStoreExpensesByFilterParams struct {
 }
 
 type GetAllStoreExpensesByFilterItem struct {
-	ID           int64              `db:"id"`
-	SupplierID   pgtype.Int8        `db:"supplier_id"`
-	SupplierName string             `db:"supplier_name"`
-	PayerID      pgtype.Int8        `db:"payer_id"`
-	PayerName    pgtype.Text        `db:"payer_name"`
-	Category     pgtype.Text        `db:"category"`
-	Amount       pgtype.Numeric     `db:"amount"`
-	OtherFee     pgtype.Numeric     `db:"other_fee"`
-	ExpenseDate  pgtype.Date        `db:"expense_date"`
-	Note         pgtype.Text        `db:"note"`
-	IsReimbursed pgtype.Bool        `db:"is_reimbursed"`
-	ReimbursedAt pgtype.Timestamptz `db:"reimbursed_at"`
-	Updater      string             `db:"updater"`
-	CreatedAt    pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
+	ID              int64              `db:"id"`
+	SupplierID      pgtype.Int8        `db:"supplier_id"`
+	SupplierName    string             `db:"supplier_name"`
+	PayerID         pgtype.Int8        `db:"payer_id"`
+	PayerName       pgtype.Text        `db:"payer_name"`
+	Category        pgtype.Text        `db:"category"`
+	Amount          pgtype.Numeric     `db:"amount"`
+	OtherFee        pgtype.Numeric     `db:"other_fee"`
+	ExpenseDate     pgtype.Date        `db:"expense_date"`
+	Note            pgtype.Text        `db:"note"`
+	IsReimbursed    pgtype.Bool        `db:"is_reimbursed"`
+	ReimbursedAt    pgtype.Timestamptz `db:"reimbursed_at"`
+	Updater         string             `db:"updater"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
+	HasPendingItems pgtype.Bool        `db:"has_pending_items"`
 }
 
 func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, storeID int64, params GetAllStoreExpensesByFilterParams) (int, []GetAllStoreExpensesByFilterItem, error) {
@@ -129,7 +130,12 @@ func (r *ExpenseRepository) GetAllStoreExpensesByFilter(ctx context.Context, sto
 			e.reimbursed_at,
 			COALESCE(su2.username, '') AS updater,
 			e.created_at,
-			e.updated_at
+			e.updated_at,
+			CASE 
+				WHEN NOT EXISTS (SELECT 1 FROM expense_items ei WHERE ei.expense_id = e.id) THEN NULL
+				WHEN EXISTS (SELECT 1 FROM expense_items ei WHERE ei.expense_id = e.id AND ei.is_arrived = false) THEN true
+				ELSE false
+			END AS has_pending_items
 		FROM expenses e
 		LEFT JOIN suppliers s ON e.supplier_id = s.id
 		LEFT JOIN staff_users su ON e.payer_id = su.id

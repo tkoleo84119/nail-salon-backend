@@ -26,19 +26,20 @@ type GetAllResponse struct {
 }
 
 type GetAllExpenseItem struct {
-	ID           string                     `json:"id"`
-	Supplier     *GetAllExpenseSupplierItem `json:"supplier,omitempty"`
-	Payer        *GetAllExpensePayerItem    `json:"payer,omitempty"`
-	Category     string                     `json:"category"`
-	Amount       int64                      `json:"amount"`
-	OtherFee     *int64                     `json:"otherFee,omitempty"`
-	ExpenseDate  string                     `json:"expenseDate"`
-	Note         string                     `json:"note"`
-	IsReimbursed *bool                      `json:"isReimbursed,omitempty"`
-	ReimbursedAt *string                    `json:"reimbursedAt,omitempty"`
-	CreatedAt    string                     `json:"createdAt"`
-	Updater      string                     `json:"updater"`
-	UpdatedAt    string                     `json:"updatedAt"`
+	ID              string                     `json:"id"`
+	Supplier        *GetAllExpenseSupplierItem `json:"supplier,omitempty"`
+	Payer           *GetAllExpensePayerItem    `json:"payer,omitempty"`
+	Category        string                     `json:"category"`
+	Amount          int64                      `json:"amount"`
+	OtherFee        *int64                     `json:"otherFee,omitempty"`
+	ExpenseDate     string                     `json:"expenseDate"`
+	Note            string                     `json:"note"`
+	IsReimbursed    *bool                      `json:"isReimbursed,omitempty"`
+	ReimbursedAt    *string                    `json:"reimbursedAt,omitempty"`
+	HasPendingItems *bool                      `json:"hasPendingItems"`
+	CreatedAt       string                     `json:"createdAt"`
+	Updater         string                     `json:"updater"`
+	UpdatedAt       string                     `json:"updatedAt"`
 }
 
 type GetAllExpenseSupplierItem struct {

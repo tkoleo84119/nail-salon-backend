@@ -85,6 +85,7 @@
         "note": "薪資備註",
         "isReimbursed": true, // 如果沒有代墊人沒有此欄位
         "reimbursedAt": "2025-01-01", // 如果沒有代墊人沒有此欄位
+        "hasPendingItems": null, // 到貨狀態
         "updater": "員工A", // 如果是 "" 就是系統更新
         "createdAt": "2025-01-01T00:00:00+08:00",
         "updatedAt": "2025-01-01T00:00:00+08:00"
@@ -155,3 +156,4 @@
 ## 注意事項
 
 - createdAt 與 updatedAt 會是標準 Iso 8601 格式。
+- hasPendingItems 會是 null 代表沒有進貨項目，如果是 true 代表有未到貨的進貨項目，如果是 false 代表所有進貨項目都已到貨。

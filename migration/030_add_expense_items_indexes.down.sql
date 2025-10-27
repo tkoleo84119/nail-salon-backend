@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS idx_expense_items_on_expense_id;
+DROP INDEX IF EXISTS idx_expense_items_on_product_id;
+DROP INDEX IF EXISTS idx_expense_items_on_expense_id_and_is_arrived;
