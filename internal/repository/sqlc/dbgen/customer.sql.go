@@ -200,7 +200,7 @@ func (q *Queries) GetCustomerByLineUid(ctx context.Context, lineUid string) (Get
 
 const updateCustomerLastVisitAt = `-- name: UpdateCustomerLastVisitAt :exec
 UPDATE customers
-SET last_visit_at = NOW()
+SET last_visit_at = NOW(), updated_at = NOW()
 WHERE id = $1
 `
 
