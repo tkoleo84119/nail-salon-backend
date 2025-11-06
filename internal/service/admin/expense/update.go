@@ -142,6 +142,12 @@ func (s *Update) Update(ctx context.Context, storeID, expenseID int64, req admin
 		updateParams.ReimbursedAt = nil
 	}
 
+	// when payerId is provided, and expense is not have isReimbursed field (isReimbursed is null), set isReimbursed to false
+	if req.PayerID != nil && !expense.IsReimbursed.Valid {
+		falseValue := false
+		updateParams.IsReimbursed = &falseValue
+	}
+
 	result, err := s.repo.Expense.UpdateStoreExpense(ctx, storeID, expenseID, updateParams)
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update expense", err)
