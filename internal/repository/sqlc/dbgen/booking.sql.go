@@ -74,7 +74,7 @@ INSERT INTO bookings (
     status
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9
-) RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, actual_duration, note, status, created_at, updated_at, cancel_reason, store_note
+) RETURNING id, store_id, customer_id, stylist_id, time_slot_id, is_chat_enabled, actual_duration, note, status, created_at, updated_at, cancel_reason, store_note, pinterest_image_urls
 `
 
 type CreateBookingParams struct {
@@ -116,6 +116,7 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 		&i.UpdatedAt,
 		&i.CancelReason,
 		&i.StoreNote,
+		&i.PinterestImageUrls,
 	)
 	return i, err
 }

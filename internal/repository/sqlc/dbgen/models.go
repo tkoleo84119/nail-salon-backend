@@ -33,19 +33,20 @@ type AccountTransaction struct {
 }
 
 type Booking struct {
-	ID             int64              `db:"id" json:"id"`
-	StoreID        int64              `db:"store_id" json:"store_id"`
-	CustomerID     int64              `db:"customer_id" json:"customer_id"`
-	StylistID      int64              `db:"stylist_id" json:"stylist_id"`
-	TimeSlotID     int64              `db:"time_slot_id" json:"time_slot_id"`
-	IsChatEnabled  pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
-	ActualDuration pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
-	Note           pgtype.Text        `db:"note" json:"note"`
-	Status         string             `db:"status" json:"status"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
-	CancelReason   pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
-	StoreNote      pgtype.Text        `db:"store_note" json:"store_note"`
+	ID                 int64              `db:"id" json:"id"`
+	StoreID            int64              `db:"store_id" json:"store_id"`
+	CustomerID         int64              `db:"customer_id" json:"customer_id"`
+	StylistID          int64              `db:"stylist_id" json:"stylist_id"`
+	TimeSlotID         int64              `db:"time_slot_id" json:"time_slot_id"`
+	IsChatEnabled      pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
+	ActualDuration     pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
+	Note               pgtype.Text        `db:"note" json:"note"`
+	Status             string             `db:"status" json:"status"`
+	CreatedAt          pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	CancelReason       pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
+	StoreNote          pgtype.Text        `db:"store_note" json:"store_note"`
+	PinterestImageUrls []string           `db:"pinterest_image_urls" json:"pinterest_image_urls"`
 }
 
 type BookingDetail struct {

@@ -193,8 +193,8 @@ Table bookings {
   actual_duration int // 實際完成時間(分)
   note text // 客人備註(當次指甲狀況)
   store_note text // 店家備註
-  used_products text[] // 使用的產品
   cancel_reason text // 取消原因
+  pinterest_image_urls text[] // Pinterest圖片連結陣列
   status varchar(30) [not null] // SCHEDULED, CANCELLED, COMPLETED, NO_SHOW
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
