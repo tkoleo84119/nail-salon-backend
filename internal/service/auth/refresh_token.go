@@ -88,8 +88,8 @@ func (s *RefreshToken) RefreshToken(ctx context.Context, req auth.RefreshTokenRe
 
 		customer, err := s.queries.GetCustomerByID(logCtx, tokenRecord.CustomerID)
 		if err == nil {
-			if err := s.activityLog.LogCustomerRegister(logCtx, customer.Name, utils.PgTextToString(customer.LineName)); err != nil {
-				log.Printf("failed to log customer register activity: %v", err)
+			if err := s.activityLog.LogCustomerBrowse(logCtx, customer.Name, utils.PgTextToString(customer.LineName)); err != nil {
+				log.Printf("failed to log customer browse activity: %v", err)
 			}
 		}
 	}()
