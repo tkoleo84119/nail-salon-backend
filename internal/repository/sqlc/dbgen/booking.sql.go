@@ -142,6 +142,7 @@ SELECT
     b.store_note,
     b.cancel_reason,
     b.actual_duration,
+    b.pinterest_image_urls,
     b.status,
     b.created_at,
     b.updated_at
@@ -155,28 +156,29 @@ WHERE b.id = $1
 `
 
 type GetBookingDetailByIDRow struct {
-	ID               int64              `db:"id" json:"id"`
-	StoreID          int64              `db:"store_id" json:"store_id"`
-	StoreName        string             `db:"store_name" json:"store_name"`
-	CustomerID       int64              `db:"customer_id" json:"customer_id"`
-	CustomerLineUid  string             `db:"customer_line_uid" json:"customer_line_uid"`
-	CustomerLineName pgtype.Text        `db:"customer_line_name" json:"customer_line_name"`
-	CustomerName     string             `db:"customer_name" json:"customer_name"`
-	CustomerPhone    string             `db:"customer_phone" json:"customer_phone"`
-	StylistID        int64              `db:"stylist_id" json:"stylist_id"`
-	StylistName      pgtype.Text        `db:"stylist_name" json:"stylist_name"`
-	TimeSlotID       int64              `db:"time_slot_id" json:"time_slot_id"`
-	StartTime        pgtype.Time        `db:"start_time" json:"start_time"`
-	EndTime          pgtype.Time        `db:"end_time" json:"end_time"`
-	WorkDate         pgtype.Date        `db:"work_date" json:"work_date"`
-	IsChatEnabled    pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
-	Note             pgtype.Text        `db:"note" json:"note"`
-	StoreNote        pgtype.Text        `db:"store_note" json:"store_note"`
-	CancelReason     pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
-	ActualDuration   pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
-	Status           string             `db:"status" json:"status"`
-	CreatedAt        pgtype.Timestamptz `db:"created_at" json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	ID                 int64              `db:"id" json:"id"`
+	StoreID            int64              `db:"store_id" json:"store_id"`
+	StoreName          string             `db:"store_name" json:"store_name"`
+	CustomerID         int64              `db:"customer_id" json:"customer_id"`
+	CustomerLineUid    string             `db:"customer_line_uid" json:"customer_line_uid"`
+	CustomerLineName   pgtype.Text        `db:"customer_line_name" json:"customer_line_name"`
+	CustomerName       string             `db:"customer_name" json:"customer_name"`
+	CustomerPhone      string             `db:"customer_phone" json:"customer_phone"`
+	StylistID          int64              `db:"stylist_id" json:"stylist_id"`
+	StylistName        pgtype.Text        `db:"stylist_name" json:"stylist_name"`
+	TimeSlotID         int64              `db:"time_slot_id" json:"time_slot_id"`
+	StartTime          pgtype.Time        `db:"start_time" json:"start_time"`
+	EndTime            pgtype.Time        `db:"end_time" json:"end_time"`
+	WorkDate           pgtype.Date        `db:"work_date" json:"work_date"`
+	IsChatEnabled      pgtype.Bool        `db:"is_chat_enabled" json:"is_chat_enabled"`
+	Note               pgtype.Text        `db:"note" json:"note"`
+	StoreNote          pgtype.Text        `db:"store_note" json:"store_note"`
+	CancelReason       pgtype.Text        `db:"cancel_reason" json:"cancel_reason"`
+	ActualDuration     pgtype.Int4        `db:"actual_duration" json:"actual_duration"`
+	PinterestImageUrls []string           `db:"pinterest_image_urls" json:"pinterest_image_urls"`
+	Status             string             `db:"status" json:"status"`
+	CreatedAt          pgtype.Timestamptz `db:"created_at" json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
 func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookingDetailByIDRow, error) {
@@ -202,6 +204,7 @@ func (q *Queries) GetBookingDetailByID(ctx context.Context, id int64) (GetBookin
 		&i.StoreNote,
 		&i.CancelReason,
 		&i.ActualDuration,
+		&i.PinterestImageUrls,
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,

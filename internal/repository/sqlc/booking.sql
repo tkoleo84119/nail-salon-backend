@@ -34,6 +34,7 @@ SELECT
     b.store_note,
     b.cancel_reason,
     b.actual_duration,
+    b.pinterest_image_urls,
     b.status,
     b.created_at,
     b.updated_at

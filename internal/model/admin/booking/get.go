@@ -1,20 +1,21 @@
 package adminBooking
 
 type GetResponse struct {
-	ID             string                 `json:"id"`
-	Customer       GetCustomer            `json:"customer"`
-	Stylist        GetStylist             `json:"stylist"`
-	TimeSlot       GetTimeSlot            `json:"timeSlot"`
-	ActualDuration *int32                 `json:"actualDuration,omitempty"`
-	Status         string                 `json:"status"`
-	IsChatEnabled  bool                   `json:"isChatEnabled"`
-	Note           string                 `json:"note"`
-	CancelReason   string                 `json:"cancelReason"`
-	StoreNote      string                 `json:"storeNote"`
-	CreatedAt      string                 `json:"createdAt"`
-	UpdatedAt      string                 `json:"updatedAt"`
-	BookingDetails []GetBookingDetailItem `json:"bookingDetails"`
-	Checkout       *GetCheckout           `json:"checkout"`
+	ID                 string                 `json:"id"`
+	Customer           GetCustomer            `json:"customer"`
+	Stylist            GetStylist             `json:"stylist"`
+	TimeSlot           GetTimeSlot            `json:"timeSlot"`
+	ActualDuration     *int32                 `json:"actualDuration,omitempty"`
+	Status             string                 `json:"status"`
+	IsChatEnabled      bool                   `json:"isChatEnabled"`
+	Note               string                 `json:"note"`
+	CancelReason       string                 `json:"cancelReason"`
+	StoreNote          string                 `json:"storeNote"`
+	PinterestImageUrls []string               `json:"pinterestImageUrls"`
+	CreatedAt          string                 `json:"createdAt"`
+	UpdatedAt          string                 `json:"updatedAt"`
+	BookingDetails     []GetBookingDetailItem `json:"bookingDetails"`
+	Checkout           *GetCheckout           `json:"checkout"`
 }
 
 type GetCustomer struct {
