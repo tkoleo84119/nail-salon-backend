@@ -42,15 +42,20 @@
 
 ```json
 {
-  "actualDuration": 120
+  "actualDuration": 120,
+  "pinterestImageUrls": [
+    "https://pin.it/xxxxx",
+    "https://pin.it/xxxxx"
+  ]
 }
 ```
 
 ### 驗證規則
 
-| 欄位           | 必填 | 其他規則                  | 說明         |
-| -------------- | ---- | ------------------------- | ------------ |
-| actualDuration | 否   | <li>最小值0<li>最大值1440 | 完成時間(分) |
+| 欄位               | 必填 | 其他規則                  | 說明               |
+| ------------------ | ---- | ------------------------- | ------------------ |
+| actualDuration     | 否   | <li>最小值0<li>最大值1440 | 完成時間(分)       |
+| pinterestImageUrls | 否   | <li>最多5張               | Pinterest 圖片 URL |
 
 
 - 至少提供一個欄位進行更新

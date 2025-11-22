@@ -23,6 +23,7 @@ func SetupRoutes(container *Container) *gin.Engine {
 	router.Use(middleware.CORSMiddleware(cfg.CORS))
 
 	router.GET("/health", handler.Health)
+	router.GET("/readyz", handler.Readyz(database))
 
 	api := router.Group("/api")
 	{
