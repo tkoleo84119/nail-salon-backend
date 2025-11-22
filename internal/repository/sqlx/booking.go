@@ -204,6 +204,7 @@ func (r *BookingRepository) GetAllStoreBookingsByFilter(ctx context.Context, sto
 		"customer":  "c.name",
 		"stylist":   "st.name",
 		"startTime": "ts.start_time",
+		"updatedAt": "b.updated_at",
 	}, defaultSortArr, params.Sort)
 
 	args = append(args, limit, offset)
@@ -315,6 +316,53 @@ func (r *BookingRepository) UpdateBookingTx(ctx context.Context, tx *sqlx.Tx, bo
 	}
 
 	return result, nil
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+type UpdateBookingCompletedInfoParams struct {
+	ActualDuration     *int32
+	PinterestImageUrls *[]string
+}
+
+// UpdateBookingCompletedInfo updates the completed info of a booking
+func (r *BookingRepository) UpdateBookingCompletedInfo(ctx context.Context, bookingID int64, params UpdateBookingCompletedInfoParams) error {
+	// SET conditions
+	setParts := []string{"updated_at = NOW()"}
+	args := []interface{}{}
+
+	if params.ActualDuration != nil {
+		setParts = append(setParts, fmt.Sprintf("actual_duration = $%d", len(args)+1))
+		args = append(args, *params.ActualDuration)
+	}
+
+	if params.PinterestImageUrls != nil {
+		setParts = append(setParts, fmt.Sprintf("pinterest_image_urls = $%d", len(args)+1))
+		args = append(args, *params.PinterestImageUrls)
+	}
+
+	// Check if there are any fields to update
+	if len(setParts) == 1 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	args = append(args, bookingID)
+	setClause := strings.Join(setParts, ", ")
+
+	// Data query
+	query := fmt.Sprintf(`
+		UPDATE bookings
+		SET %s
+		WHERE id = $%d
+		RETURNING id
+	`, setClause, len(args))
+
+	var result int64
+	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
+		return fmt.Errorf("failed to update booking completed info: %w", err)
+	}
+
+	return nil
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

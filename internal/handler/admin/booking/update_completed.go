@@ -1,7 +1,9 @@
 package adminBooking
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	errorCodes "github.com/tkoleo84119/nail-salon-backend/internal/errors"
@@ -64,6 +66,67 @@ func (h *UpdateCompleted) UpdateCompleted(c *gin.Context) {
 	if !req.HasUpdates() {
 		errorCodes.AbortWithError(c, errorCodes.ValAllFieldsEmpty, nil)
 		return
+	}
+
+	// trim url and validate url format
+	if req.PinterestImageUrls != nil && len(*req.PinterestImageUrls) > 0 {
+		rawUrls := make([]string, len(*req.PinterestImageUrls))
+
+		type result struct {
+			index int
+			url   string
+			err   error
+		}
+		resultChan := make(chan result, len(*req.PinterestImageUrls))
+
+		for i, url := range *req.PinterestImageUrls {
+			go func(idx int, u string) {
+				trimmedUrl := strings.TrimSpace(u)
+
+				// if url is already a valid url (ex: https://www.pinterest.com/pin/xxxxx/), return it
+				if strings.HasPrefix(trimmedUrl, "https://www.pinterest.com/pin/") {
+					resultChan <- result{
+						index: idx,
+						url:   trimmedUrl,
+						err:   nil,
+					}
+					return
+				}
+
+				// valid url format => https://pin.it/xxxxx
+				if !strings.HasPrefix(trimmedUrl, "https://pin.it/") {
+					resultChan <- result{index: idx, err: fmt.Errorf("格式錯誤")}
+					return
+				}
+				rawUrl, err := utils.ResolveURL(trimmedUrl)
+				if err != nil {
+					resultChan <- result{index: idx, err: err}
+					return
+				}
+
+				// validate raw url format => https://www.pinterest.com/pin/xxxxx/
+				if !strings.HasPrefix(rawUrl, "https://www.pinterest.com/pin/") {
+					resultChan <- result{index: idx, err: fmt.Errorf("無法解析")}
+					return
+				}
+
+				resultChan <- result{index: idx, url: rawUrl}
+			}(i, url)
+		}
+
+		// get results from channel
+		for i := 0; i < len(*req.PinterestImageUrls); i++ {
+			res := <-resultChan
+			if res.err != nil {
+				errorCodes.AbortWithError(c, errorCodes.ValInputValidationFailed, map[string]string{
+					"pinterestImageUrls": "無法解析 Pinterest 圖片 URL",
+				})
+				return
+			}
+			rawUrls[res.index] = res.url
+		}
+
+		req.PinterestImageUrls = &rawUrls
 	}
 
 	staffContext, exists := middleware.GetStaffFromContext(c)

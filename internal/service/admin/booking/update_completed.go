@@ -9,16 +9,19 @@ import (
 	adminBookingModel "github.com/tkoleo84119/nail-salon-backend/internal/model/admin/booking"
 	"github.com/tkoleo84119/nail-salon-backend/internal/model/common"
 	"github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlc/dbgen"
+	sqlxRepo "github.com/tkoleo84119/nail-salon-backend/internal/repository/sqlx"
 	"github.com/tkoleo84119/nail-salon-backend/internal/utils"
 )
 
 type UpdateCompleted struct {
 	queries *dbgen.Queries
+	repo    *sqlxRepo.Repositories
 }
 
-func NewUpdateCompleted(queries *dbgen.Queries) UpdateCompletedInterface {
+func NewUpdateCompleted(queries *dbgen.Queries, repo *sqlxRepo.Repositories) UpdateCompletedInterface {
 	return &UpdateCompleted{
 		queries: queries,
+		repo:    repo,
 	}
 }
 
@@ -47,9 +50,9 @@ func (s *UpdateCompleted) UpdateCompleted(ctx context.Context, storeID, bookingI
 	}
 
 	// Update booking completed record
-	err = s.queries.UpdateBookingActualDuration(ctx, dbgen.UpdateBookingActualDurationParams{
-		ID:             bookingID,
-		ActualDuration: utils.Int32PtrToPgInt4(req.ActualDuration),
+	err = s.repo.Booking.UpdateBookingCompletedInfo(ctx, bookingID, sqlxRepo.UpdateBookingCompletedInfoParams{
+		ActualDuration:     req.ActualDuration,
+		PinterestImageUrls: req.PinterestImageUrls,
 	})
 	if err != nil {
 		return nil, errorCodes.NewServiceError(errorCodes.SysDatabaseError, "failed to update completed booking", err)
